@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VOLT — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0e1118;
+  --bg-2:#0a0d13;
+  --panel:#161b24;
+  --panel-2:#1c222e;
+  --line:rgba(235,240,255,.11);
+  --line-2:rgba(235,240,255,.18);
+  --spectrum:linear-gradient(90deg,#3d9bff,#41f0a4 28%,#ffd23d 52%,#ff8a3d 76%,#ff4757);
+  --txt:#eef2fa;
+  --muted:#9aa3b8;
+  --muted-2:#707a90;
+  --mint:#41f0a4;
+  --mint-2:#7df7c3;
+  --mint-ink:#062a1b;
+  --violet:#7b6cf6;
+  --red:#ff4757;
+  --orange:#ff8a3d;
+  --blue:#3d9bff;
+  --yellow:#ffd23d;
+  --sidebar:220px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:#1e232d;border-radius:8px}
+
+/* ── sidebar ── */
+.sidebar{width:var(--sidebar);min-height:100vh;background:var(--bg-2);border-right:1px solid var(--line);display:flex;flex-direction:column;flex:none;position:fixed;top:0;left:0;bottom:0;z-index:10}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:22px 20px 18px;border-bottom:1px solid var(--line)}
+.sb-logo .volt-ic{width:30px;height:30px;background:var(--spectrum);border-radius:8px;display:grid;place-items:center;font-size:14px}
+.sb-logo span{font-family:'Inter',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em}
+.sb-logo small{font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-2);margin-left:auto;background:var(--panel-2);padding:3px 7px;border-radius:99px}
+.sb-nav{padding:12px 10px;flex:1;display:flex;flex-direction:column;gap:2px}
+.sb-sec{font-size:9px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-2);padding:10px 10px 6px}
+.sb-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700;color:var(--muted);transition:.14s;border:none;background:none;width:100%;text-align:left}
+.sb-item svg{width:16px;height:16px;flex:none}
+.sb-item:hover{background:var(--panel);color:var(--txt)}
+.sb-item.active{background:var(--panel);color:var(--txt)}
+.sb-item .badge{margin-left:auto;font-size:10px;font-weight:800;background:var(--red);color:#fff;padding:2px 7px;border-radius:99px}
+.sb-bottom{padding:12px 10px;border-top:1px solid var(--line)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:var(--panel)}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--spectrum);display:grid;place-items:center;font-size:12px;font-weight:900;color:#08090c;flex:none}
+.sb-user-info{min-width:0}
+.sb-user-info b{display:block;font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-user-info span{font-size:10px;color:var(--muted)}
+
+/* ── main ── */
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{display:flex;align-items:center;gap:12px;padding:18px 28px;border-bottom:1px solid var(--line);background:var(--bg)}
+.topbar h1{font-family:'Inter',sans-serif;font-size:17px;font-weight:700;letter-spacing:.04em;flex:1}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.tbtn{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:var(--txt);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.14s}
+.tbtn:hover{background:var(--panel-2)}
+.tbtn.primary{background:var(--mint);color:var(--mint-ink);border-color:transparent}
+.tbtn.primary:hover{filter:brightness(1.08)}
+.content{padding:28px;flex:1}
+
+/* ── stat cards ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+.stat-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.stat-label svg{width:14px;height:14px}
+.stat-val{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:5px}
+.stat-sub .up{color:var(--mint)}
+.stat-sub .dn{color:var(--red)}
+
+/* ── chart ── */
+.chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:28px}
+.chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.chart-head h3{font-size:14px;font-weight:800}
+.chart-tabs{display:flex;gap:4px}
+.ctab{padding:5px 13px;border-radius:7px;border:none;background:none;color:var(--muted);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:.14s}
+.ctab.active{background:var(--panel-2);color:var(--txt)}
+.chart-svg{width:100%;height:180px}
+.chart-labels{display:flex;justify-content:space-between;margin-top:8px}
+.chart-labels span{font-size:10px;color:var(--muted-2)}
+
+/* ── section head ── */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sec-head h3{font-size:14px;font-weight:800}
+
+/* ── two col ── */
+.two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;margin-bottom:28px}
+
+/* ── table ── */
+.tbl-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tbl-toolbar{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.tbl-search{display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:7px 12px;flex:1;max-width:280px}
+.tbl-search input{background:none;border:none;outline:none;color:var(--txt);font-family:inherit;font-size:12.5px;flex:1}
+.tbl-search input::placeholder{color:var(--muted-2)}
+.filter-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;border:1px solid var(--line);background:none;color:var(--muted);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.14s}
+.filter-btn:hover,.filter-btn.active{background:var(--panel-2);color:var(--txt);border-color:var(--line-2)}
+.filter-btn.active{color:var(--mint);border-color:var(--mint)}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-2);padding:10px 18px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+tbody tr{transition:.12s;cursor:default}
+tbody tr:hover{background:var(--panel-2)}
+tbody td{padding:12px 18px;font-size:13px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+.td-user{display:flex;align-items:center;gap:10px}
+.u-avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:900;flex:none;color:#08090c}
+.u-name{font-weight:700;font-size:13px}
+.u-email{font-size:11px;color:var(--muted)}
+.badge-status{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}
+.badge-status::before{content:"";width:6px;height:6px;border-radius:50%;flex:none}
+.badge-status.active{background:rgba(65,240,164,.12);color:var(--mint)}
+.badge-status.active::before{background:var(--mint)}
+.badge-status.suspended{background:rgba(255,71,87,.1);color:var(--red)}
+.badge-status.suspended::before{background:var(--red)}
+.badge-status.pending{background:rgba(255,210,61,.1);color:var(--yellow)}
+.badge-status.pending::before{background:var(--yellow)}
+.badge-status.completed{background:rgba(65,240,164,.12);color:var(--mint)}
+.badge-status.completed::before{background:var(--mint)}
+.badge-status.failed{background:rgba(255,71,87,.1);color:var(--red)}
+.badge-status.failed::before{background:var(--red)}
+.badge-type{display:inline-flex;align-items:center;font-size:11px;font-weight:800;padding:3px 9px;border-radius:99px;letter-spacing:.04em}
+.badge-type.deposit{background:rgba(61,155,255,.12);color:var(--blue)}
+.badge-type.withdraw{background:rgba(255,138,61,.12);color:var(--orange)}
+.badge-type.bet{background:rgba(255,255,255,.06);color:var(--muted)}
+.badge-type.win{background:rgba(65,240,164,.1);color:var(--mint)}
+.amt-pos{color:var(--mint);font-weight:800;font-variant-numeric:tabular-nums}
+.amt-neg{color:var(--txt);font-weight:800;font-variant-numeric:tabular-nums}
+.tbl-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.pg{display:flex;gap:4px}
+.pg-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:none;color:var(--muted);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:grid;place-items:center;transition:.14s}
+.pg-btn:hover,.pg-btn.active{background:var(--panel-2);color:var(--txt);border-color:var(--line-2)}
+.pg-btn.active{color:var(--mint)}
+
+/* ── top games ── */
+.top-games{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.tg-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.tg-item:last-child{border-bottom:none;padding-bottom:0}
+.tg-item:first-child{padding-top:0}
+.tg-rank{font-size:12px;font-weight:900;color:var(--muted-2);width:18px;flex:none;text-align:center}
+.tg-ic{width:34px;height:34px;border-radius:9px;flex:none;display:grid;place-items:center;font-size:16px}
+.tg-info{flex:1;min-width:0}
+.tg-info b{display:block;font-size:13px;font-weight:800}
+.tg-info span{font-size:11px;color:var(--muted)}
+.tg-rev{text-align:right}
+.tg-rev b{display:block;font-size:13px;font-weight:800;color:var(--mint)}
+.tg-rev span{font-size:11px;color:var(--muted)}
+.tg-bar-wrap{width:60px;height:4px;background:var(--panel-2);border-radius:99px;overflow:hidden;margin-top:4px;margin-left:auto}
+.tg-bar{height:100%;background:var(--mint);border-radius:99px}
+
+/* ── tabs ── */
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* ── live indicator ── */
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--mint);display:inline-block;animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+/* ── promo editor ── */
+.promo-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px}
+.promo-card-edit{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.pce-preview{position:relative;height:160px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pce-preview-a{background:linear-gradient(120deg,#0e3f2c,#16805a 55%,#41f0a4 130%)}
+.pce-preview-b{background:linear-gradient(120deg,#2b2670,#5a4fd4 70%,#7b6cf6 120%)}
+.pce-preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.pce-preview-label{position:absolute;top:12px;left:14px;font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;background:rgba(0,0,0,.35);padding:4px 10px;border-radius:99px}
+.pce-preview-title{position:absolute;bottom:14px;left:14px;font-size:17px;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+.pce-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.pce-field{display:flex;flex-direction:column;gap:6px}
+.pce-field label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pce-input{background:var(--panel-2);border:1px solid var(--line-2);border-radius:8px;padding:9px 12px;color:var(--txt);font-family:inherit;font-size:12.5px;outline:none;transition:.14s;width:100%}
+.pce-input:focus{border-color:var(--mint)}
+.pce-row{display:flex;gap:8px}
+.pce-upload{display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:8px;border:1px dashed var(--line-2);background:none;color:var(--muted);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.14s;flex:1;justify-content:center}
+.pce-upload:hover{border-color:var(--mint);color:var(--mint)}
+.pce-save{padding:9px 20px;border-radius:8px;border:none;background:var(--mint);color:var(--mint-ink);font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;transition:.14s;white-space:nowrap}
+.pce-save:hover{filter:brightness(1.08)}
+.pce-toast{font-size:11px;color:var(--mint);text-align:center;height:16px;transition:.2s}
+.promo-settings{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+.promo-settings h3{font-size:14px;font-weight:800;margin-bottom:18px}
+.ps-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.ps-field{display:flex;flex-direction:column;gap:6px}
+.ps-field label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- sidebar -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="volt-ic">⚡</div>
+    <span>VOLT</span>
+    <small>Admin</small>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">Overview</div>
+    <button class="sb-item active" data-tab="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </button>
+    <div class="sb-sec">Management</div>
+    <button class="sb-item" data-tab="users">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
+      Users
+    </button>
+    <button class="sb-item" data-tab="transactions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+      Transactions
+      <span class="badge">4</span>
+    </button>
+    <div class="sb-sec">Casino</div>
+    <button class="sb-item" data-tab="games">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 12h4M8 10v4M15 12h.01M18 12h.01"/></svg>
+      Games
+    </button>
+    <button class="sb-item" data-tab="bets">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Live Bets
+    </button>
+    <button class="sb-item" data-tab="promos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Promotions
+    </button>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-avatar">A</div>
+      <div class="sb-user-info">
+        <b>Admin</b>
+        <span>Super Admin</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- main -->
+<main class="main">
+
+  <!-- topbar -->
+  <div class="topbar">
+    <h1 id="pageTitle">Dashboard</h1>
+    <div class="topbar-actions">
+      <span style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px">
+        <span class="live-dot"></span> Live
+      </span>
+      <button class="tbtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="tbtn primary">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add User
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══════════════ DASHBOARD ═══════════════ -->
+    <div class="tab-content active" id="tab-dashboard">
+
+      <!-- stat cards -->
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+            Total Revenue
+          </div>
+          <div class="stat-val">$284,920</div>
+          <div class="stat-sub"><span class="up">↑ 12.4%</span> vs last week</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+            Active Users
+          </div>
+          <div class="stat-val">1,847</div>
+          <div class="stat-sub"><span class="up">↑ 8.1%</span> vs yesterday</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Bets Today
+          </div>
+          <div class="stat-val">24,391</div>
+          <div class="stat-sub"><span class="dn">↓ 2.3%</span> vs yesterday</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Total Wagered
+          </div>
+          <div class="stat-val">$1.24M</div>
+          <div class="stat-sub"><span class="up">↑ 5.7%</span> vs last week</div>
+        </div>
+      </div>
+
+      <!-- revenue chart -->
+      <div class="chart-wrap">
+        <div class="chart-head">
+          <h3>Revenue Overview</h3>
+          <div class="chart-tabs">
+            <button class="ctab active">7D</button>
+            <button class="ctab">30D</button>
+            <button class="ctab">90D</button>
+          </div>
+        </div>
+        <svg class="chart-svg" viewBox="0 0 800 180" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#41f0a4" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#41f0a4" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- grid lines -->
+          <line x1="0" y1="45" x2="800" y2="45" stroke="rgba(235,240,255,.06)" stroke-width="1"/>
+          <line x1="0" y1="90" x2="800" y2="90" stroke="rgba(235,240,255,.06)" stroke-width="1"/>
+          <line x1="0" y1="135" x2="800" y2="135" stroke="rgba(235,240,255,.06)" stroke-width="1"/>
+          <!-- area fill -->
+          <path d="M0,120 C60,110 100,60 160,70 C220,80 260,40 330,50 C400,60 430,100 500,80 C570,60 620,30 680,40 C720,46 760,55 800,45 L800,180 L0,180 Z" fill="url(#chartGrad)"/>
+          <!-- line -->
+          <path d="M0,120 C60,110 100,60 160,70 C220,80 260,40 330,50 C400,60 430,100 500,80 C570,60 620,30 680,40 C720,46 760,55 800,45" fill="none" stroke="#41f0a4" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- dots -->
+          <circle cx="0" cy="120" r="4" fill="#41f0a4"/>
+          <circle cx="160" cy="70" r="4" fill="#41f0a4"/>
+          <circle cx="330" cy="50" r="4" fill="#41f0a4"/>
+          <circle cx="500" cy="80" r="4" fill="#41f0a4"/>
+          <circle cx="680" cy="40" r="4" fill="#41f0a4"/>
+          <circle cx="800" cy="45" r="4" fill="#41f0a4"/>
+        </svg>
+        <div class="chart-labels">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- recent bets -->
+        <div class="tbl-wrap">
+          <div class="tbl-toolbar">
+            <h3 style="font-size:13px;font-weight:800;flex:1">Recent Bets</h3>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Game</th>
+                <th>Wager</th>
+                <th>Outcome</th>
+                <th>Profit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="dashRecentPlaceholder"><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- top games -->
+        <div class="tbl-wrap">
+          <div class="tbl-toolbar">
+            <h3 style="font-size:13px;font-weight:800;flex:1">Top Games by Revenue</h3>
+          </div>
+          <div style="padding:8px 16px">
+            <div id="dashTopGames"><div style="padding:24px;text-align:center;color:var(--muted)">Loading…</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /dashboard -->
+
+    <!-- ═══════════════ USERS ═══════════════ -->
+    <div class="tab-content" id="tab-users">
+      <div class="tbl-wrap">
+        <div class="tbl-toolbar">
+          <div class="tbl-search">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="text" placeholder="Search users…" id="userSearch"/>
+          </div>
+          <button class="filter-btn active" data-uf="all">All</button>
+          <button class="filter-btn" data-uf="active">Active</button>
+          <button class="filter-btn" data-uf="suspended">Suspended</button>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="tbtn primary">+ Add User</button>
+          </div>
+        </div>
+        <table id="usersTable">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Balance</th>
+              <th>Total Wagered</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTbody"></tbody>
+        </table>
+        <div class="tbl-footer">
+          <span id="usersCount">Showing 8 users</span>
+          <div class="pg">
+            <button class="pg-btn active">1</button>
+            <button class="pg-btn">2</button>
+            <button class="pg-btn">3</button>
+            <button class="pg-btn">›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ TRANSACTIONS ═══════════════ -->
+    <div class="tab-content" id="tab-transactions">
+      <div class="tbl-wrap">
+        <div class="tbl-toolbar">
+          <div class="tbl-search">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="text" placeholder="Search transactions…"/>
+          </div>
+          <button class="filter-btn active" data-tf="all">All</button>
+          <button class="filter-btn" data-tf="deposit">Deposits</button>
+          <button class="filter-btn" data-tf="withdraw">Withdrawals</button>
+          <button class="filter-btn" data-tf="pending">Pending <span class="badge" style="background:var(--yellow);color:#000;padding:1px 6px;border-radius:99px;font-size:10px;margin-left:3px">4</span></button>
+        </div>
+        <table id="txTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>User</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Currency</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="txTbody"></tbody>
+        </table>
+        <div class="tbl-footer">
+          <span id="txCount">Showing 10 transactions</span>
+          <div class="pg">
+            <button class="pg-btn active">1</button>
+            <button class="pg-btn">2</button>
+            <button class="pg-btn">›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ GAMES ═══════════════ -->
+    <div class="tab-content" id="tab-games">
+      <div class="tbl-wrap">
+        <div class="tbl-toolbar">
+          <h3 style="font-size:13px;font-weight:800;flex:1">Game Management</h3>
+          <button class="tbtn primary">+ Add Game</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Game</th><th>Category</th><th>House Edge</th><th>Bets Today</th><th>Revenue Today</th><th>Status</th><th>Toggle</th></tr>
+          </thead>
+          <tbody id="gamesTbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Game Art Editor -->
+      <div style="margin-top:28px">
+        <div class="tbl-toolbar" style="margin-bottom:14px">
+          <h3 style="font-size:13px;font-weight:800;flex:1">Game Card Images</h3>
+        </div>
+        <div id="gameArtGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ LIVE BETS ═══════════════ -->
+    <div class="tab-content" id="tab-bets">
+      <div class="tbl-wrap">
+        <div class="tbl-toolbar">
+          <h3 style="font-size:13px;font-weight:800;flex:1">Live Bet Feed <span class="live-dot" style="margin-left:8px"></span></h3>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Time</th><th>User</th><th>Game</th><th>Wager</th><th>Multiplier</th><th>Profit</th><th>Outcome</th></tr>
+          </thead>
+          <tbody id="liveBetsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════ PROMOTIONS ═══════════════ -->
+    <div class="tab-content" id="tab-promos">
+
+      <div class="promo-cards">
+        <!-- Slide A: Welcome Bonus -->
+        <div class="promo-card-edit" id="pce-a">
+          <div class="pce-preview" style="background:linear-gradient(110deg,#0b3320 0%,#165c3a 55%,#1e8a56 110%)">
+            <span class="pce-preview-label">🎁 New Players</span>
+            <img id="previewImgA" src="" alt="" style="display:none">
+            <span class="pce-preview-title" id="previewTitleA">Welcome Bonus</span>
+          </div>
+          <div class="pce-body">
+            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlA" type="text" placeholder="https://…" value=""/></div>
+            <div class="pce-field"><label>Heading</label><input class="pce-input" id="headA" type="text" value="Welcome Bonus"/></div>
+            <div class="pce-field"><label>Subtext</label><input class="pce-input" id="subA" type="text" value="Get up to $1,000 + 150 Free Spins on your first deposit"/></div>
+            <div class="pce-row">
+              <label class="pce-upload" id="uploadBtnA"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Upload file<input type="file" accept="image/*" id="fileA" hidden/></label>
+              <button class="pce-save" onclick="savePromo('a')">Save</button>
+            </div>
+            <div class="pce-toast" id="toastA"></div>
+          </div>
+        </div>
+
+        <!-- Slide B: New Releases -->
+        <div class="promo-card-edit" id="pce-b">
+          <div class="pce-preview" style="background:linear-gradient(110deg,#0b1340 0%,#162060 60%,#1e2d80 100%)">
+            <span class="pce-preview-label">⭐ Featured</span>
+            <img id="previewImgB" src="" alt="" style="display:none">
+            <span class="pce-preview-title" id="previewTitleB">New Releases</span>
+          </div>
+          <div class="pce-body">
+            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlB" type="text" placeholder="https://…" value=""/></div>
+            <div class="pce-field"><label>Heading</label><input class="pce-input" id="headB" type="text" value="New Releases"/></div>
+            <div class="pce-field"><label>Subtext</label><input class="pce-input" id="subB" type="text" value="Discover and play the latest games on VOLT."/></div>
+            <div class="pce-row">
+              <label class="pce-upload" id="uploadBtnB"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Upload file<input type="file" accept="image/*" id="fileB" hidden/></label>
+              <button class="pce-save" onclick="savePromo('b')">Save</button>
+            </div>
+            <div class="pce-toast" id="toastB"></div>
+          </div>
+        </div>
+
+        <!-- Slide C: Weekly Race -->
+        <div class="promo-card-edit" id="pce-c">
+          <div class="pce-preview" style="background:linear-gradient(110deg,#2a1a8a 0%,#4433cc 55%,#5b40e8 120%)">
+            <span class="pce-preview-label">🏁 Promotion</span>
+            <img id="previewImgC" src="" alt="" style="display:none">
+            <span class="pce-preview-title" id="previewTitleC">$75,000 Weekly Race</span>
+          </div>
+          <div class="pce-body">
+            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlC" type="text" placeholder="https://…" value=""/></div>
+            <div class="pce-field"><label>Heading</label><input class="pce-input" id="headC" type="text" value="$75,000 Weekly Race"/></div>
+            <div class="pce-field"><label>Subtext</label><input class="pce-input" id="subC" type="text" value="Climb the leaderboard. Earn your spot."/></div>
+            <div class="pce-row">
+              <label class="pce-upload" id="uploadBtnC"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Upload file<input type="file" accept="image/*" id="fileC" hidden/></label>
+              <button class="pce-save" onclick="savePromo('c')">Save</button>
+            </div>
+            <div class="pce-toast" id="toastC"></div>
+          </div>
+        </div>
+
+        <!-- Slide D: Sports Cashback -->
+        <div class="promo-card-edit" id="pce-d">
+          <div class="pce-preview" style="background:linear-gradient(110deg,#3d1000 0%,#8b2e00 55%,#c84a0a 120%)">
+            <span class="pce-preview-label">⚡ Sports</span>
+            <img id="previewImgD" src="" alt="" style="display:none">
+            <span class="pce-preview-title" id="previewTitleD">Sports Cashback</span>
+          </div>
+          <div class="pce-body">
+            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlD" type="text" placeholder="https://…" value=""/></div>
+            <div class="pce-field"><label>Heading</label><input class="pce-input" id="headD" type="text" value="Sports Cashback"/></div>
+            <div class="pce-field"><label>Subtext</label><input class="pce-input" id="subD" type="text" value="Get 10% back on every sports bet, every week."/></div>
+            <div class="pce-row">
+              <label class="pce-upload" id="uploadBtnD"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Upload file<input type="file" accept="image/*" id="fileD" hidden/></label>
+              <button class="pce-save" onclick="savePromo('d')">Save</button>
+            </div>
+            <div class="pce-toast" id="toastD"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /promos -->
+
+  </div><!-- /content -->
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/supabase-client.js"></script>
+<script>
+'use strict';
+/* ── helpers ── */
+const $=id=>document.getElementById(id);
+const fmtDate=ts=>new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(ts));
+const fmtN=n=>(+n||0).toLocaleString('en-US',{maximumFractionDigits:4});
+const ACOLS=['#7b6cf6','#3d9bff','#41f0a4','#ff8a3d','#ff4757','#ffd23d','#f0b90b','#9945ff'];
+const acol=s=>ACOLS[(s||'?').charCodeAt(0)%ACOLS.length];
+const todayStr=()=>new Date().toISOString().split('T')[0];
+
+/* ── tab switching ── */
+const TITLES={dashboard:'Dashboard',users:'Users',transactions:'Transactions',games:'Games',bets:'Live Bets',promos:'Promotions'};
+document.querySelectorAll('.sb-item[data-tab]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    $('tab-'+btn.dataset.tab).classList.add('active');
+    $('pageTitle').textContent=TITLES[btn.dataset.tab];
+  });
+});
+document.querySelectorAll('.ctab').forEach(t=>{
+  t.addEventListener('click',()=>{document.querySelectorAll('.ctab').forEach(x=>x.classList.remove('active'));t.classList.add('active');});
+});
+
+/* ── auth error / login screen ── */
+function showAuthError(msg){
+  document.querySelector('.main').innerHTML=`
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:20px;text-align:center;padding:40px">
+      <div style="font-size:44px">🔒</div>
+      <h2 style="font-size:18px;font-weight:800;color:var(--txt)">${msg||'Admin access required'}</h2>
+      ${msg
+        ? `<p style="font-size:13px;color:var(--muted);max-width:340px;line-height:1.6">${msg}</p>
+           <a href="Volt Casino.html" style="padding:10px 24px;background:var(--panel);border:1px solid var(--line-2);color:var(--txt);border-radius:10px;font-weight:700;font-size:13px;text-decoration:none">← Back to Casino</a>`
+        : `<div style="background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px 32px;width:100%;max-width:360px;text-align:left;display:flex;flex-direction:column;gap:14px">
+             <div style="display:flex;flex-direction:column;gap:6px">
+               <label style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Email</label>
+               <input id="adminEmail" type="email" autocomplete="email" placeholder="admin@example.com"
+                 style="background:var(--panel-2);border:1px solid var(--line-2);border-radius:8px;padding:10px 13px;color:var(--txt);font-family:inherit;font-size:13px;outline:none;width:100%">
+             </div>
+             <div style="display:flex;flex-direction:column;gap:6px">
+               <label style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Password</label>
+               <input id="adminPass" type="password" autocomplete="current-password" placeholder="••••••••"
+                 style="background:var(--panel-2);border:1px solid var(--line-2);border-radius:8px;padding:10px 13px;color:var(--txt);font-family:inherit;font-size:13px;outline:none;width:100%">
+             </div>
+             <div id="adminLoginErr" style="font-size:12px;color:var(--red);min-height:16px"></div>
+             <button id="adminLoginBtn"
+               style="padding:11px;border-radius:9px;border:none;background:var(--mint);color:var(--mint-ink);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;width:100%">
+               Sign In
+             </button>
+             <div style="display:flex;align-items:center;gap:10px;margin:2px 0">
+               <div style="flex:1;height:1px;background:var(--line)"></div>
+               <span style="font-size:11px;color:var(--muted-2)">or</span>
+               <div style="flex:1;height:1px;background:var(--line)"></div>
+             </div>
+             <button id="adminGoogleBtn"
+               style="padding:11px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--txt);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:9px">
+               <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+               Continue with Google
+             </button>
+           </div>
+           <a href="Volt Casino.html" style="font-size:12px;color:var(--muted);text-decoration:none">← Back to Casino</a>`
+      }
+    </div>`;
+
+  /* wire login form if rendered */
+  const btn = document.getElementById('adminLoginBtn');
+  if (!btn) return;
+  const doLogin = async () => {
+    const email = document.getElementById('adminEmail').value.trim();
+    const pass  = document.getElementById('adminPass').value;
+    const err   = document.getElementById('adminLoginErr');
+    if (!email || !pass) { err.textContent = 'Enter email and password.'; return; }
+    btn.textContent = '…'; btn.disabled = true;
+    const { error } = await supa.auth.signInWithPassword({ email, password: pass });
+    if (error) {
+      err.textContent = error.message;
+      btn.textContent = 'Sign In'; btn.disabled = false;
+    } else {
+      initAdmin();
+    }
+  };
+  btn.addEventListener('click', doLogin);
+  document.getElementById('adminPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+  const gBtn = document.getElementById('adminGoogleBtn');
+  if (gBtn) {
+    gBtn.addEventListener('click', async () => {
+      gBtn.textContent = 'Connecting…'; gBtn.disabled = true;
+      const { error } = await supa.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: location.href }
+      });
+      if (error) {
+        gBtn.textContent = 'Continue with Google'; gBtn.disabled = false;
+        document.getElementById('adminLoginErr').textContent = error.message;
+      }
+    });
+  }
+}
+
+/* ── fetch rows + join profile usernames ── */
+async function withProfiles(rows){
+  if(!rows?.length) return [];
+  const ids=[...new Set(rows.map(r=>r.user_id))];
+  const {data:profiles}=await supa.from('profiles').select('id,username').in('id',ids);
+  const pmap=Object.fromEntries((profiles||[]).map(p=>[p.id,p]));
+  return rows.map(r=>({...r,_profile:pmap[r.user_id]}));
+}
+
+/* ══ DASHBOARD ══════════════════════════════════════════════ */
+async function loadDashboard(){
+  /* stats */
+  const {data:stats,error:se}=await supa.rpc('admin_stats');
+  if(!se&&stats){
+    const vals=document.querySelectorAll('#tab-dashboard .stat-val');
+    if(vals[0]) vals[0].textContent='$'+fmtN(Math.abs(stats.house_profit));
+    if(vals[1]) vals[1].textContent=fmtN(stats.total_users);
+    if(vals[2]) vals[2].textContent=fmtN(stats.bets_today);
+    if(vals[3]) vals[3].textContent=fmtN(stats.wagered_today);
+    const badge=document.querySelector('[data-tab="transactions"] .badge');
+    if(badge) badge.textContent=stats.pending_tx;
+  }
+
+  /* recent bets */
+  const {data:bets}=await supa.from('bets').select('*').order('created_at',{ascending:false}).limit(5);
+  const enriched=await withProfiles(bets);
+  const dashTbody=document.querySelector('#tab-dashboard .two-col .tbl-wrap:first-child tbody');
+  if(dashTbody){
+    dashTbody.innerHTML=enriched.length
+      ? enriched.map(b=>`
+          <tr>
+            <td><div class="td-user"><div class="u-avatar" style="background:${acol(b._profile?.username||'?')}">${(b._profile?.username||'?')[0].toUpperCase()}</div><div class="u-name">${b._profile?.username||'—'}</div></div></td>
+            <td>${b.game}</td>
+            <td class="amt-neg">${fmtN(b.wager)} ${b.currency}</td>
+            <td><span class="badge-status ${b.outcome==='win'?'active':b.outcome==='push'?'pending':'suspended'}">${b.outcome}</span></td>
+            <td class="${(+b.profit||0)>0?'amt-pos':'amt-neg'}">${(+b.profit||0)>0?'+':''}${fmtN(b.profit)} ${b.currency}</td>
+          </tr>`).join('')
+      : `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No bets yet</td></tr>`;
+  }
+
+  /* top games */
+  const {data:todayBets}=await supa.from('bets').select('game,wager,profit,outcome').gte('created_at',todayStr());
+  const gmap={};
+  (todayBets||[]).forEach(b=>{
+    const k=b.game.replace(/^originals-/i,'').replace(/^\w/,c=>c.toUpperCase());
+    if(!gmap[k]) gmap[k]={count:0,rev:0};
+    gmap[k].count++;
+    gmap[k].rev+=b.outcome==='loss'?+b.wager:-(+b.profit||0);
+  });
+  const sorted=Object.entries(gmap).sort((a,b)=>b[1].rev-a[1].rev).slice(0,5);
+  const maxRev=sorted[0]?.[1]?.rev||1;
+  const GICONS={crash:'💥',mines:'💎',dice:'🎲',plinko:'🔮',coinflip:'🪙',keno:'🎯',blackjack:'🃏'};
+  const gicon=n=>GICONS[n.toLowerCase()]||'🎮';
+  $('dashTopGames').innerHTML=sorted.length
+    ? sorted.map(([name,s],i)=>`
+        <div class="tg-item">
+          <div class="tg-rank">${i+1}</div>
+          <div class="tg-ic" style="background:rgba(65,240,164,.1)">${gicon(name)}</div>
+          <div class="tg-info"><b>${name}</b><span>${s.count} bets today</span></div>
+          <div class="tg-rev"><b>${fmtN(s.rev)}</b><span>${Math.round(s.rev/maxRev*100)}%</span>
+            <div class="tg-bar-wrap"><div class="tg-bar" style="width:${Math.round(s.rev/maxRev*100)}%"></div></div>
+          </div>
+        </div>`).join('')
+    : `<div style="padding:24px;text-align:center;color:var(--muted)">No bets today yet</div>`;
+}
+
+/* ══ USERS ══════════════════════════════════════════════════ */
+let _users=[], _uFilter='all', _uQ='';
+
+async function loadUsers(){
+  const [{data:profiles},{data:wallets},{data:betRows}]=await Promise.all([
+    supa.from('profiles').select('id,username,email,is_admin,vip_level,created_at').order('created_at',{ascending:false}).limit(200),
+    supa.from('wallets').select('user_id,currency,balance'),
+    supa.from('bets').select('user_id,wager'),
+  ]);
+  const wmap={};
+  (wallets||[]).forEach(w=>{if(!wmap[w.user_id])wmap[w.user_id]={};wmap[w.user_id][w.currency]=+w.balance;});
+  const wagMap={};
+  (betRows||[]).forEach(b=>{wagMap[b.user_id]=(wagMap[b.user_id]||0)+(+b.wager);});
+  _users=(profiles||[]).map(p=>({...p,_wallets:wmap[p.id]||{},_wagered:wagMap[p.id]||0}));
+  renderUsers();
+}
+
+function renderUsers(){
+  const q=_uQ.toLowerCase();
+  const rows=_users.filter(u=>
+    (_uFilter==='all'||(_uFilter==='active'&&!u.is_admin)||(_uFilter==='suspended'&&u.is_admin))
+    &&(!q||(u.username||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q))
+  );
+  $('usersTbody').innerHTML=rows.map(u=>{
+    const name=u.username||'—';
+    const bal=fmtN(u._wallets.USDT||0);
+    return `<tr>
+      <td><div class="td-user"><div class="u-avatar" style="background:${acol(name)}">${name[0].toUpperCase()}</div><div><div class="u-name">${name}</div><div class="u-email">${u.email||'—'}</div></div></div></td>
+      <td style="font-weight:700">${bal} USDT</td>
+      <td style="color:var(--muted)">${fmtN(u._wagered)}</td>
+      <td><span class="badge-status ${u.is_admin?'pending':'active'}">${u.is_admin?'Admin':'Active'}</span></td>
+      <td style="color:var(--muted)">${u.created_at?fmtDate(u.created_at):'—'}</td>
+      <td><button class="filter-btn" style="padding:4px 10px;font-size:11px">View</button></td>
+    </tr>`;
+  }).join('')||`<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">No users found</td></tr>`;
+  $('usersCount').textContent=`Showing ${rows.length} user${rows.length!==1?'s':''}`;
+}
+
+document.querySelectorAll('[data-uf]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('[data-uf]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');_uFilter=btn.dataset.uf;renderUsers();
+  });
+});
+$('userSearch').addEventListener('input',e=>{_uQ=e.target.value.trim();renderUsers();});
+
+/* ══ TRANSACTIONS ═══════════════════════════════════════════ */
+let _txs=[], _txFilter='all';
+
+async function loadTransactions(){
+  const {data}=await supa.from('transactions').select('*').order('created_at',{ascending:false}).limit(100);
+  _txs=await withProfiles(data||[]);
+  renderTx();
+}
+
+function renderTx(){
+  const rows=_txFilter==='all'?_txs:_txFilter==='pending'?_txs.filter(t=>t.status==='pending'):_txs.filter(t=>t.type===_txFilter);
+  $('txTbody').innerHTML=rows.map(t=>`
+    <tr>
+      <td style="font-family:monospace;font-size:11px;color:var(--muted)">${t.id.slice(0,8)}…</td>
+      <td style="font-weight:700">${t._profile?.username||'—'}</td>
+      <td><span class="badge-type ${t.type}">${t.type}</span></td>
+      <td class="${t.type==='deposit'?'amt-pos':'amt-neg'}">${t.type==='deposit'?'+':'-'}${fmtN(t.amount)} ${t.currency}</td>
+      <td style="color:var(--muted)">—</td>
+      <td><span class="badge-status ${t.status}">${t.status}</span></td>
+      <td style="color:var(--muted);font-size:12px">${fmtDate(t.created_at)}</td>
+      <td><div style="display:flex;gap:6px">
+        ${t.status==='pending'
+          ?`<button class="filter-btn" style="padding:4px 10px;font-size:11px;color:var(--mint)" onclick="approveTx('${t.id}')">Approve</button>
+             <button class="filter-btn" style="padding:4px 10px;font-size:11px;color:var(--red)" onclick="rejectTx('${t.id}')">Reject</button>`
+          :`<button class="filter-btn" style="padding:4px 10px;font-size:11px">View</button>`}
+      </div></td>
+    </tr>`).join('')||`<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">No transactions found</td></tr>`;
+  $('txCount').textContent=`Showing ${rows.length} transaction${rows.length!==1?'s':''}`;
+}
+
+document.querySelectorAll('[data-tf]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('[data-tf]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');_txFilter=btn.dataset.tf;renderTx();
+  });
+});
+
+window.approveTx=async id=>{await supa.from('transactions').update({status:'completed'}).eq('id',id);loadTransactions();};
+window.rejectTx =async id=>{await supa.from('transactions').update({status:'failed'}).eq('id',id);loadTransactions();};
+
+/* ══ GAMES ══════════════════════════════════════════════════ */
+const GDEFS=[
+  {name:'Crash',    icon:'💥',cat:'Originals',edge:'3%'},
+  {name:'Mines',    icon:'💎',cat:'Originals',edge:'2.5%'},
+  {name:'Dice',     icon:'🎲',cat:'Originals',edge:'1%'},
+  {name:'Plinko',   icon:'🔮',cat:'Originals',edge:'2%'},
+  {name:'Coinflip', icon:'🪙',cat:'Originals',edge:'2%'},
+  {name:'Keno',     icon:'🎯',cat:'Originals',edge:'4%'},
+  {name:'Blackjack',icon:'🃏',cat:'Table',    edge:'0.5%'},
+];
+
+async function loadGames(){
+  const {data}=await supa.from('bets').select('game,wager,profit,outcome').gte('created_at',todayStr());
+  const gmap={};
+  (data||[]).forEach(b=>{
+    const k=b.game.replace(/^originals-/i,'').replace(/^\w/,c=>c.toUpperCase());
+    if(!gmap[k]) gmap[k]={bets:0,rev:0};
+    gmap[k].bets++;
+    gmap[k].rev+=b.outcome==='loss'?+b.wager:-(+b.profit||0);
+  });
+  $('gamesTbody').innerHTML=GDEFS.map(g=>{
+    const s=gmap[g.name]||{bets:0,rev:0};
+    return `<tr>
+      <td><div class="td-user"><div class="tg-ic" style="width:32px;height:32px;border-radius:8px;background:var(--panel-2);font-size:16px;display:grid;place-items:center">${g.icon}</div><div class="u-name">${g.name}</div></div></td>
+      <td style="color:var(--muted)">${g.cat}</td>
+      <td style="color:var(--yellow);font-weight:700">${g.edge}</td>
+      <td style="color:var(--muted)">${s.bets.toLocaleString()}</td>
+      <td class="amt-pos">${fmtN(s.rev)}</td>
+      <td><span class="badge-status active">Active</span></td>
+      <td>
+        <label style="position:relative;display:inline-block;width:38px;height:22px;cursor:pointer">
+          <input type="checkbox" checked style="opacity:0;width:0;height:0"
+            onchange="this.closest('tr').querySelector('.badge-status').className='badge-status '+(this.checked?'active':'suspended');this.closest('tr').querySelector('.badge-status').textContent=this.checked?'Active':'Disabled';
+                      this.previousElementSibling.style.background=this.checked?'var(--mint)':'var(--panel-2)';
+                      this.nextElementSibling.style.left=this.checked?'18px':'3px'">
+          <span style="position:absolute;inset:0;background:var(--mint);border-radius:99px;transition:.2s;border:1px solid var(--line-2)"></span>
+          <span style="position:absolute;top:3px;left:18px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s"></span>
+        </label>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* ══ LIVE BETS ══════════════════════════════════════════════ */
+let _liveBets=[];
+
+async function loadLiveBets(){
+  const {data}=await supa.from('bets').select('*').order('created_at',{ascending:false}).limit(25);
+  _liveBets=await withProfiles(data||[]);
+  renderLiveBets();
+}
+
+function renderLiveBets(){
+  $('liveBetsTbody').innerHTML=_liveBets.map(b=>{
+    const win=b.outcome==='win',push=b.outcome==='push';
+    const t=new Date(b.created_at).toLocaleTimeString('en-US',{hour12:false});
+    return `<tr>
+      <td style="font-family:monospace;font-size:12px;color:var(--muted)">${t}</td>
+      <td style="font-weight:700">${b._profile?.username||'—'}</td>
+      <td>${b.game}</td>
+      <td style="color:var(--muted);font-variant-numeric:tabular-nums">${fmtN(b.wager)} ${b.currency}</td>
+      <td style="font-weight:800;color:${win?'var(--mint)':push?'var(--yellow)':'var(--muted)'}">${b.multiplier!=null?b.multiplier+'×':'—'}</td>
+      <td class="${win?'amt-pos':'amt-neg'}">${win?'+':''}${fmtN(b.profit)} ${b.currency}</td>
+      <td><span class="badge-status ${win?'active':push?'pending':'suspended'}">${b.outcome}</span></td>
+    </tr>`;
+  }).join('')||`<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">No bets yet</td></tr>`;
+}
+
+/* ══ REALTIME ═══════════════════════════════════════════════ */
+function subscribeRealtime(){
+  supa.channel('admin-live')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'bets'},async({new:b})=>{
+      const {data:p}=await supa.from('profiles').select('id,username').eq('id',b.user_id).single();
+      _liveBets=[{...b,_profile:p},..._liveBets].slice(0,50);
+      renderLiveBets();
+      if($('tab-dashboard').classList.contains('active')) loadDashboard();
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'transactions'},()=>{
+      if($('tab-transactions').classList.contains('active')) loadTransactions();
+      loadDashboard(); // refresh pending count
+    })
+    .subscribe();
+}
+
+/* ══ PROMO EDITOR ═══════════════════════════════════════════ */
+const LS_PROMOS='volt-promos';
+function loadPromoState(){ try{ return JSON.parse(localStorage.getItem(LS_PROMOS))||{}; }catch{ return {}; } }
+function initPromoEditor(){
+  const state=loadPromoState();
+  ['a','b','c','d'].forEach(k=>{
+    const K=k.toUpperCase();
+    const imgEl=$('previewImg'+K);
+    if(state[k]){
+      if(state[k].img){
+        const urlEl=$('url'+K);
+        imgEl.src=state[k].img;
+        imgEl.style.display='';
+        if(state[k].img.startsWith('data:')){
+          urlEl.value='(uploaded file)';
+          urlEl.dataset.dataUrl=state[k].img;
+        } else {
+          urlEl.value=state[k].img;
+        }
+      }
+      if(state[k].head){ $('head'+K).value=state[k].head; $('previewTitle'+K).textContent=state[k].head; }
+      if(state[k].sub)  $('sub'+K).value=state[k].sub;
+    }
+    $('url'+K).addEventListener('input',e=>{
+      const v=e.target.value.trim();
+      if(v){ imgEl.src=v; imgEl.style.display=''; delete $('url'+K).dataset.dataUrl; }
+      else { imgEl.src=''; imgEl.style.display='none'; }
+    });
+    $('head'+K).addEventListener('input',e=>{
+      $('previewTitle'+K).textContent=e.target.value||' ';
+    });
+    $('file'+K).addEventListener('change',e=>{
+      const f=e.target.files[0]; if(!f) return;
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        const url=ev.target.result;
+        imgEl.src=url; imgEl.style.display='';
+        $('url'+K).value='(uploaded file)';
+        $('url'+K).dataset.dataUrl=url;
+      };
+      reader.readAsDataURL(f);
+    });
+  });
+}
+window.savePromo=function(k){
+  const K=k.toUpperCase();
+  const urlEl=$('url'+K);
+  const img=urlEl.dataset.dataUrl||urlEl.value.trim();
+  const head=$('head'+K).value.trim();
+  const sub=$('sub'+K).value.trim();
+  const state=loadPromoState(); state[k]={img,head,sub};
+  const toast=$('toast'+K);
+  try{
+    localStorage.setItem(LS_PROMOS,JSON.stringify(state));
+    toast.textContent='✓ Saved — reload the casino page to see changes';
+  }catch(e){
+    toast.textContent='⚠ Image too large to save — try a smaller file or use a URL instead';
+    toast.style.color='#f87171';
+  }
+  setTimeout(()=>{toast.textContent='';toast.style.color='';},4000);
+};
+initPromoEditor();
+
+/* ══ GAME ART EDITOR ════════════════════════════════════════ */
+const LS_GAME_ART='volt-game-art';
+const GAME_ART_GAMES=[
+  {slug:'originals-dice',      name:'Dice',      grad:'linear-gradient(160deg,#1e9ad6,#41cdf0)'},
+  {slug:'originals-mines',     name:'Mines',     grad:'linear-gradient(160deg,#c93a2e,#f0763d)'},
+  {slug:'originals-plinko',    name:'Plinko',    grad:'linear-gradient(160deg,#11936b,#2ec98f)'},
+  {slug:'originals-crash',     name:'Crash',     grad:'linear-gradient(160deg,#c92356,#f05a8a)'},
+  {slug:'originals-blackjack', name:'Blackjack', grad:'linear-gradient(160deg,#16365c,#2356c9)'},
+  {slug:'originals-keno',      name:'Keno',      grad:'linear-gradient(160deg,#5a2ea6,#9a3df0)'},
+  {slug:'originals-limbo',     name:'Limbo',     grad:'linear-gradient(160deg,#a63aba,#e052b8)'},
+  {slug:'originals-baccarat',  name:'Baccarat',  grad:'linear-gradient(160deg,#d4452e,#f0763d)'},
+  {slug:'originals-coinflip',  name:'Coinflip',  grad:'linear-gradient(160deg,#8a6d1c,#d4af37)'},
+];
+function loadGameArt(){try{return JSON.parse(localStorage.getItem(LS_GAME_ART)||'{}');}catch{return{};}}
+function initGameArtEditor(){
+  const saved=loadGameArt();
+  const grid=document.getElementById('gameArtGrid');
+  grid.innerHTML=GAME_ART_GAMES.map(g=>`
+    <div class="promo-card-edit" id="gae-${g.slug}">
+      <div class="pce-preview" style="background:${g.grad};height:130px">
+        <img id="gaeImg-${g.slug}" src="${saved[g.slug]||''}" alt="" style="${saved[g.slug]?'':'display:none'};position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none">
+        <span class="pce-preview-label">${g.name}</span>
+      </div>
+      <div class="pce-body" style="padding:12px 14px;gap:8px">
+        <input class="pce-input" id="gaeUrl-${g.slug}" type="text" placeholder="Image URL" value="${saved[g.slug]&&!saved[g.slug].startsWith('data:')?saved[g.slug]:(saved[g.slug]?'(uploaded file)':'')}"/>
+        <div class="pce-row">
+          <label class="pce-upload"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Upload<input type="file" accept="image/*" id="gaeFile-${g.slug}" hidden/></label>
+          <button class="pce-save" onclick="saveGameArt('${g.slug}')">Save</button>
+        </div>
+        <div class="pce-toast" id="gaeTost-${g.slug}"></div>
+      </div>
+    </div>`).join('');
+  GAME_ART_GAMES.forEach(g=>{
+    const imgEl=document.getElementById('gaeImg-'+g.slug);
+    const urlEl=document.getElementById('gaeUrl-'+g.slug);
+    if(saved[g.slug]&&saved[g.slug].startsWith('data:')) urlEl.dataset.dataUrl=saved[g.slug];
+    urlEl.addEventListener('input',e=>{
+      const v=e.target.value.trim();
+      if(v){imgEl.src=v;imgEl.style.display='';delete urlEl.dataset.dataUrl;}
+      else{imgEl.src='';imgEl.style.display='none';}
+    });
+    document.getElementById('gaeFile-'+g.slug).addEventListener('change',e=>{
+      const f=e.target.files[0];if(!f)return;
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        imgEl.src=ev.target.result;imgEl.style.display='';
+        urlEl.value='(uploaded file)';urlEl.dataset.dataUrl=ev.target.result;
+      };
+      reader.readAsDataURL(f);
+    });
+  });
+}
+window.saveGameArt=function(slug){
+  const urlEl=document.getElementById('gaeUrl-'+slug);
+  const img=urlEl.dataset.dataUrl||urlEl.value.trim();
+  const state=loadGameArt();state[slug]=img;
+  const toast=document.getElementById('gaeTost-'+slug);
+  try{
+    localStorage.setItem(LS_GAME_ART,JSON.stringify(state));
+    toast.textContent='✓ Saved — reload the casino page';
+  }catch(e){
+    toast.textContent='⚠ Image too large — use a URL instead';
+    toast.style.color='#f87171';
+  }
+  setTimeout(()=>{toast.textContent='';toast.style.color='';},4000);
+};
+initGameArtEditor();
+
+/* ══ INIT ═══════════════════════════════════════════════════ */
+async function initAdmin(){
+  const {data:{user}}=await supa.auth.getUser();
+  if(!user){ showAuthError(); return; }
+
+  /* try fetching profile — is_admin may not exist if admin-schema.sql wasn't run */
+  const {data:profile,error:pe}=await supa.from('profiles').select('username,email,is_admin').eq('id',user.id).single();
+
+  /* schema not migrated yet */
+  if(pe?.message?.includes('is_admin')){
+    showAuthError('Run supabase/admin-schema.sql first, then set your account as admin.');
+    return;
+  }
+
+  if(!profile?.is_admin){
+    showAuthError('Your account does not have admin privileges. Run this in Supabase SQL editor:<br><br><code style="font-family:monospace;font-size:12px;background:var(--panel-2);padding:6px 10px;border-radius:6px;display:inline-block">UPDATE profiles SET is_admin=true<br>WHERE email=\''+user.email+'\';</code>');
+    return;
+  }
+
+  document.querySelector('.sb-user-info b').textContent=profile.username||'Admin';
+  document.querySelector('.sb-user-info span').textContent=profile.email||user.email||'admin';
+  document.querySelector('.sb-avatar').textContent=(profile.username||'A')[0].toUpperCase();
+
+  await Promise.all([loadDashboard(),loadUsers(),loadTransactions(),loadGames(),loadLiveBets()]);
+  subscribeRealtime();
+}
+
+initAdmin().catch(e=>{ console.error(e); showAuthError('Connection failed: '+e.message); });
+</script>
+</body>
+</html>

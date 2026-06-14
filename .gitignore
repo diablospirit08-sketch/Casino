@@ -1,0 +1,26 @@
+# Dependencies
+chain/node_modules/
+
+# Hardhat build artifacts
+chain/artifacts/
+chain/cache/
+
+# Sensitive runtime data
+chain/ledger.json
+
+# Environment secrets (never commit)
+.env
+.env.*
+
+# Dev screenshots (reference only, not needed in repo)
+screenshots/
+
+# Uploads / scratch images
+uploads/
+
+# Supabase CLI temp files
+supabase/.temp/
+
+# OS
+.DS_Store
+Thumbs.db
