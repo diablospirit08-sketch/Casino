@@ -848,6 +848,14 @@
   .srch-flat{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
   .srch-empty{color:var(--muted);font-size:13px;padding:32px 0;text-align:center;line-height:1.7}
   .srch-empty b{color:var(--txt)}
+  /* avatar picker */
+  .av-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:4px 0}
+  .av-opt{background:none;border:3px solid transparent;border-radius:50%;cursor:pointer;padding:0;transition:.15s;width:100%}
+  .av-opt:hover{border-color:var(--mint);transform:scale(1.06)}
+  .av-opt.sel{border-color:var(--mint);box-shadow:0 0 0 3px rgba(65,240,164,.2)}
+  .av-opt svg{width:100%;height:100%;border-radius:50%;display:block;pointer-events:none}
+  .av-name{font-size:9.5px;color:var(--muted);text-align:center;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #avatarBtn>svg{pointer-events:none;border-radius:50%}
 </style>
 </head>
 <body>
@@ -886,6 +894,7 @@
         <button class="icon-btn avatar" id="avatarBtn" aria-label="Account" aria-haspopup="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.2 3.8-5 7-5s5.8 1.8 7 5"/></svg></button>
         <div class="hdr-menu" id="userMenu">
           <div class="vip-block" id="vipBlock"></div>
+          <button class="umi" id="chooseAvatarBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><circle cx="18" cy="18" r="3"/><path d="m17 19 1 1 2-2"/></svg>Choose Avatar</button>
           <button class="umi" id="profileBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.2 3.8-5 7-5s5.8 1.8 7 5"/></svg>Profile</button>
           <button class="umi" id="rbBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg>Rakeback<span class="umi-dot" id="rbDot" hidden></span></button>
           <button class="umi" id="vaultBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M12 9v1m0 4v1m-3-3h1m4 0h1"/></svg>Vault</button>
@@ -1423,6 +1432,18 @@
 <!-- toasts -->
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
+<!-- AVATAR PICKER MODAL -->
+<div class="dep-overlay" id="avatarPickOverlay">
+  <div class="dep-modal" style="max-width:340px" role="dialog" aria-modal="true" aria-label="Choose Avatar">
+    <div class="dep-head">
+      <h3>Choose Avatar</h3>
+      <button class="icon-btn" id="avatarPickClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+    </div>
+    <div class="av-grid" id="avGrid"></div>
+    <button class="btn" id="avSaveBtn" style="width:100%;margin-top:16px" disabled>Save Avatar</button>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/lobby.js"></script>
@@ -1441,6 +1462,7 @@
 <script src="js/balances.js"></script>
 <script src="js/bets.js"></script>
 <script src="js/place-bet.js"></script>
+<script src="js/avatar.js"></script>
 <script>
 /* if the page loaded directly on an originals game via #play= hash */
 if(curSlug)mountEngine(curSlug);
