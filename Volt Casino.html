@@ -848,6 +848,17 @@
   .srch-flat{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
   .srch-empty{color:var(--muted);font-size:13px;padding:32px 0;text-align:center;line-height:1.7}
   .srch-empty b{color:var(--txt)}
+  /* notification bell ring */
+  #notifBtn:hover svg{animation:bellRing .9s both;transform-origin:top center}
+  #notifBtn:active{transform:scale(.8)}
+  @keyframes bellRing{
+    0%,100%{transform-origin:top center}
+    15%{transform:rotateZ(10deg)}
+    30%{transform:rotateZ(-10deg)}
+    45%{transform:rotateZ(5deg)}
+    60%{transform:rotateZ(-5deg)}
+    75%{transform:rotateZ(2deg)}
+  }
   /* avatar picker */
   .av-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:4px 0}
   .av-opt{background:none;border:3px solid transparent;border-radius:50%;cursor:pointer;padding:0;transition:.15s;width:100%}
