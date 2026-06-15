@@ -88,8 +88,8 @@
   .wallet-dep:hover{filter:brightness(1.07)}
   .wallet-dep:active{transform:scale(.97)}
   /* dropdown menus */
-  .hdr-menu{position:absolute;top:calc(100% + 10px);left:0;width:280px;background:var(--panel);border:1px solid var(--line-2);border-radius:14px;padding:6px;display:none;box-shadow:0 20px 44px -14px rgba(0,0,0,.75);z-index:80}
-  .wallet.open .hdr-menu,.avatar-wrap.open .hdr-menu{display:block}
+  .hdr-menu{position:absolute;top:calc(100% + 10px);left:0;width:280px;background:var(--panel);border:1px solid var(--line-2);border-radius:14px;padding:6px;box-shadow:0 20px 44px -14px rgba(0,0,0,.75);z-index:80;opacity:0;transform:translateY(-8px) scale(.97);pointer-events:none;transition:opacity .18s ease,transform .18s ease}
+  .wallet.open .hdr-menu,.avatar-wrap.open .hdr-menu,.notif-wrap.open .hdr-menu,.pill-wrap.open .hdr-menu{opacity:1;transform:none;pointer-events:auto}
   .hdr-menu .mlbl{font-size:9px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-2);padding:8px 10px 6px}
   .wmi{display:flex;align-items:center;gap:11px;width:100%;padding:10px 14px;border-radius:10px;border:none;background:none;color:var(--txt);font-family:inherit;cursor:pointer;transition:.14s;text-align:left}
   .wmi:hover{background:var(--panel-2)}
@@ -752,12 +752,10 @@
   /* ===== SORT/FILTER PILLS + NOTIFICATIONS ===== */
   .pill-wrap{position:relative}
   .pill-wrap .hdr-menu{left:auto;right:0;top:calc(100% + 8px);width:218px}
-  .pill-wrap.open .hdr-menu{display:block}
   .pill-wrap .tick,.lang-menu .tick{margin-left:auto}
   .pill .pv{color:var(--mint);letter-spacing:.02em}
   .notif-wrap{position:relative;display:flex}
   .notif-wrap .hdr-menu{left:auto;right:0;width:292px}
-  .notif-wrap.open .hdr-menu{display:block}
   .nitem{display:flex;gap:11px;width:100%;padding:10px;border-radius:9px;border:none;background:none;color:var(--txt);font-family:inherit;cursor:pointer;transition:.14s;text-align:left}
   .nitem:hover{background:var(--panel-2)}
   .nitem .nic{width:32px;height:32px;border-radius:50%;background:rgba(65,240,164,.1);display:grid;place-items:center;font-size:14px;flex:none}
