@@ -176,7 +176,7 @@ $id('umCopy').addEventListener('click',e=>{
 $id('walletMenuBtn').addEventListener('click',()=>{avatarWrap.classList.remove('open');openDep();});
 
 /* transactions shortcut */
-$id('txnMenuBtn').addEventListener('click',()=>{avatarWrap.classList.remove('open');if(typeof openTxn==='function')openTxn();});
+$id('txnMenuBtn').addEventListener('click',()=>{avatarWrap.classList.remove('open');if(typeof openTxnModal==='function')openTxnModal();});
 
 /* ---------- profile modal ---------- */
 const profOverlay=$id('profOverlay');
