@@ -585,28 +585,7 @@
   .crash-sub{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
   .crash-sub.cash{color:var(--mint)}
 
-  /* blackjack */
-  .bj-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;width:100%}
-  .bj-row{display:flex;flex-direction:column;align-items:center;gap:9px;min-height:118px}
-  .bj-lbl{display:flex;align-items:center;gap:8px;font-size:9.5px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-2)}
-  .bj-lbl b{font-size:11px;color:var(--txt);background:var(--panel-2);border:1px solid var(--line-2);border-radius:99px;padding:2px 9px;font-variant-numeric:tabular-nums}
-  .bj-lbl b.bust{color:#e2596a;border-color:#e2596a}
-  .bj-lbl b.bj{color:var(--mint);border-color:var(--mint)}
-  .bj-cards{display:flex;gap:8px;min-height:86px}
-  .bjc{width:60px;height:84px;border-radius:8px;background:#f2f5fc;color:#1a2030;display:flex;flex-direction:column;justify-content:space-between;padding:6px 7px;font-weight:900;box-shadow:0 8px 18px rgba(0,0,0,.45);animation:bjdeal .3s cubic-bezier(.2,1.2,.4,1)}
-  @keyframes bjdeal{from{transform:translateY(-26px) scale(.85);opacity:0}to{transform:none;opacity:1}}
-  .bjc .r{font-size:16px;line-height:1}
-  .bjc .s{font-size:19px;align-self:flex-end;line-height:1}
-  .bjc.red{color:#d8344a}
-  .bjc.back{background:linear-gradient(150deg,#173b2d,#0d5b3e);border:2px solid rgba(65,240,164,.4);color:transparent}
-  .bj-actions{display:flex;gap:8px}
-  .bj-act{height:42px;padding:0 22px;border-radius:99px;border:1px solid var(--line-2);background:var(--panel);color:var(--txt);font-family:inherit;font-size:10.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:.15s}
-  .bj-act:hover:not(:disabled){border-color:var(--mint);color:var(--mint)}
-  .bj-act:disabled{opacity:.4;cursor:default}
-  .bj-msg{font-size:15px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;min-height:18px}
-  .bj-msg.w{color:var(--mint)}
-  .bj-msg.l{color:#e2596a}
-  .bj-msg.p{color:var(--muted)}
+  /* blackjack styles injected dynamically by js/games/blackjack.js */
 
   /* coinflip */
   .cf-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;width:100%}
