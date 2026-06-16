@@ -71,22 +71,36 @@ ORIGINALS['originals-mines']={
     const r=this.round;if(!r||r.done||r.k===0)return;
     this.end(this.multAt(r.k));
   },
-  end(mult){
+  async end(mult){
     const r=this.round;r.done=true;
     const grid=$id('mnGrid');grid.classList.remove('live');
     grid.querySelectorAll('.mtile.hid').forEach(t=>{
       t.classList.remove('hid');t.classList.add('dim');
       t.innerHTML=r.mines.has(+t.dataset.i)?MINE_IMG:GEM_IMG;
     });
-    settleBet(r.st,mult);
-    this.round=null;
-    lockBet(false);
+    let res;
+    try{
+      res=await placeBet({game:'mines',currency:r.st.w.c,wager:r.st.b,
+        params:{action:'cashout',mines:this.m,k:r.k}});
+    }catch(err){
+      settleBet(r.st,mult);
+      this.round=null;lockBet(false);
+      $id('mnSegs').querySelectorAll('.auto-seg').forEach(b=>b.disabled=false);
+      this.sync();return;
+    }
+    serverSettleBet(r.st,mult,res.new_balance);
+    this.round=null;lockBet(false);
     $id('mnSegs').querySelectorAll('.auto-seg').forEach(b=>b.disabled=false);
     this.sync();
   },
   unmount(){
     const r=this.round;
-    if(r&&!r.done)settleBet(r.st,r.k>0?this.multAt(r.k):0);
+    if(r&&!r.done){
+      const mult=r.k>0?this.multAt(r.k):0;
+      placeBet({game:'mines',currency:r.st.w.c,wager:r.st.b,params:{action:'cashout',mines:this.m,k:r.k}})
+        .then(res=>serverSettleBet(r.st,mult,res.new_balance))
+        .catch(()=>settleBet(r.st,mult));
+    }
     this.round=null;
   }
 };

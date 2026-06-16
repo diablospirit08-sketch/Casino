@@ -86,18 +86,26 @@ ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bets         ENABLE ROW LEVEL SECURITY;
 
 -- profiles: users see/edit only their own
+DROP POLICY IF EXISTS "profiles: own read"   ON public.profiles;
+DROP POLICY IF EXISTS "profiles: own update" ON public.profiles;
 CREATE POLICY "profiles: own read"   ON public.profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "profiles: own update" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
 -- wallets: users see/edit only their own
+DROP POLICY IF EXISTS "wallets: own read"  ON public.wallets;
+DROP POLICY IF EXISTS "wallets: own write" ON public.wallets;
 CREATE POLICY "wallets: own read"   ON public.wallets FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "wallets: own write"  ON public.wallets FOR ALL    USING (auth.uid() = user_id);
 
 -- transactions: users see only their own; insert only
+DROP POLICY IF EXISTS "transactions: own read"   ON public.transactions;
+DROP POLICY IF EXISTS "transactions: own insert" ON public.transactions;
 CREATE POLICY "transactions: own read"   ON public.transactions FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "transactions: own insert" ON public.transactions FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- bets: users see/insert only their own
+DROP POLICY IF EXISTS "bets: own read"   ON public.bets;
+DROP POLICY IF EXISTS "bets: own insert" ON public.bets;
 CREATE POLICY "bets: own read"   ON public.bets FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "bets: own insert" ON public.bets FOR INSERT WITH CHECK (auth.uid() = user_id);
 

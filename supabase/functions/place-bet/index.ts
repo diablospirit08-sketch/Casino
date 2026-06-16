@@ -149,6 +149,40 @@ serve(async (req) => {
         break
       }
 
+      case 'mines': {
+        const action     = String(params.action || 'cashout')
+        const minesCount = Math.max(1, Math.min(24, Math.floor(Number(params.mines) || 3)))
+        const k          = Math.max(0, Math.min(25 - minesCount, Math.floor(Number(params.k) || 0)))
+        if (action === 'cashout' && k > 0) {
+          // Recompute multiplier server-side — client cannot inflate it
+          let f = 1
+          for (let i = 0; i < k; i++) f *= (25 - i) / (25 - minesCount - i)
+          multiplier = parseFloat((0.99 * f).toFixed(6))
+          outcome    = 'win'
+        } else {
+          multiplier = 0
+          outcome    = 'loss'
+        }
+        gameData = { action, mines: minesCount, k }
+        break
+      }
+
+      case 'blackjack': {
+        const bj_outcome = String(params.outcome || 'push')
+        const clientMult = Number(params.multiplier) || 0
+        // Snap to nearest known-valid multiplier to prevent client inflation
+        const VALID      = [0, 1, 1.5, 1.98, 2, 2.5, 3]
+        multiplier       = VALID.reduce((a, b) => Math.abs(b - clientMult) < Math.abs(a - clientMult) ? b : a)
+        outcome          = bj_outcome === 'win' ? 'win' : bj_outcome === 'lose' ? 'loss' : 'push'
+        gameData         = {
+          outcome: bj_outcome,
+          dealer:  String(params.dealer || ''),
+          hands:   String(params.hands  || ''),
+          insBet:  Number(params.insBet || 0),
+        }
+        break
+      }
+
       default:
         return new Response(JSON.stringify({ error: `Unknown game: ${game}` }), { status: 400, headers: CORS })
     }

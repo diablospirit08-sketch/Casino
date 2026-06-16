@@ -14,8 +14,10 @@ async function main() {
   // Local chain has infinite play money; on a real testnet the house funds
   // come out of the deployer's faucet ETH, so default small (override with
   // $env:HOUSE_FUNDS_ETH).
+  const isBSC = chainId === 56 || chainId === 97;
+  const nativeSymbol = isBSC ? "BNB" : "ETH";
   const HOUSE_FUNDS = ethers.parseEther(
-    chainId === 31337 ? "1000" : process.env.HOUSE_FUNDS_ETH || "0.05"
+    chainId === 31337 ? "1000" : process.env.HOUSE_FUNDS_BNB || process.env.HOUSE_FUNDS_ETH || "0.05"
   );
 
   const bankroll = await ethers.deployContract("VoltBankroll");
@@ -50,7 +52,7 @@ async function main() {
   console.log("VoltBankroll:", deployment.bankroll);
   console.log("VoltDice:    ", deployment.dice);
   console.log("VoltVault:   ", deployment.vault);
-  console.log("Bankroll funded with", ethers.formatEther(HOUSE_FUNDS), "ETH");
+  console.log("Bankroll funded with", ethers.formatEther(HOUSE_FUNDS), nativeSymbol);
   console.log("Addresses written to chain/deployment.json");
 }
 
