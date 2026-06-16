@@ -46,6 +46,7 @@ ORIGINALS['originals-blackjack']={
     this._noise(0.055,0.2,0);
   },
   _chipSnd:localStorage.getItem('volt-chip-snd')||'casino',
+  _customBuf:null,_customName:'',
   sndChip(){
     // light tick on tray pickup
     this._beep(1600,0.03,0.07,'sine',0);
@@ -125,6 +126,51 @@ ORIGINALS['originals-blackjack']={
     this._beep(880,0.04,0.18,'square',0);
     this._beep(1320,0.03,0.10,'square',0.03);
     this._beep(660,0.05,0.08,'square',0.05);
+  },
+  _sndCustom(){
+    if(!this._customBuf)return this._sndCasino();
+    try{
+      const c=this._ac||(this._ac=new(window.AudioContext||window.webkitAudioContext)());
+      if(c.state==='suspended')c.resume();
+      const src=c.createBufferSource(),g=c.createGain();
+      src.buffer=this._customBuf;g.gain.value=0.9;
+      src.connect(g);g.connect(c.destination);src.start();
+    }catch(e){}
+  },
+  async _loadCustomFile(file){
+    try{
+      const c=this._ac||(this._ac=new(window.AudioContext||window.webkitAudioContext)());
+      const ab=await file.arrayBuffer();
+      this._customBuf=await c.decodeAudioData(ab);
+      this._customName=file.name;
+      this._chipSnd='custom';
+      localStorage.setItem('volt-chip-snd','custom');
+      // update button label
+      const btn=document.querySelector('.bj2sndopt[data-v="custom"]');
+      if(btn)btn.textContent='📁 '+file.name.replace(/\.[^.]+$/,'').slice(0,10);
+      document.querySelectorAll('.bj2sndopt').forEach(b=>b.classList.toggle('on',b===btn));
+      this._sndCustom(); // preview
+    }catch(e){
+      if(window.showToast)showToast({icon:'⚠',title:'Audio error',sub:'Could not decode file: '+e.message});
+    }
+  },
+  async _tryLoadProjectFile(){
+    // silently try to load sounds/chip.wav or sounds/chip.mp3 if present
+    for(const f of['sounds/chip.wav','sounds/chip.mp3','sounds/chip.ogg']){
+      try{
+        const res=await fetch(f);if(!res.ok)continue;
+        const ab=await res.arrayBuffer();
+        const c=this._ac||(this._ac=new(window.AudioContext||window.webkitAudioContext)());
+        this._customBuf=await c.decodeAudioData(ab);
+        this._customName=f;
+        if(this._chipSnd==='custom'){
+          const btn=document.querySelector('.bj2sndopt[data-v="custom"]');
+          if(btn)btn.textContent='📁 '+f.split('/').pop().replace(/\.[^.]+$/,'');
+        }
+        return true;
+      }catch(e){continue;}
+    }
+    return false;
   },
   sndWin(){[523,659,784,1047].forEach((f,i)=>this._beep(f,0.3,0.15,'sine',i*0.1));},
   sndBJ(){
@@ -854,12 +900,6 @@ ORIGINALS['originals-blackjack']={
 .bj2act.std{background:#2a3e52;color:#a0c8e8}
 .bj2act.dbl{background:#7a4a10;color:#ffd080}
 .bj2act.spl{background:#3a2a60;color:#c0a0ff}
-.bj2snds{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
-.bj2sndopt{flex:1;min-width:calc(33% - 4px);height:30px;border:1px solid rgba(255,255,255,.07);
-  border-radius:7px;background:var(--panel-2,#1a2634);color:var(--muted,#4a6a84);
-  font-size:10px;font-weight:700;cursor:pointer;transition:.12s;font-family:inherit;white-space:nowrap}
-.bj2sndopt:hover{background:#1e2e40;color:#7ac8ff}
-.bj2sndopt.on{background:#1a3a54;color:#7ac8ff;border-color:rgba(26,159,255,.3)}
 .bj2rule{display:flex;gap:6px}
 .bj2rbtn{flex:1;height:30px;border:1px solid rgba(255,255,255,.07);border-radius:7px;
   background:var(--panel-2,#1a2634);color:var(--muted,#4a6a84);font-size:11px;font-weight:700;
@@ -899,11 +939,7 @@ ORIGINALS['originals-blackjack']={
           <button class="bj2rbtn${this.ruleMode==='S17'?' on':''}" id="bj2S17">S17</button>
         </div>
       </div>
-      <div class="eng-readout"><span>Chip Sound</span></div>
-      <div class="bj2snds" id="bj2SndPick">
-        ${[['casino','🎰 Casino'],['coin','🪙 Coin'],['soft','🤫 Soft'],['glass','🔮 Glass'],['retro','👾 Retro']]
-          .map(([v,l])=>`<button class="bj2sndopt${this._chipSnd===v?' on':''}" data-v="${v}">${l}</button>`).join('')}
-      </div>`;
+      <input type="file" id="bj2SndFile" accept="audio/*" style="display:none">`;
 
     gvStage.innerHTML=`
       <div class="bj2tbl">
@@ -971,12 +1007,9 @@ ORIGINALS['originals-blackjack']={
     $id('bj2Sp2').addEventListener('click',()=>this.spl());
     $id('bj2IY').addEventListener('click', ()=>this._insYes());
     $id('bj2IN').addEventListener('click', ()=>this._insNo());
-    $id('bj2SndPick').addEventListener('click',e=>{
-      const btn=e.target.closest('.bj2sndopt');if(!btn)return;
-      this._chipSnd=btn.dataset.v;
-      localStorage.setItem('volt-chip-snd',this._chipSnd);
-      $id('bj2SndPick').querySelectorAll('.bj2sndopt').forEach(b=>b.classList.toggle('on',b===btn));
-      this.sndChipLand();
+    $id('bj2SndFile').addEventListener('change',e=>{
+      const file=e.target.files[0];if(file)this._loadCustomFile(file);
+      e.target.value=''; // reset so same file can be re-picked
     });
     $id('bj2H17').addEventListener('click',()=>{
       if(this.h)return;this.ruleMode='H17';
@@ -1002,6 +1035,7 @@ ORIGINALS['originals-blackjack']={
     };
     document.addEventListener('keydown',this._kh);
     this._acts(false);this.syncBtn();
+    this._tryLoadProjectFile();
   },
 
   /* ── unmount ── */
