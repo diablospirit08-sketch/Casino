@@ -28,6 +28,11 @@ serve(async (req) => {
 })
 
 async function handlePayload(payload: any) {
+  console.log('[alchemy-webhook] payload keys:', Object.keys(payload ?? {}))
+  console.log('[alchemy-webhook] event keys:', Object.keys(payload?.event ?? {}))
+  console.log('[alchemy-webhook] activity length:', payload?.event?.activity?.length ?? 'undefined')
+  console.log('[alchemy-webhook] raw sample:', JSON.stringify(payload).slice(0, 500))
+
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
@@ -36,24 +41,23 @@ async function handlePayload(payload: any) {
 
   const vaultAddr = (Deno.env.get('VAULT_ADDRESS') ?? '').toLowerCase()
 
-  // Alchemy "Address Activity" webhook — logs live in event.activity[].log
-  // or inside event.data.block.logs depending on webhook type
   const activity: any[] = payload?.event?.activity ?? []
 
   for (const act of activity) {
-    const log = act?.log ?? act
-    if (!log?.topics) continue
+    // Native BNB transfer to the vault (Address Activity webhook format)
+    const toAddr     = act.toAddress?.toLowerCase()
+    const fromAddr   = act.fromAddress?.toLowerCase()
+    const amountBnb  = parseFloat(act.value) || 0
+    const txHash     = act.hash ?? null
+    const category   = act.category  // 'external' for native transfers
 
-    if (
-      log.address?.toLowerCase() !== vaultAddr ||
-      log.topics[0] !== DEPOSITED_TOPIC
-    ) continue
+    console.log('[alchemy-webhook] activity:', category, fromAddr, '->', toAddr, amountBnb, 'BNB')
 
-    // player is topics[1]: 32-byte padded address → take last 20 bytes
-    const playerAddr = ('0x' + log.topics[1].slice(26)).toLowerCase()
-    const amountWei  = BigInt(log.data ?? '0x0')
-    const amountBnb  = Number(amountWei) / 1e18
-    const txHash     = log.transactionHash ?? act.hash ?? null
+    if (toAddr !== vaultAddr) continue
+    if (amountBnb <= 0) continue
+    if (category !== 'external' && category !== 'internal') continue
+
+    const playerAddr = fromAddr
 
     console.log('[alchemy-webhook] Deposited:', playerAddr, amountBnb, 'BNB tx:', txHash)
 
