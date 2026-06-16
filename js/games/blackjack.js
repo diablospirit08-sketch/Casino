@@ -45,41 +45,86 @@ ORIGINALS['originals-blackjack']={
     this._beep(55,0.11,0.3,'sine',0);this._beep(110,0.06,0.15,'sine',0);
     this._noise(0.055,0.2,0);
   },
+  _chipSnd:localStorage.getItem('volt-chip-snd')||'casino',
   sndChip(){
-    // light "tick" when picking up from tray
-    this._beep(1600,0.03,0.08,'sine',0);
-    this._beep(2400,0.02,0.04,'sine',0.008);
+    // light tick on tray pickup
+    this._beep(1600,0.03,0.07,'sine',0);
   },
   sndChipLand(){
-    // realistic casino chip clack: sharp crack + ceramic ring + body thud
     if(!this.sndOn)return;
+    ({
+      casino:()=>this._sndCasino(),
+      coin:  ()=>this._sndCoin(),
+      soft:  ()=>this._sndSoft(),
+      glass: ()=>this._sndGlass(),
+      retro: ()=>this._sndRetro(),
+    }[this._chipSnd]||this._sndCasino).call(this);
+  },
+  _sndCasino(){
+    // clay chip: crack + ceramic ring + thud
     try{
       const c=this._ac||(this._ac=new(window.AudioContext||window.webkitAudioContext)());
-      if(c.state==='suspended')c.resume();
-      const t=c.currentTime;
-      // 1. sharp crack — filtered noise burst
+      if(c.state==='suspended')c.resume();const t=c.currentTime;
       const buf=c.createBuffer(1,Math.ceil(c.sampleRate*0.009),c.sampleRate);
-      const d=buf.getChannelData(0);
-      for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);
+      const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);
       const src=c.createBufferSource(),bf=c.createBiquadFilter(),bg=c.createGain();
       bf.type='bandpass';bf.frequency.value=3800+Math.random()*600;bf.Q.value=3;
-      bg.gain.setValueAtTime(0.55,t);bg.gain.exponentialRampToValueAtTime(0.001,t+0.009);
-      src.buffer=buf;src.connect(bf);bf.connect(bg);bg.connect(c.destination);
-      src.start(t);src.stop(t+0.01);
-      // 2. ceramic ring — decaying sine (varies per chip for natural feel)
-      const ringFreq=1900+Math.random()*500;
+      bg.gain.setValueAtTime(0.5,t);bg.gain.exponentialRampToValueAtTime(0.001,t+0.009);
+      src.buffer=buf;src.connect(bf);bf.connect(bg);bg.connect(c.destination);src.start(t);src.stop(t+0.01);
       const ro=c.createOscillator(),rg=c.createGain();
-      ro.type='sine';ro.frequency.value=ringFreq;
-      rg.gain.setValueAtTime(0.18,t);rg.gain.exponentialRampToValueAtTime(0.001,t+0.14);
-      ro.connect(rg);rg.connect(c.destination);ro.start(t);ro.stop(t+0.15);
-      // 3. body thud — pitch-drop sine
-      const to2=c.createOscillator(),tg=c.createGain();
-      to2.type='sine';
-      to2.frequency.setValueAtTime(220,t);
-      to2.frequency.exponentialRampToValueAtTime(70,t+0.055);
-      tg.gain.setValueAtTime(0.28,t);tg.gain.exponentialRampToValueAtTime(0.001,t+0.06);
-      to2.connect(tg);tg.connect(c.destination);to2.start(t);to2.stop(t+0.06);
+      ro.type='sine';ro.frequency.value=1900+Math.random()*400;
+      rg.gain.setValueAtTime(0.16,t);rg.gain.exponentialRampToValueAtTime(0.001,t+0.13);
+      ro.connect(rg);rg.connect(c.destination);ro.start(t);ro.stop(t+0.14);
+      const to=c.createOscillator(),tg=c.createGain();
+      to.type='sine';to.frequency.setValueAtTime(200,t);to.frequency.exponentialRampToValueAtTime(65,t+0.05);
+      tg.gain.setValueAtTime(0.25,t);tg.gain.exponentialRampToValueAtTime(0.001,t+0.06);
+      to.connect(tg);tg.connect(c.destination);to.start(t);to.stop(t+0.06);
     }catch(e){}
+  },
+  _sndCoin(){
+    // metallic coin: bright harmonics, medium ring
+    try{
+      const c=this._ac||(this._ac=new(window.AudioContext||window.webkitAudioContext)());
+      if(c.state==='suspended')c.resume();const t=c.currentTime;
+      [[800,0.35,0.22],[1600,0.25,0.14],[2400,0.18,0.08]].forEach(([f,dur,gain])=>{
+        const o=c.createOscillator(),g=c.createGain();
+        o.type='sine';o.frequency.value=f+Math.random()*30;
+        g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+        o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur);
+      });
+      const buf=c.createBuffer(1,Math.ceil(c.sampleRate*0.006),c.sampleRate);
+      const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);
+      const src=c.createBufferSource(),bf=c.createBiquadFilter(),bg=c.createGain();
+      bf.type='highpass';bf.frequency.value=4000;
+      bg.gain.setValueAtTime(0.3,t);bg.gain.exponentialRampToValueAtTime(0.001,t+0.006);
+      src.buffer=buf;src.connect(bf);bf.connect(bg);bg.connect(c.destination);src.start(t);src.stop(t+0.007);
+    }catch(e){}
+  },
+  _sndSoft(){
+    // muted felt thump — quiet, low, no ring
+    this._noise(0.018,0.22,0);
+    this._beep(180,0.04,0.12,'sine',0);
+    this._beep(90,0.06,0.08,'sine',0.005);
+  },
+  _sndGlass(){
+    // crystal ping — high freq, long sustain
+    try{
+      const c=this._ac||(this._ac=new(window.AudioContext||window.webkitAudioContext)());
+      if(c.state==='suspended')c.resume();const t=c.currentTime;
+      [[3200,0.7,0.14],[6400,0.4,0.06],[1600,0.3,0.05]].forEach(([f,dur,gain])=>{
+        const o=c.createOscillator(),g=c.createGain();
+        o.type='sine';o.frequency.value=f;
+        g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(gain,t+0.004);
+        g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+        o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.01);
+      });
+    }catch(e){}
+  },
+  _sndRetro(){
+    // 8-bit arcade bleep
+    this._beep(880,0.04,0.18,'square',0);
+    this._beep(1320,0.03,0.10,'square',0.03);
+    this._beep(660,0.05,0.08,'square',0.05);
   },
   sndWin(){[523,659,784,1047].forEach((f,i)=>this._beep(f,0.3,0.15,'sine',i*0.1));},
   sndBJ(){
@@ -809,6 +854,12 @@ ORIGINALS['originals-blackjack']={
 .bj2act.std{background:#2a3e52;color:#a0c8e8}
 .bj2act.dbl{background:#7a4a10;color:#ffd080}
 .bj2act.spl{background:#3a2a60;color:#c0a0ff}
+.bj2snds{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
+.bj2sndopt{flex:1;min-width:calc(33% - 4px);height:30px;border:1px solid rgba(255,255,255,.07);
+  border-radius:7px;background:var(--panel-2,#1a2634);color:var(--muted,#4a6a84);
+  font-size:10px;font-weight:700;cursor:pointer;transition:.12s;font-family:inherit;white-space:nowrap}
+.bj2sndopt:hover{background:#1e2e40;color:#7ac8ff}
+.bj2sndopt.on{background:#1a3a54;color:#7ac8ff;border-color:rgba(26,159,255,.3)}
 .bj2rule{display:flex;gap:6px}
 .bj2rbtn{flex:1;height:30px;border:1px solid rgba(255,255,255,.07);border-radius:7px;
   background:var(--panel-2,#1a2634);color:var(--muted,#4a6a84);font-size:11px;font-weight:700;
@@ -847,6 +898,11 @@ ORIGINALS['originals-blackjack']={
           <button class="bj2rbtn${this.ruleMode==='H17'?' on':''}" id="bj2H17">H17</button>
           <button class="bj2rbtn${this.ruleMode==='S17'?' on':''}" id="bj2S17">S17</button>
         </div>
+      </div>
+      <div class="eng-readout"><span>Chip Sound</span></div>
+      <div class="bj2snds" id="bj2SndPick">
+        ${[['casino','🎰 Casino'],['coin','🪙 Coin'],['soft','🤫 Soft'],['glass','🔮 Glass'],['retro','👾 Retro']]
+          .map(([v,l])=>`<button class="bj2sndopt${this._chipSnd===v?' on':''}" data-v="${v}">${l}</button>`).join('')}
       </div>`;
 
     gvStage.innerHTML=`
@@ -915,6 +971,13 @@ ORIGINALS['originals-blackjack']={
     $id('bj2Sp2').addEventListener('click',()=>this.spl());
     $id('bj2IY').addEventListener('click', ()=>this._insYes());
     $id('bj2IN').addEventListener('click', ()=>this._insNo());
+    $id('bj2SndPick').addEventListener('click',e=>{
+      const btn=e.target.closest('.bj2sndopt');if(!btn)return;
+      this._chipSnd=btn.dataset.v;
+      localStorage.setItem('volt-chip-snd',this._chipSnd);
+      $id('bj2SndPick').querySelectorAll('.bj2sndopt').forEach(b=>b.classList.toggle('on',b===btn));
+      this.sndChipLand();
+    });
     $id('bj2H17').addEventListener('click',()=>{
       if(this.h)return;this.ruleMode='H17';
       $id('bj2H17').classList.add('on');$id('bj2S17').classList.remove('on');
