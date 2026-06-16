@@ -184,7 +184,7 @@ function fetchEthBalance(){
     return supa.auth.getUser().then(function(res){
       var user=res.data&&res.data.user;
       if(!user)return ethW?ethW.amt:0;
-      return supa.from('wallets').select('balance').eq('user_id',user.id).eq('currency','ETH').single()
+      return supa.from('wallets').select('balance').eq('user_id',user.id).eq('currency','BNB').single()
         .then(function(r){return parseFloat(r.data&&r.data.balance)||0;});
     });
   }
