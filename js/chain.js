@@ -42,6 +42,13 @@ if(typeof document==='undefined'){ /* loaded under Node for tests */
 }
 if(!window.ethereum)return; /* pure demo mode */
 
+/* When multiple wallets are installed (TrustWallet, TronLink, etc.) they override
+   window.ethereum. Find MetaMask specifically from the providers array. */
+if(window.ethereum.providers&&window.ethereum.providers.length){
+  var _mm=window.ethereum.providers.find(function(p){return p.isMetaMask&&!p.isTrust&&!p.isTronLink;});
+  if(_mm)window.ethereum=_mm;
+}
+
 /* ---------- state ---------- */
 var account=null,vaultAddr=null,chainIdHex=null,chainCurrency='BNB';
 var nativeW=WALLETS.find(function(w){return w.c==='BNB';}); /* BNB is the native token on BSC */
