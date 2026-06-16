@@ -108,10 +108,11 @@ ORIGINALS['originals-blackjack']={
   },
 
   /* ── chip toss animation ── */
-  _throwChip(fromEl,toX,toY,val,onDone){
+  _throwChip(fromEl,toX,toY,cryptoAmt,onDone){
+    const w=curW(),fiat=Math.max(1,Math.round(cryptoAmt*w.rate));
     const from=fromEl.getBoundingClientRect();
     const SIZE=48,PAD=8;
-    const cv=this._drawChipCanvas(val,SIZE);
+    const cv=this._drawChipCanvas(fiat,SIZE);
     cv.style.cssText=`position:fixed;pointer-events:none;z-index:9999;
       left:${from.left+from.width/2-SIZE/2-PAD}px;
       top:${from.top+from.height/2-SIZE/2-PAD}px;will-change:transform`;
@@ -135,14 +136,16 @@ ORIGINALS['originals-blackjack']={
   },
 
   /* ── bet stack on table ── */
-  _renderBetStack(amount){
+  _renderBetStack(cryptoAmt){
     const el=$id('bj2BetZone');if(!el)return;
     el.innerHTML='';
-    if(!amount){el.hidden=true;return;}
+    if(!cryptoAmt){el.hidden=true;return;}
     el.hidden=false;
+    const w=curW(),fiat=cryptoAmt*w.rate;
     const S=36,denoms=[100,50,25,10,5,1];
-    let rem=Math.round(amount);const chips=[];
+    let rem=Math.max(1,Math.round(fiat));const chips=[];
     for(const d of denoms){while(rem>=d){chips.push(d);rem-=d;}}
+    if(!chips.length)chips.push(1);
     chips.slice(0,6).forEach((val,i)=>{
       const c=this._drawChipCanvas(val,S);
       c.style.cssText=`position:absolute;left:50%;transform:translateX(-50%);bottom:${i*5}px;`;
@@ -150,7 +153,7 @@ ORIGINALS['originals-blackjack']={
     });
     const lbl=document.createElement('div');
     lbl.className='bj2bslbl';
-    lbl.textContent='$'+amount.toFixed(2);
+    lbl.textContent=fmtW(w,cryptoAmt)+' '+w.c;
     el.appendChild(lbl);
   },
 
@@ -193,7 +196,7 @@ ORIGINALS['originals-blackjack']={
   _isPair(hand){return hand.length===2&&hand[0].v===hand[1].v;},
 
   /* ── card DOM ── */
-  _OV:46,// card overlap offset px
+  _OV:52,// card overlap offset px
   _ROTS:[0,-0.7,1.0,-0.5,0.8,-0.6],
   _SHADS:['0 6px 18px rgba(0,0,0,.48)','0 10px 26px rgba(0,0,0,.54)',
            '0 13px 30px rgba(0,0,0,.6)','0 15px 34px rgba(0,0,0,.63)',
@@ -221,7 +224,7 @@ ORIGINALS['originals-blackjack']={
   },
   _renderStack(container,hand,hidden,isPlayer,stagger){
     container.innerHTML='';
-    const OV=this._OV,totalW=Math.max(96,(hand.length-1)*OV+90);
+    const OV=this._OV,totalW=Math.max(102,(hand.length-1)*OV+102);
     hand.forEach((card,i)=>{
       const isHidden=hidden&&i===0;
       const delay=stagger?i*120:0;
@@ -519,18 +522,18 @@ ORIGINALS['originals-blackjack']={
 .bj2pill.d{background:rgba(0,0,0,.45);color:#c8dff0;border:1px solid rgba(255,255,255,.15)}
 
 /* card stacks */
-.bj2stk{position:relative;min-height:118px;min-width:90px;display:flex;align-items:center}
+.bj2stk{position:relative;min-height:134px;min-width:102px;display:flex;align-items:center}
 
 /* cards */
-.bj2c{position:absolute;width:82px;height:114px;border-radius:10px;background:#fff;
+.bj2c{position:absolute;width:94px;height:130px;border-radius:11px;background:#fff;
   box-shadow:0 6px 18px rgba(0,0,0,.48);overflow:hidden;user-select:none}
-.bj2corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:0px;line-height:1;padding:6px 7px}
+.bj2corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:0px;line-height:1;padding:7px 8px}
 .bj2corner.tl{top:0;left:0}
 .bj2corner.br{bottom:0;right:0;transform:rotate(180deg)}
-.bj2c .cr{font-size:20px;font-weight:900;color:#1a2634;line-height:1}
-.bj2c .cs{font-size:14px;color:#1a2634;line-height:1.1}
+.bj2c .cr{font-size:23px;font-weight:900;color:#1a2634;line-height:1}
+.bj2c .cs{font-size:16px;color:#1a2634;line-height:1.1}
 .bj2center-suit{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-size:30px;opacity:.12;pointer-events:none;line-height:1}
+  font-size:36px;opacity:.12;pointer-events:none;line-height:1}
 .bj2c.red .cr,.bj2c.red .cs{color:#cc1a2e}
 .bj2c.back{background:linear-gradient(145deg,#1a6fd6 0%,#0d55b8 55%,#0840a0 100%);
   border:2px solid rgba(255,255,255,.28)}
