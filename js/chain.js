@@ -71,7 +71,7 @@ function api(path,body){
 }
 function refreshBalance(){
   return fetchEthBalance().then(function(amt){
-    setLedgerEth((amt*1e18).toString());
+    setLedgerEth(ethToWei(amt).toString());
     return BigInt(Math.round(amt*1e18));
   });
 }
@@ -273,7 +273,7 @@ var ui=(function(){
     var amt=el.querySelector('#cbAmt');
     function val(){return parseFloat(amt.value)||0;}
     el.querySelector('#cbDep').addEventListener('click',function(){
-      if(val()<=0)return flash('Enter an ETH amount first');
+      if(val()<=0)return flash('Enter a BNB amount first');
       busy(true);
       depositEth(val()).then(function(){flash('Deposited — BNB balance is live');amt.value='';},function(e){flash(e.message);}).then(function(){busy(false);});
     });

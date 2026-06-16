@@ -67,25 +67,26 @@ serve(async (req) => {
       });
     }
 
-    /* derive next unused index */
-    const { count } = await supabase
-      .from('deposit_addresses')
-      .select('*', { count: 'exact', head: true })
-      .eq('currency', currency);
+    /* Atomically claim the next HD index (advisory lock inside the RPC
+       ensures concurrent requests for the same currency get distinct slots). */
+    const { data: claimedIndex, error: slotErr } = await supabase.rpc('claim_deposit_address_slot', {
+      p_user_id:  user.id,
+      p_currency: currency,
+    });
+    if (slotErr) throw slotErr;
 
-    const index = count ?? 0;
+    const index = claimedIndex as number;
 
     const mnemonic = Mnemonic.fromPhrase(Deno.env.get('MASTER_MNEMONIC')!);
-    const root = HDNodeWallet.fromMnemonic(mnemonic, `m/44'/60'/0'/0/${index}`);
-    const child = root;
-    const address = child.address;
+    const address = HDNodeWallet.fromMnemonic(mnemonic, `m/44'/60'/0'/0/${index}`).address;
 
-    await supabase.from('deposit_addresses').insert({
-      user_id: user.id,
-      currency,
-      address,
-      address_index: index,
-    });
+    /* Fill in the real address on the placeholder row the RPC created */
+    await supabase
+      .from('deposit_addresses')
+      .update({ address })
+      .eq('user_id', user.id)
+      .eq('currency', currency)
+      .eq('address_index', index);
 
     /* register with Alchemy so it starts watching this address */
     await addAddressToWebhook(address, currency);

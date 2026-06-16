@@ -61,8 +61,6 @@ async function handlePayload(payload: any) {
 
     console.log('[alchemy-webhook] Deposited:', playerAddr, amountBnb, 'BNB tx:', txHash)
 
-    if (amountBnb <= 0) continue
-
     // Find Supabase user by wallet address (case-insensitive)
     const { data: profile } = await supabase
       .from('profiles')
