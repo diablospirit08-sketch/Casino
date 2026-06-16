@@ -43,11 +43,15 @@ if(typeof document==='undefined'){ /* loaded under Node for tests */
 if(!window.ethereum)return; /* pure demo mode */
 
 /* When multiple wallets are installed (TrustWallet, TronLink, etc.) they override
-   window.ethereum. Find MetaMask specifically from the providers array. */
-if(window.ethereum.providers&&window.ethereum.providers.length){
-  var _mm=window.ethereum.providers.find(function(p){return p.isMetaMask&&!p.isTrust&&!p.isTronLink;});
-  if(_mm)window.ethereum=_mm;
-}
+   window.ethereum. Pick MetaMask specifically; fall back to window.ethereum. */
+var _provider=(function(){
+  var providers=window.ethereum.providers;
+  if(providers&&providers.length){
+    return providers.find(function(p){return p.isMetaMask&&!p.isTrust&&!p.isTronLink;})
+           ||window.ethereum;
+  }
+  return window.ethereum;
+})();
 
 /* ---------- state ---------- */
 var account=null,vaultAddr=null,chainIdHex=null,chainCurrency='BNB';
@@ -95,7 +99,7 @@ window.creditTo=function(w,x){
 };
 
 /* ---------- MetaMask plumbing ---------- */
-function rpc(method,params){return window.ethereum.request({method:method,params:params});}
+function rpc(method,params){return _provider.request({method:method,params:params});}
 /* BSC chain definitions — MetaMask can auto-add these */
 var BSC_CHAINS={
   '0x38':{chainId:'0x38',chainName:'BNB Smart Chain',rpcUrls:['https://bsc-dataseed.binance.org/'],nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},blockExplorerUrls:['https://bscscan.com']},
@@ -138,7 +142,7 @@ function connect(){
     return rpc('eth_requestAccounts');
   }).then(function(accs){
     account=accs[0];
-    window.ethereum.on&&window.ethereum.on('accountsChanged',function(accs){
+    _provider.on&&_provider.on('accountsChanged',function(accs){
       account=accs[0]||null;
       if(account)refreshBalance();else ui.disconnected();
       ui.render();
