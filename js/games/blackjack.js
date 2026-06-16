@@ -417,6 +417,7 @@ ORIGINALS['originals-blackjack']={
     this._T.push(setTimeout(()=>{
       const h=this.h;h.hidden=false;this.render();
       const allBust=h.hands.every(hand=>this._val(hand)>21);
+
       const hits=[];
       if(!allBust){
         const tmp=[...h.dealer];
@@ -436,7 +437,7 @@ ORIGINALS['originals-blackjack']={
         },hitDelay));
       });
       this._T.push(setTimeout(()=>this._finish(),hitDelay+350));
-    },320));
+    },520));
   },
   _settleHand(hand,bet){
     const p=this._val(hand),d=this._val(this.h.dealer);
@@ -492,7 +493,7 @@ ORIGINALS['originals-blackjack']={
     if(window.addRakeback)addRakeback(totalWagered*w.rate);
     renderSession();
     pushChip(totalPayout/h.handBets[0]||0,state==='w');
-    if(state==='w')pushFeed('You',h.st.name,Math.max(0,prof)*w.rate,true);
+    if(state==='w')pushFeed('You','Blackjack',Math.max(0,prof)*w.rate,true);
 
     this._floatPnl(prof,w);
     this._renderBetStack(0);
@@ -504,8 +505,8 @@ ORIGINALS['originals-blackjack']={
 
   /* ── insurance ── */
   _insYes(){
-    const h=this.h,side=Math.max(1,Math.floor(h.st.b/2));
-    if(h.st.b<2||curW().amt<side){$id('bj2Ins').hidden=true;this._insNo();return;}
+    const h=this.h,side=h.st.b/2;
+    if(side<=0||curW().amt<side){$id('bj2Ins').hidden=true;this._insNo();return;}
     this.sndChip();creditTo(h.st.w,-side);h.insBet=side;
     $id('bj2Ins').hidden=true;this.render();
     if(this._val(h.dealer)===21){
@@ -799,12 +800,9 @@ ORIGINALS['originals-blackjack']={
     if(this._kh){document.removeEventListener('keydown',this._kh);this._kh=null;}
     const h=this.h;
     if(h){
-      while(this._val(h.dealer)<17)h.dealer.push(this._drawCard());
-      const p=this._val(h.hands[0]),d=this._val(h.dealer);
-      const mult=p>21?0:d>21?2:p>d?2:p===d?1:0;
-      if(mult>0)creditTo(h.st.w,h.st.b*mult);
-      gsession.wag+=h.st.b*h.st.w.rate;
-      gsession.prof+=h.st.b*(mult-1)*h.st.w.rate;
+      // refund total wagered (safest on mid-round close)
+      const totalWagered=h.handBets.reduce((a,b)=>a+b,0)+(h.insBet||0);
+      creditTo(h.st.w,totalWagered);
       renderSession();
     }
     this.h=null;
