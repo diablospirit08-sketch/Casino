@@ -193,34 +193,35 @@ ORIGINALS['originals-blackjack']={
   _isPair(hand){return hand.length===2&&hand[0].v===hand[1].v;},
 
   /* ── card DOM ── */
-  // depth rotations per stack position
+  _OV:46,// card overlap offset px
   _ROTS:[0,-0.7,1.0,-0.5,0.8,-0.6],
-  _SHADS:['0 5px 14px rgba(0,0,0,.48)','0 8px 22px rgba(0,0,0,.54)',
-           '0 11px 26px rgba(0,0,0,.6)','0 13px 28px rgba(0,0,0,.63)',
-           '0 15px 30px rgba(0,0,0,.65)','0 16px 32px rgba(0,0,0,.67)'],
+  _SHADS:['0 6px 18px rgba(0,0,0,.48)','0 10px 26px rgba(0,0,0,.54)',
+           '0 13px 30px rgba(0,0,0,.6)','0 15px 34px rgba(0,0,0,.63)',
+           '0 17px 36px rgba(0,0,0,.65)','0 18px 38px rgba(0,0,0,.67)'],
   _makeCard(card,hidden,isPlayer,delayMs,idx){
     const el=document.createElement('div');
     el.className='bj2c'+(hidden?' back':'')+(isPlayer?' p':'');
     if(!hidden){
       const red=card.s==='♥'||card.s==='♦';
       if(red)el.classList.add('red');
-      el.innerHTML=`<span class="cr">${card.r}</span><span class="cs">${card.s}</span>`+
-        `<span class="cs2">${card.s}</span><span class="cr2">${card.r}</span>`;
+      el.innerHTML=
+        `<div class="bj2corner tl"><span class="cr">${card.r}</span><span class="cs">${card.s}</span></div>`+
+        `<div class="bj2center-suit">${card.s}</div>`+
+        `<div class="bj2corner br"><span class="cr">${card.r}</span><span class="cs">${card.s}</span></div>`;
     }
     const i=Math.min(idx||0,5);
-    if(i>0){el.style.boxShadow=this._SHADS[i];}
+    if(i>0)el.style.boxShadow=this._SHADS[i];
     if(delayMs)el.style.animationDelay=delayMs+'ms';
     el.classList.add('dealing');
     el.addEventListener('animationend',()=>{
       el.classList.remove('dealing');
-      // apply depth rotation after deal animation so it doesn't conflict
       if(i>0)el.style.transform=`rotate(${this._ROTS[i]}deg)`;
     },{once:true});
     return el;
   },
   _renderStack(container,hand,hidden,isPlayer,stagger){
     container.innerHTML='';
-    const OV=36,totalW=Math.max(80,(hand.length-1)*OV+74);
+    const OV=this._OV,totalW=Math.max(96,(hand.length-1)*OV+90);
     hand.forEach((card,i)=>{
       const isHidden=hidden&&i===0;
       const delay=stagger?i*120:0;
@@ -390,7 +391,7 @@ ORIGINALS['originals-blackjack']={
       hits.forEach((card,i)=>{
         hitDelay=(i+1)*420;
         this._T.push(setTimeout(()=>{
-          const OV=36,idx=2+i;
+          const OV=this._OV,idx=2+i;
           const el=this._makeCard(h.dealer[idx],false,false,0,idx);
           el.style.left=idx*OV+'px';
           const ds=$id('bj2DS');if(ds)ds.appendChild(el);
@@ -518,24 +519,29 @@ ORIGINALS['originals-blackjack']={
 .bj2pill.d{background:rgba(0,0,0,.45);color:#c8dff0;border:1px solid rgba(255,255,255,.15)}
 
 /* card stacks */
-.bj2stk{position:relative;min-height:92px;min-width:74px;display:flex;align-items:center}
+.bj2stk{position:relative;min-height:118px;min-width:90px;display:flex;align-items:center}
 
 /* cards */
-.bj2c{position:absolute;width:64px;height:88px;border-radius:8px;background:#fff;
-  box-shadow:0 5px 14px rgba(0,0,0,.48);
-  display:flex;flex-direction:column;padding:5px 6px;overflow:hidden;user-select:none}
-.bj2c .cr{font-size:17px;font-weight:900;line-height:1;color:#1a2634}
-.bj2c .cs{font-size:13px;line-height:1;color:#1a2634}
-.bj2c .cr2{position:absolute;bottom:4px;right:5px;font-size:17px;font-weight:900;line-height:1;color:#1a2634;transform:rotate(180deg)}
-.bj2c .cs2{position:absolute;bottom:22px;right:6px;font-size:13px;line-height:1;color:#1a2634;transform:rotate(180deg)}
-.bj2c.red .cr,.bj2c.red .cs,.bj2c.red .cr2,.bj2c.red .cs2{color:#cc1a2e}
+.bj2c{position:absolute;width:82px;height:114px;border-radius:10px;background:#fff;
+  box-shadow:0 6px 18px rgba(0,0,0,.48);overflow:hidden;user-select:none}
+.bj2corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:0px;line-height:1;padding:6px 7px}
+.bj2corner.tl{top:0;left:0}
+.bj2corner.br{bottom:0;right:0;transform:rotate(180deg)}
+.bj2c .cr{font-size:20px;font-weight:900;color:#1a2634;line-height:1}
+.bj2c .cs{font-size:14px;color:#1a2634;line-height:1.1}
+.bj2center-suit{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-size:30px;opacity:.12;pointer-events:none;line-height:1}
+.bj2c.red .cr,.bj2c.red .cs{color:#cc1a2e}
 .bj2c.back{background:linear-gradient(145deg,#1a6fd6 0%,#0d55b8 55%,#0840a0 100%);
   border:2px solid rgba(255,255,255,.28)}
+.bj2c.back::after{content:"";position:absolute;inset:6px;border-radius:5px;
+  border:1.5px solid rgba(255,255,255,.2);
+  background:repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 2px,transparent 2px,transparent 6px)}
 .bj2c.p{border:2px solid rgba(255,255,255,.5)}
 .bj2c.p.win{border-color:#22dd66;box-shadow:0 0 0 2px rgba(34,221,102,.2),0 8px 22px rgba(0,0,0,.5)}
 .bj2c.p.lose{border-color:#e8304a;box-shadow:0 0 0 2px rgba(232,48,74,.2),0 8px 22px rgba(0,0,0,.5)}
-@keyframes bj2deal{from{opacity:0;transform:translateY(-24px) scale(.85) rotate(-4deg)}to{opacity:1;transform:none}}
-.bj2c.dealing{animation:bj2deal .3s cubic-bezier(.22,1,.36,1) both}
+@keyframes bj2deal{from{opacity:0;transform:translateY(-28px) scale(.84) rotate(-5deg)}to{opacity:1;transform:none}}
+.bj2c.dealing{animation:bj2deal .32s cubic-bezier(.22,1,.36,1) both}
 @keyframes bj2flip{0%{transform:rotateY(0deg)}50%{transform:rotateY(90deg)}100%{transform:rotateY(0deg)}}
 .bj2c.flip{animation:bj2flip .45s ease both}
 
