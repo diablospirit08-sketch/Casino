@@ -447,7 +447,7 @@ ORIGINALS['originals-blackjack']={
     if(p<d) return{payout:0,   r:'lose'};
     return{payout:bet,r:'push'};
   },
-  _finish(){
+  async _finish(){
     const h=this.h;
     this._acts(false);h.hidden=false;this.render();
     const dealerNat=this._isNat(h.dealer);
@@ -484,23 +484,52 @@ ORIGINALS['originals-blackjack']={
     const w=h.st.w;
     const totalWagered=h.handBets.reduce((a,b)=>a+b,0)+(h.insBet||0);
     const totalPayout=mainPayout+insPayout;
+    const mult=totalWagered>0?totalPayout/totalWagered:0;
     const prof=totalPayout-totalWagered;
 
-    if(totalPayout>0)creditTo(w,totalPayout);
-    gsession.wag+=totalWagered*w.rate;gsession.prof+=prof*w.rate;
-    if(prof>0)gsession.w++;else if(prof<0)gsession.l++;
-    addXp(totalWagered*w.rate);
-    if(window.addRakeback)addRakeback(totalWagered*w.rate);
-    renderSession();
-    pushChip(totalPayout/h.handBets[0]||0,state==='w');
-    if(state==='w')pushFeed('You','Blackjack',Math.max(0,prof)*w.rate,true);
-
+    // visual updates — immediate
     this._floatPnl(prof,w);
     this._renderBetStack(0);
     this.colorCards(state==='w'?'win':state==='l'?'lose':'');
     this.setMsg(msgs.join(' · '),state);
     this.setFlush(state==='w'?'w':state==='l'?'l':'');
-    this.h=null;lockBet(false);this.syncBtn();
+
+    // session stats — immediate
+    gsession.wag+=totalWagered*w.rate;gsession.prof+=prof*w.rate;
+    if(prof>0)gsession.w++;else if(prof<0)gsession.l++;
+    addXp(totalWagered*w.rate);
+    if(window.addRakeback)addRakeback(totalWagered*w.rate);
+    renderSession();
+    pushChip(mult,state==='w');
+    if(state==='w')pushFeed('You','Blackjack',Math.max(0,prof)*w.rate,true);
+
+    // clear round state; keep button locked until server responds
+    this.h=null;
+    gvBetBtn.disabled=true;gvBetBtn.textContent='Settling…';
+
+    // server settlement
+    try{
+      const res=await placeBet({
+        game:'blackjack',
+        currency:w.c,
+        wager:totalWagered,
+        params:{
+          outcome:state==='w'?'win':state==='l'?'lose':'push',
+          multiplier:parseFloat(mult.toFixed(6)),
+          dealer:h.dealer.map(c=>c.r+c.s).join(','),
+          hands:h.hands.map(hand=>hand.map(c=>c.r+c.s).join(',')).join('|'),
+          insBet:h.insBet||0
+        }
+      });
+      // server is source of truth for balance
+      w.amt=res.new_balance;w.fiat=w.amt*w.rate;renderWallet();
+    }catch(err){
+      // server unreachable — apply payout client-side so player isn't stuck
+      if(totalPayout>0)creditTo(w,totalPayout);
+      if(window.showToast)showToast({icon:'⚠',title:'Settlement error',sub:err.message});
+    }
+
+    lockBet(false);this.syncBtn();
   },
 
   /* ── insurance ── */
@@ -800,10 +829,13 @@ ORIGINALS['originals-blackjack']={
     if(this._kh){document.removeEventListener('keydown',this._kh);this._kh=null;}
     const h=this.h;
     if(h){
-      // refund total wagered (safest on mid-round close)
+      // refund all locally-deducted amounts on mid-round close
       const totalWagered=h.handBets.reduce((a,b)=>a+b,0)+(h.insBet||0);
-      creditTo(h.st.w,totalWagered);
-      renderSession();
+      // attempt server refund; fallback to local credit
+      placeBet({game:'blackjack',currency:h.st.w.c,wager:totalWagered,
+        params:{outcome:'push',multiplier:1,dealer:'',hands:'',insBet:0}})
+        .then(r=>{h.st.w.amt=r.new_balance;h.st.w.fiat=h.st.w.amt*h.st.w.rate;renderWallet();})
+        .catch(()=>{creditTo(h.st.w,totalWagered);});
     }
     this.h=null;
   }
