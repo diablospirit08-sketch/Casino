@@ -241,7 +241,7 @@ function setRailMin(min){
   localStorage.setItem(LS_RAIL,min?'min':'full');
   railToggle.setAttribute('aria-expanded',!min);
   /* re-fit tiles once the rail width transition lands */
-  setTimeout(()=>{sizeTiles();updateFades();movePill(document.querySelector('#railNav a.active'),true);},230);
+  setTimeout(()=>{sizeTiles();updateFades();movePill(document.querySelector('#railNav a.active'),true);syncAllRowArrows();syncProvArrows();},230);
 }
 const storedRail=localStorage.getItem(LS_RAIL);
 setRailMin(storedRail?storedRail==='min':window.innerWidth<1100);
@@ -406,13 +406,29 @@ document.getElementById('rows').innerHTML = ROWS.map(row=>`
   </div>
 `).join('');
 
-/* row scrolling — arrows page by one full set of tiles */
+/* row scrolling — arrows page by one full set of tiles, disabled at limits */
+function syncRowArrows(track){
+  if(!track)return;
+  const atStart=track.scrollLeft<=1;
+  const atEnd=track.scrollLeft>=track.scrollWidth-track.clientWidth-1;
+  const key=track.id.replace('track-','');
+  document.querySelectorAll(`[data-scroll="${key}"]`).forEach(b=>{
+    b.disabled=(+b.dataset.dir<0&&atStart)||(+b.dataset.dir>0&&atEnd);
+  });
+}
+function syncAllRowArrows(){
+  document.querySelectorAll('.row-track').forEach(syncRowArrows);
+}
 document.querySelectorAll('[data-scroll]').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const track=document.getElementById('track-'+btn.dataset.scroll);
     track.scrollBy({left:(+btn.dataset.dir)*track.clientWidth,behavior:'smooth'});
   });
 });
+document.querySelectorAll('.row-track').forEach(t=>{
+  t.addEventListener('scroll',()=>syncRowArrows(t),{passive:true});
+});
+syncAllRowArrows();
 
 /* ---------- fluid tile sizing: a whole number of tiles always fits ---------- */
 function sizeTiles(){
@@ -444,7 +460,7 @@ function wireFade(el){
 }
 function updateFades(){_fadeUpds.forEach(f=>f());}
 document.querySelectorAll('.cats').forEach(wireFade);
-window.addEventListener('resize',()=>{sizeTiles();updateFades();});
+window.addEventListener('resize',()=>{sizeTiles();updateFades();syncAllRowArrows();syncProvArrows();});
 
 /* ---------- category + search filtering ---------- */
 const catsEl=document.getElementById('cats'),
@@ -605,11 +621,19 @@ provRowEl.addEventListener('keydown',e=>{
     if(c){e.preventDefault();c.click();}
   }
 });
-document.querySelectorAll('[data-pscroll]').forEach(btn=>{
+const _pBtns=[...document.querySelectorAll('[data-pscroll]')];
+function syncProvArrows(){
+  const atStart=provRowEl.scrollLeft<=1;
+  const atEnd=provRowEl.scrollLeft>=provRowEl.scrollWidth-provRowEl.clientWidth-1;
+  _pBtns.forEach(b=>{b.disabled=(+b.dataset.pscroll<0&&atStart)||(+b.dataset.pscroll>0&&atEnd);});
+}
+_pBtns.forEach(btn=>{
   btn.addEventListener('click',()=>{
     provRowEl.scrollBy({left:(+btn.dataset.pscroll)*provRowEl.clientWidth,behavior:'smooth'});
   });
 });
+provRowEl.addEventListener('scroll',syncProvArrows,{passive:true});
+syncProvArrows();
 
 /* ---------- bets table ---------- */
 const bplayers=['Hidden','Volty_88','Nina_X','Hidden','Krakn','Joules','Hidden','Mx_Turbo','Hidden','Ohmies'];

@@ -1,13 +1,12 @@
 (async function(){
 'use strict';
 
-const CURRENCIES = ['BTC','ETH','BNB','LTC','USDT','SOL','XRP','TRX','DOGE','MATIC'];
+const CURRENCIES = ['BTC','ETH','BNB','LTC','USDT','SOL'];
 
 /* ── live price fetch (CoinGecko free tier) ── */
 const CG_IDS = {
   BTC:'bitcoin', ETH:'ethereum', BNB:'binancecoin', LTC:'litecoin',
-  USDT:'tether', SOL:'solana', XRP:'ripple', TRX:'tron',
-  DOGE:'dogecoin', MATIC:'matic-network',
+  USDT:'tether', SOL:'solana',
 };
 const LS_RATES = 'volt-rates';
 const LS_RATES_TS = 'volt-rates-ts';

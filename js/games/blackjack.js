@@ -276,27 +276,6 @@ ORIGINALS['originals-blackjack']={
   },
 
   /* ── bet stack on table ── */
-  _renderBetStack(cryptoAmt){
-    const el=$id('bj2BetZone');if(!el)return;
-    el.innerHTML='';
-    if(!cryptoAmt){el.hidden=true;return;}
-    el.hidden=false;
-    const w=curW(),fiat=cryptoAmt*w.rate;
-    const S=36,denoms=[100,50,25,10,5,1];
-    let rem=Math.max(1,Math.round(fiat));const chips=[];
-    for(const d of denoms){while(rem>=d){chips.push(d);rem-=d;}}
-    if(!chips.length)chips.push(1);
-    chips.slice(0,6).forEach((val,i)=>{
-      const c=this._drawChipCanvas(val,S);
-      c.style.cssText=`position:absolute;left:50%;transform:translateX(-50%);bottom:${i*5}px;`;
-      el.appendChild(c);
-    });
-    const lbl=document.createElement('div');
-    lbl.className='bj2bslbl';
-    lbl.textContent=fmtW(w,cryptoAmt)+' '+w.c;
-    el.appendChild(lbl);
-  },
-
   /* ── betting ring ── */
   _throwChipToCircle(fromBtn,usd){
     const ring=$id('bj2BetRing');if(!ring)return;
@@ -526,12 +505,26 @@ ORIGINALS['originals-blackjack']={
     sp.disabled=!(on&&this._isPair(curH)&&!h?.splitDone&&curW().amt>=curB);
   },
 
+  /* ── sync bet ring with manual input edits ── */
+  sync(){
+    if(this.h||!this._betChips.length)return;
+    const w=curW();
+    const ringCrypto=this._betChips.reduce((a,b)=>a+b,0)/w.rate;
+    const betCrypto=parseFloat(gvBetIn.value)||0;
+    const tol=Math.max(ringCrypto,betCrypto)*1e-4+1e-9;
+    if(Math.abs(betCrypto-ringCrypto)>tol){
+      this._betChips=[];this._renderBetRing();
+    }
+  },
+  onCur(){this.sync();},
+
   /* ── game flow ── */
   onBet(){this.deal();},
   deal(){
     if(this.h)return;
     const st=debitBet();if(!st)return;
     lockBet(true);gvBetBtn.disabled=true;
+    this._T.forEach(clearTimeout);this._T=[];
     this._deck=[];
     const dealer=[this._drawCard(),this._drawCard()];
     const hand=[this._drawCard(),this._drawCard()];
@@ -548,9 +541,11 @@ ORIGINALS['originals-blackjack']={
       this._T.push(setTimeout(()=>{
         if(dealer[1].r==='A'){
           this._acts(false);$id('bj2Ins').hidden=false;
+        }else if(this._isNat(hand)){
+          this._acts(false);this.setMsg('Blackjack!');
+          this._T.push(setTimeout(()=>this.stand(),600));
         }else{
           this._acts(true);this.setMsg('Your move.');
-          if(this._isNat(hand))this._T.push(setTimeout(()=>this.stand(),600));
         }
       },4*120+300));
     });
