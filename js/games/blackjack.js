@@ -45,7 +45,7 @@ ORIGINALS['originals-blackjack']={
     this._beep(55,0.11,0.3,'sine',0);this._beep(110,0.06,0.15,'sine',0);
     this._noise(0.055,0.2,0);
   },
-  _chipSnd:localStorage.getItem('volt-chip-snd')||'casino',
+  _chipSnd:localStorage.getItem('volt-chip-snd')||'custom',
   _customBuf:null,_customName:'',
   sndChip(){
     // light tick on tray pickup
@@ -156,7 +156,7 @@ ORIGINALS['originals-blackjack']={
   },
   async _tryLoadProjectFile(){
     // silently try to load sounds/chip.wav or sounds/chip.mp3 if present
-    for(const f of['sounds/chip.wav','sounds/chip.mp3','sounds/chip.ogg']){
+    for(const f of['sounds/GAMEMisc_blackjack Poker chips (ID 0942)_com.mp3','sounds/chip.wav','sounds/chip.mp3','sounds/chip.ogg']){
       try{
         const res=await fetch(f);if(!res.ok)continue;
         const ab=await res.arrayBuffer();
