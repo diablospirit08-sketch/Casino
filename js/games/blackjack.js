@@ -3,7 +3,7 @@ ORIGINALS['originals-blackjack']={
   rtp:'99.5%',auto:false,
   h:null,
   ruleMode:'H17',
-  _T:[],_kh:null,
+  _T:[],_kh:null,_betChips:[],
 
   /* ── sound ── */
   sndOn:localStorage.getItem('volt-snd')!=='off',
@@ -163,6 +163,68 @@ ORIGINALS['originals-blackjack']={
     lbl.className='bj2bslbl';
     lbl.textContent=fmtW(w,cryptoAmt)+' '+w.c;
     el.appendChild(lbl);
+  },
+
+  /* ── betting ring ── */
+  _throwChipToCircle(fromBtn,usd){
+    const ring=$id('bj2BetRing');if(!ring)return;
+    const from=fromBtn.getBoundingClientRect();
+    const to=ring.getBoundingClientRect();
+    const SIZE=40,PAD=5;
+    const cv=this._drawChipCanvas(Math.max(1,Math.round(usd)),SIZE);
+    const sx=from.left+from.width/2-SIZE/2-PAD,sy=from.top+from.height/2-SIZE/2-PAD;
+    const dx=to.left+to.width/2-SIZE/2-PAD,dy=to.top+to.height/2-SIZE/2-PAD;
+    cv.style.cssText=`position:fixed;pointer-events:none;z-index:9999;left:${sx}px;top:${sy}px`;
+    document.body.appendChild(cv);
+    const dur=340,t0=performance.now();
+    this.sndChip();
+    const frame=now=>{
+      const t=Math.min((now-t0)/dur,1);
+      const e=t<0.5?2*t*t:-1+(4-2*t)*t;
+      cv.style.left=(sx+(dx-sx)*e)+'px';
+      cv.style.top=(sy+(dy-sy)*e-60*Math.sin(Math.PI*t))+'px';
+      cv.style.transform=`rotate(${t*240}deg)`;
+      cv.style.opacity=t>0.88?1-(t-0.88)/0.12:1;
+      if(t<1)requestAnimationFrame(frame);
+      else{
+        cv.remove();
+        this._betChips.push(usd);
+        this._renderBetRing();
+        this.sndThud();
+      }
+    };
+    requestAnimationFrame(frame);
+  },
+  _renderBetRing(){
+    const ring=$id('bj2BetRing'),stk=$id('bj2BRStk'),lbl=$id('bj2BRLbl');
+    if(!ring||!stk)return;
+    stk.innerHTML='';
+    const chips=this._betChips;
+    if(!chips.length){
+      ring.classList.remove('has-chips');
+      if(lbl){lbl.textContent='BET';lbl.classList.remove('active');}
+      return;
+    }
+    ring.classList.add('has-chips');
+    const S=40,show=chips.slice(-5);
+    show.forEach((usd,i)=>{
+      const c=this._drawChipCanvas(Math.max(1,Math.round(usd)),S);
+      c.style.cssText=`position:absolute;left:50%;transform:translateX(-50%);bottom:${i*5}px;z-index:${i}`;
+      stk.appendChild(c);
+    });
+    const w=curW(),totalUsd=chips.reduce((a,b)=>a+b,0);
+    if(lbl){lbl.textContent=fmtW(w,totalUsd/w.rate)+' '+w.c;lbl.classList.add('active');}
+  },
+  _clearBetRing(){
+    const ring=$id('bj2BetRing');
+    if(ring){
+      ring.style.transition='transform .12s ease-in,opacity .22s';
+      ring.style.transform='scale(0.88)';ring.style.opacity='0';
+      setTimeout(()=>{
+        ring.style.cssText='';
+        this._betChips=[];this._renderBetRing();
+      },230);
+    }else{this._betChips=[];}
   },
 
   /* ── win/loss float ── */
@@ -345,11 +407,11 @@ ORIGINALS['originals-blackjack']={
              hidden:true,splitDone:false,splitAces:false,insBet:0};
     this.setMsg('');
     this.syncBtn();
-    // chip toss → then deal cards
+    // chip toss from ring (or deal button if ring empty) → card area
     const sr=gvStage.getBoundingClientRect();
-    const toX=sr.left+sr.width/2,toY=sr.top+sr.height*0.52;
-    this._throwChip(gvBetBtn,toX,toY,st.b,()=>{
-      this._renderBetStack(st.b);
+    const toX=sr.left+sr.width/2,toY=sr.top+sr.height*0.28;
+    const fromEl=this._betChips.length?($id('bj2BetRing')||gvBetBtn):gvBetBtn;
+    this._throwChip(fromEl,toX,toY,st.b,()=>{
       this.render(true);
       this._T.push(setTimeout(()=>{
         if(dealer[1].r==='A'){
@@ -375,9 +437,9 @@ ORIGINALS['originals-blackjack']={
     const h=this.h;if(!h)return;
     const bet=h.handBets[h.activeHand];
     if(curW().amt<bet)return this.setMsg('Not enough to double.','l');
-    this.sndChip();
     creditTo(h.st.w,-bet);h.handBets[h.activeHand]*=2;
-    this._renderBetStack(h.handBets[h.activeHand]);
+    const db=$id('bj2Db');
+    if(db)this._throwChipToCircle(db,bet*h.st.w.rate);
     this._cur().push(this._drawCard());this.sndCard(0.08);this.render();
     this._T.push(setTimeout(()=>this._next(),300));
   },
@@ -489,7 +551,7 @@ ORIGINALS['originals-blackjack']={
 
     // visual updates — immediate
     this._floatPnl(prof,w);
-    this._renderBetStack(0);
+    this._clearBetRing();
     this.colorCards(state==='w'?'win':state==='l'?'lose':'');
     this.setMsg(msgs.join(' · '),state);
     this.setFlush(state==='w'?'w':state==='l'?'l':'');
@@ -629,16 +691,33 @@ ORIGINALS['originals-blackjack']={
   font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.1s}
 .bj2tray-clr:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.65)}
 
-/* center section: arc + bet stack + ribbon */
+/* center section: arc + ribbon */
 .bj2center{display:flex;flex-direction:column;align-items:center;gap:6px;z-index:2;width:100%}
 .bj2arc-svg{width:min(460px,88%);height:22px;overflow:visible}
-.bj2betstk{position:relative;height:56px;min-width:50px;display:flex;justify-content:center}
-.bj2bslbl{position:absolute;top:-18px;left:50%;transform:translateX(-50%);
-  background:rgba(0,0,0,.72);color:#f5c842;font-size:10px;font-weight:800;
-  border-radius:5px;padding:2px 8px;white-space:nowrap;pointer-events:none}
 .bj2rib{font-size:7.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
   color:rgba(255,255,255,.22);padding:3px 0;width:100%;text-align:center;
   border-top:1px solid rgba(195,155,55,.2);border-bottom:1px solid rgba(195,155,55,.2)}
+
+/* betting ring */
+.bj2ring-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;z-index:2}
+.bj2betring{
+  position:relative;width:90px;height:90px;border-radius:50%;
+  border:2.5px dashed rgba(195,155,55,.4);
+  box-shadow:0 0 0 5px rgba(195,155,55,.05),inset 0 0 22px rgba(0,0,0,.22);
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .25s,box-shadow .25s;
+}
+.bj2betring.has-chips{
+  border-color:rgba(245,200,66,.8);border-style:solid;
+  box-shadow:0 0 0 5px rgba(245,200,66,.1),0 0 22px rgba(245,200,66,.2),inset 0 0 22px rgba(0,0,0,.22);
+}
+.bj2br-stk{position:relative;width:50px;height:50px}
+.bj2br-lbl{
+  font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(255,255,255,.25);padding:2px 9px;border-radius:5px;
+  background:rgba(0,0,0,.35);white-space:nowrap;transition:color .25s,background .25s;
+}
+.bj2br-lbl.active{color:#f5c842;background:rgba(0,0,0,.6)}
 
 /* split */
 .bj2sp{display:flex;gap:40px;z-index:2;align-items:flex-start}
@@ -746,8 +825,13 @@ ORIGINALS['originals-blackjack']={
             <path d="M12,18 Q250,-6 488,18" stroke="rgba(195,155,55,.5)" stroke-width="1.5" stroke-linecap="round"/>
             <path d="M12,21 Q250,-3 488,21" stroke="rgba(255,235,140,.18)" stroke-width="1" stroke-linecap="round"/>
           </svg>
-          <div class="bj2betstk" id="bj2BetZone" hidden></div>
           <div class="bj2rib">BLACKJACK PAYS 3:2 &nbsp;·&nbsp; INSURANCE PAYS 2:1 &nbsp;·&nbsp; DEALER STANDS ON 17</div>
+        </div>
+        <div class="bj2ring-wrap">
+          <div class="bj2betring" id="bj2BetRing">
+            <div class="bj2br-stk" id="bj2BRStk"></div>
+          </div>
+          <div class="bj2br-lbl" id="bj2BRLbl">BET</div>
         </div>
         <div class="bj2sp" id="bj2Sp" hidden>
           <div class="bj2sh" id="bj2SH0">
@@ -782,10 +866,11 @@ ORIGINALS['originals-blackjack']={
       const next=Math.min(+(cur+usd/w.rate).toFixed(8),w.amt);
       gvBetIn.value=fmtW(w,next);
       if(window.syncBetUI)syncBetUI();
-      this.sndChip();
+      this._throwChipToCircle(btn,usd);
     });
     $id('bj2TrayClr').addEventListener('click',()=>{
       if(this.h)return;
+      this._clearBetRing();
       const w=curW();gvBetIn.value=fmtW(w,0);
       if(window.syncBetUI)syncBetUI();
     });
