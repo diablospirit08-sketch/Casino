@@ -162,13 +162,19 @@ ORIGINALS['originals-keno']={
     try{
       res=await placeBet({game:'keno',currency:st.w.c,wager:st.b,params:{picks:[...this.picks],diff:this.diff}});
     }catch(err){
-      st.w.amt+=st.b;st.w.fiat=st.w.amt*st.w.rate;renderWallet();
+      creditTo(st.w,st.b);
       window._sbActive=false;
       showToast({icon:'⚠',title:'Bet failed',sub:err.message});
       if(done)stopAuto();
       return;
     }
     window._sbActive=false;
+    if(!res.gameData||!Array.isArray(res.gameData.draws)){
+      creditTo(st.w,st.b);
+      showToast({icon:'⚠',title:'Bet error',sub:'Unexpected server response'});
+      if(done)stopAuto();
+      return;
+    }
     const{draws,hits}=res.gameData,mult=res.multiplier;
     const drawn=new Set(draws);
     this.busy=true;

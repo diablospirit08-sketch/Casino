@@ -1055,6 +1055,7 @@ ORIGINALS['originals-blackjack']={
     if(this._cv){this._cv.remove();this._cv=null;this._cctx=null;}
     if(this._kh){document.removeEventListener('keydown',this._kh);this._kh=null;}
     if(this._chipAudio){this._chipAudio.pause();this._chipAudio=null;}
+    this._betChips=[];
     const h=this.h;
     if(h){
       // refund all locally-deducted amounts on mid-round close
