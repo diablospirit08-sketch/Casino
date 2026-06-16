@@ -2,8 +2,8 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { createHmac } from 'node:crypto'
 
-// keccak256("Deposited(address,uint256)") — VoltVault event topic
-const DEPOSITED_TOPIC = '0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c'
+// keccak256("Deposited(address,uint256)") — VoltVault event topic (verified from BSCScan)
+const DEPOSITED_TOPIC = '0x2da466a7b24304f47e87fa2e1e5a81b9831ce54fec19055ce277ca2f39ba42c4'
 
 serve(async (req) => {
   try {
