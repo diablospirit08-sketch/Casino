@@ -144,9 +144,10 @@ function connect(){
     account=accs[0];
     _provider.on&&_provider.on('accountsChanged',function(accs){
       account=accs[0]||null;
-      if(account)refreshBalance();else ui.disconnected();
+      if(account){saveWalletAddress(account);refreshBalance();}else ui.disconnected();
       ui.render();
     });
+    saveWalletAddress(account);
     return refreshBalance();
   }).then(function(){
     if(!document.body.classList.contains('authed'))setAuth(true);
@@ -176,6 +177,16 @@ function depositEth(amountEth){
         })();
       });
     });
+}
+
+/* save MetaMask address to profiles so the deposit webhook can find the user */
+function saveWalletAddress(addr){
+  if(typeof supa==='undefined')return;
+  supa.auth.getUser().then(function(res){
+    var user=res.data&&res.data.user;
+    if(!user)return;
+    supa.from('profiles').update({wallet_address:addr.toLowerCase()}).eq('id',user.id).then(function(){});
+  });
 }
 
 /* fetch ETH balance from Supabase (prod) or local cashier (dev) */

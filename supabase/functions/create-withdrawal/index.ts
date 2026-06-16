@@ -42,12 +42,15 @@ serve(async (req) => {
     const amountNative = Number(amount) / 1e18
     const currency     = Deno.env.get('VAULT_CURRENCY') || 'BNB'
 
+    console.log('[create-withdrawal] userId:', user.id, 'currency:', currency, 'amountNative:', amountNative)
+
     /* ── atomic balance debit ── */
     const { data: withdrawn, error: we } = await supabase.rpc('create_withdrawal', {
       p_user_id:    user.id,
       p_currency:   currency,
       p_amount_eth: amountNative,
     })
+    console.log('[create-withdrawal] rpc result:', JSON.stringify(withdrawn), 'error:', we?.message)
     if (we) {
       return new Response(JSON.stringify({ error: we.message }), { status: 400, headers: CORS })
     }
@@ -64,6 +67,12 @@ serve(async (req) => {
 
     const signer  = new ethers.Wallet(privateKey)
     const chainId = parseInt(Deno.env.get('VAULT_CHAIN_ID') || '97') // BSC Testnet default
+
+    console.log('[create-withdrawal] signerAddr:', signer.address)
+    console.log('[create-withdrawal] vaultAddr:', vaultAddr)
+    console.log('[create-withdrawal] chainId:', chainId)
+    console.log('[create-withdrawal] amountWei:', amountWei)
+    console.log('[create-withdrawal] walletAddress:', walletAddress)
 
     const domain = {
       name:              'VoltVault',
@@ -85,6 +94,11 @@ serve(async (req) => {
     const voucher  = { player: walletAddress, amount, nonce, deadline }
 
     const signature = await signer.signTypedData(domain, types, voucher)
+
+    // verify locally — if this fails the signing code itself is broken
+    const recovered = ethers.verifyTypedData(domain, types, voucher, signature)
+    console.log('[create-withdrawal] recovered:', recovered)
+    console.log('[create-withdrawal] match:', recovered.toLowerCase() === signer.address.toLowerCase())
 
     return new Response(
       JSON.stringify({
