@@ -45,7 +45,42 @@ ORIGINALS['originals-blackjack']={
     this._beep(55,0.11,0.3,'sine',0);this._beep(110,0.06,0.15,'sine',0);
     this._noise(0.055,0.2,0);
   },
-  sndChip(){this._beep(900,0.08,0.12,'sine',0);this._beep(1200,0.05,0.06,'sine',0.02);},
+  sndChip(){
+    // light "tick" when picking up from tray
+    this._beep(1600,0.03,0.08,'sine',0);
+    this._beep(2400,0.02,0.04,'sine',0.008);
+  },
+  sndChipLand(){
+    // realistic casino chip clack: sharp crack + ceramic ring + body thud
+    if(!this.sndOn)return;
+    try{
+      const c=this._ac||(this._ac=new(window.AudioContext||window.webkitAudioContext)());
+      if(c.state==='suspended')c.resume();
+      const t=c.currentTime;
+      // 1. sharp crack — filtered noise burst
+      const buf=c.createBuffer(1,Math.ceil(c.sampleRate*0.009),c.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);
+      const src=c.createBufferSource(),bf=c.createBiquadFilter(),bg=c.createGain();
+      bf.type='bandpass';bf.frequency.value=3800+Math.random()*600;bf.Q.value=3;
+      bg.gain.setValueAtTime(0.55,t);bg.gain.exponentialRampToValueAtTime(0.001,t+0.009);
+      src.buffer=buf;src.connect(bf);bf.connect(bg);bg.connect(c.destination);
+      src.start(t);src.stop(t+0.01);
+      // 2. ceramic ring — decaying sine (varies per chip for natural feel)
+      const ringFreq=1900+Math.random()*500;
+      const ro=c.createOscillator(),rg=c.createGain();
+      ro.type='sine';ro.frequency.value=ringFreq;
+      rg.gain.setValueAtTime(0.18,t);rg.gain.exponentialRampToValueAtTime(0.001,t+0.14);
+      ro.connect(rg);rg.connect(c.destination);ro.start(t);ro.stop(t+0.15);
+      // 3. body thud — pitch-drop sine
+      const to2=c.createOscillator(),tg=c.createGain();
+      to2.type='sine';
+      to2.frequency.setValueAtTime(220,t);
+      to2.frequency.exponentialRampToValueAtTime(70,t+0.055);
+      tg.gain.setValueAtTime(0.28,t);tg.gain.exponentialRampToValueAtTime(0.001,t+0.06);
+      to2.connect(tg);tg.connect(c.destination);to2.start(t);to2.stop(t+0.06);
+    }catch(e){}
+  },
   sndWin(){[523,659,784,1047].forEach((f,i)=>this._beep(f,0.3,0.15,'sine',i*0.1));},
   sndBJ(){
     [523,659,784,1047,1319].forEach((f,i)=>this._beep(f,0.4,0.2,'sine',i*0.08));
@@ -190,7 +225,7 @@ ORIGINALS['originals-blackjack']={
         cv.remove();
         this._betChips.push(usd);
         this._renderBetRing();
-        this.sndThud();
+        this.sndChipLand();
       }
     };
     requestAnimationFrame(frame);
