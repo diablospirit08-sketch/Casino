@@ -1,5 +1,6 @@
 /* --- mines --- */
-const MINE_IMG='<img class="mine-img" src="art/artmine.jpg.webp" alt="mine">';
+const MINE_IMG='<img class="mine-img" src="art/mine/mine.webp.webp" alt="mine">';
+const GEM_IMG='<img class="mine-img" src="art/mine/gem.png.png" alt="gem">';
 ORIGINALS['originals-mines']={
   rtp:'99%',auto:false,m:3,round:null,
   mount(){
@@ -60,7 +61,7 @@ ORIGINALS['originals-mines']={
       t.classList.add('boom');t.innerHTML=MINE_IMG;
       this.end(0);
     }else{
-      t.classList.add('safe');t.textContent='💎';
+      t.classList.add('safe');t.innerHTML=GEM_IMG;
       r.k++;
       if(r.k===25-this.m)this.cashout();
       else this.sync();
@@ -75,7 +76,7 @@ ORIGINALS['originals-mines']={
     const grid=$id('mnGrid');grid.classList.remove('live');
     grid.querySelectorAll('.mtile.hid').forEach(t=>{
       t.classList.remove('hid');t.classList.add('dim');
-      t.innerHTML=r.mines.has(+t.dataset.i)?MINE_IMG:'💎';
+      t.innerHTML=r.mines.has(+t.dataset.i)?MINE_IMG:GEM_IMG;
     });
     settleBet(r.st,mult);
     this.round=null;
