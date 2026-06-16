@@ -428,8 +428,6 @@ document.querySelectorAll('[data-scroll]').forEach(btn=>{
 document.querySelectorAll('.row-track').forEach(t=>{
   t.addEventListener('scroll',()=>syncRowArrows(t),{passive:true});
 });
-syncAllRowArrows();
-
 /* ---------- fluid tile sizing: a whole number of tiles always fits ---------- */
 function sizeTiles(){
   const gap=14;
@@ -445,6 +443,7 @@ function sizeTiles(){
   }
 }
 sizeTiles();
+syncAllRowArrows();
 
 /* ---------- scroll-edge fades (chip bar only — tiles fit exactly) ---------- */
 const _fadeUpds=[];
