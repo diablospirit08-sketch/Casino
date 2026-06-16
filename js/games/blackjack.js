@@ -232,7 +232,7 @@ ORIGINALS['originals-blackjack']={
   },
   _renderStack(container,hand,hidden,isPlayer,stagger){
     container.innerHTML='';
-    const OV=this._OV,totalW=Math.max(102,(hand.length-1)*OV+102);
+    const OV=this._OV,totalW=Math.max(112,(hand.length-1)*OV+112);
     hand.forEach((card,i)=>{
       const isHidden=hidden&&i===0;
       const delay=stagger?i*120:0;
@@ -554,7 +554,7 @@ ORIGINALS['originals-blackjack']={
 .bj2pill.d{background:rgba(0,0,0,.45);color:#c8dff0;border:1px solid rgba(255,255,255,.15)}
 
 /* card stacks */
-.bj2stk{position:relative;min-height:134px;min-width:102px;display:flex;align-items:center;perspective:700px}
+.bj2stk{position:relative;min-height:148px;min-width:112px;display:flex;align-items:center;perspective:700px}
 
 /* cards */
 .bj2c{position:absolute;width:104px;height:144px;border-radius:12px;background:#fff;
