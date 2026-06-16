@@ -36,7 +36,15 @@ ORIGINALS['originals-blackjack']={
       src.start(t);src.stop(t+dur);
     }catch(e){}
   },
-  sndCard(d){this._noise(0.04,0.12,d);this._beep(280,0.06,0.08,'triangle',d);},
+  sndCard(d){
+    const p=240+Math.random()*80,v=0.07+Math.random()*0.06;
+    this._noise(0.034+Math.random()*0.012,0.09+Math.random()*0.05,d);
+    this._beep(p,0.05+Math.random()*0.025,v,'triangle',d);
+  },
+  sndThud(){
+    this._beep(55,0.11,0.3,'sine',0);this._beep(110,0.06,0.15,'sine',0);
+    this._noise(0.055,0.2,0);
+  },
   sndChip(){this._beep(900,0.08,0.12,'sine',0);this._beep(1200,0.05,0.06,'sine',0.02);},
   sndWin(){[523,659,784,1047].forEach((f,i)=>this._beep(f,0.3,0.15,'sine',i*0.1));},
   sndBJ(){
@@ -196,7 +204,7 @@ ORIGINALS['originals-blackjack']={
   _isPair(hand){return hand.length===2&&hand[0].v===hand[1].v;},
 
   /* ── card DOM ── */
-  _OV:52,// card overlap offset px
+  _OV:56,// card overlap offset px
   _ROTS:[0,-0.7,1.0,-0.5,0.8,-0.6],
   _SHADS:['0 6px 18px rgba(0,0,0,.48)','0 10px 26px rgba(0,0,0,.54)',
            '0 13px 30px rgba(0,0,0,.6)','0 15px 34px rgba(0,0,0,.63)',
@@ -236,14 +244,35 @@ ORIGINALS['originals-blackjack']={
     container.style.width=totalW+'px';
   },
   _revealHole(){
-    const h=this.h,el=$id('bj2DS').querySelector('.bj2c.back');if(!el)return;
-    this.sndFlip();el.classList.add('flip');
+    const h=this.h,el=$id('bj2DS')?.querySelector('.bj2c.back');if(!el)return;
+    this.sndFlip();
+    // phase 1: fold away to 90deg
+    el.style.transition='transform .19s ease-in';
+    el.style.transform='rotateY(90deg)';
     setTimeout(()=>{
+      // swap to face
       const c=h.dealer[0],red=c.s==='♥'||c.s==='♦';
-      el.className='bj2c flip'+(red?' red':'');
-      el.innerHTML=`<span class="cr">${c.r}</span><span class="cs">${c.s}</span>`+
-        `<span class="cs2">${c.s}</span><span class="cr2">${c.r}</span>`;
-    },225);
+      el.className='bj2c'+(red?' red':'');
+      el.innerHTML=
+        `<div class="bj2corner tl"><span class="cr">${c.r}</span><span class="cs">${c.s}</span></div>`+
+        `<div class="bj2center-suit">${c.s}</div>`+
+        `<div class="bj2corner br"><span class="cr">${c.r}</span><span class="cs">${c.s}</span></div>`;
+      // phase 2: unfold from -90deg
+      el.style.transition='none';el.style.transform='rotateY(-90deg)';
+      void el.offsetHeight;
+      el.style.transition='transform .21s ease-out';
+      el.style.transform='rotateY(0deg)';
+      // thud + micro bounce on landing
+      setTimeout(()=>{
+        this.sndThud();
+        el.style.transition='transform .1s ease-out';
+        el.style.transform='scale(1.06) translateY(-3px)';
+        setTimeout(()=>{
+          el.style.transition='transform .12s ease-in';
+          el.style.transform='scale(1) translateY(0)';
+        },100);
+      },210);
+    },190);
   },
   _pill(hand,isDealer,hidden){
     if(!hand.length)return'';
@@ -289,7 +318,10 @@ ORIGINALS['originals-blackjack']={
 
   /* ── button state ── */
   label(){return this.h?'In Play…':'Deal';},
-  syncBtn(){gvBetBtn.textContent=this.h?'In Play…':'Deal';gvBetBtn.disabled=!!this.h;},
+  syncBtn(){
+    gvBetBtn.textContent=this.h?'In Play…':'Deal';gvBetBtn.disabled=!!this.h;
+    document.querySelectorAll('.bj2traychip,.bj2tray-clr').forEach(b=>b.disabled=!!this.h);
+  },
   _acts(on){
     const h=this.h,hit=$id('bj2Hit'),st=$id('bj2St'),db=$id('bj2Db'),sp=$id('bj2Sp2');
     if(!hit)return;
@@ -522,18 +554,18 @@ ORIGINALS['originals-blackjack']={
 .bj2pill.d{background:rgba(0,0,0,.45);color:#c8dff0;border:1px solid rgba(255,255,255,.15)}
 
 /* card stacks */
-.bj2stk{position:relative;min-height:134px;min-width:102px;display:flex;align-items:center}
+.bj2stk{position:relative;min-height:134px;min-width:102px;display:flex;align-items:center;perspective:700px}
 
 /* cards */
-.bj2c{position:absolute;width:94px;height:130px;border-radius:11px;background:#fff;
+.bj2c{position:absolute;width:104px;height:144px;border-radius:12px;background:#fff;
   box-shadow:0 6px 18px rgba(0,0,0,.48);overflow:hidden;user-select:none}
-.bj2corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:0px;line-height:1;padding:7px 8px}
+.bj2corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:0px;line-height:1;padding:8px 9px}
 .bj2corner.tl{top:0;left:0}
 .bj2corner.br{bottom:0;right:0;transform:rotate(180deg)}
-.bj2c .cr{font-size:23px;font-weight:900;color:#1a2634;line-height:1}
-.bj2c .cs{font-size:16px;color:#1a2634;line-height:1.1}
+.bj2c .cr{font-size:26px;font-weight:900;color:#1a2634;line-height:1}
+.bj2c .cs{font-size:18px;color:#1a2634;line-height:1.1}
 .bj2center-suit{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-size:36px;opacity:.12;pointer-events:none;line-height:1}
+  font-size:42px;opacity:.12;pointer-events:none;line-height:1}
 .bj2c.red .cr,.bj2c.red .cs{color:#cc1a2e}
 .bj2c.back{background:linear-gradient(145deg,#1a6fd6 0%,#0d55b8 55%,#0840a0 100%);
   border:2px solid rgba(255,255,255,.28)}
@@ -545,8 +577,27 @@ ORIGINALS['originals-blackjack']={
 .bj2c.p.lose{border-color:#e8304a;box-shadow:0 0 0 2px rgba(232,48,74,.2),0 8px 22px rgba(0,0,0,.5)}
 @keyframes bj2deal{from{opacity:0;transform:translateY(-28px) scale(.84) rotate(-5deg)}to{opacity:1;transform:none}}
 .bj2c.dealing{animation:bj2deal .32s cubic-bezier(.22,1,.36,1) both}
-@keyframes bj2flip{0%{transform:rotateY(0deg)}50%{transform:rotateY(90deg)}100%{transform:rotateY(0deg)}}
-.bj2c.flip{animation:bj2flip .45s ease both}
+
+/* chip tray */
+.bj2tray{display:flex;gap:7px;margin-bottom:4px;flex-wrap:wrap}
+.bj2traychip{width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
+  font-size:10px;font-weight:900;color:#fff;letter-spacing:-.01em;
+  box-shadow:0 4px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.25),inset 0 -2px 0 rgba(0,0,0,.25);
+  outline:2px dashed rgba(255,255,255,.3);outline-offset:-5px;
+  transition:transform .1s,filter .1s;font-family:inherit}
+.bj2traychip:hover:not(:disabled){transform:translateY(-3px) scale(1.1);filter:brightness(1.18)}
+.bj2traychip:active:not(:disabled){transform:scale(.93)}
+.bj2traychip:disabled{opacity:.3;cursor:not-allowed}
+.bj2traychip[data-v="1"]  {background:#2471a3}
+.bj2traychip[data-v="5"]  {background:#c0392b}
+.bj2traychip[data-v="25"] {background:#1e8449}
+.bj2traychip[data-v="100"]{background:#8e44ad}
+.bj2traychip[data-v="500"]{background:#c9a227;color:#1a1100}
+.bj2tray-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.bj2tray-clr{height:26px;padding:0 11px;border:1px solid rgba(255,255,255,.1);border-radius:6px;
+  background:rgba(255,255,255,.05);color:rgba(255,255,255,.38);
+  font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.1s}
+.bj2tray-clr:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.65)}
 
 /* center section: arc + bet stack + ribbon */
 .bj2center{display:flex;flex-direction:column;align-items:center;gap:6px;z-index:2;width:100%}
@@ -629,6 +680,18 @@ ORIGINALS['originals-blackjack']={
     this._cctx=this._cv.getContext('2d');
 
     engFields.innerHTML=`
+      <div class="gv-field"><label>Bet Amount</label>
+        <div class="bj2tray" id="bj2Tray">
+          <button class="bj2traychip" data-v="1">$1</button>
+          <button class="bj2traychip" data-v="5">$5</button>
+          <button class="bj2traychip" data-v="25">$25</button>
+          <button class="bj2traychip" data-v="100">$100</button>
+          <button class="bj2traychip" data-v="500">$500</button>
+        </div>
+        <div class="bj2tray-bar">
+          <button class="bj2tray-clr" id="bj2TrayClr">Clear</button>
+        </div>
+      </div>
       <div class="bj2acts">
         <button class="bj2act hit" id="bj2Hit">Hit <small>H</small></button>
         <button class="bj2act std" id="bj2St">Stand <small>S</small></button>
@@ -682,6 +745,20 @@ ORIGINALS['originals-blackjack']={
         </div>
       </div>`;
 
+    $id('bj2Tray').addEventListener('click',e=>{
+      const btn=e.target.closest('.bj2traychip');if(!btn||this.h)return;
+      const usd=+btn.dataset.v,w=curW();
+      const cur=parseFloat(gvBetIn.value)||0;
+      const next=Math.min(+(cur+usd/w.rate).toFixed(8),w.amt);
+      gvBetIn.value=fmtW(w,next);
+      if(window.syncBetUI)syncBetUI();
+      this.sndChip();
+    });
+    $id('bj2TrayClr').addEventListener('click',()=>{
+      if(this.h)return;
+      const w=curW();gvBetIn.value=fmtW(w,0);
+      if(window.syncBetUI)syncBetUI();
+    });
     $id('bj2Hit').addEventListener('click',()=>this.hit());
     $id('bj2St').addEventListener('click', ()=>this.stand());
     $id('bj2Db').addEventListener('click', ()=>this.dbl());
