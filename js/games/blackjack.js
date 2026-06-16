@@ -45,14 +45,20 @@ ORIGINALS['originals-blackjack']={
     this._beep(55,0.11,0.3,'sine',0);this._beep(110,0.06,0.15,'sine',0);
     this._noise(0.055,0.2,0);
   },
-  _chipSnd:localStorage.getItem('volt-chip-snd')||'custom',
-  _customBuf:null,_customName:'',
+  _chipSnd:localStorage.getItem('volt-chip-snd')||'casino',
+  _customBuf:null,_customName:'',_chipAudio:null,
   sndChip(){
     // light tick on tray pickup
     this._beep(1600,0.03,0.07,'sine',0);
   },
   sndChipLand(){
     if(!this.sndOn)return;
+    // use loaded audio file if available
+    if(this._chipAudio){
+      this._chipAudio.currentTime=0;
+      this._chipAudio.play().catch(()=>{});
+      return;
+    }
     ({
       casino:()=>this._sndCasino(),
       coin:  ()=>this._sndCoin(),
@@ -1035,7 +1041,12 @@ ORIGINALS['originals-blackjack']={
     };
     document.addEventListener('keydown',this._kh);
     this._acts(false);this.syncBtn();
-    this._tryLoadProjectFile();
+    // preload chip sound file
+    const chipFile='sounds/GAMEMisc_blackjack Poker chips (ID 0942)_com.mp3';
+    const a=new Audio(chipFile);
+    a.addEventListener('canplaythrough',()=>{this._chipAudio=a;},{once:true});
+    a.addEventListener('error',()=>{this._tryLoadProjectFile();},{once:true});
+    a.load();
   },
 
   /* ── unmount ── */
@@ -1044,6 +1055,7 @@ ORIGINALS['originals-blackjack']={
     cancelAnimationFrame(this._craf);
     if(this._cv){this._cv.remove();this._cv=null;this._cctx=null;}
     if(this._kh){document.removeEventListener('keydown',this._kh);this._kh=null;}
+    if(this._chipAudio){this._chipAudio.pause();this._chipAudio=null;}
     const h=this.h;
     if(h){
       // refund all locally-deducted amounts on mid-round close
