@@ -132,15 +132,35 @@ ORIGINALS['originals-crash']={
     c.strokeStyle='rgba(235,240,255,.1)';c.lineWidth=1;
     c.beginPath();c.moveTo(pad,pad+ph);c.lineTo(this.W-pad,pad+ph);c.stroke();
     const tmax=Math.max(t,2.5),ymax=Math.max(m*1.15,1.5);
+    const tipX=pad+t/tmax*pw;
     c.beginPath();c.moveTo(pad,pad+ph);
     const n=60;
     for(let i=1;i<=n;i++){
       const tt=t*i/n,mm=Math.exp(this.GR*tt);
       c.lineTo(pad+tt/tmax*pw,pad+ph-(mm-1)/(ymax-1)*ph);
     }
-    c.strokeStyle=busted?'#e2596a':'#41f0a4';c.lineWidth=3;c.lineJoin='round';c.stroke();
-    c.lineTo(pad+t/tmax*pw,pad+ph);c.closePath();
-    c.fillStyle=busted?'rgba(226,89,106,.10)':'rgba(65,240,164,.10)';
+    if(busted){
+      c.strokeStyle='#e2596a';c.shadowBlur=0;
+      c.lineWidth=3;c.lineJoin='round';c.stroke();
+      c.lineTo(tipX,pad+ph);c.closePath();
+      c.fillStyle='rgba(226,89,106,.10)';
+    }else{
+      /* hue sweeps 155 (mint) → 55 (yellow) → 20 (orange) on a log scale */
+      const h=Math.round(Math.max(20,155-Math.log(Math.max(m,1))/Math.log(20)*135));
+      const tipColor=`hsl(${h},88%,60%)`;
+      const sg=c.createLinearGradient(pad,0,tipX,0);
+      sg.addColorStop(0,'#41f0a4');sg.addColorStop(1,tipColor);
+      c.strokeStyle=sg;
+      c.shadowBlur=Math.min(Math.log(Math.max(m,1))/Math.log(20),1)*20;
+      c.shadowColor=tipColor;
+      c.lineWidth=3;c.lineJoin='round';c.stroke();
+      c.shadowBlur=0;
+      c.lineTo(tipX,pad+ph);c.closePath();
+      const fg=c.createLinearGradient(0,pad,0,pad+ph);
+      fg.addColorStop(0,`hsla(${h},88%,60%,0)`);
+      fg.addColorStop(1,`hsla(${h},88%,60%,.15)`);
+      c.fillStyle=fg;
+    }
     c.fill();
   },
   drawIdle(){

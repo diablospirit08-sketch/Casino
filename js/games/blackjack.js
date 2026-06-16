@@ -993,7 +993,11 @@ ORIGINALS['originals-blackjack']={
       const cur=parseFloat(gvBetIn.value)||0;
       const next=Math.min(+(cur+usd/w.rate).toFixed(8),w.amt);
       gvBetIn.value=fmtW(w,next);
-      if(window.syncBetUI)syncBetUI();
+      /* use syncDerived+syncBetBtn instead of syncBetUI to avoid
+         triggering sync(), which compares ring total vs input and
+         clears the ring while chip animations are still in flight */
+      if(window.syncDerived)syncDerived();
+      if(window.syncBetBtn)syncBetBtn();
       this._throwChipToCircle(btn,usd);
     });
     $id('bj2TrayClr').addEventListener('click',()=>{
