@@ -1,9 +1,12 @@
 /* --- blackjack v2 --- */
+const DEAL_BJ_URL='https://czqqdwmifcqoiyphjqjk.supabase.co/functions/v1/deal-blackjack';
 ORIGINALS['originals-blackjack']={
   rtp:'99.5%',auto:false,
   h:null,
   ruleMode:'H17',
   _T:[],_kh:null,_betChips:[],
+  /* server-committed deck state */
+  _serverCards:[],_serverCardIdx:0,_deckId:null,_actions:[],
 
   /* ── sound ── */
   sndOn:localStorage.getItem('volt-snd')!=='off',
@@ -375,6 +378,12 @@ ORIGINALS['originals-blackjack']={
   },
   _isNat(hand){return hand.length===2&&this._val(hand)===21;},
   _isPair(hand){return hand.length===2&&hand[0].v===hand[1].v;},
+  /* draw next card from the server-committed deck */
+  _nextCard(){
+    return this._serverCardIdx<this._serverCards.length
+      ?this._serverCards[this._serverCardIdx++]
+      :this._drawCard(); /* fallback: should never be reached */
+  },
 
   /* ── card DOM ── */
   _OV:56,// card overlap offset px
@@ -520,14 +529,37 @@ ORIGINALS['originals-blackjack']={
 
   /* ── game flow ── */
   onBet(){this.deal();},
-  deal(){
+  async deal(){
     if(this.h)return;
-    const st=debitBet();if(!st)return;
-    lockBet(true);gvBetBtn.disabled=true;
+    if(!document.body.classList.contains('authed')){openAuth('in');return;}
+    const w=curW(),b=Math.min(parseFloat(gvBetIn.value)||0,w.amt);
+    if(b<=0)return;
+    lockBet(true);gvBetBtn.disabled=true;gvBetBtn.textContent='Dealing…';
+    /* fetch server-committed deck before touching local balance */
+    let deckData;
+    try{
+      const{data:{session}}=await supa.auth.getSession();
+      if(!session)throw new Error('Not signed in');
+      const res=await fetch(DEAL_BJ_URL,{method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+        body:'{}'});
+      deckData=await res.json();
+      if(!res.ok)throw new Error(deckData.error||'Deal failed');
+    }catch(err){
+      lockBet(false);gvBetBtn.disabled=false;gvBetBtn.textContent='Deal';
+      if(window.showToast)showToast({icon:'⚠',title:'Deal failed',sub:err.message});
+      return;
+    }
+    /* debit locally only after the server committed to a deck */
+    const st=debitBet();if(!st){lockBet(false);return;}
+    this._serverCards=deckData.cards;
+    this._serverCardIdx=0;
+    this._deckId=deckData.deckId;
+    this._actions=[];
     this._T.forEach(clearTimeout);this._T=[];
     this._deck=[];
-    const dealer=[this._drawCard(),this._drawCard()];
-    const hand=[this._drawCard(),this._drawCard()];
+    const dealer=[this._nextCard(),this._nextCard()];
+    const hand=[this._nextCard(),this._nextCard()];
     this.h={st,dealer,hands:[hand],handBets:[st.b],activeHand:0,
              hidden:true,splitDone:false,splitAces:false,insBet:0};
     this.setMsg('');
@@ -553,21 +585,24 @@ ORIGINALS['originals-blackjack']={
   _cur(){return this.h.hands[this.h.activeHand];},
   hit(){
     const h=this.h;if(!h||h.splitAces)return;
-    this._cur().push(this._drawCard());this.sndCard(0);this.render();
+    this._actions.push('H');
+    this._cur().push(this._nextCard());this.sndCard(0);this.render();
     const v=this._val(this._cur());
     if(v>21){this.setMsg('Bust!','l');this._acts(false);this._T.push(setTimeout(()=>this._next(),700));}
-    else if(v===21)this._T.push(setTimeout(()=>this.stand(),300));
+    else if(v===21)this._T.push(setTimeout(()=>this._next(),300));
     else this._acts(true);
   },
-  stand(){if(!this.h)return;this._next();},
+  /* explicit=true only when player clicks Stand or presses S; bust/21/auto-stand don't push 'S' */
+  stand(explicit=false){if(!this.h)return;if(explicit)this._actions.push('S');this._next();},
   dbl(){
     const h=this.h;if(!h)return;
     const bet=h.handBets[h.activeHand];
     if(curW().amt<bet)return this.setMsg('Not enough to double.','l');
     creditTo(h.st.w,-bet);h.handBets[h.activeHand]*=2;
+    this._actions.push('D');
     const db=$id('bj2Db');
     if(db)this._throwChipToCircle(db,bet*h.st.w.rate);
-    this._cur().push(this._drawCard());this.sndCard(0.08);this.render();
+    this._cur().push(this._nextCard());this.sndCard(0.08);this.render();
     this._T.push(setTimeout(()=>this._next(),300));
   },
   spl(){
@@ -575,9 +610,10 @@ ORIGINALS['originals-blackjack']={
     const bet=h.handBets[h.activeHand];
     if(curW().amt<bet)return this.setMsg('Not enough to split.','l');
     this.sndChip();creditTo(h.st.w,-bet);
+    this._actions.push('P');
     const isAce=h.hands[0][0].r==='A';
     const[c1,c2]=[h.hands[0][0],h.hands[0][1]];
-    h.hands=[[c1,this._drawCard()],[c2,this._drawCard()]];
+    h.hands=[[c1,this._nextCard()],[c2,this._nextCard()]];
     h.handBets=[h.st.b,h.st.b];
     h.splitDone=true;h.splitAces=isAce;h.activeHand=0;
     this.setMsg(isAce?'Split Aces — one card each.':'Split — play Hand 1.');
@@ -696,18 +732,18 @@ ORIGINALS['originals-blackjack']={
     this.h=null;
     gvBetBtn.disabled=true;gvBetBtn.textContent='Settling…';
 
-    // server settlement
+    // server settlement — outcome is computed server-side from deckId + actions
     try{
       const res=await placeBet({
         game:'blackjack',
         currency:w.c,
-        wager:totalWagered,
+        wager:h.handBets[0], /* initial bet; server computes totalWagered from replay */
         params:{
-          outcome:state==='w'?'win':state==='l'?'lose':'push',
-          multiplier:parseFloat(mult.toFixed(6)),
-          dealer:h.dealer.map(c=>c.r+c.s).join(','),
-          hands:h.hands.map(hand=>hand.map(c=>c.r+c.s).join(',')).join('|'),
-          insBet:h.insBet||0
+          deckId:this._deckId,
+          actions:this._actions,
+          ruleMode:this.ruleMode,
+          insTook:!!h.insBet,
+          insBet:h.insBet||0,
         }
       });
       // server is source of truth for balance
@@ -725,6 +761,7 @@ ORIGINALS['originals-blackjack']={
   _insYes(){
     const h=this.h,side=h.st.b/2;
     if(side<=0||curW().amt<side){$id('bj2Ins').hidden=true;this._insNo();return;}
+    this._actions.push('I');
     this.sndChip();creditTo(h.st.w,-side);h.insBet=side;
     $id('bj2Ins').hidden=true;this.render();
     if(this._val(h.dealer)===21){
@@ -735,7 +772,7 @@ ORIGINALS['originals-blackjack']={
     }
   },
   _insNo(){
-    const h=this.h;$id('bj2Ins').hidden=true;
+    const h=this.h;this._actions.push('NI');$id('bj2Ins').hidden=true;
     if(this._val(h.dealer)===21){
       h.hidden=false;this.render();this._T.push(setTimeout(()=>this._finish(),400));
     }else{
@@ -1007,7 +1044,7 @@ ORIGINALS['originals-blackjack']={
       if(window.syncBetUI)syncBetUI();
     });
     $id('bj2Hit').addEventListener('click',()=>this.hit());
-    $id('bj2St').addEventListener('click', ()=>this.stand());
+    $id('bj2St').addEventListener('click', ()=>this.stand(true));
     $id('bj2Db').addEventListener('click', ()=>this.dbl());
     $id('bj2Sp2').addEventListener('click',()=>this.spl());
     $id('bj2IY').addEventListener('click', ()=>this._insYes());
@@ -1034,7 +1071,7 @@ ORIGINALS['originals-blackjack']={
       if(e.target.tagName==='INPUT'||!this.h)return;
       const k=e.key.toUpperCase();
       if(k==='H'){const b=$id('bj2Hit');if(b&&!b.disabled)this.hit();}
-      else if(k==='S'){const b=$id('bj2St');if(b&&!b.disabled)this.stand();}
+      else if(k==='S'){const b=$id('bj2St');if(b&&!b.disabled)this.stand(true);}
       else if(k==='D'){const b=$id('bj2Db');if(b&&!b.disabled)this.dbl();}
       else if(k==='P'){const b=$id('bj2Sp2');if(b&&!b.disabled)this.spl();}
     };
@@ -1058,14 +1095,16 @@ ORIGINALS['originals-blackjack']={
     this._betChips=[];
     const h=this.h;
     if(h){
-      // refund all locally-deducted amounts on mid-round close
+      // Restore locally-deducted amounts. Supabase balance was never touched
+      // (settle_bet only runs on _finish), so the real balance is unchanged.
+      // The orphaned bj_rounds row auto-expires without harm.
       const totalWagered=h.handBets.reduce((a,b)=>a+b,0)+(h.insBet||0);
-      // attempt server refund; fallback to local credit
-      placeBet({game:'blackjack',currency:h.st.w.c,wager:totalWagered,
-        params:{outcome:'push',multiplier:1,dealer:'',hands:'',insBet:0}})
-        .then(r=>{h.st.w.amt=r.new_balance;h.st.w.fiat=h.st.w.amt*h.st.w.rate;renderWallet();})
-        .catch(()=>{creditTo(h.st.w,totalWagered);});
+      creditTo(h.st.w,totalWagered);
     }
     this.h=null;
+    this._deckId=null;
+    this._serverCards=[];
+    this._serverCardIdx=0;
+    this._actions=[];
   }
 };

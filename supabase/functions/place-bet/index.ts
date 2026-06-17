@@ -30,6 +30,33 @@ function randHex(n: number): string {
     .map(b => b.toString(16).padStart(2,'0')).join('')
 }
 
+/* ── blackjack server deck (commit-reveal) ── */
+type BjCard = { r: string; s: string; v: number }
+
+async function hmacUint32(seed: string, msg: string): Promise<number> {
+  const key = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(seed),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  )
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(msg))
+  const b = new Uint8Array(sig)
+  return ((b[0] << 24 | b[1] << 16 | b[2] << 8 | b[3]) >>> 0)
+}
+
+async function buildDeck(serverSeed: string): Promise<BjCard[]> {
+  const suits = ['♠','♥','♦','♣']
+  const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K']
+  const deck: BjCard[] = []
+  for (const s of suits)
+    for (const r of ranks)
+      deck.push({ r, s, v: r === 'A' ? 11 : ['J','Q','K','10'].includes(r) ? 10 : +r })
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = (await hmacUint32(serverSeed, `s:${i}`)) % (i + 1)
+    ;[deck[i], deck[j]] = [deck[j], deck[i]]
+  }
+  return deck
+}
+
 /* ── plinko multiplier tables ── */
 const PLINKO: Record<string, Record<number, number[]>> = {
   low:    { 8:[5.6,2.1,1.1,1,0.5,1,1.1,2.1,5.6], 12:[10,3,1.6,1.4,1.1,1,0.5,1,1.1,1.4,1.6,3,10], 16:[16,9,2,1.4,1.4,1.2,1.1,1,0.5,1,1.1,1.2,1.4,1.4,2,9,16] },
@@ -59,7 +86,9 @@ serve(async (req) => {
     const { data: { user }, error: ae } = await supabase.auth.getUser(token)
     if (ae || !user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: CORS })
 
-    const { game, currency, wager, params = {}, clientSeed: rawClient, nonce: rawNonce } = await req.json()
+    const body = await req.json()
+    const { game, currency, params = {}, clientSeed: rawClient, nonce: rawNonce } = body
+    let wager: number = Number(body.wager)
     if (!game || !currency || !wager || wager <= 0) {
       return new Response(JSON.stringify({ error: 'Invalid parameters' }), { status: 400, headers: CORS })
     }
@@ -168,18 +197,137 @@ serve(async (req) => {
       }
 
       case 'blackjack': {
-        const bj_outcome = String(params.outcome || 'push')
-        const clientMult = Number(params.multiplier) || 0
-        // Snap to nearest known-valid multiplier to prevent client inflation
-        const VALID      = [0, 1, 1.5, 1.98, 2, 2.5, 3]
-        multiplier       = VALID.reduce((a, b) => Math.abs(b - clientMult) < Math.abs(a - clientMult) ? b : a)
-        outcome          = bj_outcome === 'win' ? 'win' : bj_outcome === 'lose' ? 'loss' : 'push'
-        gameData         = {
-          outcome: bj_outcome,
-          dealer:  String(params.dealer || ''),
-          hands:   String(params.hands  || ''),
-          insBet:  Number(params.insBet || 0),
+        // Client sends deckId (from deal-blackjack) + actions array.
+        // Server re-generates the same deck and replays the hand to compute
+        // the outcome independently — the client cannot inflate or fake it.
+
+        const deckId   = String(params.deckId || '')
+        const actions  = Array.isArray(params.actions) ? params.actions.map(String) : []
+        const ruleMode = params.ruleMode === 'S17' ? 'S17' : 'H17'
+        const insTook  = Boolean(params.insTook)
+
+        if (!deckId) {
+          return new Response(JSON.stringify({ error: 'Missing deckId' }), { status: 400, headers: CORS })
         }
+
+        // Fetch and delete the one-time pending round
+        const { data: round, error: re } = await supabase
+          .from('bj_rounds')
+          .delete()
+          .eq('id', deckId)
+          .eq('user_id', user.id)
+          .select('server_seed')
+          .single()
+        if (re || !round) {
+          return new Response(JSON.stringify({ error: 'Invalid or expired round' }), { status: 400, headers: CORS })
+        }
+
+        const deck = await buildDeck(round.server_seed)
+        let di = 0
+        const draw = (): BjCard => deck[di++]
+
+        const handVal = (h: BjCard[]) => {
+          let t = h.reduce((s, c) => s + c.v, 0), a = h.filter(c => c.r === 'A').length
+          while (t > 21 && a) { t -= 10; a-- }
+          return t
+        }
+        const isSoft = (h: BjCard[]) => {
+          let t = h.reduce((s, c) => s + c.v, 0)
+          const ta = h.filter(c => c.r === 'A').length
+          if (!ta) return false
+          let a = ta, fl = 0
+          while (t > 21 && a) { t -= 10; a--; fl++ }
+          return t <= 21 && fl < ta
+        }
+        const isNat          = (h: BjCard[]) => h.length === 2 && handVal(h) === 21
+        const dealerShouldHit = (h: BjCard[]) => {
+          const t = handVal(h)
+          return t < 17 || (t === 17 && isSoft(h) && ruleMode === 'H17')
+        }
+
+        // Initial deal: dealer[hole, upcard], player[c0, c1]
+        const dealer: BjCard[] = [draw(), draw()]
+        const hands: BjCard[][] = [[draw(), draw()]]
+        const handBets: number[] = [wager]
+        let splitDone = false, activeHand = 0, playerDone = false
+
+        // Replay player actions in order
+        for (const act of actions) {
+          if (playerDone) break
+          const h = hands[activeHand]
+          if (act === 'I' || act === 'NI') {
+            // Insurance decision — no card drawn
+          } else if (act === 'H') {
+            h.push(draw())
+            // Bust or 21 → auto-advance (same logic as client)
+            if (handVal(h) >= 21) {
+              if (splitDone && activeHand === 0) activeHand = 1
+              else playerDone = true
+            }
+          } else if (act === 'S') {
+            if (splitDone && activeHand === 0) activeHand = 1
+            else playerDone = true
+          } else if (act === 'D') {
+            h.push(draw())
+            handBets[activeHand] *= 2
+            if (splitDone && activeHand === 0) activeHand = 1
+            else playerDone = true
+          } else if (act === 'P') {
+            const isAce = hands[0][0].r === 'A'
+            const [c1, c2] = [hands[0][0], hands[0][1]]
+            hands[0] = [c1, draw()]
+            hands.push([c2, draw()])
+            handBets.push(wager)
+            splitDone = true
+            if (isAce) playerDone = true  // split aces: one card each, then dealer
+            else activeHand = 0
+          }
+        }
+
+        // Dealer draws unless all player hands busted
+        const allBust = hands.every(h => handVal(h) > 21)
+        if (!allBust) while (dealerShouldHit(dealer)) dealer.push(draw())
+
+        const dealerNat = isNat(dealer)
+
+        // Insurance side bet
+        const insWager  = insTook ? wager / 2 : 0
+        const insPayout = insTook && dealerNat ? insWager * 3 : 0
+
+        // Settle each hand
+        const settleHand = (h: BjCard[], bet: number): number => {
+          const p = handVal(h), d = handVal(dealer)
+          if (p > 21) return 0
+          if (d > 21) return bet * 2
+          if (p > d)  return bet * 2
+          if (p < d)  return 0
+          return bet   // push
+        }
+
+        let mainPayout = 0
+        if (!splitDone) {
+          const h = hands[0], bet = handBets[0]
+          mainPayout = (isNat(h) && !dealerNat)
+            ? Math.round(bet * 2.5 * 100) / 100   // 3:2 blackjack
+            : settleHand(h, bet)
+        } else {
+          hands.forEach((h, i) => { mainPayout += settleHand(h, handBets[i] ?? wager) })
+        }
+
+        const totalWagered = handBets.reduce((a, b) => a + b, 0) + insWager
+        const totalPayout  = mainPayout + insPayout
+        multiplier = totalWagered > 0 ? +(totalPayout / totalWagered).toFixed(6) : 0
+        outcome    = multiplier > 1 ? 'win' : multiplier === 1 ? 'push' : 'loss'
+        gameData   = {
+          dealer:         dealer.map(c => c.r + c.s).join(','),
+          hands:          hands.map(h => h.map(c => c.r + c.s).join(',')).join('|'),
+          actions:        actions.join(','),
+          serverSeed:     round.server_seed,
+          serverSeedHash: await sha256hex(round.server_seed),
+        }
+
+        // Use server-computed total so settle_bet debits the right amount
+        wager = totalWagered
         break
       }
 
