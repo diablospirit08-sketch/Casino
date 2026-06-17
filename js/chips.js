@@ -1,5 +1,8 @@
 /* ── Monte Carlo Poker Club chip renderer ── */
 const CHIP_CFGS=[
+  {val:1,    label:'$1',   sml:'1',   fs_f:.202,c1:'#e0e0e0',c2:'#a8a8a8',ring:'#b8b8b8',lbl:'#505050'},
+  {val:5,    label:'$5',   sml:'5',   fs_f:.202,c1:'#cc2020',c2:'#881010',ring:'#aa1010',lbl:'#5a0000'},
+  {val:10,   label:'$10',  sml:'10',  fs_f:.202,c1:'#1a6bc8',c2:'#0d3d80',ring:'#1055a0',lbl:'#082860'},
   {val:25,   label:'$25',  sml:'25',  fs_f:.202,c1:'#1aaa38',c2:'#d4c000',ring:'#1a8228',lbl:'#0a5a1e'},
   {val:50,   label:'$50',  sml:'50',  fs_f:.202,c1:'#30b8ff',c2:'#1830b0',ring:'#1880c8',lbl:'#082870'},
   {val:100,  label:'$100', sml:'100', fs_f:.190,c1:'#e8c200',c2:'#0d0d0d',ring:'#a88000',lbl:'#7a5800'},

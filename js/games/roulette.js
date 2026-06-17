@@ -5,7 +5,7 @@ ORIGINALS['originals-roulette']={
   bets:[],
   spinning:false,
   _wheelAngle:0,
-  _chipVal:25,
+  _chipVal:1,
   _ballAngle:null,
   _ballRadius:null,
   _history:[],
@@ -23,7 +23,7 @@ ORIGINALS['originals-roulette']={
     engFields.innerHTML=`
       <div class="gv-field"><label>Chip</label>
         <div class="rl-chips" id="rlChips">
-          ${[25,50,100,500].map((v,i)=>`<button class="rl-chip${i===0?' active':''}" data-v="${v}"></button>`).join('')}
+          ${[1,5,10,25,100,500].map((v,i)=>`<button class="rl-chip${i===0?' active':''}" data-v="${v}"></button>`).join('')}
         </div>
       </div>
       <div class="gv-field">
@@ -85,7 +85,7 @@ ORIGINALS['originals-roulette']={
       const cell=document.querySelector(`[data-bet-key="${bet.key}"]`);if(!cell)continue;
       const chip=document.createElement('div');chip.className='rl-bet-chip';
       const v=bet.fiat;
-      chip.style.background=chipCfg(Math.max(25,Math.round(v))).c1;
+      chip.style.background=chipCfg(Math.round(v)).c1;
       cell.appendChild(chip);
     }
   },

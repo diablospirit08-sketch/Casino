@@ -223,7 +223,7 @@ ORIGINALS['originals-blackjack']={
   /* ── chip helpers ── */
   _drawChipCanvas(val,SIZE){
     const PAD=6;
-    const inner=makeChipCanvas(Math.max(25,val),120);
+    const inner=makeChipCanvas(val,120);
     const cv=document.createElement('canvas');
     cv.width=SIZE+PAD*2;cv.height=SIZE+PAD*2;
     const ctx=cv.getContext('2d');
@@ -959,8 +959,10 @@ ORIGINALS['originals-blackjack']={
     engFields.innerHTML=`
       <div class="gv-field"><label>Bet Amount</label>
         <div class="bj2tray" id="bj2Tray">
+          <button class="bj2traychip" data-v="1"></button>
+          <button class="bj2traychip" data-v="5"></button>
+          <button class="bj2traychip" data-v="10"></button>
           <button class="bj2traychip" data-v="25"></button>
-          <button class="bj2traychip" data-v="50"></button>
           <button class="bj2traychip" data-v="100"></button>
           <button class="bj2traychip" data-v="500"></button>
         </div>
