@@ -223,11 +223,11 @@ ORIGINALS['originals-blackjack']={
   /* ── chip helpers ── */
   _chipCol(v){
     if(v>=500)return{bg:'#c9a227',label:'$500'};
-    if(v>=100)return{bg:'#c0392b',label:'$100'};
-    if(v>=50) return{bg:'#8e44ad',label:'$50'};
+    if(v>=100)return{bg:'#8e44ad',label:'$100'};
+    if(v>=50) return{bg:'#3d8bcd',label:'$50'};
     if(v>=25) return{bg:'#1e8449',label:'$25'};
     if(v>=10) return{bg:'#1a6fa8',label:'$10'};
-    if(v>=5)  return{bg:'#cb4335',label:'$5'};
+    if(v>=5)  return{bg:'#c0392b',label:'$5'};
     return          {bg:'#2471a3',label:'$1'};
   },
   _drawChipCanvas(val,SIZE,label){
@@ -647,7 +647,7 @@ ORIGINALS['originals-blackjack']={
       const hits=[];
       if(!allBust){
         const tmp=[...h.dealer];
-        while(this._shouldHit(tmp)){const c=this._drawCard();h.dealer.push(c);tmp.push(c);hits.push(c);}
+        while(this._shouldHit(tmp)){const c=this._nextCard();h.dealer.push(c);tmp.push(c);hits.push(c);}
       }
       let hitDelay=0;
       hits.forEach((card,i)=>{

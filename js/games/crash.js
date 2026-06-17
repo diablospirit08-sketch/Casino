@@ -94,28 +94,6 @@ ORIGINALS['originals-crash']={
     this.draw(r.m,t,false);
     this._raf=requestAnimationFrame(()=>this.tick());
   },
-  async bust(){
-    const r=this.run;if(!r)return;
-    cancelAnimationFrame(this._raf);
-    const animBust=r.m;
-    $id('crMult').textContent=animBust.toFixed(2)+'×';
-    $id('crMult').className='crash-mult bust';
-    $id('crSub').textContent='Busted';
-    $id('crSub').className='crash-sub';
-    this.draw(animBust,Math.log(animBust)/this.GR,true);
-    if(!autoRunning)gvBetBtn.disabled=true;
-    /* send cashout=0 → server always returns loss, settles authoritatively */
-    let res;
-    try{
-      res=await placeBet({game:'crash',currency:r.st.w.c,wager:r.st.b,params:{cashout:0}});
-    }catch(err){
-      /* on network error fall back to client balance (already deducted) */
-      res={new_balance:r.st.w.amt};
-    }
-    window._sbActive=false;
-    serverSettleBet(r.st,0,res.new_balance);
-    this.endSoon(900,false);
-  },
   endSoon(ms,win){
     const r=this.run;
     this._t=setTimeout(()=>{
@@ -173,6 +151,17 @@ ORIGINALS['originals-crash']={
     cancelAnimationFrame(this._raf);
     clearTimeout(this._t);clearTimeout(this._szT);
     window.removeEventListener('resize',this._rs);
+    const r=this.run;
+    if(r&&!r.cashed){
+      /* player navigated away mid-round — cashout at current multiplier;
+         server will settle as win or loss depending on the server's bust point */
+      placeBet({game:'crash',currency:r.st.w.c,wager:r.st.b,params:{cashout:r.m}})
+        .then(res=>{
+          const win=res.outcome==='win';
+          serverSettleBet(r.st,win?r.m:0,res.new_balance);
+        })
+        .catch(()=>serverSettleBet(r.st,0,r.st.w.amt));
+    }
     window._sbActive=false;
     this.run=null;
   }

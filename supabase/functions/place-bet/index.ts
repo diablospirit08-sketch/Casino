@@ -179,11 +179,28 @@ serve(async (req) => {
       }
 
       case 'mines': {
-        const action     = String(params.action || 'cashout')
-        const minesCount = Math.max(1, Math.min(24, Math.floor(Number(params.mines) || 3)))
-        const k          = Math.max(0, Math.min(25 - minesCount, Math.floor(Number(params.k) || 0)))
-        if (action === 'cashout' && k > 0) {
-          // Recompute multiplier server-side — client cannot inflate it
+        const roundId = String(params.roundId || '')
+        if (!roundId) {
+          return new Response(JSON.stringify({ error: 'Missing roundId' }), { status: 400, headers: CORS })
+        }
+
+        /* Fetch and delete the round atomically — prevents double-settlement */
+        const { data: round, error: re } = await supabase
+          .from('mines_rounds')
+          .delete()
+          .eq('id', roundId)
+          .eq('user_id', user.id)
+          .select('mines_count, safe_tiles')
+          .single()
+
+        if (re || !round) {
+          return new Response(JSON.stringify({ error: 'Invalid or expired mines round' }), { status: 400, headers: CORS })
+        }
+
+        const minesCount = round.mines_count as number
+        const k          = (round.safe_tiles as number[]).length
+
+        if (k > 0) {
           let f = 1
           for (let i = 0; i < k; i++) f *= (25 - i) / (25 - minesCount - i)
           multiplier = parseFloat((0.99 * f).toFixed(6))
@@ -192,7 +209,7 @@ serve(async (req) => {
           multiplier = 0
           outcome    = 'loss'
         }
-        gameData = { action, mines: minesCount, k }
+        gameData = { mines: minesCount, k }
         break
       }
 
