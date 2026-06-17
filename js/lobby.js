@@ -190,29 +190,28 @@ document.addEventListener('click',()=>{
 
 /* ---------- nav rail ---------- */
 /* cat: rail item activates the matching category chip; items without one scroll to their lobby section */
+/* sprite: 4-col × 4-row grid. positions: col=(0|33.33|66.67|100)% row=(0|33.33|66.67|100)% */
 const railItems = [
-  {l:'Lobby',        t:'sec-top',       cat:'lobby',     em:'🏛️', img:'1'},
-  {l:'Originals',    t:'sec-originals', cat:'originals', em:'🎲', img:'2'},
-  {l:'Slots',        t:'sec-slots',     cat:'slots',     em:'🎰', img:'3'},
-  {l:'Hot Picks',    t:'sec-hot',                        em:'🌶️', img:'4'},
-  {l:'Live Casino',  t:'sec-live',      cat:'live',      em:'🃏', img:'5'},
-  {l:'Game Shows',   t:'sec-shows',     cat:'shows',     em:'🎤', img:'6'},
-  {l:'New Arrivals', t:'sec-new',       cat:'new',       em:'🎁', img:'7'},
-  {l:'VIP Club',     t:'sec-vip',                        em:'⭐', img:'8'},
-  {l:'All Bets',     t:'sec-bets',                       em:'💰', img:'9'},
+  {l:'Lobby',        t:'sec-top',       cat:'lobby',     sp:'0% 0%'},        /* dealer */
+  {l:'Originals',    t:'sec-originals', cat:'originals', sp:'100% 66.67%'},  /* roulette wheel */
+  {l:'Slots',        t:'sec-slots',     cat:'slots',     sp:'33.33% 0%'},    /* 777 */
+  {l:'Hot Picks',    t:'sec-hot',                        sp:'100% 0%'},      /* target/arrow */
+  {l:'Live Casino',  t:'sec-live',      cat:'live',      sp:'0% 33.33%'},    /* group */
+  {l:'Game Shows',   t:'sec-shows',     cat:'shows',     sp:'66.67% 66.67%'},/* hat */
+  {l:'New Arrivals', t:'sec-new',       cat:'new',       sp:'33.33% 100%'},  /* horseshoe */
+  {l:'VIP Club',     t:'sec-vip',                        sp:'33.33% 66.67%'},/* diamond */
+  {l:'All Bets',     t:'sec-bets',                       sp:'33.33% 33.33%'},/* coin */
 ];
-function _railIcon(r){
-  return `<span class="it"><img src="art/nav/${r.img}.png" class="rail-img" alt="" onerror="this.parentNode.innerHTML='${r.em}'"></span>`;
-}
+function _sp(pos){return `<span class="it"><span class="rail-sp" style="background-position:${pos}"></span></span>`;}
 document.getElementById('railNav').innerHTML = railItems.map((r,i)=>`
   <a href="#${r.t}" data-target="${r.t}" ${r.cat?`data-cat="${r.cat}"`:''} title="${r.l}" class="${i===0?'active':''}">
-    ${_railIcon(r)}<span class="lbl">${r.l}</span></a>
+    ${_sp(r.sp)}<span class="lbl">${r.l}</span></a>
   ${i===2||i===5?'<span class="sep"></span>':''}
 `).join('')+`
   <div class="rail-foot">
     <span class="sep"></span>
     <a href="#" id="railChat" title="Live support">
-      <span class="it"><img src="art/nav/10.png" class="rail-img" alt="" onerror="this.parentNode.innerHTML='🎧'"></span><span class="lbl">Support</span></a>
+      ${_sp('100% 100%')}<span class="lbl">Support</span></a>
     <span class="rail-lang" id="railLang">
       <a href="#" id="langBtn" title="Language" aria-haspopup="true">
         <span class="it">🌍</span><span class="lbl" id="langLbl">English</span></a>
