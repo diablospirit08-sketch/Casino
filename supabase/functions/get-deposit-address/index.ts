@@ -96,8 +96,9 @@ serve(async (req) => {
     });
 
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
     console.error('get-deposit-address error:', err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: msg }), {
       status: 500, headers: { ...CORS, 'Content-Type': 'application/json' }
     });
   }

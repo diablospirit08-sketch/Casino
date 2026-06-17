@@ -6,6 +6,11 @@ async function placeBet({ game, currency, wager, params = {} }) {
   const { data: { session } } = await supa.auth.getSession();
   if (!session) throw new Error('Not authenticated');
 
+  /* Snapshot-and-increment before the fetch so concurrent auto-bets each
+     get a distinct nonce. JS is single-threaded between awaits, so ++ here
+     is atomic — no two calls in flight can read the same value. */
+  const nonce = window._pfNonce !== undefined ? window._pfNonce++ : 0;
+
   const res = await fetch(PLACE_BET_URL, {
     method: 'POST',
     headers: {
@@ -15,15 +20,13 @@ async function placeBet({ game, currency, wager, params = {} }) {
     body: JSON.stringify({
       game, currency, wager, params,
       clientSeed: window._pfClient || 'default',
-      nonce:      window._pfNonce  || 0,
+      nonce,
     }),
   });
 
   const json = await res.json();
   if (!res.ok) throw new Error(json.error || 'place-bet failed');
 
-  /* advance nonce + record seeds for provably fair modal */
-  if (window._pfNonce !== undefined) window._pfNonce++;
   if (window.pfRecordServer) pfRecordServer(json.serverSeed, json.serverSeedHash, json.clientSeed, json.nonce);
 
   return json; // { new_balance, profit, outcome, multiplier, gameData, serverSeed, serverSeedHash, clientSeed, nonce }
