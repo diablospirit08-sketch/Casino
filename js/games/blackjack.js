@@ -221,51 +221,16 @@ ORIGINALS['originals-blackjack']={
   },
 
   /* ── chip helpers ── */
-  _chipCol(v){
-    if(v>=500)return{bg:'#c9a227',text:'#1a1100',ring1:'rgba(0,0,0,.35)',ring2:'rgba(0,0,0,.18)',label:'$500'};
-    if(v>=100)return{bg:'#8e44ad',text:'#fff',ring1:'rgba(255,255,255,.85)',ring2:'rgba(255,255,255,.45)',label:'$100'};
-    if(v>=50) return{bg:'#3d8bcd',text:'#fff',ring1:'rgba(255,255,255,.85)',ring2:'rgba(255,255,255,.45)',label:'$50'};
-    if(v>=25) return{bg:'#1e8449',text:'#fff',ring1:'rgba(255,255,255,.85)',ring2:'rgba(255,255,255,.45)',label:'$25'};
-    if(v>=10) return{bg:'#1a6fa8',text:'#fff',ring1:'rgba(255,255,255,.85)',ring2:'rgba(255,255,255,.45)',label:'$10'};
-    if(v>=5)  return{bg:'#c0392b',text:'#fff',ring1:'rgba(255,255,255,.85)',ring2:'rgba(255,255,255,.45)',label:'$5'};
-    return          {bg:'#2471a3',text:'#fff',ring1:'rgba(255,255,255,.85)',ring2:'rgba(255,255,255,.45)',label:'$1'};
-  },
-  _drawChipCanvas(val,SIZE,label){
-    const PAD=6,cv=document.createElement('canvas');
-    cv.width=SIZE+PAD*2;cv.height=SIZE+PAD*2;
-    const cc=this._chipCol(val),ctx=cv.getContext('2d');
-    const cx=SIZE/2+PAD,cy=SIZE/2+PAD,r=SIZE/2-2;
-    /* drop shadow */
-    ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=9;ctx.shadowOffsetY=3;
-    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=cc.bg;ctx.fill();
+  _drawChipCanvas(val,SIZE){
+    const PAD=6,inner=makeChipCanvas(Math.max(25,val),SIZE);
+    const cv=document.createElement('canvas');
+    const dpr=Math.min(window.devicePixelRatio||2,3);
+    cv.width=(SIZE+PAD*2)*dpr;cv.height=(SIZE+PAD*2)*dpr;
+    cv.style.width=(SIZE+PAD*2)+'px';cv.style.height=(SIZE+PAD*2)+'px';
+    const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+    ctx.shadowColor='rgba(0,0,0,.65)';ctx.shadowBlur=8;ctx.shadowOffsetY=3;
+    ctx.drawImage(inner,PAD,PAD,SIZE,SIZE);
     ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-    /* outer rim ring */
-    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
-    ctx.strokeStyle=cc.ring1;ctx.lineWidth=2.4;ctx.stroke();
-    /* 8 edge stripe segments */
-    const STRIPES=8,stripeW=Math.PI*2/STRIPES,rOuter=r-3,rInner=r-8;
-    for(let i=0;i<STRIPES;i++){
-      const a0=i*stripeW+0.05,a1=(i+0.5)*stripeW-0.05;
-      ctx.beginPath();ctx.arc(cx,cy,rOuter,a0,a1);ctx.arc(cx,cy,rInner,a1,a0,true);
-      ctx.closePath();ctx.fillStyle='rgba(255,255,255,.18)';ctx.fill();
-    }
-    /* re-fill centre inside stripe ring */
-    ctx.beginPath();ctx.arc(cx,cy,rInner-1,0,Math.PI*2);ctx.fillStyle=cc.bg;ctx.fill();
-    /* inner dashed ring */
-    ctx.setLineDash([2.5,2.5]);
-    ctx.beginPath();ctx.arc(cx,cy,rInner-4,0,Math.PI*2);
-    ctx.strokeStyle=cc.ring2;ctx.lineWidth=1.2;ctx.stroke();
-    ctx.setLineDash([]);
-    /* dome radial highlight */
-    const grad=ctx.createRadialGradient(cx,cy-r*.3,0,cx,cy,r*.7);
-    grad.addColorStop(0,'rgba(255,255,255,.28)');
-    grad.addColorStop(1,'rgba(255,255,255,0)');
-    ctx.beginPath();ctx.arc(cx,cy,r-3,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();
-    /* label */
-    ctx.fillStyle=cc.text;
-    ctx.font=`bold ${SIZE>40?10:8}px Inter,system-ui,sans-serif`;
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(label||cc.label,cx,cy);
     return cv;
   },
 
@@ -879,27 +844,12 @@ ORIGINALS['originals-blackjack']={
 
 /* chip tray */
 .bj2tray{display:flex;gap:7px;margin-bottom:4px;flex-wrap:wrap}
-.bj2traychip{position:relative;width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
-  font-size:10px;font-weight:900;color:#fff;letter-spacing:-.01em;
-  box-shadow:0 5px 12px rgba(0,0,0,.55),0 2px 4px rgba(0,0,0,.35),
-    inset 0 2px 0 rgba(255,255,255,.32),inset 0 -3px 0 rgba(0,0,0,.3);
-  outline:2px dashed rgba(255,255,255,.32);outline-offset:-5px;
-  transition:transform .12s,filter .12s,box-shadow .12s;font-family:inherit;overflow:hidden}
-/* dome highlight */
-.bj2traychip::before{content:"";position:absolute;top:2px;left:50%;transform:translateX(-50%);
-  width:70%;height:46%;border-radius:50%;pointer-events:none;
-  background:radial-gradient(ellipse at 50% 30%,rgba(255,255,255,.38) 0%,transparent 70%)}
-.bj2traychip:hover:not(:disabled){transform:translateY(-4px) scale(1.11);
-  filter:brightness(1.2);box-shadow:0 8px 18px rgba(0,0,0,.6),0 3px 6px rgba(0,0,0,.35),
-    inset 0 2px 0 rgba(255,255,255,.32),inset 0 -3px 0 rgba(0,0,0,.3)}
-.bj2traychip:active:not(:disabled){transform:scale(.92);
-  box-shadow:0 2px 6px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.2),inset 0 -2px 0 rgba(0,0,0,.25)}
+.bj2traychip{position:relative;width:46px;height:46px;border-radius:50%;border:none;
+  cursor:pointer;background:transparent;
+  transition:transform .12s,filter .12s;font-family:inherit;overflow:hidden}
+.bj2traychip:hover:not(:disabled){transform:translateY(-4px) scale(1.11);filter:brightness(1.18)}
+.bj2traychip:active:not(:disabled){transform:scale(.92)}
 .bj2traychip:disabled{opacity:.3;cursor:not-allowed}
-.bj2traychip[data-v="1"]  {background:#2471a3}
-.bj2traychip[data-v="5"]  {background:#c0392b}
-.bj2traychip[data-v="25"] {background:#1e8449}
-.bj2traychip[data-v="100"]{background:#8e44ad}
-.bj2traychip[data-v="500"]{background:#c9a227;color:#1a1100}
 .bj2tray-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .bj2tray-clr{height:26px;padding:0 11px;border:1px solid rgba(255,255,255,.1);border-radius:6px;
   background:rgba(255,255,255,.05);color:rgba(255,255,255,.38);
@@ -1010,11 +960,11 @@ ORIGINALS['originals-blackjack']={
     engFields.innerHTML=`
       <div class="gv-field"><label>Bet Amount</label>
         <div class="bj2tray" id="bj2Tray">
-          <button class="bj2traychip" data-v="1">$1</button>
-          <button class="bj2traychip" data-v="5">$5</button>
-          <button class="bj2traychip" data-v="25">$25</button>
-          <button class="bj2traychip" data-v="100">$100</button>
-          <button class="bj2traychip" data-v="500">$500</button>
+          <button class="bj2traychip" data-v="25"></button>
+          <button class="bj2traychip" data-v="50"></button>
+          <button class="bj2traychip" data-v="100"></button>
+          <button class="bj2traychip" data-v="500"></button>
+          <button class="bj2traychip" data-v="1000"></button>
         </div>
         <div class="bj2tray-bar">
           <button class="bj2tray-clr" id="bj2TrayClr">Clear</button>
@@ -1079,6 +1029,12 @@ ORIGINALS['originals-blackjack']={
           </div>
         </div>
       </div>`;
+
+    document.querySelectorAll('.bj2traychip').forEach(btn=>{
+      const cv=makeChipCanvas(+btn.dataset.v,46);
+      cv.style.cssText='position:absolute;inset:0;pointer-events:none;border-radius:50%';
+      btn.appendChild(cv);
+    });
 
     $id('bj2Tray').addEventListener('click',e=>{
       const btn=e.target.closest('.bj2traychip');if(!btn||this.h)return;

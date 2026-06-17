@@ -5,7 +5,7 @@ ORIGINALS['originals-roulette']={
   bets:[],
   spinning:false,
   _wheelAngle:0,
-  _chipVal:1,
+  _chipVal:25,
   _ballAngle:null,
   _ballRadius:null,
   _history:[],
@@ -23,8 +23,7 @@ ORIGINALS['originals-roulette']={
     engFields.innerHTML=`
       <div class="gv-field"><label>Chip</label>
         <div class="rl-chips" id="rlChips">
-          ${[1,5,25,100,500].map(v=>`<button class="rl-chip${v===1?' active':''}" data-v="${v}"
-            style="background:${v>=500?'#c9a227':v>=100?'#8e44ad':v>=25?'#1e8449':v>=5?'#c0392b':'#2471a3'};color:${v>=500?'#1a1100':'#fff'}">\$${v}</button>`).join('')}
+          ${[25,50,100,500,1000].map((v,i)=>`<button class="rl-chip${i===0?' active':''}" data-v="${v}"></button>`).join('')}
         </div>
       </div>
       <div class="gv-field">
@@ -45,6 +44,11 @@ ORIGINALS['originals-roulette']={
           ${this._tableHTML()}
         </div>
       </div>`;
+    document.querySelectorAll('.rl-chip').forEach(btn=>{
+      const cv=makeChipCanvas(+btn.dataset.v,40);
+      cv.style.cssText='position:absolute;inset:0;pointer-events:none;border-radius:50%';
+      btn.appendChild(cv);
+    });
     document.getElementById('rlChips').addEventListener('click',e=>{
       const b=e.target.closest('.rl-chip');if(!b)return;
       this._chipVal=+b.dataset.v;
@@ -81,8 +85,7 @@ ORIGINALS['originals-roulette']={
       const cell=document.querySelector(`[data-bet-key="${bet.key}"]`);if(!cell)continue;
       const chip=document.createElement('div');chip.className='rl-bet-chip';
       const v=bet.fiat;
-      chip.style.cssText=`background:${v>=500?'#c9a227':v>=100?'#8e44ad':v>=25?'#1e8449':v>=5?'#c0392b':'#2471a3'};color:${v>=500?'#1a1100':'#fff'}`;
-      chip.textContent=v>=1000?(v/1000).toFixed(1)+'k':'$'+Math.round(v);
+      chip.style.background=chipCfg(Math.max(25,Math.round(v))).c1;
       cell.appendChild(chip);
     }
   },
@@ -430,9 +433,9 @@ ORIGINALS['originals-roulette']={
 .rl-sdot.black{background:#232323;border:1px solid rgba(255,255,255,.18)}
 /* chips */
 .rl-chips{display:flex;gap:7px}
-.rl-chip{width:40px;height:40px;border-radius:50%;border:2px dashed rgba(255,255,255,.28);
-  font-size:9px;font-weight:900;cursor:pointer;
-  transition:transform .1s,box-shadow .1s,filter .12s;font-family:inherit}
+.rl-chip{position:relative;width:40px;height:40px;border-radius:50%;border:none;
+  background:transparent;cursor:pointer;overflow:hidden;
+  transition:transform .1s,filter .12s;font-family:inherit}
 .rl-chip.active{transform:scale(1.18);box-shadow:0 0 0 2px #fff,0 4px 14px rgba(0,0,0,.5)}
 .rl-chip:hover:not(.active){filter:brightness(1.22)}
 .rl-totals{display:flex;flex-direction:column;gap:5px;font-size:12px;color:rgba(255,255,255,.55)}
