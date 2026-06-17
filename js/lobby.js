@@ -191,19 +191,22 @@ document.addEventListener('click',()=>{
 /* ---------- nav rail ---------- */
 /* cat: rail item activates the matching category chip; items without one scroll to their lobby section */
 const railItems = [
-  {l:'Lobby',        t:'sec-top',       cat:'lobby',     em:'🏛️'},
-  {l:'Originals',    t:'sec-originals', cat:'originals', em:'🎲'},
-  {l:'Slots',        t:'sec-slots',     cat:'slots',     em:'🎰'},
-  {l:'Hot Picks',    t:'sec-hot',                        em:'🌶️'},
-  {l:'Live Casino',  t:'sec-live',      cat:'live',      em:'🃏'},
-  {l:'Game Shows',   t:'sec-shows',     cat:'shows',     em:'🎤'},
-  {l:'New Arrivals', t:'sec-new',       cat:'new',       em:'🎁'},
-  {l:'VIP Club',     t:'sec-vip',                        em:'⭐'},
-  {l:'All Bets',     t:'sec-bets',                       em:'💰'},
+  {l:'Lobby',        t:'sec-top',       cat:'lobby',     em:'🏛️', img:'1'},
+  {l:'Originals',    t:'sec-originals', cat:'originals', em:'🎲', img:'2'},
+  {l:'Slots',        t:'sec-slots',     cat:'slots',     em:'🎰', img:'3'},
+  {l:'Hot Picks',    t:'sec-hot',                        em:'🌶️', img:'4'},
+  {l:'Live Casino',  t:'sec-live',      cat:'live',      em:'🃏', img:'5'},
+  {l:'Game Shows',   t:'sec-shows',     cat:'shows',     em:'🎤', img:'6'},
+  {l:'New Arrivals', t:'sec-new',       cat:'new',       em:'🎁', img:'7'},
+  {l:'VIP Club',     t:'sec-vip',                        em:'⭐', img:'8'},
+  {l:'All Bets',     t:'sec-bets',                       em:'💰', img:'9'},
 ];
+function _railIcon(r){
+  return `<span class="it"><img src="art/nav/${r.img}.png" class="rail-img" alt="" onerror="this.parentNode.innerHTML='${r.em}'"></span>`;
+}
 document.getElementById('railNav').innerHTML = railItems.map((r,i)=>`
   <a href="#${r.t}" data-target="${r.t}" ${r.cat?`data-cat="${r.cat}"`:''} title="${r.l}" class="${i===0?'active':''}">
-    <span class="it">${r.em}</span><span class="lbl">${r.l}</span></a>
+    ${_railIcon(r)}<span class="lbl">${r.l}</span></a>
   ${i===2||i===5?'<span class="sep"></span>':''}
 `).join('')+`
   <div class="rail-foot">
