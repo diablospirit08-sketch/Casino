@@ -212,7 +212,7 @@ document.getElementById('railNav').innerHTML = railItems.map((r,i)=>`
   <div class="rail-foot">
     <span class="sep"></span>
     <a href="#" id="railChat" title="Live support">
-      <span class="it">🎧</span><span class="lbl">Support</span></a>
+      <span class="it"><img src="art/nav/10.png" class="rail-img" alt="" onerror="this.parentNode.innerHTML='🎧'"></span><span class="lbl">Support</span></a>
     <span class="rail-lang" id="railLang">
       <a href="#" id="langBtn" title="Language" aria-haspopup="true">
         <span class="it">🌍</span><span class="lbl" id="langLbl">English</span></a>
