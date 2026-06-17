@@ -222,13 +222,13 @@ ORIGINALS['originals-blackjack']={
 
   /* ── chip helpers ── */
   _chipCol(v){
-    if(v>=500)return{bg:'#c9a227',label:'$500'};
-    if(v>=100)return{bg:'#8e44ad',label:'$100'};
-    if(v>=50) return{bg:'#3d8bcd',label:'$50'};
-    if(v>=25) return{bg:'#1e8449',label:'$25'};
-    if(v>=10) return{bg:'#1a6fa8',label:'$10'};
-    if(v>=5)  return{bg:'#c0392b',label:'$5'};
-    return          {bg:'#2471a3',label:'$1'};
+    if(v>=500)return{bg:'#c9a227',text:'#1a1100',ring1:'rgba(0,0,0,.35)',ring2:'rgba(0,0,0,.18)',label:'$500'};
+    if(v>=100)return{bg:'#8e44ad',text:'#fff',ring1:'rgba(255,255,255,.85)',ring2:'rgba(255,255,255,.45)',label:'$100'};
+    if(v>=50) return{bg:'#3d8bcd',text:'#fff',ring1:'rgba(255,255,255,.85)',ring2:'rgba(255,255,255,.45)',label:'$50'};
+    if(v>=25) return{bg:'#1e8449',text:'#fff',ring1:'rgba(255,255,255,.85)',ring2:'rgba(255,255,255,.45)',label:'$25'};
+    if(v>=10) return{bg:'#1a6fa8',text:'#fff',ring1:'rgba(255,255,255,.85)',ring2:'rgba(255,255,255,.45)',label:'$10'};
+    if(v>=5)  return{bg:'#c0392b',text:'#fff',ring1:'rgba(255,255,255,.85)',ring2:'rgba(255,255,255,.45)',label:'$5'};
+    return          {bg:'#2471a3',text:'#fff',ring1:'rgba(255,255,255,.85)',ring2:'rgba(255,255,255,.45)',label:'$1'};
   },
   _drawChipCanvas(val,SIZE,label){
     const PAD=6,cv=document.createElement('canvas');
@@ -239,12 +239,12 @@ ORIGINALS['originals-blackjack']={
     ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=cc.bg;ctx.fill();
     ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
     ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
-    ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=2.2;ctx.stroke();
+    ctx.strokeStyle=cc.ring1;ctx.lineWidth=2.2;ctx.stroke();
     ctx.setLineDash([3,3]);
     ctx.beginPath();ctx.arc(cx,cy,r-5,0,Math.PI*2);
-    ctx.strokeStyle='rgba(255,255,255,.45)';ctx.lineWidth=1.2;ctx.stroke();
+    ctx.strokeStyle=cc.ring2;ctx.lineWidth=1.2;ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle='#fff';
+    ctx.fillStyle=cc.text;
     ctx.font=`bold ${SIZE>40?10:8}px Inter,system-ui,sans-serif`;
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText(label||cc.label,cx,cy);
