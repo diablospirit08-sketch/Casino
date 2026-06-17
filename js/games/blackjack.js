@@ -222,7 +222,8 @@ ORIGINALS['originals-blackjack']={
 
   /* ── chip helpers ── */
   _drawChipCanvas(val,SIZE){
-    const PAD=6,inner=makeChipCanvas(Math.max(25,val),SIZE);
+    const PAD=6,RENDER=120;
+    const inner=makeChipCanvas(Math.max(25,val),RENDER);
     const cv=document.createElement('canvas');
     const dpr=Math.min(window.devicePixelRatio||2,3);
     cv.width=(SIZE+PAD*2)*dpr;cv.height=(SIZE+PAD*2)*dpr;
@@ -1031,8 +1032,8 @@ ORIGINALS['originals-blackjack']={
       </div>`;
 
     document.querySelectorAll('.bj2traychip').forEach(btn=>{
-      const cv=makeChipCanvas(+btn.dataset.v,46);
-      cv.style.cssText='position:absolute;inset:0;pointer-events:none;border-radius:50%';
+      const cv=makeChipCanvas(+btn.dataset.v,120);
+      cv.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;border-radius:50%';
       btn.appendChild(cv);
     });
 

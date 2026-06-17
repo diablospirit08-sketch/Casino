@@ -45,8 +45,8 @@ ORIGINALS['originals-roulette']={
         </div>
       </div>`;
     document.querySelectorAll('.rl-chip').forEach(btn=>{
-      const cv=makeChipCanvas(+btn.dataset.v,40);
-      cv.style.cssText='position:absolute;inset:0;pointer-events:none;border-radius:50%';
+      const cv=makeChipCanvas(+btn.dataset.v,120);
+      cv.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;border-radius:50%';
       btn.appendChild(cv);
     });
     document.getElementById('rlChips').addEventListener('click',e=>{

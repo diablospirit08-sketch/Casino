@@ -8,7 +8,6 @@ const CHIP_CFGS=[
   {val:10000,label:'$10K', sml:'10K', fs_f:.131,c1:'#c87028',c2:'#181818',ring:'#9a5010',lbl:'#5a1800'},
 ];
 
-/* Find the highest denomination ≤ val (or lowest if val is below all) */
 function chipCfg(val){
   let best=CHIP_CFGS[0];
   for(const c of CHIP_CFGS){if(c.val<=val)best=c;}
@@ -34,6 +33,8 @@ function _arcText(ctx,txt,cx,cy,r,ca,cw,fs,col,ls){
   ctx.restore();
 }
 
+/* Always renders full Monte Carlo design regardless of size.
+   Pass displaySize to override CSS display size (chip renders at S but displays at displaySize). */
 function makeChipCanvas(val,S,dpr){
   dpr=dpr||Math.min(window.devicePixelRatio||2,3);
   const cfg=chipCfg(val);
@@ -41,10 +42,11 @@ function makeChipCanvas(val,S,dpr){
   cv.width=S*dpr;cv.height=S*dpr;
   cv.style.width=S+'px';cv.style.height=S+'px';
   const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
-  const cx=S/2,cy=S/2,R=S/2-.5;
-  const BO=R*.958,BI=R*.748,CR=BI*.82;
-  const full=S>=100,med=S>=40;
-  const N=full?24:med?12:8;
+  const cx=S/2,cy=S/2,R=S/2-1;
+  /* proportions scaled from reference (170px → R=84) */
+  const BO=R*.9586,BI=R*.7515;
+  const CR=BI-R*.142;
+  const N=24,GAP=.01;
   const label=S>=80?cfg.label:cfg.sml;
 
   ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.clip();
@@ -52,10 +54,9 @@ function makeChipCanvas(val,S,dpr){
 
   /* silver rim */
   ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);
-  ctx.strokeStyle='#c0c0c0';ctx.lineWidth=Math.max(.8,R*.04);ctx.stroke();
+  ctx.strokeStyle='#c8c8c8';ctx.lineWidth=Math.max(.8,R*.042);ctx.stroke();
 
-  /* alternating segments */
-  const GAP=full?.01:0;
+  /* 24 alternating segments */
   for(let i=0;i<N;i++){
     const a0=(i/N)*Math.PI*2-Math.PI/2+GAP,a1=((i+1)/N)*Math.PI*2-Math.PI/2-GAP,mid=(a0+a1)/2;
     const c=i%2===0?cfg.c1:cfg.c2;
@@ -64,7 +65,7 @@ function makeChipCanvas(val,S,dpr){
     gr.addColorStop(.62,_cl(c,55));gr.addColorStop(.85,_cl(c,15));gr.addColorStop(1,_cd(c,40));
     ctx.beginPath();ctx.arc(cx,cy,BO,a0,a1);ctx.arc(cx,cy,BI,a1,a0,true);ctx.closePath();
     ctx.fillStyle=gr;ctx.fill();
-    if(full){ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=.6;ctx.stroke();}
+    ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=.6;ctx.stroke();
   }
 
   /* band borders */
@@ -74,62 +75,59 @@ function makeChipCanvas(val,S,dpr){
   ctx.strokeStyle='rgba(0,0,0,.9)';ctx.lineWidth=Math.max(.8,R*.024);ctx.stroke();
 
   /* white dots at segment joints */
-  if(med){
-    const dr=Math.max(1.5,R*.034);
-    for(let i=0;i<N;i++){
-      const a=(i/N)*Math.PI*2-Math.PI/2;
-      ctx.beginPath();ctx.arc(cx+(BO-dr)*Math.cos(a),cy+(BO-dr)*Math.sin(a),dr,0,Math.PI*2);
-      ctx.fillStyle='#fff';ctx.fill();
-    }
+  const dr=Math.max(1,R*.033);
+  for(let i=0;i<N;i++){
+    const a=(i/N)*Math.PI*2-Math.PI/2;
+    ctx.beginPath();ctx.arc(cx+(BO-dr)*Math.cos(a),cy+(BO-dr)*Math.sin(a),dr,0,Math.PI*2);
+    ctx.fillStyle='#fff';ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,.3)';ctx.lineWidth=.5;ctx.stroke();
   }
 
-  /* inner double rings */
+  /* inner double rings — matching reference pixel ratios */
   ctx.beginPath();ctx.arc(cx,cy,BI-R*.036,0,Math.PI*2);
-  ctx.strokeStyle=cfg.ring;ctx.lineWidth=Math.max(.8,R*.045);ctx.stroke();
-  if(full){
-    ctx.beginPath();ctx.arc(cx,cy,BI-R*.077,0,Math.PI*2);
-    ctx.strokeStyle='rgba(0,0,0,.75)';ctx.lineWidth=R*.014;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,BI-R*.1,0,Math.PI*2);
-    ctx.strokeStyle=cfg.ring;ctx.lineWidth=R*.03;ctx.globalAlpha=.7;ctx.stroke();ctx.globalAlpha=1;
-    ctx.beginPath();ctx.arc(cx,cy,BI-R*.125,0,Math.PI*2);
-    ctx.strokeStyle='rgba(0,0,0,.65)';ctx.lineWidth=R*.012;ctx.stroke();
-  }
+  ctx.strokeStyle=cfg.ring;ctx.lineWidth=Math.max(.5,R*.030);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,BI-R*.077,0,Math.PI*2);
+  ctx.strokeStyle='rgba(0,0,0,.75)';ctx.lineWidth=Math.max(.4,R*.014);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,BI-R*.101,0,Math.PI*2);
+  ctx.strokeStyle=cfg.ring;ctx.lineWidth=Math.max(.4,R*.018);ctx.globalAlpha=.7;ctx.stroke();ctx.globalAlpha=1;
+  ctx.beginPath();ctx.arc(cx,cy,BI-R*.124,0,Math.PI*2);
+  ctx.strokeStyle='rgba(0,0,0,.65)';ctx.lineWidth=Math.max(.4,R*.012);ctx.stroke();
 
   /* white center disc */
   const cg=ctx.createRadialGradient(cx-CR*.1,cy-CR*.14,2,cx,cy,CR);
   cg.addColorStop(0,'#fff');cg.addColorStop(.5,'#f9f9f9');cg.addColorStop(1,'#e4e4e4');
   ctx.beginPath();ctx.arc(cx,cy,CR,0,Math.PI*2);ctx.fillStyle=cg;ctx.fill();
 
-  if(full){
-    /* horizontal line texture + two divider lines */
-    ctx.save();ctx.beginPath();ctx.arc(cx,cy,CR,0,Math.PI*2);ctx.clip();
-    ctx.strokeStyle='rgba(0,0,0,.02)';ctx.lineWidth=.7;
-    for(let y2=-CR;y2<CR;y2+=2.5){ctx.beginPath();ctx.moveTo(cx-CR,cy+y2);ctx.lineTo(cx+CR,cy+y2);ctx.stroke();}
-    [[cy-CR*.3],[cy+CR*.34]].forEach(([ly])=>{
-      const dy2=ly-cy,half=Math.sqrt(Math.max(0,CR*CR-dy2*dy2))*.78;
-      ctx.strokeStyle=cfg.ring;ctx.lineWidth=1.3;ctx.globalAlpha=.55;
-      ctx.beginPath();ctx.moveTo(cx-half,ly);ctx.lineTo(cx+half,ly);ctx.stroke();
-    });
-    ctx.globalAlpha=1;ctx.restore();
-    /* arc text */
-    const arcR=CR-R*.105;
-    _arcText(ctx,'MONTE CARLO',cx,cy,arcR,-Math.PI/2,true,Math.max(5,R*.082),cfg.lbl,1.1);
-    _arcText(ctx,'POKER CLUB',cx,cy,arcR,Math.PI/2,false,Math.max(5,R*.077),cfg.lbl,1.1);
-    /* crown */
-    ctx.font=`bold ${Math.max(8,R*.13)}px serif`;ctx.fillStyle=cfg.lbl;
-    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('♛',cx,cy-CR+R*.26);
-  }
+  /* horizontal texture + two divider lines */
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,CR,0,Math.PI*2);ctx.clip();
+  ctx.strokeStyle='rgba(0,0,0,.02)';ctx.lineWidth=.7;
+  for(let y2=-CR;y2<CR;y2+=2.5){ctx.beginPath();ctx.moveTo(cx-CR,cy+y2);ctx.lineTo(cx+CR,cy+y2);ctx.stroke();}
+  [[cy-CR*.3],[cy+CR*.34]].forEach(([ly])=>{
+    const dy2=ly-cy,half=Math.sqrt(Math.max(0,CR*CR-dy2*dy2))*.78;
+    ctx.strokeStyle=cfg.ring;ctx.lineWidth=Math.max(.5,R*.015);ctx.globalAlpha=.55;
+    ctx.beginPath();ctx.moveTo(cx-half,ly);ctx.lineTo(cx+half,ly);ctx.stroke();
+  });
+  ctx.globalAlpha=1;ctx.restore();
 
   /* center border */
   ctx.beginPath();ctx.arc(cx,cy,CR,0,Math.PI*2);
   ctx.strokeStyle='rgba(0,0,0,.18)';ctx.lineWidth=Math.max(.5,R*.012);ctx.stroke();
 
+  /* arc text */
+  const arcR=CR-R*.107;
+  _arcText(ctx,'MONTE CARLO',cx,cy,arcR,-Math.PI/2,true,Math.max(4,R*.083),cfg.lbl,1.1);
+  _arcText(ctx,'POKER CLUB',cx,cy,arcR,Math.PI/2,false,Math.max(4,R*.077),cfg.lbl,1.1);
+
+  /* crown */
+  ctx.font=`bold ${Math.max(6,R*.13)}px serif`;ctx.fillStyle=cfg.lbl;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('♛',cx,cy-CR+R*.26);
+
   /* value text */
-  const fs=full?(cfg.fs_f*R*2):(CR*.6*Math.pow(.82,Math.max(0,label.length-2)));
-  ctx.font=`bold ${Math.max(6,fs)}px Georgia,serif`;
+  ctx.font=`bold ${Math.max(5,cfg.fs_f*R*2)}px Georgia,serif`;
   ctx.fillStyle='#0a0a0a';ctx.textAlign='center';ctx.textBaseline='middle';
-  if(full){ctx.shadowColor='rgba(0,0,0,.08)';ctx.shadowBlur=1.5;}
-  ctx.fillText(label,cx,cy+(full?2:0));
+  ctx.shadowColor='rgba(0,0,0,.08)';ctx.shadowBlur=1.5;
+  ctx.fillText(label,cx,cy+2);
   ctx.shadowBlur=0;ctx.shadowColor='transparent';
 
   /* shine overlay */
