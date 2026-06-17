@@ -348,6 +348,35 @@ serve(async (req) => {
         break
       }
 
+      case 'roulette': {
+        const RED_SET = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36])
+        const PAYS: Record<string, number> = {
+          straight:36, split:18, street:12, corner:9, sixline:6,
+          dozen:3, column:3, half:2, color:2, evenodd:2,
+        }
+        const clientBets = Array.isArray(params.bets) ? params.bets : []
+        if (!clientBets.length) {
+          return new Response(JSON.stringify({ error: 'No bets placed' }), { status: 400, headers: CORS })
+        }
+        const betSum = clientBets.reduce((s: number, b: any) => s + Number(b.amount || 0), 0)
+        if (Math.abs(betSum - wager) > wager * 0.001 + 1e-9) {
+          return new Response(JSON.stringify({ error: 'Bet total mismatch' }), { status: 400, headers: CORS })
+        }
+        const result = Math.floor((await rnd(0)) * 37) // 0–36 (European)
+        let totalPayout = 0
+        for (const bet of clientBets) {
+          const amt = Number(bet.amount)
+          const nums = Array.isArray(bet.numbers) ? bet.numbers.map(Number) : []
+          const pay = PAYS[String(bet.type)] ?? 0
+          if (pay > 0 && nums.includes(result)) totalPayout += amt * pay
+        }
+        wager = betSum // server-authoritative
+        multiplier = wager > 0 ? +(totalPayout / wager).toFixed(6) : 0
+        outcome    = multiplier > 1 ? 'win' : multiplier === 1 ? 'push' : 'loss'
+        gameData   = { result }
+        break
+      }
+
       default:
         return new Response(JSON.stringify({ error: `Unknown game: ${game}` }), { status: 400, headers: CORS })
     }

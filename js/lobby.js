@@ -322,6 +322,7 @@ const ROWS = [
     {n:'Keno',      p:'Volt Originals', g:['#5a2ea6','#9a3df0']},
     {n:'Limbo',     p:'Volt Originals', g:['#a63aba','#e052b8']},
     {n:'Baccarat',  p:'Volt Originals', g:['#d4452e','#f0763d']},
+    {n:'Roulette',  p:'Volt Originals', g:['#1a6a2e','#2dbd54'], corner:'New'},
     {n:'Coinflip',  p:'Volt Originals', g:['#8a6d1c','#d4af37'], corner:'New'},
   ]},
   {key:'slots', title:'Slots', icon:'M5 4h14v16H5zM9 4v16M15 4v16', games:[
