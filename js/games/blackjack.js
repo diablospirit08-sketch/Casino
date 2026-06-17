@@ -235,15 +235,33 @@ ORIGINALS['originals-blackjack']={
     cv.width=SIZE+PAD*2;cv.height=SIZE+PAD*2;
     const cc=this._chipCol(val),ctx=cv.getContext('2d');
     const cx=SIZE/2+PAD,cy=SIZE/2+PAD,r=SIZE/2-2;
-    ctx.shadowColor='rgba(0,0,0,.55)';ctx.shadowBlur=8;ctx.shadowOffsetY=3;
+    /* drop shadow */
+    ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=9;ctx.shadowOffsetY=3;
     ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=cc.bg;ctx.fill();
     ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+    /* outer rim ring */
     ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
-    ctx.strokeStyle=cc.ring1;ctx.lineWidth=2.2;ctx.stroke();
-    ctx.setLineDash([3,3]);
-    ctx.beginPath();ctx.arc(cx,cy,r-5,0,Math.PI*2);
+    ctx.strokeStyle=cc.ring1;ctx.lineWidth=2.4;ctx.stroke();
+    /* 8 edge stripe segments */
+    const STRIPES=8,stripeW=Math.PI*2/STRIPES,rOuter=r-3,rInner=r-8;
+    for(let i=0;i<STRIPES;i++){
+      const a0=i*stripeW+0.05,a1=(i+0.5)*stripeW-0.05;
+      ctx.beginPath();ctx.arc(cx,cy,rOuter,a0,a1);ctx.arc(cx,cy,rInner,a1,a0,true);
+      ctx.closePath();ctx.fillStyle='rgba(255,255,255,.18)';ctx.fill();
+    }
+    /* re-fill centre inside stripe ring */
+    ctx.beginPath();ctx.arc(cx,cy,rInner-1,0,Math.PI*2);ctx.fillStyle=cc.bg;ctx.fill();
+    /* inner dashed ring */
+    ctx.setLineDash([2.5,2.5]);
+    ctx.beginPath();ctx.arc(cx,cy,rInner-4,0,Math.PI*2);
     ctx.strokeStyle=cc.ring2;ctx.lineWidth=1.2;ctx.stroke();
     ctx.setLineDash([]);
+    /* dome radial highlight */
+    const grad=ctx.createRadialGradient(cx,cy-r*.3,0,cx,cy,r*.7);
+    grad.addColorStop(0,'rgba(255,255,255,.28)');
+    grad.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.beginPath();ctx.arc(cx,cy,r-3,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();
+    /* label */
     ctx.fillStyle=cc.text;
     ctx.font=`bold ${SIZE>40?10:8}px Inter,system-ui,sans-serif`;
     ctx.textAlign='center';ctx.textBaseline='middle';
@@ -789,8 +807,18 @@ ORIGINALS['originals-blackjack']={
       s.textContent=`
 /* TABLE — casino felt green */
 .bj2tbl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
-  justify-content:space-between;padding:14px 12px 44px;overflow:hidden;
+  justify-content:space-between;padding:14px 12px 52px;overflow:hidden;
   background:radial-gradient(ellipse at 50% 30%,#2d8a52 0%,#1c6639 40%,#0e4225 72%,#071c10 100%)}
+/* padded rail */
+.bj2rail{position:absolute;bottom:0;left:0;right:0;height:52px;z-index:3;
+  background:linear-gradient(180deg,#2a1a0c 0%,#3e2410 28%,#4c2e14 52%,#3a2010 76%,#1a0e06 100%);
+  border-radius:50% 50% 0 0/20px 20px 0 0}
+.bj2rail::before{content:"";position:absolute;inset:0;border-radius:inherit;
+  background:repeating-linear-gradient(90deg,transparent 0,transparent 10px,rgba(0,0,0,.09) 10px,rgba(0,0,0,.09) 11px),
+             repeating-linear-gradient(0deg,transparent 0,transparent 6px,rgba(255,255,255,.02) 6px,rgba(255,255,255,.02) 7px)}
+.bj2rail::after{content:"";position:absolute;top:0;left:5%;right:5%;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(195,155,55,.5) 15%,rgba(245,210,80,.95) 50%,rgba(195,155,55,.5) 85%,transparent);
+  box-shadow:0 1px 6px rgba(195,155,55,.3)}
 /* felt weave texture */
 .bj2tbl::before{content:"";position:absolute;inset:0;pointer-events:none;
   background:
@@ -814,36 +842,58 @@ ORIGINALS['originals-blackjack']={
 .bj2stk{position:relative;min-height:148px;min-width:112px;display:flex;align-items:center;perspective:700px}
 
 /* cards */
-.bj2c{position:absolute;width:104px;height:144px;border-radius:12px;background:#fff;
-  box-shadow:0 6px 18px rgba(0,0,0,.48);overflow:hidden;user-select:none}
+.bj2c{position:absolute;width:104px;height:144px;border-radius:12px;
+  background:linear-gradient(175deg,#fefefe 0%,#f3f3f1 100%);
+  box-shadow:0 1px 3px rgba(0,0,0,.1),0 6px 20px rgba(0,0,0,.54),0 14px 32px rgba(0,0,0,.2);
+  border:1px solid rgba(0,0,0,.09);overflow:hidden;user-select:none}
+/* top-edge gloss on face cards */
+.bj2c::before{content:"";position:absolute;top:0;left:0;right:0;height:52%;
+  border-radius:12px 12px 0 0;
+  background:linear-gradient(180deg,rgba(255,255,255,.2) 0%,transparent 100%);
+  pointer-events:none;z-index:1}
 .bj2corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:0px;line-height:1;padding:8px 9px}
 .bj2corner.tl{top:0;left:0}
 .bj2corner.br{bottom:0;right:0;transform:rotate(180deg)}
 .bj2c .cr{font-size:26px;font-weight:900;color:#1a2634;line-height:1}
 .bj2c .cs{font-size:18px;color:#1a2634;line-height:1.1}
 .bj2center-suit{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-size:42px;opacity:.12;pointer-events:none;line-height:1}
+  font-size:42px;opacity:.15;pointer-events:none;line-height:1}
 .bj2c.red .cr,.bj2c.red .cs{color:#cc1a2e}
-.bj2c.back{background:linear-gradient(145deg,#1a6fd6 0%,#0d55b8 55%,#0840a0 100%);
-  border:2px solid rgba(255,255,255,.28)}
-.bj2c.back::after{content:"";position:absolute;inset:6px;border-radius:5px;
-  border:1.5px solid rgba(255,255,255,.2);
-  background:repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 2px,transparent 2px,transparent 6px)}
+.bj2c.back{background:linear-gradient(145deg,#1e74d8 0%,#0d51b8 48%,#0940a2 100%);
+  border:2px solid rgba(255,255,255,.32)}
+/* ornate inner frame — replaces face gloss on back cards */
+.bj2c.back::before{content:"";position:absolute;inset:6px;border-radius:7px;
+  border:1.5px solid rgba(255,255,255,.28);pointer-events:none;z-index:1;background:none}
+/* tighter diamond pattern inside the frame */
+.bj2c.back::after{content:"";position:absolute;inset:11px;border-radius:4px;
+  background:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.07) 0,rgba(255,255,255,.07) 2px,transparent 2px,transparent 8px),
+    repeating-linear-gradient(-45deg,rgba(255,255,255,.07) 0,rgba(255,255,255,.07) 2px,transparent 2px,transparent 8px)}
 .bj2c.p{border:2px solid rgba(255,255,255,.5)}
-.bj2c.p.win{border-color:#22dd66;box-shadow:0 0 0 2px rgba(34,221,102,.2),0 8px 22px rgba(0,0,0,.5)}
-.bj2c.p.lose{border-color:#e8304a;box-shadow:0 0 0 2px rgba(232,48,74,.2),0 8px 22px rgba(0,0,0,.5)}
+.bj2c.p.win{border-color:#22dd66;
+  box-shadow:0 0 0 3px rgba(34,221,102,.22),0 8px 24px rgba(0,0,0,.52),0 0 22px rgba(34,221,102,.2)}
+.bj2c.p.lose{border-color:#e8304a;
+  box-shadow:0 0 0 3px rgba(232,48,74,.22),0 8px 24px rgba(0,0,0,.52),0 0 18px rgba(232,48,74,.15)}
 @keyframes bj2deal{from{opacity:0;transform:translateY(-28px) scale(.84) rotate(-5deg)}to{opacity:1;transform:none}}
 .bj2c.dealing{animation:bj2deal .32s cubic-bezier(.22,1,.36,1) both}
 
 /* chip tray */
 .bj2tray{display:flex;gap:7px;margin-bottom:4px;flex-wrap:wrap}
-.bj2traychip{width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
+.bj2traychip{position:relative;width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
   font-size:10px;font-weight:900;color:#fff;letter-spacing:-.01em;
-  box-shadow:0 4px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.25),inset 0 -2px 0 rgba(0,0,0,.25);
-  outline:2px dashed rgba(255,255,255,.3);outline-offset:-5px;
-  transition:transform .1s,filter .1s;font-family:inherit}
-.bj2traychip:hover:not(:disabled){transform:translateY(-3px) scale(1.1);filter:brightness(1.18)}
-.bj2traychip:active:not(:disabled){transform:scale(.93)}
+  box-shadow:0 5px 12px rgba(0,0,0,.55),0 2px 4px rgba(0,0,0,.35),
+    inset 0 2px 0 rgba(255,255,255,.32),inset 0 -3px 0 rgba(0,0,0,.3);
+  outline:2px dashed rgba(255,255,255,.32);outline-offset:-5px;
+  transition:transform .12s,filter .12s,box-shadow .12s;font-family:inherit;overflow:hidden}
+/* dome highlight */
+.bj2traychip::before{content:"";position:absolute;top:2px;left:50%;transform:translateX(-50%);
+  width:70%;height:46%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 30%,rgba(255,255,255,.38) 0%,transparent 70%)}
+.bj2traychip:hover:not(:disabled){transform:translateY(-4px) scale(1.11);
+  filter:brightness(1.2);box-shadow:0 8px 18px rgba(0,0,0,.6),0 3px 6px rgba(0,0,0,.35),
+    inset 0 2px 0 rgba(255,255,255,.32),inset 0 -3px 0 rgba(0,0,0,.3)}
+.bj2traychip:active:not(:disabled){transform:scale(.92);
+  box-shadow:0 2px 6px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.2),inset 0 -2px 0 rgba(0,0,0,.25)}
 .bj2traychip:disabled{opacity:.3;cursor:not-allowed}
 .bj2traychip[data-v="1"]  {background:#2471a3}
 .bj2traychip[data-v="5"]  {background:#c0392b}
@@ -867,15 +917,19 @@ ORIGINALS['originals-blackjack']={
 .bj2ring-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;z-index:2}
 .bj2betring{
   position:relative;width:90px;height:90px;border-radius:50%;
-  border:2.5px dashed rgba(195,155,55,.4);
-  box-shadow:0 0 0 5px rgba(195,155,55,.05),inset 0 0 22px rgba(0,0,0,.22);
+  border:1.5px solid rgba(195,155,55,.6);
+  box-shadow:0 0 0 3px rgba(195,155,55,.12),0 0 14px rgba(195,155,55,.1),inset 0 0 22px rgba(0,0,0,.28);
   display:flex;align-items:center;justify-content:center;
-  transition:border-color .25s,box-shadow .25s;
+  transition:border-color .3s,box-shadow .3s;
 }
+/* inner concentric ring — permanent felt marking */
+.bj2betring::before{content:"";position:absolute;inset:7px;border-radius:50%;
+  border:1px solid rgba(195,155,55,.3);pointer-events:none;transition:border-color .3s}
 .bj2betring.has-chips{
-  border-color:rgba(245,200,66,.8);border-style:solid;
-  box-shadow:0 0 0 5px rgba(245,200,66,.1),0 0 22px rgba(245,200,66,.2),inset 0 0 22px rgba(0,0,0,.22);
+  border-color:rgba(245,200,66,.95);
+  box-shadow:0 0 0 3px rgba(245,200,66,.15),0 0 24px rgba(245,200,66,.3),inset 0 0 22px rgba(0,0,0,.22);
 }
+.bj2betring.has-chips::before{border-color:rgba(245,200,66,.5)}
 .bj2br-stk{position:relative;width:50px;height:50px}
 .bj2br-lbl{
   font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
@@ -1015,6 +1069,7 @@ ORIGINALS['originals-blackjack']={
         </div>
         <div class="bj2msg" id="bj2Msg">Place a bet and deal</div>
         <div class="bj2fl"  id="bj2Fl"></div>
+        <div class="bj2rail"></div>
         <div class="bj2ins" id="bj2Ins" hidden>
           <strong>🛡 Insurance?</strong>
           <p>Dealer shows Ace. Side bet costs ½ wager<br>— pays 2:1 if dealer has Blackjack.</p>
