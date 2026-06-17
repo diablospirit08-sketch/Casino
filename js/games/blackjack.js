@@ -222,6 +222,7 @@ ORIGINALS['originals-blackjack']={
 
   /* ── chip helpers ── */
   _chipCol(v){
+    if(v>=500)return{bg:'#c9a227',label:'$500'};
     if(v>=100)return{bg:'#c0392b',label:'$100'};
     if(v>=50) return{bg:'#8e44ad',label:'$50'};
     if(v>=25) return{bg:'#1e8449',label:'$25'};
