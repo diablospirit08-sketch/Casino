@@ -222,13 +222,11 @@ ORIGINALS['originals-blackjack']={
 
   /* ── chip helpers ── */
   _drawChipCanvas(val,SIZE){
-    const PAD=6,RENDER=120;
-    const inner=makeChipCanvas(Math.max(25,val),RENDER);
+    const PAD=6;
+    const inner=makeChipCanvas(Math.max(25,val),120);
     const cv=document.createElement('canvas');
-    const dpr=Math.min(window.devicePixelRatio||2,3);
-    cv.width=(SIZE+PAD*2)*dpr;cv.height=(SIZE+PAD*2)*dpr;
-    cv.style.width=(SIZE+PAD*2)+'px';cv.style.height=(SIZE+PAD*2)+'px';
-    const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+    cv.width=SIZE+PAD*2;cv.height=SIZE+PAD*2;
+    const ctx=cv.getContext('2d');
     ctx.shadowColor='rgba(0,0,0,.65)';ctx.shadowBlur=8;ctx.shadowOffsetY=3;
     ctx.drawImage(inner,PAD,PAD,SIZE,SIZE);
     ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
