@@ -191,28 +191,28 @@ document.addEventListener('click',()=>{
 /* ---------- nav rail ---------- */
 /* cat: rail item activates the matching category chip; items without one scroll to their lobby section */
 const railItems = [
-  {l:'Lobby', t:'sec-top', cat:'lobby', svg:'<path class="fl" d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1v-9.5Z"/>'},
-  {l:'Originals', t:'sec-originals', cat:'originals', svg:'<rect class="fl" x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle class="pip" cx="8.6" cy="8.6" r="1.25" fill="currentColor" stroke="none"/><circle class="pip" cx="15.4" cy="8.6" r="1.25" fill="currentColor" stroke="none"/><circle class="pip" cx="12" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle class="pip" cx="8.6" cy="15.4" r="1.25" fill="currentColor" stroke="none"/><circle class="pip" cx="15.4" cy="15.4" r="1.25" fill="currentColor" stroke="none"/>'},
-  {l:'Slots', t:'sec-slots', cat:'slots', svg:'<path d="M7.2 12.5C7.6 8.5 9.8 5.2 13.5 3.5"/><path d="M16.6 12.8c-1.2-3.3-1.7-6.4-3.1-9.3"/><path d="M13.5 3.5c1.6-.6 3.3-.7 4.9-.2-1 1.3-2.6 2-4.4 2.1"/><circle class="fl" cx="7" cy="15.8" r="3.4"/><circle class="fl" cx="16.2" cy="16.4" r="3.4"/>'},
-  {l:'Hot Picks', t:'sec-hot', svg:'<path class="fl" d="M12 3c1.8 3.4-2.4 4.6-1.1 8.2.8 2.3-.7 3.3-1.7 3.4 3.3 3 9.3.9 9.3-3.6 0-3.5-3.5-4.4-2.6-8-1.9.8-2.8 2-3.9 0Z"/><path d="M7.5 9.5c-1.6 1.5-2.5 3.3-2.5 5.2 0 1.6.6 3 1.7 4"/>'},
-  {l:'Live Casino', t:'sec-live', cat:'live', svg:'<circle cx="12" cy="12" r="8.5"/><circle class="fl" cx="12" cy="12" r="2.6"/><path d="M12 3.5v6M12 14.6v5.9M3.5 12h6M14.6 12h5.9"/>'},
-  {l:'Game Shows', t:'sec-shows', cat:'shows', svg:'<rect class="fl" x="9.3" y="2.8" width="5.4" height="10" rx="2.7"/><path d="M6 11a6 6 0 0 0 12 0"/><path d="M12 17v4M9 21h6"/>'},
-  {l:'New Arrivals', t:'sec-new', cat:'new', svg:'<path class="fl" d="M11 4 12.6 9.4 18 11l-5.4 1.6L11 18l-1.6-5.4L4 11l5.4-1.6L11 4Z"/><path d="M18.5 16.5v4M16.5 18.5h4"/>'},
-  {l:'VIP Club', t:'sec-vip', svg:'<path class="fl" d="M12 3l2.5 6H21l-5 4 2 7-6-4.5L6 20l2-7-5-4h6.5L12 3Z"/>'},
-  {l:'All Bets', t:'sec-bets', svg:'<ellipse class="fl" cx="12" cy="6.5" rx="7" ry="3"/><path d="M5 6.5v5.5c0 1.65 3.13 3 7 3s7-1.35 7-3V6.5"/><path d="M5 12v5.5c0 1.65 3.13 3 7 3s7-1.35 7-3V12"/>'},
+  {l:'Lobby',        t:'sec-top',       cat:'lobby',     em:'🏛️'},
+  {l:'Originals',    t:'sec-originals', cat:'originals', em:'🎲'},
+  {l:'Slots',        t:'sec-slots',     cat:'slots',     em:'🎰'},
+  {l:'Hot Picks',    t:'sec-hot',                        em:'🌶️'},
+  {l:'Live Casino',  t:'sec-live',      cat:'live',      em:'🃏'},
+  {l:'Game Shows',   t:'sec-shows',     cat:'shows',     em:'🎤'},
+  {l:'New Arrivals', t:'sec-new',       cat:'new',       em:'🎁'},
+  {l:'VIP Club',     t:'sec-vip',                        em:'⭐'},
+  {l:'All Bets',     t:'sec-bets',                       em:'💰'},
 ];
 document.getElementById('railNav').innerHTML = railItems.map((r,i)=>`
   <a href="#${r.t}" data-target="${r.t}" ${r.cat?`data-cat="${r.cat}"`:''} title="${r.l}" class="${i===0?'active':''}">
-    <span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${r.svg}</svg></span><span class="lbl">${r.l}</span></a>
+    <span class="it">${r.em}</span><span class="lbl">${r.l}</span></a>
   ${i===2||i===5?'<span class="sep"></span>':''}
 `).join('')+`
   <div class="rail-foot">
     <span class="sep"></span>
     <a href="#" id="railChat" title="Live support">
-      <span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H4l2-3a8 8 0 1 1 15-5Z"/></svg></span><span class="lbl">Support</span></a>
+      <span class="it">🎧</span><span class="lbl">Support</span></a>
     <span class="rail-lang" id="railLang">
       <a href="#" id="langBtn" title="Language" aria-haspopup="true">
-        <span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.3 4 5.2 4 8.5s-1.4 6.2-4 8.5c-2.6-2.3-4-5.2-4-8.5s1.4-6.2 4-8.5Z"/></svg></span><span class="lbl" id="langLbl">English</span></a>
+        <span class="it">🌍</span><span class="lbl" id="langLbl">English</span></a>
       <div class="hdr-menu lang-menu" id="langMenu"></div>
     </span>
   </div>
@@ -230,8 +230,6 @@ function movePill(a,instant){
   pill.style.top=a.offsetTop+'px';
   if(!_rm)pill.animate([{transform:'scaleY(1)'},{transform:'scaleY(1.13)',offset:.42},{transform:'scaleY(1)'}],{duration:240,easing:'ease-in-out'});
 }
-/* uniform draw-in speed regardless of true path length */
-document.querySelectorAll('#railNav svg :is(path,circle,rect,ellipse)').forEach(el=>el.setAttribute('pathLength','100'));
 
 /* ---------- rail collapse toggle ---------- */
 const LS_RAIL='volt-rail';
