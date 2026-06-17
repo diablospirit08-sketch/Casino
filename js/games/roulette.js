@@ -23,7 +23,7 @@ ORIGINALS['originals-roulette']={
     engFields.innerHTML=`
       <div class="gv-field"><label>Chip</label>
         <div class="rl-chips" id="rlChips">
-          ${[25,50,100,500,1000].map((v,i)=>`<button class="rl-chip${i===0?' active':''}" data-v="${v}"></button>`).join('')}
+          ${[25,50,100,500].map((v,i)=>`<button class="rl-chip${i===0?' active':''}" data-v="${v}"></button>`).join('')}
         </div>
       </div>
       <div class="gv-field">

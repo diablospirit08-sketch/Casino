@@ -963,7 +963,6 @@ ORIGINALS['originals-blackjack']={
           <button class="bj2traychip" data-v="50"></button>
           <button class="bj2traychip" data-v="100"></button>
           <button class="bj2traychip" data-v="500"></button>
-          <button class="bj2traychip" data-v="1000"></button>
         </div>
         <div class="bj2tray-bar">
           <button class="bj2tray-clr" id="bj2TrayClr">Clear</button>
