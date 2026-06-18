@@ -10,6 +10,7 @@ ORIGINALS['originals-roulette']={
   _nbCount:2, _autoRunning:false, _racetrkVisible:true, _fast:false, _muted:false,
   _sessWag:0, _sessProf:0, _sessWins:0, _sessLoss:0,
   _idleRunning:false, _idleRaf:null,
+  _chipBufRaw:null, _chipBuf:null,
 
   WHEEL:[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26],
   RED:new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]),
@@ -45,7 +46,7 @@ ORIGINALS['originals-roulette']={
     s.textContent=this._css();
     document.querySelector('.gv-panel').classList.add('rl-panel-mode');
     this._sessWag=0;this._sessProf=0;this._sessWins=0;this._sessLoss=0;
-    this._loadBallSnd();
+    this._loadBallSnd();this._loadChipSnd();
 
     engFields.innerHTML=`
 <div class="rl-tabs">
@@ -719,6 +720,11 @@ ${brushes}
     fetch('sounds/roulette/mixkit-casino-roulette-ball-1987.wav')
       .then(r=>r.arrayBuffer()).then(ab=>{this._ballBufRaw=ab;}).catch(()=>{});
   },
+  _loadChipSnd(){
+    this._chipBuf=null;this._chipBufRaw=null;
+    fetch('sounds/chips%20(ID%200942)_com.mp3')
+      .then(r=>r.arrayBuffer()).then(ab=>{this._chipBufRaw=ab;}).catch(()=>{});
+  },
   _sndSpin(dur){
     if(this._muted)return;
     try{
@@ -836,6 +842,19 @@ ${brushes}
     if(this._muted)return;
     try{
       const ac=this._getAC();
+      if(this._chipBufRaw&&!this._chipBuf){
+        ac.decodeAudioData(this._chipBufRaw.slice(0)).then(buf=>{this._chipBuf=buf;}).catch(()=>{});
+      }
+      if(this._chipBuf){
+        const src=ac.createBufferSource();
+        const gain=ac.createGain();
+        src.buffer=this._chipBuf;
+        gain.gain.setValueAtTime(0.55,ac.currentTime);
+        src.connect(gain);gain.connect(ac.destination);
+        src.start();
+        return;
+      }
+      /* synth fallback */
       const osc=ac.createOscillator(),gain=ac.createGain();
       osc.type='sine';
       osc.frequency.setValueAtTime(560,ac.currentTime);
