@@ -471,6 +471,7 @@ ORIGINALS['originals-roulette']={
     const totalC=this.bets.reduce((s,b)=>s+b.amount,0);
     if(totalC<=0)return false;
     if(authed&&totalC>w.amt+1e-9)return false;
+    this._removeDolly();
     this.spinning=true;lockBet(true);gvBetBtn.disabled=true;gvBetBtn.textContent='Spinning…';
     let res=null,spinResult=null;
     if(authed){
@@ -519,7 +520,6 @@ ORIGINALS['originals-roulette']={
     this._lastBets=this.bets.map(b=>({...b}));
     this.bets=[];this._undoStack=[];
     this._renderBets();this._syncInfo();
-    this._removeDolly();
     if(rlRes)rlRes.className='rl-res';
     lockBet(false);this._syncBtn();
   },
