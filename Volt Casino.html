@@ -127,7 +127,7 @@
   .rail{position:fixed;left:0;top:62px;bottom:0;width:var(--rail);background:var(--bg-2);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px 10px;gap:2px;z-index:60;overflow-y:auto;overflow-x:hidden;transition:width .2s ease}
   .rail::-webkit-scrollbar{display:none}
   .rail a{position:relative;z-index:1;display:flex;align-items:center;gap:11px;height:48px;flex:none;padding:0 4px;border-radius:10px;color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;transition:color .16s}
-  .rail-pill{position:absolute;pointer-events:none;z-index:0;border-radius:10px;background:rgba(65,240,164,.07);border:1px solid rgba(65,240,164,.28);box-shadow:inset 0 1px 0 rgba(65,240,164,.1),0 0 14px -6px rgba(65,240,164,.25);transition:top .22s cubic-bezier(.34,1.15,.64,1),left .15s ease,width .15s ease}
+  .rail-pill{display:none}
   .rail a .it{width:32px;height:32px;flex:none;border-radius:8px;display:grid;place-items:center;
     background:transparent;border:none;transition:.15s;user-select:none}
   .it svg{width:20px;height:20px;color:#6b82a0;transition:color .15s,transform .15s}
