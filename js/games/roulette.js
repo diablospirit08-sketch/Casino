@@ -61,8 +61,6 @@ ORIGINALS['originals-roulette']={
   </div>
   <div class="rl-actions">
     <button class="rl-act" id="rlUndo">↩<span>UNDO</span></button>
-    <button class="rl-act" id="rlDouble">×2<span>DOUBLE</span></button>
-    <button class="rl-act" id="rlHalf">½<span>HALF</span></button>
     <button class="rl-act" id="rlClear">✕<span>CLEAR</span></button>
   </div>
   <div class="rl-toggle-row">
@@ -202,8 +200,8 @@ ORIGINALS['originals-roulette']={
 
     /* action buttons */
     document.getElementById('rlUndo').addEventListener('click',()=>{if(!this.spinning)this._doUndo();});
-    document.getElementById('rlDouble').addEventListener('click',()=>{if(!this.spinning)this._doDouble();});
-    document.getElementById('rlHalf').addEventListener('click',()=>{if(!this.spinning)this._doHalf();});
+    document.getElementById('gvDouble').addEventListener('click',()=>{if(!this.spinning)this._doDouble();});
+    document.getElementById('gvHalf').addEventListener('click',()=>{if(!this.spinning)this._doHalf();});
     const doClear=()=>{
       if(this.spinning)return;
       this.bets=[];this._undoStack=[];this._renderBets();this._syncInfo();this._syncBtn();
@@ -403,6 +401,11 @@ ORIGINALS['originals-roulette']={
     if(!rlTotal)return;
     rlTotal.textContent=totalF>0?'$'+totalF.toFixed(totalF<10?2:0):'—';
     rlMaxWin.textContent=maxW>0?'$'+maxW.toFixed(maxW<10?2:0):'—';
+    const w=curW();const rate=(w&&w.rate)||1;
+    const gvBet=document.getElementById('gvBet');
+    const gvBetFiat=document.getElementById('gvBetFiat');
+    if(gvBet)gvBet.value=totalF>0?(totalF/rate).toFixed(4):'0.0000';
+    if(gvBetFiat)gvBetFiat.textContent=totalF>0?'$'+totalF.toFixed(2):'$0.00';
   },
 
   _syncBtn(){
@@ -982,10 +985,11 @@ ${brushes}
   _css(){return`
 /* hide redundant panel fields when roulette is active */
 .rl-panel-mode #gvTabs,
-.rl-panel-mode .gv-field:has(#gvBet),
 .rl-panel-mode #gvMultField,
 .rl-panel-mode #gvProfitField,
 .rl-panel-mode #autoPanel{display:none!important}
+.rl-panel-mode #gvBet{pointer-events:none;background:transparent;border:none;padding-left:0;font-weight:700;color:var(--txt)}
+.rl-panel-mode .gv-field:has(#gvBet) label{font-size:10px;letter-spacing:.06em;color:var(--muted-2)}
 /* layout */
 .rl-wrap{display:flex;flex-direction:row;align-items:flex-start;gap:12px;width:100%;padding:12px;
   background:radial-gradient(120% 85% at 50% -5%,#20273A 0%,#161B29 58%,#10141E 100%);
