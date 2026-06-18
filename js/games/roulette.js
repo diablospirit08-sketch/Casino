@@ -91,27 +91,23 @@ ORIGINALS['originals-roulette']={
 
     gvStage.innerHTML=`
 <div class="rl-wrap">
-  <div class="rl-left">
-    <div class="rl-wheel-area">
-      ${this._buildWheelSVG()}
-      <div class="rl-ptr">▼</div>
-      <div class="rl-res" id="rlRes"></div>
-      <div class="rl-nb-label" id="rlNbLabel"></div>
-    </div>
-    <div class="rl-streak" id="rlStreak"></div>
+  <div class="rl-wheel-area">
+    ${this._buildWheelSVG()}
+    <div class="rl-ptr">▼</div>
+    <div class="rl-res" id="rlRes"></div>
+    <div class="rl-nb-label" id="rlNbLabel"></div>
   </div>
-  <div class="rl-right">
-    <div class="rl-limits">
-      <span>MIN <b>$1</b></span>
-      <span class="rl-limits-name">European Roulette · 97.3% RTP</span>
-      <span>MAX <b>$500</b></span>
-    </div>
-    <div class="rl-table-wrap">
-      ${this._tableHTML()}
-    </div>
-    <div class="rl-rt-wrap" id="rlRtWrap" style="display:none">
-      ${this._buildRacetrack()}
-    </div>
+  <div class="rl-streak" id="rlStreak"></div>
+  <div class="rl-limits">
+    <span>MIN <b>$1</b></span>
+    <span class="rl-limits-name">European Roulette · 97.3% RTP</span>
+    <span>MAX <b>$500</b></span>
+  </div>
+  <div class="rl-table-wrap">
+    ${this._tableHTML()}
+  </div>
+  <div class="rl-rt-wrap" id="rlRtWrap" style="display:none">
+    ${this._buildRacetrack()}
   </div>
 </div>`;
 
@@ -189,9 +185,9 @@ ORIGINALS['originals-roulette']={
     });
 
     /* racetrack number clicks */
-    document.getElementById('rlRtSvg').addEventListener('click',e=>{
+    document.getElementById('rlRtEl').addEventListener('click',e=>{
       if(this.spinning)return;
-      const t=e.target.closest('[data-n]');if(!t)return;
+      const t=e.target.closest('.rl-rt-n[data-n]');if(!t)return;
       this._neighborBet(+t.dataset.n);
     });
 
@@ -279,10 +275,8 @@ ORIGINALS['originals-roulette']={
     }
     /* highlight active racetrack numbers */
     const active=new Set(this.bets.flatMap(b=>b.numbers));
-    document.querySelectorAll('#rlRtSvg [data-n]').forEach(el=>{
-      const n=+el.dataset.n;
-      const circle=el.querySelector('circle');
-      if(circle)circle.setAttribute('stroke',active.has(n)?'#E6BE55':'#2A3148');
+    document.querySelectorAll('#rlRtEl .rl-rt-n[data-n]').forEach(el=>{
+      el.classList.toggle('rl-rt-active',active.has(+el.dataset.n));
     });
   },
 
@@ -482,7 +476,7 @@ ORIGINALS['originals-roulette']={
     for(let i=0;i<5;i++){
       turret+=`<g transform="rotate(${i*72} 250 250)"><polygon points="246.5,250 253.5,250 251,150 249,150" fill="url(#rlGoldArm)" stroke="#7E5E1C" stroke-width="0.4"/><line x1="250" y1="246" x2="250" y2="153" stroke="#FFF4CE" stroke-opacity="0.5" stroke-width="0.8"/><circle cx="250" cy="150" r="7" fill="url(#rlGoldKnob)" stroke="#7E5E1C" stroke-width="0.6"/></g>`;
     }
-    return`<svg id="rlWheelSvg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:270px;filter:drop-shadow(0 16px 40px rgba(0,0,0,.85))">
+    return`<svg id="rlWheelSvg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:360px;filter:drop-shadow(0 20px 52px rgba(0,0,0,.85))">
 <defs>
 <radialGradient id="rlWoodGrad" cx="50%" cy="42%" r="60%"><stop offset="0%" stop-color="#8A552E"/><stop offset="60%" stop-color="#5C3318"/><stop offset="100%" stop-color="#2E1809"/></radialGradient>
 <radialGradient id="rlWoodInner" cx="50%" cy="40%" r="58%"><stop offset="0%" stop-color="#7A4824"/><stop offset="100%" stop-color="#3A2010"/></radialGradient>
@@ -523,37 +517,28 @@ ${brushes}
   },
 
   _buildRacetrack(){
-    const N=37,cx=350,cy=40,rx=295,ry=26;
-    const VOISINS=new Set([0,2,3,4,7,12,15,18,19,21,22,25,26,28,29,32,35]);
-    const TIERS=new Set([5,8,10,11,13,16,23,24,27,30,33,36]);
-    const ZERO_SP=new Set([0,3,12,15,26,32,35]);
-    const secColor=n=>{
-      if(ZERO_SP.has(n))return'#1A6B3C';
-      if(VOISINS.has(n))return'#7A5A0A';
-      if(TIERS.has(n))return'#0D4A8A';
-      return'#7A1A4A'; /* orphelins */
-    };
-    let nums='';
-    for(let i=0;i<N;i++){
-      const n=this.WHEEL[i];
-      const angle=Math.PI+(i/N)*2*Math.PI;
-      const x=(cx+rx*Math.cos(angle)).toFixed(1);
-      const y=(cy+ry*Math.sin(angle)).toFixed(1);
-      const fill=n===0?'#1E7A3C':(this.RED.has(n)?'#C81E29':'#1A1F2E');
-      nums+=`<g data-n="${n}" style="cursor:pointer">
-        <circle cx="${x}" cy="${y}" r="11" fill="${fill}" stroke="#2A3148" stroke-width="1.2"/>
-        <text x="${x}" y="${y}" fill="#fff" font-size="7.5" font-weight="700" font-family="Sora,Inter,system-ui,sans-serif" text-anchor="middle" dominant-baseline="central">${n}</text>
-      </g>`;
-    }
-    return`<svg id="rlRtSvg" viewBox="0 0 700 80" xmlns="http://www.w3.org/2000/svg" style="width:100%">
-  <rect x="4" y="4" width="692" height="72" rx="36" fill="#0C1220" stroke="#2A3148" stroke-width="1.5"/>
-  ${nums}
-</svg>
-<div class="rl-rt-btns">
-  <button class="rl-rt-btn rl-voisins" data-sector="voisins">VOISINS <span>17</span></button>
-  <button class="rl-rt-btn rl-tiers" data-sector="tiers">TIERS <span>12</span></button>
-  <button class="rl-rt-btn rl-orphelins" data-sector="orphelins">ORPHELINS <span>8</span></button>
-  <button class="rl-rt-btn rl-zero" data-sector="zero">ZERO <span>6</span></button>
+    const W=this.WHEEL,R=this.RED;
+    const n=(v)=>{const cl=v===0?'g':(R.has(v)?'r':'b');return`<div class="rl-rt-n ${cl}" data-n="${v}">${v}</div>`;};
+    /* wheel order layout:
+       left cap  : W[18]=10, W[17]=23
+       top L→R   : W[19..35] = 5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3
+       right cap : W[36]=26, W[0]=0
+       bottom L→R: reverse(W[1..16]) = 8,30,11,36,13,27,6,34,17,25,2,21,4,19,15,32 */
+    const top=W.slice(19,36);
+    const bot=[...W.slice(1,17)].reverse();
+    return`<div class="rl-rt" id="rlRtEl">
+  <div class="rl-rt-end">${n(W[18])}${n(W[17])}</div>
+  <div class="rl-rt-body">
+    <div class="rl-rt-row">${top.map(v=>n(v)).join('')}</div>
+    <div class="rl-rt-secs">
+      <div class="rl-rt-sec rl-sec-tiers" data-sector="tiers">TIERS</div>
+      <div class="rl-rt-sec rl-sec-orphelins" data-sector="orphelins">ORPHELINS</div>
+      <div class="rl-rt-sec rl-sec-voisins" data-sector="voisins">VOISINS</div>
+      <div class="rl-rt-sec rl-sec-zero" data-sector="zero">ZERO</div>
+    </div>
+    <div class="rl-rt-row">${bot.map(v=>n(v)).join('')}</div>
+  </div>
+  <div class="rl-rt-end">${n(W[36])}${n(W[0])}</div>
 </div>`;
   },
 
@@ -720,25 +705,23 @@ ${brushes}
 
   _css(){return`
 /* layout */
-.rl-wrap{display:flex;flex-direction:row;align-items:stretch;gap:14px;width:100%;padding:12px;
+.rl-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;padding:14px 16px 12px;
   background:radial-gradient(120% 85% at 50% -5%,#20273A 0%,#161B29 58%,#10141E 100%);
   border-radius:16px;box-sizing:border-box}
-.rl-left{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;width:272px}
-.rl-right{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
 /* wheel */
 .rl-wheel-area{position:relative;display:flex;align-items:center;justify-content:center;width:100%}
 .rl-ptr{position:absolute;top:2px;left:50%;transform:translateX(-50%);
-  color:#E6BE55;font-size:16px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.9));pointer-events:none;z-index:2}
-.rl-res{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);
-  width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:15px;font-weight:900;color:#fff;opacity:0;transition:opacity .4s .1s;
+  color:#E6BE55;font-size:18px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.9));pointer-events:none;z-index:2}
+.rl-res{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
+  width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:900;color:#fff;opacity:0;transition:opacity .4s .1s;
   box-shadow:0 4px 20px rgba(0,0,0,.8);pointer-events:none;z-index:2}
 .rl-res.show{opacity:1}
 .rl-res.green{background:#1E7A3C}
 .rl-res.red{background:#C81E29}
 .rl-res.black{background:#14181F;border:1.5px solid rgba(255,255,255,.2)}
 /* streak */
-.rl-streak{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;padding:0 2px;width:100%}
+.rl-streak{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;padding:0 4px;width:100%;max-width:680px}
 .rl-sdot{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:6.5px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.5)}
 .rl-sdot.green{background:#1E7A3C}
@@ -802,7 +785,9 @@ ${brushes}
 .rl-limits b{color:rgba(255,255,255,.6)}
 .rl-limits-name{font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.03em}
 /* table */
-.rl-table-wrap{width:100%;display:flex;flex-direction:column;gap:4px}
+.rl-table-wrap{width:100%;max-width:680px;display:flex;flex-direction:column;gap:4px}
+.rl-limits{width:100%;max-width:680px}
+.rl-rt-wrap{width:100%;max-width:680px;display:flex;flex-direction:column;gap:5px}
 .rl-tbl{display:flex;flex-direction:column;gap:5px}
 .rl-num-section{display:flex;gap:5px;align-items:stretch}
 .rl-zero-col{flex-shrink:0;width:34px;align-self:stretch;display:flex}
@@ -870,21 +855,37 @@ ${brushes}
   content:'';position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);
   border:3px solid transparent;border-top-color:#E6BE55;pointer-events:none;z-index:200}
 /* racetrack */
-.rl-rt-wrap{display:flex;flex-direction:column;gap:5px}
-.rl-rt-btns{display:flex;gap:5px}
-.rl-rt-btn{flex:1;height:26px;border-radius:6px;border:1px solid;
-  font-size:9px;font-weight:700;letter-spacing:.05em;cursor:pointer;font-family:inherit;transition:all .15s}
-.rl-rt-btn span{opacity:.6;margin-left:3px}
-.rl-voisins{background:rgba(184,134,11,.1);border-color:rgba(184,134,11,.3);color:#C8960F}
-.rl-voisins:hover{background:rgba(184,134,11,.22);border-color:#B8860B}
-.rl-tiers{background:rgba(21,101,192,.1);border-color:rgba(21,101,192,.3);color:#4A90D9}
-.rl-tiers:hover{background:rgba(21,101,192,.22);border-color:#1565C0}
-.rl-orphelins{background:rgba(173,26,87,.1);border-color:rgba(173,26,87,.3);color:#D94A8A}
-.rl-orphelins:hover{background:rgba(173,26,87,.22);border-color:#AD1A57}
-.rl-zero{background:rgba(27,94,32,.12);border-color:rgba(27,94,32,.4);color:#4CAF66}
-.rl-zero:hover{background:rgba(27,94,32,.25);border-color:#1B5E20}
-/* racetrack numbers hover */
-#rlRtSvg [data-n]:hover circle{stroke:#E6BE55!important;stroke-width:2!important}
+.rl-rt-wrap{width:100%;max-width:680px}
+.rl-rt{display:flex;align-items:stretch;background:#0D1322;border-radius:44px;
+  border:1.5px solid #252D3D;padding:5px 0;gap:0;overflow:hidden}
+.rl-rt-end{display:flex;flex-direction:column;justify-content:space-around;align-items:center;
+  padding:0 8px;min-width:42px;gap:4px}
+.rl-rt-body{flex:1;display:flex;flex-direction:column;
+  border-left:1px solid #252D3D;border-right:1px solid #252D3D}
+.rl-rt-row{display:flex;justify-content:space-between;padding:4px 4px;gap:2px}
+.rl-rt-secs{display:flex;border-top:1px solid #252D3D;border-bottom:1px solid #252D3D;min-height:28px}
+.rl-rt-sec{display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;letter-spacing:.07em;cursor:pointer;
+  border-right:1px solid #252D3D;transition:all .14s;padding:0 4px}
+.rl-rt-sec:last-child{border-right:none}
+.rl-sec-tiers{flex:8;color:#4A90D9}
+.rl-sec-tiers:hover{background:rgba(21,101,192,.18);color:#7AB8F0}
+.rl-sec-orphelins{flex:7;color:#D94A8A}
+.rl-sec-orphelins:hover{background:rgba(173,26,87,.18);color:#EC7AB8}
+.rl-sec-voisins{flex:11;color:#C8960F}
+.rl-sec-voisins:hover{background:rgba(184,134,11,.18);color:#E0B830}
+.rl-sec-zero{flex:5;color:#4CAF66}
+.rl-sec-zero:hover{background:rgba(27,94,32,.2);color:#6DD98A}
+/* racetrack number cells */
+.rl-rt-n{width:26px;height:26px;border-radius:5px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;cursor:pointer;user-select:none;
+  transition:transform .1s,filter .1s}
+.rl-rt-n.r{background:#C81E29;color:#fff}
+.rl-rt-n.b{background:#181F2E;color:#fff;border:1px solid #2A3148}
+.rl-rt-n.g{background:#1E7A3C;color:#fff}
+.rl-rt-n:hover{transform:scale(1.18);filter:brightness(1.35);z-index:2}
+.rl-rt-n.rl-rt-active{box-shadow:0 0 0 2px #E6BE55}
 /* neighbor label */
 .rl-nb-label{position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);
   background:#0C1220;border:1px solid #E6BE55;color:#E6BE55;
