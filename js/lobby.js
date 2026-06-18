@@ -193,13 +193,13 @@ document.addEventListener('click',()=>{
 /* sprite: 4-col × 4-row grid. positions: col=(0|33.33|66.67|100)% row=(0|33.33|66.67|100)% */
 const railItems = [
   {l:'Lobby',        t:'sec-top',       cat:'lobby',     sp:'0% 0%'},        /* dealer */
-  {l:'Originals',    t:'sec-originals', cat:'originals', sp:'100% 66.67%'},  /* roulette wheel */
+  {l:'Originals',    t:'sec-originals', cat:'originals', sp:'66.67% 0%'},    /* playing cards */
   {l:'Slots',        t:'sec-slots',     cat:'slots',     sp:'33.33% 0%'},    /* 777 */
-  {l:'Hot Picks',    t:'sec-hot',                        sp:'100% 0%'},      /* target/arrow */
-  {l:'Live Casino',  t:'sec-live',      cat:'live',      sp:'0% 33.33%'},    /* group */
-  {l:'Game Shows',   t:'sec-shows',     cat:'shows',     sp:'66.67% 66.67%'},/* hat */
-  {l:'New Arrivals', t:'sec-new',       cat:'new',       sp:'33.33% 100%'},  /* horseshoe */
-  {l:'VIP Club',     t:'sec-vip',                        sp:'33.33% 66.67%'},/* diamond */
+  {l:'Hot Picks',    t:'sec-hot',                        sp:'66.67% 100%'},  /* dollar target */
+  {l:'Live Casino',  t:'sec-live',      cat:'live',      sp:'0% 66.67%'},    /* dealer vest */
+  {l:'Game Shows',   t:'sec-shows',     cat:'shows',     sp:'66.67% 33.33%'},/* champagne glass */
+  {l:'New Arrivals', t:'sec-new',       cat:'new',       sp:'0% 100%'},      /* 8-ball */
+  {l:'VIP Club',     t:'sec-vip',                        sp:'100% 100%'},    /* bow tie */
   {l:'All Bets',     t:'sec-bets',                       sp:'33.33% 33.33%'},/* coin */
 ];
 function _sp(pos){return `<span class="it"><span class="rail-sp" style="background-position:${pos}"></span></span>`;}

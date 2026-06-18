@@ -105,7 +105,7 @@ function openAvPick() {
 }
 function closeAvPick() { $id('avatarPickOverlay').classList.remove('open'); }
 
-$id('chooseAvatarBtn').addEventListener('click', openAvPick);
+if($id('chooseAvatarBtn'))$id('chooseAvatarBtn').addEventListener('click', openAvPick);
 $id('avatarPickClose').addEventListener('click', closeAvPick);
 $id('avatarPickOverlay').addEventListener('click', e => { if (e.target === $id('avatarPickOverlay')) closeAvPick(); });
 document.addEventListener('keydown', e => {
