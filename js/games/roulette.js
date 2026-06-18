@@ -292,8 +292,8 @@ ORIGINALS['originals-roulette']={
     if(totalSoFar+chipCrypto>maxAmt+1e-9)return;
     const fullKey=src==='rt'?'rt:'+key:key;
     const ex=this.bets.find(b=>b.key===fullKey);
-    if(ex){ex.amount+=chipCrypto;ex.fiat+=this._chipVal;}
-    else this.bets.push({type,key:fullKey,numbers,amount:chipCrypto,fiat:this._chipVal,src});
+    if(ex){ex.amount+=chipCrypto;ex.fiat+=this._chipVal;ex.clicks=(ex.clicks||1)+1;}
+    else this.bets.push({type,key:fullKey,numbers,amount:chipCrypto,fiat:this._chipVal,src,clicks:1});
     this._undoStack.push({key:fullKey,fiat:this._chipVal,crypto:chipCrypto});
     this._sndChip();
     this._renderBets();this._syncInfo();this._syncBtn();
@@ -304,7 +304,7 @@ ORIGINALS['originals-roulette']={
     const {key,fiat,crypto}=this._undoStack.pop();
     const ex=this.bets.find(b=>b.key===key);
     if(ex){
-      ex.fiat-=fiat;ex.amount-=crypto;
+      ex.fiat-=fiat;ex.amount-=crypto;ex.clicks=Math.max(1,(ex.clicks||1)-1);
       if(ex.fiat<0.001)this.bets=this.bets.filter(b=>b.key!==key);
     }
     this._renderBets();this._syncInfo();this._syncBtn();
@@ -359,13 +359,11 @@ ORIGINALS['originals-roulette']={
   _renderBets(){
     document.querySelectorAll('.rl-bet-chip,.rl-rt-chip').forEach(e=>e.remove());
 
-    const stackN=fiat=>fiat>=50?4:fiat>=10?3:fiat>=5?2:1;
-
     /* table chips — stacked canvases, each offset 3px upward */
     for(const bet of this.bets){
       if(bet.src==='rt')continue;
       const cell=document.querySelector(`[data-bet-key="${bet.key}"]`);if(!cell)continue;
-      const n=stackN(bet.fiat);
+      const n=Math.min(4,bet.clicks||1);
       for(let i=0;i<n;i++){
         const cv=makeChipCanvas(Math.max(1,Math.round(bet.fiat)),40);
         cv.className='rl-bet-chip';
