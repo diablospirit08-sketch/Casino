@@ -448,7 +448,7 @@
   .help{display:flex;flex-direction:column;align-items:center;gap:14px;padding:34px 0 10px;text-align:center}
   .help h3{font-size:16px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
   .rg-strip{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:20px 0;border-bottom:1px solid var(--line)}
-  .rg-badge{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;transition:.15s;white-space:nowrap;flex:none}
+  .rg-badge{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;transition:.15s;white-space:nowrap;flex:none;cursor:pointer}
   .rg-badge:hover{border-color:rgba(255,255,255,.3);color:var(--txt)}
   .rg-badge svg{flex:none}
   .rg-rg{flex-direction:column;align-items:center;gap:5px;padding:8px 14px;text-align:center;line-height:1.25;font-size:11px;font-weight:700;letter-spacing:.01em}
@@ -456,13 +456,13 @@
   .rg-gt{flex-direction:column;gap:1px;padding:6px 12px;font-size:11px;font-weight:400;letter-spacing:.01em;line-height:1.3}
   .rg-gt b{font-size:12px;font-weight:700;color:var(--txt);letter-spacing:.02em}
   .rg-bga{gap:6px;font-size:12px;font-weight:700}
-  .rg-valid{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:7px 12px;flex:none;text-decoration:none;transition:.15s}
+  .rg-valid{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.13);border-radius:8px;padding:7px 12px;flex:none;text-decoration:none;transition:.15s;cursor:pointer}
   .rg-valid:hover{border-color:rgba(255,255,255,.3)}
   .rg-valid-circle{width:32px;height:32px;border-radius:50%;border:2px solid #22c55e;display:grid;place-items:center;flex:none}
   .rg-valid-txt{display:flex;flex-direction:column;gap:1px;line-height:1.3}
   .rg-valid-txt b{font-size:11px;font-weight:900;color:#22c55e;letter-spacing:.06em}
   .rg-valid-txt span{font-size:10px;color:var(--muted-2)}
-  .rg-gamecheck{display:inline-flex;align-items:center;gap:10px;border:2px solid #22c55e;border-radius:8px;padding:6px 12px 6px 8px;flex:none;text-decoration:none;transition:.15s}
+  .rg-gamecheck{display:inline-flex;align-items:center;gap:10px;border:2px solid #22c55e;border-radius:8px;padding:6px 12px 6px 8px;flex:none;text-decoration:none;transition:.15s;cursor:pointer}
   .rg-gamecheck:hover{border-color:#4ade80}
   .rg-gamecheck-info{display:flex;flex-direction:column;gap:1px;line-height:1.3}
   .rg-gamecheck-info b{font-size:12px;font-weight:900;color:#22c55e;letter-spacing:.12em}
@@ -1195,12 +1195,12 @@
           BeGambleAware.org
         </a>
         <!-- VALID -->
-        <div class="rg-valid">
+        <a href="https://www.gamecheck.org" target="_blank" rel="noopener" class="rg-valid">
           <div class="rg-valid-circle">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
           </div>
           <div class="rg-valid-txt"><b>VALID</b><span>Click to verify</span></div>
-        </div>
+        </a>
         <!-- GameCheck -->
         <a href="https://www.gamecheck.org" target="_blank" rel="noopener" class="rg-gamecheck">
           <svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
