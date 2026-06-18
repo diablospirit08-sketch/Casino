@@ -11,6 +11,8 @@
    LAN that loads http://<pc-ip>:8080 talks to the cashier at <pc-ip>:8484
    (typeof guard: this file is also evaluated under Node by the tests) */
 var CASHIER=typeof location!=='undefined'?'http://'+location.hostname+':8484':'';
+/* Set window.CASHIER_SECRET to match the CASHIER_SECRET env var on the cashier server. */
+var CASHIER_SECRET=typeof window!=='undefined'&&window.CASHIER_SECRET?window.CASHIER_SECRET:'';
 var DEPLOYMENT_URL='chain/deployment.json';
 var WITHDRAWAL_URL='https://czqqdwmifcqoiyphjqjk.supabase.co/functions/v1/create-withdrawal';
 var LOCAL_CHAIN_ID=31337; /* hardhat; the actual target chain comes from deployment.json */
@@ -65,7 +67,9 @@ var ethW=nativeW;
 
 /* ---------- cashier API ---------- */
 function api(path,body){
-  return fetch(CASHIER+path,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:undefined)
+  var hdrs={'Content-Type':'application/json'};
+  if(CASHIER_SECRET)hdrs['Authorization']='Bearer '+CASHIER_SECRET;
+  return fetch(CASHIER+path,body?{method:'POST',headers:hdrs,body:JSON.stringify(body)}:undefined)
     .then(function(r){return r.json();})
     .then(function(j){if(j.error)throw new Error(j.error);return j;});
 }

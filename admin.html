@@ -606,6 +606,9 @@ document.querySelectorAll('.ctab').forEach(t=>{
   t.addEventListener('click',()=>{document.querySelectorAll('.ctab').forEach(x=>x.classList.remove('active'));t.classList.add('active');});
 });
 
+/* ── HTML escape — always use for DB-sourced values in innerHTML ── */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
 /* ── auth error / login screen ── */
 function showAuthError(msg){
   document.querySelector('.main').innerHTML=`
@@ -713,11 +716,11 @@ async function loadDashboard(){
     dashTbody.innerHTML=enriched.length
       ? enriched.map(b=>`
           <tr>
-            <td><div class="td-user"><div class="u-avatar" style="background:${acol(b._profile?.username||'?')}">${(b._profile?.username||'?')[0].toUpperCase()}</div><div class="u-name">${b._profile?.username||'—'}</div></div></td>
-            <td>${b.game}</td>
-            <td class="amt-neg">${fmtN(b.wager)} ${b.currency}</td>
-            <td><span class="badge-status ${b.outcome==='win'?'active':b.outcome==='push'?'pending':'suspended'}">${b.outcome}</span></td>
-            <td class="${(+b.profit||0)>0?'amt-pos':'amt-neg'}">${(+b.profit||0)>0?'+':''}${fmtN(b.profit)} ${b.currency}</td>
+            <td><div class="td-user"><div class="u-avatar" style="background:${acol(b._profile?.username||'?')}">${esc((b._profile?.username||'?')[0].toUpperCase())}</div><div class="u-name">${esc(b._profile?.username||'—')}</div></div></td>
+            <td>${esc(b.game)}</td>
+            <td class="amt-neg">${fmtN(b.wager)} ${esc(b.currency)}</td>
+            <td><span class="badge-status ${b.outcome==='win'?'active':b.outcome==='push'?'pending':'suspended'}">${esc(b.outcome)}</span></td>
+            <td class="${(+b.profit||0)>0?'amt-pos':'amt-neg'}">${(+b.profit||0)>0?'+':''}${fmtN(b.profit)} ${esc(b.currency)}</td>
           </tr>`).join('')
       : `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No bets yet</td></tr>`;
   }
@@ -775,7 +778,7 @@ function renderUsers(){
     const name=u.username||'—';
     const bal=fmtN(u._wallets.USDT||0);
     return `<tr>
-      <td><div class="td-user"><div class="u-avatar" style="background:${acol(name)}">${name[0].toUpperCase()}</div><div><div class="u-name">${name}</div><div class="u-email">${u.email||'—'}</div></div></div></td>
+      <td><div class="td-user"><div class="u-avatar" style="background:${acol(name)}">${esc(name[0].toUpperCase())}</div><div><div class="u-name">${esc(name)}</div><div class="u-email">${esc(u.email||'—')}</div></div></div></td>
       <td style="font-weight:700">${bal} USDT</td>
       <td style="color:var(--muted)">${fmtN(u._wagered)}</td>
       <td><span class="badge-status ${u.is_admin?'pending':'active'}">${u.is_admin?'Admin':'Active'}</span></td>
@@ -807,17 +810,17 @@ function renderTx(){
   const rows=_txFilter==='all'?_txs:_txFilter==='pending'?_txs.filter(t=>t.status==='pending'):_txs.filter(t=>t.type===_txFilter);
   $('txTbody').innerHTML=rows.map(t=>`
     <tr>
-      <td style="font-family:monospace;font-size:11px;color:var(--muted)">${t.id.slice(0,8)}…</td>
-      <td style="font-weight:700">${t._profile?.username||'—'}</td>
-      <td><span class="badge-type ${t.type}">${t.type}</span></td>
-      <td class="${t.type==='deposit'?'amt-pos':'amt-neg'}">${t.type==='deposit'?'+':'-'}${fmtN(t.amount)} ${t.currency}</td>
+      <td style="font-family:monospace;font-size:11px;color:var(--muted)">${esc(t.id.slice(0,8))}…</td>
+      <td style="font-weight:700">${esc(t._profile?.username||'—')}</td>
+      <td><span class="badge-type ${esc(t.type)}">${esc(t.type)}</span></td>
+      <td class="${t.type==='deposit'?'amt-pos':'amt-neg'}">${t.type==='deposit'?'+':'-'}${fmtN(t.amount)} ${esc(t.currency)}</td>
       <td style="color:var(--muted)">—</td>
-      <td><span class="badge-status ${t.status}">${t.status}</span></td>
+      <td><span class="badge-status ${esc(t.status)}">${esc(t.status)}</span></td>
       <td style="color:var(--muted);font-size:12px">${fmtDate(t.created_at)}</td>
       <td><div style="display:flex;gap:6px">
         ${t.status==='pending'
-          ?`<button class="filter-btn" style="padding:4px 10px;font-size:11px;color:var(--mint)" onclick="approveTx('${t.id}')">Approve</button>
-             <button class="filter-btn" style="padding:4px 10px;font-size:11px;color:var(--red)" onclick="rejectTx('${t.id}')">Reject</button>`
+          ?`<button class="filter-btn" style="padding:4px 10px;font-size:11px;color:var(--mint)" onclick="approveTx('${esc(t.id)}')">Approve</button>
+             <button class="filter-btn" style="padding:4px 10px;font-size:11px;color:var(--red)" onclick="rejectTx('${esc(t.id)}')">Reject</button>`
           :`<button class="filter-btn" style="padding:4px 10px;font-size:11px">View</button>`}
       </div></td>
     </tr>`).join('')||`<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">No transactions found</td></tr>`;
@@ -891,13 +894,13 @@ function renderLiveBets(){
     const win=b.outcome==='win',push=b.outcome==='push';
     const t=new Date(b.created_at).toLocaleTimeString('en-US',{hour12:false});
     return `<tr>
-      <td style="font-family:monospace;font-size:12px;color:var(--muted)">${t}</td>
-      <td style="font-weight:700">${b._profile?.username||'—'}</td>
-      <td>${b.game}</td>
-      <td style="color:var(--muted);font-variant-numeric:tabular-nums">${fmtN(b.wager)} ${b.currency}</td>
-      <td style="font-weight:800;color:${win?'var(--mint)':push?'var(--yellow)':'var(--muted)'}">${b.multiplier!=null?b.multiplier+'×':'—'}</td>
-      <td class="${win?'amt-pos':'amt-neg'}">${win?'+':''}${fmtN(b.profit)} ${b.currency}</td>
-      <td><span class="badge-status ${win?'active':push?'pending':'suspended'}">${b.outcome}</span></td>
+      <td style="font-family:monospace;font-size:12px;color:var(--muted)">${esc(t)}</td>
+      <td style="font-weight:700">${esc(b._profile?.username||'—')}</td>
+      <td>${esc(b.game)}</td>
+      <td style="color:var(--muted);font-variant-numeric:tabular-nums">${fmtN(b.wager)} ${esc(b.currency)}</td>
+      <td style="font-weight:800;color:${win?'var(--mint)':push?'var(--yellow)':'var(--muted)'}">${b.multiplier!=null?esc(b.multiplier)+'×':'—'}</td>
+      <td class="${win?'amt-pos':'amt-neg'}">${win?'+':''}${fmtN(b.profit)} ${esc(b.currency)}</td>
+      <td><span class="badge-status ${win?'active':push?'pending':'suspended'}">${esc(b.outcome)}</span></td>
     </tr>`;
   }).join('')||`<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">No bets yet</td></tr>`;
 }
@@ -1064,7 +1067,7 @@ async function initAdmin(){
   }
 
   if(!profile?.is_admin){
-    showAuthError('Your account does not have admin privileges. Run this in Supabase SQL editor:<br><br><code style="font-family:monospace;font-size:12px;background:var(--panel-2);padding:6px 10px;border-radius:6px;display:inline-block">UPDATE profiles SET is_admin=true<br>WHERE email=\''+user.email+'\';</code>');
+    showAuthError('Your account does not have admin privileges. Run this in Supabase SQL editor:<br><br><code style="font-family:monospace;font-size:12px;background:var(--panel-2);padding:6px 10px;border-radius:6px;display:inline-block">UPDATE profiles SET is_admin=true<br>WHERE email=\''+esc(user.email)+'\';</code>');
     return;
   }
 
@@ -1076,7 +1079,7 @@ async function initAdmin(){
   subscribeRealtime();
 }
 
-initAdmin().catch(e=>{ console.error(e); showAuthError('Connection failed: '+e.message); });
+initAdmin().catch(e=>{ console.error(e); showAuthError('Connection failed: '+esc(e.message)); });
 </script>
 </body>
 </html>

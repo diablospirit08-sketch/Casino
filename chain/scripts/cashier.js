@@ -26,6 +26,21 @@ const PORT = 8484;
 const LEDGER_FILE = path.join(__dirname, "..", "ledger.json");
 const VOUCHER_TTL_SECONDS = 3600;
 
+// Auth & CORS — set CASHIER_SECRET and CASHIER_ORIGIN in your environment.
+// chain.js must send: Authorization: Bearer <same secret>
+const CASHIER_SECRET = process.env.CASHIER_SECRET || '';
+const ALLOWED_ORIGIN = process.env.CASHIER_ORIGIN || 'http://localhost:8080';
+
+if (!CASHIER_SECRET) {
+  console.warn('[cashier] WARNING: CASHIER_SECRET is not set — /settle and /withdraw are unprotected. Set it before going live.');
+}
+
+function checkAuth(req) {
+  if (!CASHIER_SECRET) return true;
+  const h = req.headers['authorization'] || '';
+  return h === 'Bearer ' + CASHIER_SECRET;
+}
+
 function loadLedger() {
   if (!fs.existsSync(LEDGER_FILE)) return { lastBlock: 0, balances: {} };
   return JSON.parse(fs.readFileSync(LEDGER_FILE, "utf8"));
@@ -100,9 +115,10 @@ async function main() {
   );
 
   const server = http.createServer(async (req, res) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Vary", "Origin");
     res.setHeader("Content-Type", "application/json");
     if (req.method === "OPTIONS") return res.end();
 
@@ -118,6 +134,7 @@ async function main() {
       }
 
       if (req.method === "POST" && req.url === "/settle") {
+        if (!checkAuth(req)) return fail(401, "unauthorized");
         const { player, delta } = await readBody(req);
         if (!ethers.isAddress(player)) return fail(400, "bad player address");
         const change = BigInt(delta);
@@ -131,6 +148,7 @@ async function main() {
       }
 
       if (req.method === "POST" && req.url === "/withdraw") {
+        if (!checkAuth(req)) return fail(401, "unauthorized");
         const { player, amount } = await readBody(req);
         if (!ethers.isAddress(player)) return fail(400, "bad player address");
         const value = BigInt(amount);

@@ -1,14 +1,14 @@
 /* ── Monte Carlo Poker Club chip renderer ── */
 const CHIP_CFGS=[
-  {val:1,    label:'$1',   sml:'1',   fs_f:.202,c1:'#e0e0e0',c2:'#a8a8a8',ring:'#b8b8b8',lbl:'#505050'},
-  {val:5,    label:'$5',   sml:'5',   fs_f:.202,c1:'#cc2020',c2:'#881010',ring:'#aa1010',lbl:'#5a0000'},
-  {val:10,   label:'$10',  sml:'10',  fs_f:.202,c1:'#1a6bc8',c2:'#0d3d80',ring:'#1055a0',lbl:'#082860'},
-  {val:25,   label:'$25',  sml:'25',  fs_f:.202,c1:'#1aaa38',c2:'#d4c000',ring:'#1a8228',lbl:'#0a5a1e'},
-  {val:50,   label:'$50',  sml:'50',  fs_f:.202,c1:'#30b8ff',c2:'#1830b0',ring:'#1880c8',lbl:'#082870'},
-  {val:100,  label:'$100', sml:'100', fs_f:.190,c1:'#e8c200',c2:'#0d0d0d',ring:'#a88000',lbl:'#7a5800'},
-  {val:500,  label:'$500', sml:'500', fs_f:.179,c1:'#b038e0',c2:'#4040d0',ring:'#8820b8',lbl:'#380870'},
-  {val:1000, label:'$1000',sml:'1K',  fs_f:.161,c1:'#cc1010',c2:'#e8c200',ring:'#bb0000',lbl:'#800000'},
-  {val:10000,label:'$10K', sml:'10K', fs_f:.131,c1:'#c87028',c2:'#181818',ring:'#9a5010',lbl:'#5a1800'},
+  {val:1,    label:'$1',   sml:'1',   fs_f:.300,c1:'#e0e0e0',c2:'#a8a8a8',ring:'#b8b8b8',lbl:'#505050'},
+  {val:5,    label:'$5',   sml:'5',   fs_f:.300,c1:'#cc2020',c2:'#881010',ring:'#aa1010',lbl:'#5a0000'},
+  {val:10,   label:'$10',  sml:'10',  fs_f:.285,c1:'#1a6bc8',c2:'#0d3d80',ring:'#1055a0',lbl:'#082860'},
+  {val:25,   label:'$25',  sml:'25',  fs_f:.285,c1:'#1aaa38',c2:'#d4c000',ring:'#1a8228',lbl:'#0a5a1e'},
+  {val:50,   label:'$50',  sml:'50',  fs_f:.285,c1:'#30b8ff',c2:'#1830b0',ring:'#1880c8',lbl:'#082870'},
+  {val:100,  label:'$100', sml:'100', fs_f:.270,c1:'#e8c200',c2:'#0d0d0d',ring:'#a88000',lbl:'#7a5800'},
+  {val:500,  label:'$500', sml:'500', fs_f:.255,c1:'#b038e0',c2:'#4040d0',ring:'#8820b8',lbl:'#380870'},
+  {val:1000, label:'$1000',sml:'1K',  fs_f:.240,c1:'#cc1010',c2:'#e8c200',ring:'#bb0000',lbl:'#800000'},
+  {val:10000,label:'$10K', sml:'10K', fs_f:.215,c1:'#c87028',c2:'#181818',ring:'#9a5010',lbl:'#5a1800'},
 ];
 
 function chipCfg(val){
@@ -127,10 +127,10 @@ function makeChipCanvas(val,S,dpr){
   ctx.fillText('♛',cx,cy-CR+R*.26);
 
   /* value text */
-  ctx.font=`bold ${Math.max(5,cfg.fs_f*R*2)}px Georgia,serif`;
-  ctx.fillStyle='#0a0a0a';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.shadowColor='rgba(0,0,0,.08)';ctx.shadowBlur=1.5;
-  ctx.fillText(label,cx,cy+2);
+  ctx.font=`900 ${Math.max(6,cfg.fs_f*R*2)}px Georgia,serif`;
+  ctx.fillStyle='#111';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.shadowColor='rgba(255,255,255,.9)';ctx.shadowBlur=3;
+  ctx.fillText(label,cx,cy+4);
   ctx.shadowBlur=0;ctx.shadowColor='transparent';
 
   /* shine overlay */
