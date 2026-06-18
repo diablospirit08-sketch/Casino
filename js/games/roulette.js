@@ -453,7 +453,7 @@ ORIGINALS['originals-roulette']={
       if(round<spins&&this._autoRunning){
         this.bets=this._lastBets.map(b=>({...b}));
         this._renderBets();this._syncInfo();
-        await new Promise(r=>setTimeout(r,500));
+        await new Promise(r=>setTimeout(r,300));
       }
     }
     this._autoRunning=false;
@@ -510,7 +510,7 @@ ORIGINALS['originals-roulette']={
     this._renderStreak();
     this._flashWin(spinResult);
     this._placeDolly(spinResult);
-    await new Promise(r=>setTimeout(r,this._fast?1400:2500));
+    await new Promise(r=>setTimeout(r,this._fast?800:1600));
     this._ballRadius=null;this._updateWheelSVG(this._wheelAngle);
     this.spinning=false;
     this._lastBets=this.bets.map(b=>({...b}));
@@ -534,7 +534,7 @@ ORIGINALS['originals-roulette']={
     const BALL_R_IN=178;  /* pocket centre, between R2=195 and R1=168  */
     const ballStart=-Math.PI/2+(7+Math.random()*3)*Math.PI*2+Math.random()*Math.PI*2;
 
-    const dur=this._fast?2200:5200,t0=performance.now();
+    const dur=this._fast?1600:3800,t0=performance.now();
     this._sndSpin(dur);this._scheduleBallClicks(dur);
     return new Promise(resolve=>{
       const frame=now=>{
