@@ -9,17 +9,18 @@ ORIGINALS['originals-roulette']={
   _ballAngle:null,
   _ballRadius:null,
   _history:[],
+  _lastBets:[],
   _ac:null,
+  _nbTimer:null,
 
   WHEEL:[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26],
   RED:new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]),
   PAYS:{straight:36,split:18,street:12,corner:9,sixline:6,dozen:3,column:3,half:2,color:2,evenodd:2},
 
   mount(){
-    if(!document.getElementById('rl-css')){
-      const s=document.createElement('style');s.id='rl-css';
-      s.textContent=this._css();document.head.appendChild(s);
-    }
+    let s=document.getElementById('rl-css');
+    if(!s){s=document.createElement('style');s.id='rl-css';document.head.appendChild(s);}
+    s.textContent=this._css();
     engFields.innerHTML=`
       <div class="gv-field"><label>Chip</label>
         <div class="rl-chips" id="rlChips">
@@ -38,6 +39,7 @@ ORIGINALS['originals-roulette']={
           ${this._buildWheelSVG()}
           <div class="rl-ptr">▼</div>
           <div class="rl-res" id="rlRes"></div>
+          <div class="rl-nb-label" id="rlNbLabel"></div>
         </div>
         <div class="rl-streak" id="rlStreak"></div>
         <div class="rl-table-wrap">
@@ -62,6 +64,16 @@ ORIGINALS['originals-roulette']={
     document.getElementById('rlClear').addEventListener('click',()=>{
       if(this.spinning)return;
       this.bets=[];this._renderBets();this._syncInfo();this._syncBtn();
+    });
+    document.getElementById('rlRebet').addEventListener('click',()=>{
+      if(this.spinning||!this._lastBets.length)return;
+      this.bets=this._lastBets.map(b=>({...b}));
+      this._renderBets();this._syncInfo();this._syncBtn();
+    });
+    document.getElementById('rlWheelSvg').addEventListener('click',e=>{
+      if(this.spinning)return;
+      const t=e.target.closest('[data-n]');if(!t)return;
+      this._neighborBet(+t.dataset.n);
     });
     this._updateWheelSVG(this._wheelAngle);
     this._renderBets();this._renderStreak();this._syncInfo();this._syncBtn();
@@ -107,6 +119,21 @@ ORIGINALS['originals-roulette']={
   _syncBtn(){
     syncBetBtn();
     gvBetBtn.disabled=!this.bets.length||this.spinning;
+    const rb=document.getElementById('rlRebet');
+    if(rb)rb.disabled=this.spinning||!this._lastBets.length;
+  },
+
+  _neighborBet(n){
+    const W=this.WHEEL,len=W.length,idx=W.indexOf(n);
+    const nums=[-2,-1,0,1,2].map(d=>W[(idx+d+len)%len]);
+    nums.forEach(ni=>this._addBet('straight',`str:${ni}`,[ni]));
+    const lbl=document.getElementById('rlNbLabel');
+    if(lbl){
+      lbl.textContent=`Neighbors: ${nums.join(' · ')}`;
+      lbl.classList.add('show');
+      clearTimeout(this._nbTimer);
+      this._nbTimer=setTimeout(()=>lbl.classList.remove('show'),2000);
+    }
   },
 
   label(){
@@ -159,7 +186,7 @@ ORIGINALS['originals-roulette']={
     await new Promise(r=>setTimeout(r,2500));
     this._ballRadius=null;
     this._updateWheelSVG(this._wheelAngle);
-    this.spinning=false;this.bets=[];this._renderBets();this._syncInfo();
+    this.spinning=false;this._lastBets=this.bets.map(b=>({...b}));this.bets=[];this._renderBets();this._syncInfo();
     if(rlRes)rlRes.className='rl-res';
     lockBet(false);this._syncBtn();
   },
@@ -232,10 +259,10 @@ ORIGINALS['originals-roulette']={
       const x2i=cx+R1*Math.cos(a2),y2i=cy+R1*Math.sin(a2);
       const d=`M${f(x1o)} ${f(y1o)} A${R2} ${R2} 0 0 1 ${f(x2o)} ${f(y2o)} L${f(x2i)} ${f(y2i)} A${R1} ${R1} 0 0 0 ${f(x1i)} ${f(y1i)} Z`;
       const fill=n===0?'#1E7A3C':(this.RED.has(n)?'#C81E29':'#14181F');
-      pockets+=`<path d="${d}" fill="${fill}" stroke="#0E0E12" stroke-width="0.5"/>`;
+      pockets+=`<path d="${d}" fill="${fill}" stroke="#0E0E12" stroke-width="0.5" data-n="${n}" style="cursor:pointer"/>`;
       const at=rad(-90+theta);
       const tx=cx+rT*Math.cos(at),ty=cy+rT*Math.sin(at);
-      numbers+=`<text x="${f(tx)}" y="${f(ty)}" transform="rotate(${f(theta)} ${f(tx)} ${f(ty)})" fill="#fff" font-size="12" font-weight="700" font-family="Sora,Inter,system-ui,sans-serif" text-anchor="middle" dominant-baseline="central">${n}</text>`;
+      numbers+=`<text x="${f(tx)}" y="${f(ty)}" transform="rotate(${f(theta)} ${f(tx)} ${f(ty)})" fill="#fff" font-size="12" font-weight="700" font-family="Sora,Inter,system-ui,sans-serif" text-anchor="middle" dominant-baseline="central" data-n="${n}" style="cursor:pointer;pointer-events:all">${n}</text>`;
       frets+=`<line x1="${f(cx+130*Math.cos(a1))}" y1="${f(cy+130*Math.sin(a1))}" x2="${f(cx+R2*Math.cos(a1))}" y2="${f(cy+R2*Math.sin(a1))}" stroke="#E8C765" stroke-width="2.2" stroke-linecap="round"/>`;
     }
     let deflectors='';
@@ -394,7 +421,7 @@ ${brushes}
     const nc=(n,gr,gc)=>{
       const cl=RED.has(n)?'r':'b';
       return `<div class="rl-cell rl-num ${cl}" style="grid-row:${gr};grid-column:${gc}"
-        data-bet-type="straight" data-bet-key="str:${n}" data-bet-nums="[${n}]">${n}</div>`;
+        data-bet-type="straight" data-bet-key="str:${n}" data-bet-nums="[${n}]" data-tip="35 : 1">${n}</div>`;
     };
     const sc=(nums,gr,gc)=>{
       const s=nums.slice().sort((a,b)=>a-b);
@@ -426,37 +453,45 @@ ${brushes}
       cells+=cc([row2[c],row2[c+1],row3[c],row3[c+1]],4,2*c+2);
     }
     return`
+<div class="rl-limits">
+  <span>MIN <b>$1</b></span>
+  <span class="rl-limits-name">European Roulette &nbsp;·&nbsp; 97.3% RTP &nbsp;·&nbsp; Click wheel numbers for neighbor bets</span>
+  <span>MAX <b>$500</b></span>
+</div>
 <div class="rl-tbl" id="rlTable">
   <div class="rl-num-section">
     <div class="rl-zero-col">
-      <div class="rl-cell rl-zero" data-bet-type="straight" data-bet-key="str:0" data-bet-nums="[0]">0</div>
+      <div class="rl-cell rl-zero" data-bet-type="straight" data-bet-key="str:0" data-bet-nums="[0]" data-tip="35 : 1">0</div>
     </div>
     <div class="rl-mid-wrap">
       <div class="rl-num-and-col">
         <div class="rl-num-area">${cells}</div>
         <div class="rl-col-bets">
-          <div class="rl-cell rl-col" data-bet-type="column" data-bet-key="col:1" data-bet-nums="[${row1}]">2:1</div>
-          <div class="rl-cell rl-col" data-bet-type="column" data-bet-key="col:2" data-bet-nums="[${row2}]">2:1</div>
-          <div class="rl-cell rl-col" data-bet-type="column" data-bet-key="col:3" data-bet-nums="[${row3}]">2:1</div>
+          <div class="rl-cell rl-col" data-bet-type="column" data-bet-key="col:1" data-bet-nums="[${row1}]" data-tip="2 : 1">2:1</div>
+          <div class="rl-cell rl-col" data-bet-type="column" data-bet-key="col:2" data-bet-nums="[${row2}]" data-tip="2 : 1">2:1</div>
+          <div class="rl-cell rl-col" data-bet-type="column" data-bet-key="col:3" data-bet-nums="[${row3}]" data-tip="2 : 1">2:1</div>
         </div>
       </div>
       <div class="rl-doz-row">
-        <div class="rl-cell rl-doz" data-bet-type="dozen" data-bet-key="doz:1" data-bet-nums="[1,2,3,4,5,6,7,8,9,10,11,12]">1<sup>ST</sup> 12</div>
-        <div class="rl-cell rl-doz" data-bet-type="dozen" data-bet-key="doz:2" data-bet-nums="[13,14,15,16,17,18,19,20,21,22,23,24]">2<sup>ND</sup> 12</div>
-        <div class="rl-cell rl-doz" data-bet-type="dozen" data-bet-key="doz:3" data-bet-nums="[25,26,27,28,29,30,31,32,33,34,35,36]">3<sup>RD</sup> 12</div>
+        <div class="rl-cell rl-doz" data-bet-type="dozen" data-bet-key="doz:1" data-bet-nums="[1,2,3,4,5,6,7,8,9,10,11,12]" data-tip="2 : 1">1<sup>ST</sup> 12</div>
+        <div class="rl-cell rl-doz" data-bet-type="dozen" data-bet-key="doz:2" data-bet-nums="[13,14,15,16,17,18,19,20,21,22,23,24]" data-tip="2 : 1">2<sup>ND</sup> 12</div>
+        <div class="rl-cell rl-doz" data-bet-type="dozen" data-bet-key="doz:3" data-bet-nums="[25,26,27,28,29,30,31,32,33,34,35,36]" data-tip="2 : 1">3<sup>RD</sup> 12</div>
       </div>
       <div class="rl-out-row">
-        <div class="rl-cell rl-out" data-bet-type="half"    data-bet-key="half:lo" data-bet-nums="[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]">1–18</div>
-        <div class="rl-cell rl-out" data-bet-type="evenodd" data-bet-key="eo:even" data-bet-nums="[2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36]">EVEN</div>
-        <div class="rl-cell rl-out rl-colr" data-bet-type="color" data-bet-key="clr:r" data-bet-nums="[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]"><div class="rl-diamond" style="background:#9E1620"></div></div>
-        <div class="rl-cell rl-out rl-colb" data-bet-type="color" data-bet-key="clr:b" data-bet-nums="[2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35]"><div class="rl-diamond" style="background:#05070A"></div></div>
-        <div class="rl-cell rl-out" data-bet-type="evenodd" data-bet-key="eo:odd"  data-bet-nums="[1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]">ODD</div>
-        <div class="rl-cell rl-out" data-bet-type="half"    data-bet-key="half:hi" data-bet-nums="[19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36]">19–36</div>
+        <div class="rl-cell rl-out" data-bet-type="half"    data-bet-key="half:lo" data-bet-nums="[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]" data-tip="1 : 1">1–18</div>
+        <div class="rl-cell rl-out" data-bet-type="evenodd" data-bet-key="eo:even" data-bet-nums="[2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36]" data-tip="1 : 1">EVEN</div>
+        <div class="rl-cell rl-out rl-colr" data-bet-type="color" data-bet-key="clr:r" data-bet-nums="[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]" data-tip="1 : 1"><div class="rl-diamond" style="background:#9E1620"></div></div>
+        <div class="rl-cell rl-out rl-colb" data-bet-type="color" data-bet-key="clr:b" data-bet-nums="[2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35]" data-tip="1 : 1"><div class="rl-diamond" style="background:#05070A"></div></div>
+        <div class="rl-cell rl-out" data-bet-type="evenodd" data-bet-key="eo:odd"  data-bet-nums="[1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]" data-tip="1 : 1">ODD</div>
+        <div class="rl-cell rl-out" data-bet-type="half"    data-bet-key="half:hi" data-bet-nums="[19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36]" data-tip="1 : 1">19–36</div>
       </div>
     </div>
   </div>
 </div>
-<button class="rl-clr" id="rlClear">✕ Clear Bets</button>`;
+<div class="rl-btns">
+  <button class="rl-rebet" id="rlRebet" disabled>↺ Rebet</button>
+  <button class="rl-clr" id="rlClear">✕ Clear</button>
+</div>`;
   },
 
   _css(){return`
@@ -542,11 +577,44 @@ ${brushes}
   width:18px;height:18px;border-radius:50%;
   font-size:6px;font-weight:900;display:flex;align-items:center;justify-content:center;
   border:1.5px solid rgba(255,255,255,.5);box-shadow:0 2px 6px rgba(0,0,0,.6);z-index:6;pointer-events:none}
-/* clear button */
-.rl-clr{margin-top:4px;width:100%;background:rgba(255,255,255,.04);
+/* limits bar */
+.rl-limits{display:flex;justify-content:space-between;align-items:center;
+  padding:5px 10px;background:rgba(255,255,255,.03);
+  border:1px solid #2E3649;border-radius:8px;margin-bottom:2px}
+.rl-limits>span{font-size:11px;color:rgba(255,255,255,.35)}
+.rl-limits b{color:rgba(255,255,255,.6)}
+.rl-limits-name{font-size:9.5px;color:rgba(255,255,255,.2);letter-spacing:.03em;text-align:center}
+/* buttons row */
+.rl-btns{display:flex;gap:6px;margin-top:4px}
+.rl-clr{flex:1;background:rgba(255,255,255,.04);
   border:1px solid #3A4358;border-radius:8px;height:28px;
   color:rgba(255,255,255,.35);font-size:11px;cursor:pointer;font-family:inherit;transition:background .1s,border-color .1s}
 .rl-clr:hover{background:rgba(255,255,255,.08);border-color:#E6BE55;color:#fff}
+.rl-rebet{flex:1;background:rgba(230,190,85,.06);
+  border:1px solid rgba(230,190,85,.25);border-radius:8px;height:28px;
+  color:rgba(230,190,85,.5);font-size:11px;cursor:pointer;font-family:inherit;transition:background .1s,border-color .1s,color .1s}
+.rl-rebet:hover:not(:disabled){background:rgba(230,190,85,.14);border-color:#E6BE55;color:#E6BE55}
+.rl-rebet:disabled{opacity:.3;cursor:not-allowed}
+/* tooltip */
+.rl-cell[data-tip]{position:relative;overflow:visible}
+.rl-cell[data-tip]:hover::before{
+  content:attr(data-tip);
+  position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);
+  background:#0C1220;border:1px solid #E6BE55;
+  color:#E6BE55;font-size:10px;font-weight:700;letter-spacing:.08em;
+  padding:3px 8px;border-radius:5px;white-space:nowrap;pointer-events:none;z-index:200}
+.rl-cell[data-tip]:hover::after{
+  content:'';position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);
+  border:4px solid transparent;border-top-color:#E6BE55;pointer-events:none;z-index:200}
+/* neighbor bet label */
+.rl-nb-label{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:#0C1220;border:1px solid #E6BE55;color:#E6BE55;
+  font-size:10px;font-weight:700;letter-spacing:.04em;
+  padding:4px 12px;border-radius:6px;white-space:nowrap;
+  pointer-events:none;opacity:0;transition:opacity .2s;z-index:20}
+.rl-nb-label.show{opacity:1}
+/* wheel hover on pockets */
+#rlSpinGroup [data-n]:hover{opacity:.82}
 @keyframes rl-flash{0%,100%{filter:brightness(1)}45%{filter:brightness(2.2) saturate(1.6)}}
 .rl-flash{animation:rl-flash .5s ease 3}
 `},
