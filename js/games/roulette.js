@@ -94,6 +94,9 @@ ORIGINALS['originals-roulette']={
     gvStage.innerHTML=`
 <div class="rl-wrap">
   <div class="rl-left">
+    <div class="rl-rt-wrap" id="rlRtWrap" style="display:none">
+      ${this._buildRacetrack()}
+    </div>
     <div class="rl-limits">
       <span>MIN <b>$1</b></span>
       <span class="rl-limits-name">European Roulette · 97.3% RTP</span>
@@ -101,9 +104,6 @@ ORIGINALS['originals-roulette']={
     </div>
     <div class="rl-table-wrap">
       ${this._tableHTML()}
-    </div>
-    <div class="rl-rt-wrap" id="rlRtWrap" style="display:none">
-      ${this._buildRacetrack()}
     </div>
   </div>
   <div class="rl-right">
@@ -311,7 +311,6 @@ ORIGINALS['originals-roulette']={
   },
 
   _syncBtn(){
-    const isAuto=document.getElementById('rlAutoPanel')?.style.display!=='none';
     syncBetBtn();
     if(this._autoRunning){
       gvBetBtn.disabled=false;
@@ -342,7 +341,8 @@ ORIGINALS['originals-roulette']={
     const spins=parseInt(document.getElementById('rlApSpins')?.value)||10;
     const stopWin=parseFloat(document.getElementById('rlApWin')?.value)||0;
     const stopLoss=parseFloat(document.getElementById('rlApLoss')?.value)||0;
-    const startFiat=curW().amt*curW().rate;
+    const w0=curW();
+    const startFiat=w0?w0.amt*w0.rate:0;
     this._autoRunning=true;this._syncBtn();
     let round=0;
     while(this._autoRunning&&round<spins&&this.bets.length>0){
@@ -351,7 +351,8 @@ ORIGINALS['originals-roulette']={
       if(st)st.textContent=`Round ${round} / ${spins}`;
       await this._spin();
       if(!this._autoRunning)break;
-      const currFiat=curW().amt*curW().rate;
+      const wc=curW();
+      const currFiat=wc?wc.amt*wc.rate:0;
       if(stopWin>0&&(currFiat-startFiat)>=stopWin)break;
       if(stopLoss>0&&(startFiat-currFiat)>=stopLoss)break;
       if(round<spins&&this._autoRunning){
@@ -448,10 +449,15 @@ ORIGINALS['originals-roulette']={
         if(t<0.78){
           this._ballAngle=freeAngle;
         } else {
-          /* pocket SVG angle follows wheel so ball locks into the pocket */
-          const pocketAngle=-Math.PI/2+idx*seg+this._wheelAngle;
+          /* pocket visual angle — normalize _wheelAngle mod 2π first to avoid huge accumulated value */
+          const TAU=Math.PI*2;
+          const wheelVis=((this._wheelAngle%TAU)+TAU)%TAU;
+          let pocketAngle=-Math.PI/2+idx*seg+wheelVis;
+          /* shortest-path diff so snap never sweeps more than π */
+          let d=((pocketAngle-freeAngle)%TAU+TAU)%TAU;
+          if(d>Math.PI)d-=TAU;
           const snap=Math.pow((t-0.78)/0.22,1.4);
-          this._ballAngle=freeAngle+(pocketAngle-freeAngle)*snap;
+          this._ballAngle=freeAngle+d*snap;
         }
 
         this._updateWheelSVG(this._wheelAngle);
@@ -956,7 +962,7 @@ ${brushes}
 
   unmount(){
     this._stopIdleSpin();
-    this.bets=[];this.spinning=false;this._ballRadius=null;
+    this.bets=[];this._undoStack=[];this.spinning=false;this._ballRadius=null;
     this._autoRunning=false;clearTimeout(this._nbTimer);
     if(typeof gvStage!=='undefined'&&gvStage){gvStage.style.overflowY='';gvStage.style.overflowX='';}
   }
