@@ -190,31 +190,32 @@ document.addEventListener('click',()=>{
 
 /* ---------- nav rail ---------- */
 /* cat: rail item activates the matching category chip; items without one scroll to their lobby section */
-/* sprite: 4-col × 4-row grid. positions: col=(0|33.33|66.67|100)% row=(0|33.33|66.67|100)% */
 const railItems = [
-  {l:'Lobby',        t:'sec-top',       cat:'lobby',     sp:'0% 0%'},        /* dealer */
-  {l:'Originals',    t:'sec-originals', cat:'originals', sp:'66.67% 0%'},    /* playing cards */
-  {l:'Slots',        t:'sec-slots',     cat:'slots',     sp:'33.33% 0%'},    /* 777 */
-  {l:'Hot Picks',    t:'sec-hot',                        sp:'66.67% 100%'},  /* dollar target */
-  {l:'Live Casino',  t:'sec-live',      cat:'live',      sp:'0% 66.67%'},    /* dealer vest */
-  {l:'Game Shows',   t:'sec-shows',     cat:'shows',     sp:'66.67% 33.33%'},/* champagne glass */
-  {l:'New Arrivals', t:'sec-new',       cat:'new',       sp:'0% 100%'},      /* 8-ball */
-  {l:'VIP Club',     t:'sec-vip',                        sp:'100% 100%'},    /* bow tie */
-  {l:'All Bets',     t:'sec-bets',                       sp:'33.33% 33.33%'},/* coin */
+  {l:'Lobby',        t:'sec-top',       cat:'lobby',     ic:'<path d="M3 11.5 12 4l9 7.5V21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9.5Z"/><path d="M9.5 22V16h5v6"/>'},
+  {l:'Originals',    t:'sec-originals', cat:'originals', ic:'<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/>'},
+  {l:'Slots',        t:'sec-slots',     cat:'slots',     ic:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>'},
+  {l:'Hot Picks',    t:'sec-hot',                        ic:'<path d="M12 2c0 4.5-4 5.5-4 9a4 4 0 0 0 8 0c0-1.5-.5-2.5-1.5-3.5 0 2-1 3-2.5 3.5C12 8 12 4.5 12 2Z"/><path d="M10 17.5c.3 1 1 1.5 2 1.5s1.7-.5 2-1.5"/>'},
+  {l:'Live Casino',  t:'sec-live',      cat:'live',      ic:'<rect x="2" y="7" width="14" height="10" rx="2"/><path d="M16 10.5l6-3.5v10l-6-3.5"/>'},
+  {l:'Game Shows',   t:'sec-shows',     cat:'shows',     ic:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>'},
+  {l:'New Arrivals', t:'sec-new',       cat:'new',       ic:'<path d="M12 3 13.5 8H19l-4.5 3.5 1.5 5L12 13l-4 3.5 1.5-5L5 8h5.5L12 3Z"/><path d="M19.5 16 20.25 18.5H23l-2 1.5.75 2.5-2.25-1.5L17.25 22.5 18 20l-2-1.5h2.75L19.5 16Z"/>'},
+  {l:'VIP Club',     t:'sec-vip',                        ic:'<path d="M3 17 7.5 7 12 13l4.5-6L21 17H3Z"/><path d="M3 17h18"/>'},
+  {l:'All Bets',     t:'sec-bets',                       ic:'<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r=".5" fill="currentColor"/><circle cx="3.5" cy="12" r=".5" fill="currentColor"/><circle cx="3.5" cy="18" r=".5" fill="currentColor"/>'},
 ];
-function _sp(pos){return `<span class="it"><span class="rail-sp" style="background-position:${pos}"></span></span>`;}
+const _IC_SUPPORT='<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3Z"/>';
+const _IC_LANG='<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2Z"/>';
+function _ic(paths){return `<span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${paths}</svg></span>`;}
 document.getElementById('railNav').innerHTML = railItems.map((r,i)=>`
   <a href="#${r.t}" data-target="${r.t}" ${r.cat?`data-cat="${r.cat}"`:''} title="${r.l}" class="${i===0?'active':''}">
-    ${_sp(r.sp)}<span class="lbl">${r.l}</span></a>
+    ${_ic(r.ic)}<span class="lbl">${r.l}</span></a>
   ${i===2||i===5?'<span class="sep"></span>':''}
 `).join('')+`
   <div class="rail-foot">
     <span class="sep"></span>
     <a href="#" id="railChat" title="Live support">
-      ${_sp('100% 100%')}<span class="lbl">Support</span></a>
+      ${_ic(_IC_SUPPORT)}<span class="lbl">Support</span></a>
     <span class="rail-lang" id="railLang">
       <a href="#" id="langBtn" title="Language" aria-haspopup="true">
-        <span class="it">🌍</span><span class="lbl" id="langLbl">English</span></a>
+        ${_ic(_IC_LANG)}<span class="lbl" id="langLbl">English</span></a>
       <div class="hdr-menu lang-menu" id="langMenu"></div>
     </span>
   </div>

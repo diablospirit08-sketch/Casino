@@ -45,6 +45,7 @@ ORIGINALS['originals-roulette']={
     s.textContent=this._css();
     document.querySelector('.gv-panel').classList.add('rl-panel-mode');
     this._sessWag=0;this._sessProf=0;this._sessWins=0;this._sessLoss=0;
+    this._loadBallSnd();
 
     engFields.innerHTML=`
 <div class="rl-tabs">
@@ -454,6 +455,7 @@ ORIGINALS['originals-roulette']={
     if(spinResult===null||spinResult===undefined)
       spinResult=this.WHEEL[Math.floor(Math.random()*37)];
     await this._animateWheel(spinResult);
+    this._stopSpinSrc();
     const col=spinResult===0?'green':this.RED.has(spinResult)?'red':'black';
     const rlRes=document.getElementById('rlRes');
     if(rlRes){rlRes.textContent=spinResult;rlRes.className='rl-res show '+col;}
@@ -709,22 +711,49 @@ ${brushes}
     if(this._ac.state==='suspended')this._ac.resume();
     return this._ac;
   },
+  _loadBallSnd(){
+    this._ballBuf=null;this._ballBufRaw=null;
+    fetch('sounds/roulette/mixkit-casino-roulette-ball-1987.wav')
+      .then(r=>r.arrayBuffer()).then(ab=>{this._ballBufRaw=ab;}).catch(()=>{});
+  },
   _sndSpin(dur){
     if(this._muted)return;
     try{
       const ac=this._getAC();
-      const buf=ac.createBuffer(1,Math.ceil(ac.sampleRate*dur/1000),ac.sampleRate);
-      const d=buf.getChannelData(0);
-      for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.8)*0.12;
-      const src=ac.createBufferSource();src.buffer=buf;
-      const filt=ac.createBiquadFilter();filt.type='bandpass';filt.frequency.value=280;filt.Q.value=4;
       const masterGain=ac.createGain();
-      src.connect(filt);filt.connect(masterGain);masterGain.connect(ac.destination);src.start();
+      masterGain.connect(ac.destination);
       this._spinGain=masterGain;
+      if(this._ballBufRaw&&!this._ballBuf){
+        ac.decodeAudioData(this._ballBufRaw.slice(0)).then(buf=>{
+          this._ballBuf=buf;
+        }).catch(()=>{});
+      }
+      if(this._ballBuf){
+        const src=ac.createBufferSource();
+        src.buffer=this._ballBuf;src.loop=true;
+        src.connect(masterGain);src.start();
+        masterGain.gain.setValueAtTime(0.7,ac.currentTime);
+        masterGain.gain.setTargetAtTime(0,ac.currentTime+dur*0.65/1000,dur*0.25/1000);
+        this._spinSrc=src;
+      } else {
+        /* fallback: synthetic noise */
+        const buf=ac.createBuffer(1,Math.ceil(ac.sampleRate*dur/1000),ac.sampleRate);
+        const d=buf.getChannelData(0);
+        for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.8)*0.12;
+        const src=ac.createBufferSource();src.buffer=buf;
+        const filt=ac.createBiquadFilter();filt.type='bandpass';filt.frequency.value=280;filt.Q.value=4;
+        src.connect(filt);filt.connect(masterGain);src.start();
+      }
     }catch(e){}
   },
+  _stopSpinSrc(){
+    try{if(this._spinSrc){this._spinSrc.stop();this._spinSrc=null;}}catch(e){}
+  },
   _muteSpin(){
-    try{if(this._spinGain){this._spinGain.gain.setTargetAtTime(0,this._ac.currentTime,0.05);this._spinGain=null;}}catch(e){}
+    try{
+      if(this._spinGain){this._spinGain.gain.setTargetAtTime(0,this._ac.currentTime,0.05);this._spinGain=null;}
+      this._stopSpinSrc();
+    }catch(e){}
   },
   _sndClick(){
     if(this._muted)return;
