@@ -776,6 +776,8 @@ ${brushes}
   background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);font-size:14px;
   cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;line-height:1;transition:all .12s}
 .rl-nb-btn:hover{border-color:#E6BE55;color:#E6BE55;background:rgba(230,190,85,.1)}
+/* manual panel — flex column so margin-top:auto works on totals */
+#rlManualPanel{display:flex;flex-direction:column;flex:1;gap:14px}
 /* totals */
 .rl-totals{display:flex;flex-direction:column;gap:4px;font-size:11px;color:rgba(255,255,255,.4);
   padding-top:6px;border-top:1px solid #1E2638;margin-top:auto}
@@ -875,13 +877,13 @@ ${brushes}
   font-size:9px;font-weight:900;letter-spacing:.02em;cursor:pointer;
   border-radius:3px;transition:all .14s;padding:2px 1px;width:20px}
 .rl-rt-sec:hover{transform:scaleX(1.2);z-index:2}
-.rl-sec-tiers{flex:8;color:#4A90D9;background:rgba(21,101,192,.12)}
+.rl-sec-tiers{flex:4;color:#4A90D9;background:rgba(21,101,192,.12)}
 .rl-sec-tiers:hover{background:rgba(21,101,192,.3);color:#7AB8F0}
-.rl-sec-orphelins{flex:7;color:#D94A8A;background:rgba(173,26,87,.12)}
+.rl-sec-orphelins{flex:3;color:#D94A8A;background:rgba(173,26,87,.12)}
 .rl-sec-orphelins:hover{background:rgba(173,26,87,.3);color:#EC7AB8}
-.rl-sec-voisins{flex:11;color:#C8960F;background:rgba(184,134,11,.12)}
+.rl-sec-voisins{flex:5;color:#C8960F;background:rgba(184,134,11,.12)}
 .rl-sec-voisins:hover{background:rgba(184,134,11,.3);color:#E0B830}
-.rl-sec-zero{flex:5;color:#4CAF66;background:rgba(27,94,32,.15)}
+.rl-sec-zero{flex:3;color:#4CAF66;background:rgba(27,94,32,.15)}
 .rl-sec-zero:hover{background:rgba(27,94,32,.3);color:#6DD98A}
 /* racetrack number cells */
 .rl-rt-n{width:24px;height:22px;border-radius:4px;flex-shrink:0;
