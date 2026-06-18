@@ -390,12 +390,12 @@ const ACTS={
   vip:()=>vipOverlay.classList.add('open'),
   chat:openChat,
 };
-document.querySelectorAll('a[data-act]').forEach(a=>{
-  a.addEventListener('click',e=>{
-    e.preventDefault();
-    const k=a.dataset.act;
-    (ACTS[k]||(()=>openInfo(k)))();
-  });
+document.addEventListener('click',e=>{
+  const a=e.target.closest('a[data-act]');
+  if(!a)return;
+  e.preventDefault();
+  const k=a.dataset.act;
+  (ACTS[k]||(()=>openInfo(k)))();
 });
 
 /* ---------- escape closes extras ---------- */
