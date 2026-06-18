@@ -319,7 +319,59 @@ const PAGES={
   sports:['Sports','<p>The sportsbook is not part of this demo — only the casino lobby is implemented.</p>'],
   referrals:['Referrals','<p>Invite friends, earn a cut of their wagers — that\'s how this page would work on a real platform.</p><p>In this demo there are no accounts, so there\'s no one to refer. Sorry to you and your imaginary friends.</p>'],
   help:['Help Center','<p><b>Stuck?</b> Everything in this demo runs locally: sign in with any email and a 6+ character password, claim the daily bonus from the gift icon, and play the Volt Originals with the demo balance.</p><p>For anything else, open Live Support — the chat is happy to listen, even if nobody is on the other end.</p>'],
-  responsible:['Responsible Gambling','<p>Gambling can be addictive — even pretend gambling can teach real habits. Set limits, take breaks, and never chase losses.</p><p>If gambling is affecting you or someone close to you, help is available: reach out to a local support organisation such as <b>GamCare</b>, <b>Gamblers Anonymous</b> or the national helpline in your country.</p>'],
+  responsible:['Responsible Gambling',`
+    <p style="color:var(--muted);line-height:1.8">At VOLT we are committed to keeping gambling fun, safe and within your control. The following tools and resources are available to every player.</p>
+
+    <h3 style="font-size:13px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;margin:22px 0 10px;color:var(--txt)">⚠️ Warning Signs</h3>
+    <ul style="color:var(--muted);line-height:2;padding-left:18px">
+      <li>Spending more than you can afford to lose</li>
+      <li>Chasing losses to try to win money back</li>
+      <li>Gambling interfering with work, family or daily life</li>
+      <li>Feeling anxious, irritable or restless when not gambling</li>
+      <li>Borrowing money or selling possessions to gamble</li>
+      <li>Hiding your gambling from friends or family</li>
+    </ul>
+
+    <h3 style="font-size:13px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;margin:22px 0 10px;color:var(--txt)">🛡️ Tools Available to You</h3>
+    <div style="display:grid;gap:10px">
+      <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px">
+        <b style="font-size:13px">Deposit Limits</b>
+        <p style="color:var(--muted);font-size:12px;margin-top:4px">Set daily, weekly or monthly deposit limits to stay in control of your spending. Limits take effect immediately.</p>
+      </div>
+      <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px">
+        <b style="font-size:13px">Reality Check</b>
+        <p style="color:var(--muted);font-size:12px;margin-top:4px">Set reminders that notify you how long you have been playing, helping you take regular breaks.</p>
+      </div>
+      <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px">
+        <b style="font-size:13px">Self-Exclusion</b>
+        <p style="color:var(--muted);font-size:12px;margin-top:4px">Take a break from gambling for 24 hours, 1 week, 1 month, or permanently. Contact support to activate.</p>
+      </div>
+      <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px">
+        <b style="font-size:13px">Cool-Off Period</b>
+        <p style="color:var(--muted);font-size:12px;margin-top:4px">Temporarily suspend your account for a short cooling-off period without full self-exclusion.</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:13px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;margin:22px 0 10px;color:var(--txt)">📞 Free Help & Support</h3>
+    <div style="display:grid;gap:8px">
+      <a href="https://www.begambleaware.org" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 16px;color:var(--txt);text-decoration:none;transition:.15s" onmouseover="this.style.borderColor='var(--mint)'" onmouseout="this.style.borderColor='var(--line)'">
+        <div><b style="font-size:13px">BeGambleAware</b><p style="color:var(--muted);font-size:12px;margin-top:2px">Free advice, information & support</p></div>
+        <span style="color:var(--muted);font-size:12px">begambleaware.org →</span>
+      </a>
+      <a href="https://www.gamcare.org.uk" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 16px;color:var(--txt);text-decoration:none;transition:.15s" onmouseover="this.style.borderColor='var(--mint)'" onmouseout="this.style.borderColor='var(--line)'">
+        <div><b style="font-size:13px">GamCare</b><p style="color:var(--muted);font-size:12px;margin-top:2px">National Gambling Helpline: 0808 8020 133</p></div>
+        <span style="color:var(--muted);font-size:12px">gamcare.org.uk →</span>
+      </a>
+      <a href="https://www.gamblersanonymous.org.uk" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 16px;color:var(--txt);text-decoration:none;transition:.15s" onmouseover="this.style.borderColor='var(--mint)'" onmouseout="this.style.borderColor='var(--line)'">
+        <div><b style="font-size:13px">Gamblers Anonymous</b><p style="color:var(--muted);font-size:12px;margin-top:2px">Peer support meetings worldwide</p></div>
+        <span style="color:var(--muted);font-size:12px">gamblersanonymous.org →</span>
+      </a>
+    </div>
+
+    <div style="margin-top:20px;background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.3);border-radius:10px;padding:14px 16px">
+      <p style="color:#e74c3c;font-size:12px;line-height:1.7"><b>Remember:</b> Gambling should always be entertainment, not a way to make money. Never gamble with money you cannot afford to lose. If you feel you have a problem, please reach out — help is free, confidential and available 24/7.</p>
+    </div>
+  `],
   complaint:['Complaint Form','<p>On a real platform this form would route to a support team with a ticket number and an SLA.</p><p>In this demo, your complaint has been pre-emptively resolved by virtue of nothing being real.</p>'],
 };
 function openInfo(key){
