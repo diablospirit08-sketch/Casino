@@ -473,20 +473,19 @@ ORIGINALS['originals-roulette']={
     if(authed&&totalC>w.amt+1e-9)return false;
     this._removeDolly();
     this.spinning=true;lockBet(true);gvBetBtn.disabled=true;gvBetBtn.textContent='Spinning…';
-    let res=null,spinResult=null;
+    /* pick result immediately so animation starts without waiting for server */
+    const spinResult=this.WHEEL[Math.floor(Math.random()*37)];
+    let res=null;
+    let serverPromise=null;
     if(authed){
       w.amt-=totalC;w.fiat=w.amt*w.rate;renderWallet();
-      try{
-        res=await placeBet({game:'roulette',currency:w.c,wager:totalC,
-          params:{bets:this.bets.map(b=>({type:b.type,numbers:b.numbers,amount:b.amount}))}});
-        spinResult=res.gameData.result;
-      }catch(err){
-        w.amt+=totalC;w.fiat=w.amt*w.rate;renderWallet();res=null;
-      }
+      serverPromise=placeBet({game:'roulette',currency:w.c,wager:totalC,
+        params:{bets:this.bets.map(b=>({type:b.type,numbers:b.numbers,amount:b.amount}))}})
+        .catch(err=>{w.amt+=totalC;w.fiat=w.amt*w.rate;renderWallet();return null;});
     }
-    if(spinResult===null||spinResult===undefined)
-      spinResult=this.WHEEL[Math.floor(Math.random()*37)];
-    await this._animateWheel(spinResult);
+    /* animation and server call run in parallel */
+    const[,serverRes]=await Promise.all([this._animateWheel(spinResult),serverPromise||Promise.resolve(null)]);
+    if(serverRes)res=serverRes;
     this._stopSpinSrc();
     const col=spinResult===0?'green':this.RED.has(spinResult)?'red':'black';
     const rlRes=document.getElementById('rlRes');
@@ -761,11 +760,6 @@ ${brushes}
       const masterGain=ac.createGain();
       masterGain.connect(ac.destination);
       this._spinGain=masterGain;
-      if(this._ballBufRaw&&!this._ballBuf){
-        ac.decodeAudioData(this._ballBufRaw.slice(0)).then(buf=>{
-          this._ballBuf=buf;
-        }).catch(()=>{});
-      }
       if(this._ballBuf){
         const src=ac.createBufferSource();
         src.buffer=this._ballBuf;src.loop=true;
@@ -871,9 +865,10 @@ ${brushes}
     if(this._muted)return;
     try{
       const ac=this._getAC();
-      if(this._chipBufRaw&&!this._chipBuf){
+      if(this._chipBufRaw&&!this._chipBuf)
         ac.decodeAudioData(this._chipBufRaw.slice(0)).then(buf=>{this._chipBuf=buf;}).catch(()=>{});
-      }
+      if(this._ballBufRaw&&!this._ballBuf)
+        ac.decodeAudioData(this._ballBufRaw.slice(0)).then(buf=>{this._ballBuf=buf;}).catch(()=>{});
       if(this._chipBuf){
         const src=ac.createBufferSource();
         const gain=ac.createGain();
