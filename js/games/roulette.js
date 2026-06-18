@@ -1,4 +1,4 @@
-/* --- roulette --- */
+/* --- roulette (new SVG design) --- */
 ORIGINALS['originals-roulette']={
   rtp:'97.3%',
   auto:false,
@@ -35,7 +35,7 @@ ORIGINALS['originals-roulette']={
     gvStage.innerHTML=`
       <div class="rl-wrap">
         <div class="rl-wheel-area">
-          <canvas id="rlWheel" class="rl-wheel" width="210" height="210"></canvas>
+          ${this._buildWheelSVG()}
           <div class="rl-ptr">▼</div>
           <div class="rl-res" id="rlRes"></div>
         </div>
@@ -63,7 +63,7 @@ ORIGINALS['originals-roulette']={
       if(this.spinning)return;
       this.bets=[];this._renderBets();this._syncInfo();this._syncBtn();
     });
-    this._drawWheel(this._wheelAngle);
+    this._updateWheelSVG(this._wheelAngle);
     this._renderBets();this._renderStreak();this._syncInfo();this._syncBtn();
   },
 
@@ -84,8 +84,7 @@ ORIGINALS['originals-roulette']={
     for(const bet of this.bets){
       const cell=document.querySelector(`[data-bet-key="${bet.key}"]`);if(!cell)continue;
       const chip=document.createElement('div');chip.className='rl-bet-chip';
-      const v=bet.fiat;
-      chip.style.background=chipCfg(Math.round(v)).c1;
+      chip.style.background=chipCfg(Math.round(bet.fiat)).c1;
       cell.appendChild(chip);
     }
   },
@@ -138,22 +137,18 @@ ORIGINALS['originals-roulette']={
     }
     const spinResult=res.gameData.result;
     await this._animateWheel(spinResult);
-    /* result badge */
     const col=spinResult===0?'green':this.RED.has(spinResult)?'red':'black';
     const rlRes=document.getElementById('rlRes');
     if(rlRes){rlRes.textContent=spinResult;rlRes.className='rl-res show '+col;}
-    /* settle */
     serverSettleBet(st,res.multiplier,res.new_balance);
-    /* play win/lose sound */
     if(res.multiplier>1)this._sndWin();else this._sndLose();
-    /* update history */
     this._history.unshift({n:spinResult,c:col});
     if(this._history.length>20)this._history.pop();
     this._renderStreak();
     this._flashWin(spinResult);
     await new Promise(r=>setTimeout(r,2500));
-    /* reset */
     this._ballRadius=null;
+    this._updateWheelSVG(this._wheelAngle);
     this.spinning=false;this.bets=[];this._renderBets();this._syncInfo();
     if(rlRes)rlRes.className='rl-res';
     lockBet(false);this._syncBtn();
@@ -162,17 +157,15 @@ ORIGINALS['originals-roulette']={
   async _animateWheel(result){
     const seg=(Math.PI*2)/37;
     const idx=this.WHEEL.indexOf(result);
-    /* wheel: spin clockwise until winning segment lands at top */
     const target=-idx*seg;
     const diff=((target-this._wheelAngle)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
     const spins=5+Math.random()*2;
     const wheelEnd=this._wheelAngle+spins*Math.PI*2+diff;
     const wheelStart=this._wheelAngle;
-    /* ball: counter-clockwise, more rotations, ends at top (winning slot) */
     const ballSpins=8+Math.random()*2;
     const extraOffset=Math.random()*Math.PI*2;
     const ballStart=-Math.PI/2+ballSpins*Math.PI*2+extraOffset;
-    const ballEnd=-Math.PI/2; /* top = where wheel stops */
+    const ballEnd=-Math.PI/2;
     const BALL_OUT=83,BALL_IN=60;
     const dur=4800,t0=performance.now();
     this._sndSpin(dur);
@@ -180,62 +173,118 @@ ORIGINALS['originals-roulette']={
     return new Promise(resolve=>{
       const frame=now=>{
         const t=Math.min((now-t0)/dur,1);
-        /* wheel: ease-out cubic */
         const we=1-Math.pow(1-t,3);
         this._wheelAngle=wheelStart+(wheelEnd-wheelStart)*we;
-        /* ball: decelerates faster than wheel */
         const be=1-Math.pow(1-Math.min(t/0.9,1),2.5);
         this._ballAngle=ballStart+(ballEnd-ballStart)*be;
-        /* ball drops from outer rim at 65% */
         if(t<0.65){
           this._ballRadius=BALL_OUT;
         }else{
           const dr=(t-0.65)/0.35,de=dr*dr;
           this._ballRadius=BALL_OUT-(BALL_OUT-BALL_IN)*de;
         }
-        this._drawWheel(this._wheelAngle);
+        this._updateWheelSVG(this._wheelAngle);
         if(t<1)requestAnimationFrame(frame);else resolve();
       };
       requestAnimationFrame(frame);
     });
   },
 
-  _drawWheel(angle){
-    const cv=document.getElementById('rlWheel');if(!cv)return;
-    const ctx=cv.getContext('2d');
-    const W=210,cx=105,cy=105,r=98,ri=26;
-    ctx.clearRect(0,0,W,W);
-    const seg=(Math.PI*2)/37;
-    for(let i=0;i<37;i++){
+  _updateWheelSVG(angle){
+    const deg=(angle*180/Math.PI).toFixed(2);
+    const spin=document.getElementById('rlSpinGroup');
+    const turret=document.getElementById('rlTurretGroup');
+    if(spin)spin.setAttribute('transform',`rotate(${deg} 250 250)`);
+    if(turret)turret.setAttribute('transform',`rotate(${deg} 250 250)`);
+    const ball=document.getElementById('rlBall');
+    if(!ball)return;
+    if(this._ballRadius===null){ball.style.display='none';return;}
+    ball.style.display='';
+    /* map canvas r (60-83) → SVG r (181-210): inside pocket zone to outer track */
+    const r_svg=181+(210-181)*(this._ballRadius-60)/(83-60);
+    ball.setAttribute('cx',(250+r_svg*Math.cos(this._ballAngle)).toFixed(1));
+    ball.setAttribute('cy',(250+r_svg*Math.sin(this._ballAngle)).toFixed(1));
+  },
+
+  _buildWheelSVG(){
+    const cx=250,cy=250,N=37,seg=360/N;
+    const R2=195,R1=168,rT=181;
+    const f=n=>n.toFixed(1);
+    const rad=d=>d*Math.PI/180;
+    let pockets='',numbers='',frets='';
+    for(let i=0;i<N;i++){
       const n=this.WHEEL[i];
-      const a0=angle+i*seg-Math.PI/2-seg/2,a1=a0+seg;
-      ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a0,a1);ctx.closePath();
-      ctx.fillStyle=n===0?'#1e8449':this.RED.has(n)?'#c92356':'#141414';ctx.fill();
-      ctx.strokeStyle='rgba(255,255,255,.1)';ctx.lineWidth=0.7;ctx.stroke();
-      const mid=(a0+a1)/2;
-      const tx=cx+(r-13)*Math.cos(mid),ty=cy+(r-13)*Math.sin(mid);
-      ctx.save();ctx.translate(tx,ty);ctx.rotate(mid+Math.PI/2);
-      ctx.fillStyle='#fff';ctx.font=`bold ${n>=10?6.5:7.5}px Inter,system-ui,sans-serif`;
-      ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(n,0,0);ctx.restore();
+      const theta=i*seg;
+      const a1=rad(-90+theta-seg/2),a2=rad(-90+theta+seg/2);
+      const x1o=cx+R2*Math.cos(a1),y1o=cy+R2*Math.sin(a1);
+      const x2o=cx+R2*Math.cos(a2),y2o=cy+R2*Math.sin(a2);
+      const x1i=cx+R1*Math.cos(a1),y1i=cy+R1*Math.sin(a1);
+      const x2i=cx+R1*Math.cos(a2),y2i=cy+R1*Math.sin(a2);
+      const d=`M${f(x1o)} ${f(y1o)} A${R2} ${R2} 0 0 1 ${f(x2o)} ${f(y2o)} L${f(x2i)} ${f(y2i)} A${R1} ${R1} 0 0 0 ${f(x1i)} ${f(y1i)} Z`;
+      const fill=n===0?'#1E7A3C':(this.RED.has(n)?'#C81E29':'#14181F');
+      pockets+=`<path d="${d}" fill="${fill}" stroke="#0E0E12" stroke-width="0.5"/>`;
+      const at=rad(-90+theta);
+      const tx=cx+rT*Math.cos(at),ty=cy+rT*Math.sin(at);
+      numbers+=`<text x="${f(tx)}" y="${f(ty)}" transform="rotate(${f(theta)} ${f(tx)} ${f(ty)})" fill="#fff" font-size="12" font-weight="700" font-family="Sora,Inter,system-ui,sans-serif" text-anchor="middle" dominant-baseline="central">${n}</text>`;
+      frets+=`<line x1="${f(cx+130*Math.cos(a1))}" y1="${f(cy+130*Math.sin(a1))}" x2="${f(cx+R2*Math.cos(a1))}" y2="${f(cy+R2*Math.sin(a1))}" stroke="#E8C765" stroke-width="2.2" stroke-linecap="round"/>`;
     }
-    /* ball track groove */
-    ctx.beginPath();ctx.arc(cx,cy,r+1,0,Math.PI*2);
-    ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=3;ctx.stroke();
-    /* hub */
-    const hg=ctx.createRadialGradient(cx,cy-5,2,cx,cy,ri);
-    hg.addColorStop(0,'#2a2a2a');hg.addColorStop(1,'#0d0d0d');
-    ctx.beginPath();ctx.arc(cx,cy,ri,0,Math.PI*2);ctx.fillStyle=hg;ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=1.5;ctx.stroke();
-    /* rolling ball */
-    if(this._ballRadius!==null){
-      const bx=cx+this._ballRadius*Math.cos(this._ballAngle);
-      const by=cy+this._ballRadius*Math.sin(this._ballAngle);
-      const bg=ctx.createRadialGradient(bx-1.5,by-1.8,0.5,bx,by,5.5);
-      bg.addColorStop(0,'#ffffff');bg.addColorStop(0.45,'#dedede');bg.addColorStop(1,'#888');
-      ctx.shadowColor='rgba(0,0,0,.55)';ctx.shadowBlur=5;ctx.shadowOffsetX=1;ctx.shadowOffsetY=2;
-      ctx.beginPath();ctx.arc(bx,by,5.5,0,Math.PI*2);ctx.fillStyle=bg;ctx.fill();
-      ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;
+    let deflectors='';
+    for(let i=0;i<8;i++){
+      const a=rad(i*45-90);
+      const x=cx+224*Math.cos(a),y=cy+224*Math.sin(a);
+      deflectors+=`<rect x="${f(x-5)}" y="${f(y-5)}" width="10" height="10" rx="1.5" transform="rotate(${i*45-45} ${f(x)} ${f(y)})" fill="url(#rlDiamondGold)" stroke="#7E5E1C" stroke-width="0.5"/>`;
     }
+    for(let i=0;i<8;i++){
+      const a=rad(i*45-67.5);
+      const x=cx+224*Math.cos(a),y=cy+224*Math.sin(a);
+      deflectors+=`<circle cx="${f(x)}" cy="${f(y)}" r="3" fill="url(#rlDiamondGold)" stroke="#7E5E1C" stroke-width="0.4"/>`;
+    }
+    let brushes='';
+    [138,122,106,90,74,58].forEach((r,i)=>{
+      brushes+=`<circle cx="250" cy="250" r="${r}" fill="none" stroke="${i%2===0?'#FFF4CE':'#8A6A22'}" stroke-width="0.5" stroke-opacity="${i%2===0?0.3:0.35}"/>`;
+    });
+    let turret='';
+    for(let i=0;i<5;i++){
+      turret+=`<g transform="rotate(${i*72} 250 250)"><polygon points="246.5,250 253.5,250 251,150 249,150" fill="url(#rlGoldArm)" stroke="#7E5E1C" stroke-width="0.4"/><line x1="250" y1="246" x2="250" y2="153" stroke="#FFF4CE" stroke-opacity="0.5" stroke-width="0.8"/><circle cx="250" cy="150" r="7" fill="url(#rlGoldKnob)" stroke="#7E5E1C" stroke-width="0.6"/></g>`;
+    }
+    return`<svg id="rlWheelSvg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:340px;filter:drop-shadow(0 20px 52px rgba(0,0,0,.85))">
+<defs>
+<radialGradient id="rlWoodGrad" cx="50%" cy="42%" r="60%"><stop offset="0%" stop-color="#8A552E"/><stop offset="60%" stop-color="#5C3318"/><stop offset="100%" stop-color="#2E1809"/></radialGradient>
+<radialGradient id="rlWoodInner" cx="50%" cy="40%" r="58%"><stop offset="0%" stop-color="#7A4824"/><stop offset="100%" stop-color="#3A2010"/></radialGradient>
+<linearGradient id="rlGoldRing" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FBE9A6"/><stop offset="40%" stop-color="#D9AE45"/><stop offset="100%" stop-color="#8A6A1E"/></linearGradient>
+<linearGradient id="rlGoldArm" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#A87C28"/><stop offset="34%" stop-color="#FBEDB0"/><stop offset="56%" stop-color="#C99A36"/><stop offset="100%" stop-color="#E8CF7C"/></linearGradient>
+<radialGradient id="rlGoldKnob" cx="40%" cy="34%" r="74%"><stop offset="0%" stop-color="#FFF4CE"/><stop offset="55%" stop-color="#E0B84E"/><stop offset="100%" stop-color="#946E1E"/></radialGradient>
+<radialGradient id="rlCenterDisc" cx="42%" cy="36%" r="78%"><stop offset="0%" stop-color="#FBEFC4"/><stop offset="60%" stop-color="#DDB957"/><stop offset="100%" stop-color="#A07B2C"/></radialGradient>
+<radialGradient id="rlGreenBowl" cx="50%" cy="40%" r="62%"><stop offset="0%" stop-color="#2E8A50"/><stop offset="100%" stop-color="#10532C"/></radialGradient>
+<radialGradient id="rlBallGrad" cx="34%" cy="30%" r="74%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#9FA7B6"/></radialGradient>
+<linearGradient id="rlDiamondGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FBEDB0"/><stop offset="100%" stop-color="#9A7320"/></linearGradient>
+<radialGradient id="rlDepth" cx="50%" cy="50%" r="50%"><stop offset="74%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity="0.5"/></radialGradient>
+<linearGradient id="rlGloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fff" stop-opacity="0.16"/><stop offset="36%" stop-color="#fff" stop-opacity="0.03"/><stop offset="60%" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+<circle cx="250" cy="250" r="249" fill="url(#rlWoodGrad)" stroke="#1E0E04" stroke-width="2"/>
+<circle cx="250" cy="250" r="247" fill="none" stroke="#B98A4E" stroke-width="1" opacity="0.4"/>
+<circle cx="250" cy="250" r="214" fill="url(#rlWoodInner)"/>
+<circle cx="250" cy="250" r="214" fill="none" stroke="#1E0E04" stroke-width="1.5"/>
+${deflectors}
+<circle cx="250" cy="250" r="200" fill="none" stroke="url(#rlGoldRing)" stroke-width="6"/>
+<g id="rlSpinGroup">
+<circle cx="250" cy="250" r="195" fill="#10532C"/>
+${pockets}
+<circle cx="250" cy="250" r="168" fill="url(#rlGreenBowl)"/>
+${frets}
+${numbers}
+</g>
+<circle cx="250" cy="250" r="232" fill="url(#rlGloss)" pointer-events="none"/>
+<circle cx="250" cy="250" r="249" fill="url(#rlDepth)" pointer-events="none"/>
+<circle id="rlBall" cx="250" cy="98" r="7" fill="url(#rlBallGrad)" style="display:none"/>
+<circle cx="250" cy="250" r="146" fill="url(#rlCenterDisc)" stroke="#7E5E1C" stroke-width="1.5"/>
+<circle cx="250" cy="250" r="146" fill="url(#rlGloss)" pointer-events="none"/>
+${brushes}
+<g id="rlTurretGroup">${turret}</g>
+<circle cx="250" cy="250" r="26" fill="url(#rlGoldKnob)" stroke="#7E5E1C" stroke-width="1.5"/>
+<circle cx="250" cy="250" r="15" fill="url(#rlGoldKnob)" stroke="#B58E32" stroke-width="0.75"/>
+<ellipse cx="244" cy="244" rx="6" ry="3.5" fill="#fff" opacity="0.55" transform="rotate(-40 244 244)"/>
+</svg>`;
   },
 
   _flashWin(result){
@@ -248,7 +297,7 @@ ORIGINALS['originals-roulette']={
     });
   },
 
-  /* ── sounds (Web Audio API, synthesised – no files) ── */
+  /* ── sounds (Web Audio API, synthesised) ── */
   _getAC(){
     if(!this._ac)this._ac=new(window.AudioContext||window.webkitAudioContext)();
     if(this._ac.state==='suspended')this._ac.resume();
@@ -279,7 +328,6 @@ ORIGINALS['originals-roulette']={
     }catch(e){}
   },
   _scheduleBallClicks(dur){
-    /* 28 clicks, denser at start (fast ball) and sparser toward end (slowing) */
     for(let i=0;i<28;i++){
       const t=i/28;
       const delay=(1-Math.pow(1-t,2))*dur*0.88+70;
@@ -328,13 +376,11 @@ ORIGINALS['originals-roulette']={
     }catch(e){}
   },
 
-  /* ── table HTML ── */
+  /* ── betting table HTML ── */
   _tableHTML(){
     const RED=this.RED;
-    /* row1 = top row (multiples of 3), row2 = mid, row3 = bottom */
     const row1=[],row2=[],row3=[];
     for(let c=1;c<=12;c++){row1.push(3*c);row2.push(3*c-1);row3.push(3*c-2);}
-    /* number grid uses CSS grid: 5 rows × 23 cols (num + 8px gap interleaved) */
     const nc=(n,gr,gc)=>{
       const cl=RED.has(n)?'r':'b';
       return `<div class="rl-cell rl-num ${cl}" style="grid-row:${gr};grid-column:${gc}"
@@ -356,18 +402,15 @@ ORIGINALS['originals-roulette']={
     for(let c=0;c<12;c++){
       cells+=nc(row1[c],1,2*c+1)+nc(row2[c],3,2*c+1)+nc(row3[c],5,2*c+1);
     }
-    /* vertical splits (between adjacent columns) */
     for(let c=0;c<11;c++){
       cells+=sc([row1[c],row1[c+1]],1,2*c+2);
       cells+=sc([row2[c],row2[c+1]],3,2*c+2);
       cells+=sc([row3[c],row3[c+1]],5,2*c+2);
     }
-    /* horizontal splits (between rows) */
     for(let c=0;c<12;c++){
       cells+=sc([row1[c],row2[c]],2,2*c+1);
       cells+=sc([row2[c],row3[c]],4,2*c+1);
     }
-    /* corners */
     for(let c=0;c<11;c++){
       cells+=cc([row1[c],row1[c+1],row2[c],row2[c+1]],2,2*c+2);
       cells+=cc([row2[c],row2[c+1],row3[c],row3[c+1]],4,2*c+2);
@@ -388,16 +431,16 @@ ORIGINALS['originals-roulette']={
         </div>
       </div>
       <div class="rl-doz-row">
-        <div class="rl-cell rl-doz" data-bet-type="dozen" data-bet-key="doz:1" data-bet-nums="[1,2,3,4,5,6,7,8,9,10,11,12]">1–12</div>
-        <div class="rl-cell rl-doz" data-bet-type="dozen" data-bet-key="doz:2" data-bet-nums="[13,14,15,16,17,18,19,20,21,22,23,24]">13–24</div>
-        <div class="rl-cell rl-doz" data-bet-type="dozen" data-bet-key="doz:3" data-bet-nums="[25,26,27,28,29,30,31,32,33,34,35,36]">25–36</div>
+        <div class="rl-cell rl-doz" data-bet-type="dozen" data-bet-key="doz:1" data-bet-nums="[1,2,3,4,5,6,7,8,9,10,11,12]">1<sup>ST</sup> 12</div>
+        <div class="rl-cell rl-doz" data-bet-type="dozen" data-bet-key="doz:2" data-bet-nums="[13,14,15,16,17,18,19,20,21,22,23,24]">2<sup>ND</sup> 12</div>
+        <div class="rl-cell rl-doz" data-bet-type="dozen" data-bet-key="doz:3" data-bet-nums="[25,26,27,28,29,30,31,32,33,34,35,36]">3<sup>RD</sup> 12</div>
       </div>
       <div class="rl-out-row">
         <div class="rl-cell rl-out" data-bet-type="half"    data-bet-key="half:lo" data-bet-nums="[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]">1–18</div>
-        <div class="rl-cell rl-out" data-bet-type="evenodd" data-bet-key="eo:even" data-bet-nums="[2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36]">Even</div>
-        <div class="rl-cell rl-out rl-colr" data-bet-type="color" data-bet-key="clr:r" data-bet-nums="[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]">Red</div>
-        <div class="rl-cell rl-out rl-colb" data-bet-type="color" data-bet-key="clr:b" data-bet-nums="[2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35]">Black</div>
-        <div class="rl-cell rl-out" data-bet-type="evenodd" data-bet-key="eo:odd"  data-bet-nums="[1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]">Odd</div>
+        <div class="rl-cell rl-out" data-bet-type="evenodd" data-bet-key="eo:even" data-bet-nums="[2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36]">EVEN</div>
+        <div class="rl-cell rl-out rl-colr" data-bet-type="color" data-bet-key="clr:r" data-bet-nums="[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]"><div class="rl-diamond" style="background:#9E1620"></div></div>
+        <div class="rl-cell rl-out rl-colb" data-bet-type="color" data-bet-key="clr:b" data-bet-nums="[2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35]"><div class="rl-diamond" style="background:#05070A"></div></div>
+        <div class="rl-cell rl-out" data-bet-type="evenodd" data-bet-key="eo:odd"  data-bet-nums="[1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]">ODD</div>
         <div class="rl-cell rl-out" data-bet-type="half"    data-bet-key="half:hi" data-bet-nums="[19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36]">19–36</div>
       </div>
     </div>
@@ -407,98 +450,94 @@ ORIGINALS['originals-roulette']={
   },
 
   _css(){return`
-.rl-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;padding:4px 0 12px}
-.rl-wheel-area{position:relative;display:flex;align-items:center;justify-content:center}
-.rl-wheel{border-radius:50%;display:block;
-  box-shadow:0 0 0 3px rgba(255,255,255,.07),0 8px 40px rgba(0,0,0,.7)}
-.rl-ptr{position:absolute;top:-10px;left:50%;transform:translateX(-50%);
-  color:#d4af37;font-size:22px;line-height:1;
-  filter:drop-shadow(0 2px 5px rgba(0,0,0,.8));pointer-events:none}
-.rl-res{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);
-  width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:15px;font-weight:900;color:#fff;opacity:0;transition:opacity .4s .1s;
-  box-shadow:0 4px 16px rgba(0,0,0,.7);pointer-events:none}
+.rl-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;padding:20px 12px 16px;
+  background:radial-gradient(120% 85% at 50% -5%,#20273A 0%,#161B29 58%,#10141E 100%);border-radius:16px}
+.rl-wheel-area{position:relative;display:flex;align-items:center;justify-content:center;width:100%}
+.rl-ptr{position:absolute;top:2px;left:50%;transform:translateX(-50%);
+  color:#E6BE55;font-size:18px;line-height:1;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.9));pointer-events:none;z-index:2}
+.rl-res{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
+  width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:900;color:#fff;opacity:0;transition:opacity .4s .1s;
+  box-shadow:0 4px 20px rgba(0,0,0,.8);pointer-events:none;z-index:2}
 .rl-res.show{opacity:1}
-.rl-res.green{background:#1e8449}
-.rl-res.red{background:#c92356}
-.rl-res.black{background:#1f1f1f;border:1.5px solid rgba(255,255,255,.2)}
-/* streak bar */
+.rl-res.green{background:#1E7A3C;box-shadow:0 4px 20px rgba(30,122,60,.5)}
+.rl-res.red{background:#C81E29;box-shadow:0 4px 20px rgba(200,30,41,.5)}
+.rl-res.black{background:#14181F;border:1.5px solid rgba(255,255,255,.2)}
+/* streak */
 .rl-streak{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;min-height:20px;
-  padding:0 4px;max-width:640px;width:100%}
+  padding:0 4px;max-width:600px;width:100%}
 .rl-sdot{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:7px;font-weight:800;color:#fff;flex-shrink:0;
-  box-shadow:0 1px 4px rgba(0,0,0,.5)}
-.rl-sdot.green{background:#1e8449}
-.rl-sdot.red{background:#c92356}
+  font-size:7px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.5)}
+.rl-sdot.green{background:#1E7A3C}
+.rl-sdot.red{background:#C81E29}
 .rl-sdot.black{background:#232323;border:1px solid rgba(255,255,255,.18)}
 /* chips */
 .rl-chips{display:flex;gap:7px}
 .rl-chip{position:relative;width:40px;height:40px;border-radius:50%;border:none;
-  background:transparent;cursor:pointer;overflow:hidden;
-  transition:transform .1s,filter .12s;font-family:inherit}
-.rl-chip.active{transform:scale(1.18);box-shadow:0 0 0 2px #fff,0 4px 14px rgba(0,0,0,.5)}
+  background:transparent;cursor:pointer;overflow:hidden;transition:transform .1s,filter .12s;font-family:inherit}
+.rl-chip.active{transform:scale(1.18);box-shadow:0 0 0 2px #E6BE55,0 4px 14px rgba(0,0,0,.5)}
 .rl-chip:hover:not(.active){filter:brightness(1.22)}
 .rl-totals{display:flex;flex-direction:column;gap:5px;font-size:12px;color:rgba(255,255,255,.55)}
 .rl-totals b{color:#e8e8e8}
-/* table layout */
-.rl-table-wrap{width:100%;max-width:640px}
-.rl-tbl{display:flex;flex-direction:column;gap:2px}
-.rl-num-section{display:flex;gap:2px;align-items:stretch}
-.rl-zero-col{flex-shrink:0;width:34px}
-.rl-zero{height:100%;min-height:118px;background:#1e8449;border-radius:5px}
-.rl-mid-wrap{flex:1;display:flex;flex-direction:column;gap:2px}
-.rl-num-and-col{display:flex;gap:2px}
-/* CSS grid for number area: 23 cols (12 num + 11 split-cols), 5 rows */
+/* table */
+.rl-table-wrap{width:100%;max-width:620px}
+.rl-tbl{display:flex;flex-direction:column;gap:6px}
+.rl-num-section{display:flex;gap:6px;align-items:stretch}
+.rl-zero-col{flex-shrink:0;width:36px}
+.rl-zero{height:100%;min-height:118px;
+  background:linear-gradient(158deg,#2E8A50,#10532C);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 4px 14px rgba(0,0,0,.34);border-radius:8px!important}
+.rl-mid-wrap{flex:1;display:flex;flex-direction:column;gap:6px}
+.rl-num-and-col{display:flex;gap:6px}
 .rl-num-area{
   flex:1;display:grid;
-  grid-template-columns:repeat(11,minmax(0,1fr) 8px) minmax(0,1fr);
-  grid-template-rows:repeat(2,34px 8px) 34px;
+  grid-template-columns:repeat(11,minmax(0,1fr) 7px) minmax(0,1fr);
+  grid-template-rows:repeat(2,38px 7px) 38px;
   position:relative}
-.rl-col-bets{flex-shrink:0;width:36px;display:flex;flex-direction:column;gap:8px}
-.rl-col-bets .rl-cell{flex:0 0 34px;height:34px}
-.rl-doz-row,.rl-out-row{display:flex;gap:2px}
+.rl-col-bets{flex-shrink:0;width:38px;display:flex;flex-direction:column;gap:7px}
+.rl-col-bets .rl-cell{flex:0 0 38px;height:38px}
+.rl-doz-row,.rl-out-row{display:flex;gap:6px}
 /* base cell */
 .rl-cell{display:flex;align-items:center;justify-content:center;
-  font-size:10px;font-weight:700;cursor:pointer;user-select:none;border-radius:4px;
-  border:1px solid rgba(255,255,255,.1);
-  transition:filter .12s,transform .06s;position:relative}
-.rl-cell:hover{filter:brightness(1.45);transform:scale(1.06);z-index:4}
-.rl-cell:active{transform:scale(.95)}
-.rl-num{min-height:34px}
-.rl-num.r{background:#c92356}
-.rl-num.b{background:#141414}
-.rl-col{background:rgba(255,255,255,.07);font-size:8px}
-.rl-doz{flex:1;background:rgba(255,255,255,.07);height:26px;min-height:26px}
-.rl-out{flex:1;background:rgba(255,255,255,.07);height:26px;min-height:26px}
-.rl-colr{background:#c92356!important}
-.rl-colb{background:#141414!important}
+  font-size:11px;font-weight:700;cursor:pointer;user-select:none;border-radius:8px;
+  border:1px solid #3A4358;color:#C6CEDF;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 2px 4px rgba(0,0,0,.32);
+  transition:border-color .12s,box-shadow .12s,transform .06s,filter .12s;position:relative}
+.rl-cell:hover{border-color:#E6BE55;box-shadow:0 0 0 1px rgba(230,190,85,.4),0 6px 18px rgba(0,0,0,.5);
+  transform:translateY(-2px);z-index:4;color:#fff}
+.rl-cell:active{transform:scale(.96)}
+/* number cells */
+.rl-num{min-height:38px;border:none;color:#fff;font-size:13px;font-weight:700}
+.rl-num.r{background:#C81E29;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 2px 4px rgba(0,0,0,.32)}
+.rl-num.b{background:#14181F;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 4px rgba(0,0,0,.32)}
+.rl-num:hover{filter:brightness(1.3);border:none}
+.rl-col{background:rgba(255,255,255,.03);font-size:10px;color:#C6CEDF}
+.rl-doz{flex:1;background:rgba(255,255,255,.03);height:30px;min-height:30px;font-size:11px}
+.rl-doz sup{font-size:7px}
+.rl-out{flex:1;background:rgba(255,255,255,.03);height:30px;min-height:30px;font-size:11px;letter-spacing:.04em}
+.rl-colr{background:#C81E29!important;border-color:#C81E29!important}
+.rl-colb{background:#14181F!important}
+.rl-diamond{width:20px;height:20px;transform:rotate(45deg);border-radius:3px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
 /* split / corner hit areas */
-.rl-spl,.rl-cor{
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;z-index:5;border-radius:2px;
-  transition:background .1s}
-.rl-spl:hover,.rl-cor:hover{background:rgba(255,255,255,.08)}
-.rl-spl-dot,.rl-cor-dot{
-  width:7px;height:7px;border-radius:50%;
-  background:rgba(255,255,255,0);
-  border:1.5px solid rgba(255,255,255,0);
-  transition:background .12s,border-color .12s}
-.rl-spl:hover .rl-spl-dot{background:rgba(255,255,255,.88);border-color:rgba(0,0,0,.25)}
+.rl-spl,.rl-cor{display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;border-radius:2px;transition:background .1s}
+.rl-spl:hover,.rl-cor:hover{background:rgba(230,190,85,.12)}
+.rl-spl-dot,.rl-cor-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0);border:1.5px solid rgba(255,255,255,0);transition:background .12s,border-color .12s}
+.rl-spl:hover .rl-spl-dot{background:#E6BE55;border-color:rgba(0,0,0,.25)}
 .rl-cor-dot{border-radius:1px;transform:rotate(45deg)}
-.rl-cor:hover .rl-cor-dot{background:rgba(255,255,255,.88);border-color:rgba(0,0,0,.25)}
+.rl-cor:hover .rl-cor-dot{background:#E6BE55;border-color:rgba(0,0,0,.25)}
 /* chip overlay */
 .rl-bet-chip{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:20px;height:20px;border-radius:50%;
-  font-size:6px;font-weight:900;
-  display:flex;align-items:center;justify-content:center;
-  border:1.5px solid rgba(255,255,255,.5);
-  box-shadow:0 2px 6px rgba(0,0,0,.6);z-index:6;pointer-events:none}
+  width:18px;height:18px;border-radius:50%;
+  font-size:6px;font-weight:900;display:flex;align-items:center;justify-content:center;
+  border:1.5px solid rgba(255,255,255,.5);box-shadow:0 2px 6px rgba(0,0,0,.6);z-index:6;pointer-events:none}
 /* clear button */
-.rl-clr{margin-top:6px;width:100%;background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.08);border-radius:6px;height:26px;
-  color:rgba(255,255,255,.38);font-size:11px;cursor:pointer;font-family:inherit;transition:background .1s}
-.rl-clr:hover{background:rgba(255,255,255,.09);color:#fff}
-@keyframes rl-flash{0%,100%{filter:brightness(1)}45%{filter:brightness(2.4) saturate(1.5)}}
+.rl-clr{margin-top:4px;width:100%;background:rgba(255,255,255,.04);
+  border:1px solid #3A4358;border-radius:8px;height:28px;
+  color:rgba(255,255,255,.35);font-size:11px;cursor:pointer;font-family:inherit;transition:background .1s,border-color .1s}
+.rl-clr:hover{background:rgba(255,255,255,.08);border-color:#E6BE55;color:#fff}
+@keyframes rl-flash{0%,100%{filter:brightness(1)}45%{filter:brightness(2.2) saturate(1.6)}}
 .rl-flash{animation:rl-flash .5s ease 3}
 `},
 
