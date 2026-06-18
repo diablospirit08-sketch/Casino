@@ -281,17 +281,30 @@ ORIGINALS['originals-roulette']={
   },
 
   _renderBets(){
-    document.querySelectorAll('.rl-bet-chip').forEach(e=>e.remove());
+    document.querySelectorAll('.rl-bet-chip,.rl-rt-chip').forEach(e=>e.remove());
+
+    /* table chips — real chip canvas centred on cell */
     for(const bet of this.bets){
       const cell=document.querySelector(`[data-bet-key="${bet.key}"]`);if(!cell)continue;
-      const chip=document.createElement('div');chip.className='rl-bet-chip';
-      chip.style.background=chipCfg(Math.round(bet.fiat)).c1;
-      cell.appendChild(chip);
+      const cv=makeChipCanvas(Math.max(1,Math.round(bet.fiat)),64);
+      cv.className='rl-bet-chip';
+      cell.appendChild(cv);
     }
-    /* highlight active racetrack numbers */
-    const active=new Set(this.bets.flatMap(b=>b.numbers));
+
+    /* racetrack — total fiat per number */
+    const numAmt={};
+    for(const bet of this.bets)
+      for(const n of bet.numbers) numAmt[n]=(numAmt[n]||0)+bet.fiat;
+
     document.querySelectorAll('#rlRtEl .rl-rt-n[data-n]').forEach(el=>{
-      el.classList.toggle('rl-rt-active',active.has(+el.dataset.n));
+      const n=+el.dataset.n;
+      const has=n in numAmt;
+      el.classList.toggle('rl-rt-active',has);
+      if(has){
+        const cv=makeChipCanvas(Math.max(1,Math.round(numAmt[n])),40);
+        cv.className='rl-rt-chip';
+        el.appendChild(cv);
+      }
     });
   },
 
@@ -349,8 +362,8 @@ ORIGINALS['originals-roulette']={
       round++;
       const st=document.getElementById('rlApStatus');
       if(st)st.textContent=`Round ${round} / ${spins}`;
-      await this._spin();
-      if(!this._autoRunning)break;
+      const ok=await this._spin();
+      if(ok===false||!this._autoRunning)break;
       const wc=curW();
       const currFiat=wc?wc.amt*wc.rate:0;
       if(stopWin>0&&(currFiat-startFiat)>=stopWin)break;
@@ -371,8 +384,8 @@ ORIGINALS['originals-roulette']={
     const authed=document.body.classList.contains('authed');
     const w=authed?curW():null;
     const totalC=this.bets.reduce((s,b)=>s+b.amount,0);
-    if(totalC<=0)return;
-    if(authed&&totalC>w.amt+1e-9)return;
+    if(totalC<=0)return false;
+    if(authed&&totalC>w.amt+1e-9)return false;
     this.spinning=true;lockBet(true);gvBetBtn.disabled=true;gvBetBtn.textContent='Spinning…';
     let res=null,spinResult=null;
     if(authed){
@@ -656,6 +669,7 @@ ${brushes}
     }catch(e){}
   },
   _startIdleSpin(){
+    if(this._idleRunning)return; /* guard against double-start */
     const SPEED=(Math.PI*2)/8000; /* 1 full rotation per 8 seconds */
     let last=performance.now();
     const tick=now=>{
@@ -765,9 +779,10 @@ ${brushes}
 
   _css(){return`
 /* layout */
+#gvStage{align-items:stretch!important}
 .rl-wrap{display:flex;flex-direction:row;align-items:flex-start;gap:12px;width:100%;padding:12px;
   background:radial-gradient(120% 85% at 50% -5%,#20273A 0%,#161B29 58%,#10141E 100%);
-  border-radius:16px;box-sizing:border-box}
+  border-radius:16px;box-sizing:border-box;flex:1}
 .rl-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
 .rl-right{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px}
 /* wheel */
@@ -894,10 +909,15 @@ ${brushes}
 .rl-spl:hover .rl-spl-dot{background:#E6BE55;border-color:rgba(0,0,0,.25)}
 .rl-cor-dot{border-radius:1px;transform:rotate(45deg)}
 .rl-cor:hover .rl-cor-dot{background:#E6BE55;border-color:rgba(0,0,0,.25)}
-/* chip overlay */
+/* chip overlay — table */
 .rl-bet-chip{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:16px;height:16px;border-radius:50%;
-  border:1.5px solid rgba(255,255,255,.5);box-shadow:0 2px 6px rgba(0,0,0,.6);z-index:6;pointer-events:none}
+  width:30px;height:30px;border-radius:50%;pointer-events:none;z-index:6;
+  filter:drop-shadow(0 2px 5px rgba(0,0,0,.7))}
+/* chip overlay — racetrack */
+.rl-rt-n{position:relative;overflow:visible}
+.rl-rt-chip{position:absolute;top:-6px;right:-6px;
+  width:14px;height:14px;border-radius:50%;pointer-events:none;z-index:4;
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,.8))}
 /* table action buttons */
 .rl-btns{display:flex;gap:5px;margin-top:2px}
 .rl-rebet,.rl-clr2{flex:1;border-radius:7px;height:26px;font-size:10px;font-weight:700;
