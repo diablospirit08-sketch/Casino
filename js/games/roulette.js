@@ -7,7 +7,8 @@ ORIGINALS['originals-roulette']={
   _history:[], _lastBets:[],
   _undoStack:[],
   _ac:null, _nbTimer:null,
-  _nbCount:2, _autoRunning:false, _racetrkVisible:true,
+  _nbCount:2, _autoRunning:false, _racetrkVisible:true, _fast:false, _muted:false,
+  _sessWag:0, _sessProf:0, _sessWins:0, _sessLoss:0,
   _idleRunning:false, _idleRaf:null,
 
   WHEEL:[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26],
@@ -43,6 +44,7 @@ ORIGINALS['originals-roulette']={
     if(!s){s=document.createElement('style');s.id='rl-css';document.head.appendChild(s);}
     s.textContent=this._css();
     document.querySelector('.gv-panel').classList.add('rl-panel-mode');
+    this._sessWag=0;this._sessProf=0;this._sessWins=0;this._sessLoss=0;
 
     engFields.innerHTML=`
 <div class="rl-tabs">
@@ -64,6 +66,14 @@ ORIGINALS['originals-roulette']={
   <div class="rl-toggle-row">
     <span>RACETRACK</span>
     <label class="rl-tog"><input type="checkbox" id="rlRtToggle" checked><span class="rl-tog-slider"></span></label>
+  </div>
+  <div class="rl-toggle-row">
+    <span>FAST SPIN</span>
+    <label class="rl-tog"><input type="checkbox" id="rlFastToggle"${this._fast?' checked':''}><span class="rl-tog-slider"></span></label>
+  </div>
+  <div class="rl-toggle-row">
+    <span>SOUND</span>
+    <label class="rl-tog"><input type="checkbox" id="rlSoundToggle"${this._muted?'':' checked'}><span class="rl-tog-slider"></span></label>
   </div>
   <div class="rl-nb-row">
     <span>NEIGHBORS</span>
@@ -112,6 +122,7 @@ ORIGINALS['originals-roulette']={
       ${this._buildWheelSVG()}
       <div class="rl-ptr">▼</div>
       <div class="rl-res" id="rlRes"></div>
+      <div class="rl-payout" id="rlPayout"></div>
       <div class="rl-nb-label" id="rlNbLabel"></div>
     </div>
     <div class="rl-streak" id="rlStreak"></div>
@@ -195,6 +206,15 @@ ORIGINALS['originals-roulette']={
     document.getElementById('rlRtToggle').addEventListener('change',e=>{
       this._racetrkVisible=e.target.checked;
       document.getElementById('rlRtWrap').style.display=e.target.checked?'':'none';
+    });
+    /* fast spin toggle */
+    document.getElementById('rlFastToggle').addEventListener('change',e=>{
+      this._fast=e.target.checked;
+    });
+    /* sound toggle */
+    document.getElementById('rlSoundToggle').addEventListener('change',e=>{
+      this._muted=!e.target.checked;
+      if(this._muted)this._muteSpin();
     });
 
     /* neighbors */
@@ -437,20 +457,30 @@ ORIGINALS['originals-roulette']={
     const col=spinResult===0?'green':this.RED.has(spinResult)?'red':'black';
     const rlRes=document.getElementById('rlRes');
     if(rlRes){rlRes.textContent=spinResult;rlRes.className='rl-res show '+col;}
+    const totalFiat=this.bets.reduce((s,b)=>s+b.fiat,0);
+    let payoutFiat=0;
     if(res){
+      payoutFiat=totalFiat*res.multiplier;
       const st={w,b:totalC,name:'Roulette'};
       serverSettleBet(st,res.multiplier,res.new_balance);
       if(res.multiplier>1)this._sndWin();else this._sndLose();
     } else {
-      const won=this.bets.some(b=>b.numbers.includes(spinResult));
-      if(won)this._sndWin();else this._sndLose();
+      payoutFiat=this.bets.filter(b=>b.numbers.includes(spinResult))
+        .reduce((s,b)=>s+b.fiat*(this.PAYS[b.type]||0),0);
+      if(payoutFiat>0)this._sndWin();else this._sndLose();
     }
+    const netFiat=payoutFiat-totalFiat;
+    this._sessWag+=totalFiat;
+    this._sessProf+=netFiat;
+    if(netFiat>0)this._sessWins++;else this._sessLoss++;
+    this._updateSessionStats();
+    this._showPayout(netFiat);
     this._history.unshift({n:spinResult,c:col});
     if(this._history.length>20)this._history.pop();
     this._renderStreak();
     this._flashWin(spinResult);
     this._placeDolly(spinResult);
-    await new Promise(r=>setTimeout(r,2500));
+    await new Promise(r=>setTimeout(r,this._fast?1400:2500));
     this._ballRadius=null;this._updateWheelSVG(this._wheelAngle);
     this.spinning=false;
     this._lastBets=this.bets.map(b=>({...b}));
@@ -474,7 +504,7 @@ ORIGINALS['originals-roulette']={
     const BALL_R_IN=178;  /* pocket centre, between R2=195 and R1=168  */
     const ballStart=-Math.PI/2+(7+Math.random()*3)*Math.PI*2+Math.random()*Math.PI*2;
 
-    const dur=5200,t0=performance.now();
+    const dur=this._fast?2200:5200,t0=performance.now();
     this._sndSpin(dur);this._scheduleBallClicks(dur);
     return new Promise(resolve=>{
       const frame=now=>{
@@ -651,12 +681,36 @@ ${brushes}
     const d=document.getElementById('rlDolly');if(d)d.remove();
   },
 
+  _showPayout(netFiat){
+    const el=document.getElementById('rlPayout');if(!el)return;
+    el.className='rl-payout';
+    if(netFiat>0){
+      el.textContent='+$'+netFiat.toFixed(netFiat<10?2:0);
+      el.classList.add('show','win');
+    } else if(netFiat<0){
+      el.textContent='-$'+Math.abs(netFiat).toFixed(Math.abs(netFiat)<10?2:0);
+      el.classList.add('show','lose');
+    }
+    clearTimeout(this._payoutTimer);
+    this._payoutTimer=setTimeout(()=>{if(el)el.className='rl-payout';},this._fast?1300:2400);
+  },
+
+  _updateSessionStats(){
+    const fmt=v=>'$'+Math.abs(v).toFixed(2);
+    const sw=document.getElementById('sWag');if(sw)sw.textContent=fmt(this._sessWag);
+    const sp=document.getElementById('sProf');
+    if(sp){sp.textContent=(this._sessProf>=0?'+':'-')+fmt(this._sessProf);sp.style.color=this._sessProf>=0?'var(--mint)':'#e2596a';}
+    const swi=document.getElementById('sWins');if(swi)swi.textContent=this._sessWins;
+    const sl=document.getElementById('sLoss');if(sl)sl.textContent=this._sessLoss;
+  },
+
   _getAC(){
     if(!this._ac)this._ac=new(window.AudioContext||window.webkitAudioContext)();
     if(this._ac.state==='suspended')this._ac.resume();
     return this._ac;
   },
   _sndSpin(dur){
+    if(this._muted)return;
     try{
       const ac=this._getAC();
       const buf=ac.createBuffer(1,Math.ceil(ac.sampleRate*dur/1000),ac.sampleRate);
@@ -664,10 +718,16 @@ ${brushes}
       for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.8)*0.12;
       const src=ac.createBufferSource();src.buffer=buf;
       const filt=ac.createBiquadFilter();filt.type='bandpass';filt.frequency.value=280;filt.Q.value=4;
-      src.connect(filt);filt.connect(ac.destination);src.start();
+      const masterGain=ac.createGain();
+      src.connect(filt);filt.connect(masterGain);masterGain.connect(ac.destination);src.start();
+      this._spinGain=masterGain;
     }catch(e){}
   },
+  _muteSpin(){
+    try{if(this._spinGain){this._spinGain.gain.setTargetAtTime(0,this._ac.currentTime,0.05);this._spinGain=null;}}catch(e){}
+  },
   _sndClick(){
+    if(this._muted)return;
     try{
       const ac=this._getAC();
       const osc=ac.createOscillator(),gain=ac.createGain();
@@ -681,6 +741,7 @@ ${brushes}
     }catch(e){}
   },
   _scheduleBallClicks(dur){
+    if(this._muted)return;
     for(let i=0;i<28;i++){
       const t=i/28;
       setTimeout(()=>{try{if(this.spinning)this._sndClick();}catch(e){}},
@@ -688,6 +749,7 @@ ${brushes}
     }
   },
   _sndWin(){
+    if(this._muted)return;
     try{
       const ac=this._getAC();
       [523.25,659.25,783.99,1046.5].forEach((freq,i)=>{
@@ -703,6 +765,7 @@ ${brushes}
     }catch(e){}
   },
   _sndLose(){
+    if(this._muted)return;
     try{
       const ac=this._getAC();
       const osc=ac.createOscillator(),gain=ac.createGain();
@@ -738,6 +801,7 @@ ${brushes}
   },
 
   _sndChip(){
+    if(this._muted)return;
     try{
       const ac=this._getAC();
       const osc=ac.createOscillator(),gain=ac.createGain();
@@ -772,6 +836,18 @@ ${brushes}
         data-bet-type="corner" data-bet-key="cor:${s.join(',')}" data-bet-nums="[${s.join(',')}]"
         title="Corner ${s.join('+')} · 8:1"><span class="rl-cor-dot"></span></div>`;
     };
+    const stc=(nums,gc)=>{
+      const s=nums.slice().sort((a,b)=>a-b);
+      return`<div class="rl-str" style="grid-row:7;grid-column:${gc}"
+        data-bet-type="street" data-bet-key="stt:${s.join(',')}" data-bet-nums="[${s.join(',')}]"
+        title="Street ${s.join('-')} · 11:1"><span class="rl-str-dot"></span></div>`;
+    };
+    const slc=(nums,gc)=>{
+      const s=nums.slice().sort((a,b)=>a-b);
+      return`<div class="rl-sixl" style="grid-row:7;grid-column:${gc}"
+        data-bet-type="sixline" data-bet-key="six:${s.join(',')}" data-bet-nums="[${s.join(',')}]"
+        title="Six Line ${s[0]}-${s[5]} · 5:1"><span class="rl-sixl-dot"></span></div>`;
+    };
     let cells='';
     for(let c=0;c<12;c++) cells+=nc(row1[c],1,2*c+1)+nc(row2[c],3,2*c+1)+nc(row3[c],5,2*c+1);
     for(let c=0;c<11;c++){
@@ -787,6 +863,8 @@ ${brushes}
       cells+=cc([row1[c],row1[c+1],row2[c],row2[c+1]],2,2*c+2);
       cells+=cc([row2[c],row2[c+1],row3[c],row3[c+1]],4,2*c+2);
     }
+    for(let c=0;c<12;c++) cells+=stc([row1[c],row2[c],row3[c]],2*c+1);
+    for(let c=0;c<11;c++) cells+=slc([row1[c],row2[c],row3[c],row1[c+1],row2[c+1],row3[c+1]],2*c+2);
     return`
 <div class="rl-tbl" id="rlTable">
   <div class="rl-num-section">
@@ -846,6 +924,14 @@ ${brushes}
   font-size:16px;font-weight:900;color:#fff;opacity:0;transition:opacity .4s .1s;
   box-shadow:0 4px 20px rgba(0,0,0,.8);pointer-events:none;z-index:2}
 .rl-res.show{opacity:1}
+/* payout toast */
+.rl-payout{position:absolute;top:18%;left:50%;transform:translateX(-50%);
+  font-size:22px;font-weight:900;letter-spacing:.02em;opacity:0;transition:opacity .3s;
+  pointer-events:none;z-index:3;text-shadow:0 2px 12px rgba(0,0,0,.9);white-space:nowrap}
+.rl-payout.show{opacity:1;animation:rl-payout-in .3s cubic-bezier(.34,1.56,.64,1) both}
+.rl-payout.win{color:#4AE68A}
+.rl-payout.lose{color:#e2596a}
+@keyframes rl-payout-in{from{transform:translateX(-50%) scale(.7)}to{transform:translateX(-50%) scale(1)}}
 .rl-res.green{background:#1E7A3C}
 .rl-res.red{background:#C81E29}
 .rl-res.black{background:#14181F;border:1.5px solid rgba(255,255,255,.2)}
@@ -929,7 +1015,7 @@ ${brushes}
 .rl-num-area{
   flex:1;display:grid;
   grid-template-columns:repeat(11,minmax(0,1fr) 6px) minmax(0,1fr);
-  grid-template-rows:repeat(2,40px 6px) 40px;
+  grid-template-rows:repeat(2,40px 6px) 40px 4px 10px;
   position:relative}
 .rl-col-bets{flex-shrink:0;width:36px;display:flex;flex-direction:column;gap:6px}
 .rl-col-bets .rl-cell{flex:0 0 40px;height:40px}
@@ -954,10 +1040,18 @@ ${brushes}
 .rl-colr{background:#C81E29!important;border-color:#C81E29!important}
 .rl-colb{background:#14181F!important}
 .rl-diamond{width:18px;height:18px;transform:rotate(45deg);border-radius:3px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+/* street / six-line */
+.rl-str,.rl-sixl{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;border-radius:2px;transition:background .1s}
+.rl-str::after,.rl-sixl::after{content:'';position:absolute;inset:-6px;z-index:0}
+.rl-str:hover,.rl-sixl:hover{background:rgba(230,190,85,.18)}
+.rl-str-dot,.rl-sixl-dot{width:18px;height:4px;border-radius:2px;background:rgba(255,255,255,0);border:1.5px solid rgba(255,255,255,0);transition:all .12s;position:relative;z-index:1}
+.rl-str:hover .rl-str-dot,.rl-sixl:hover .rl-sixl-dot{background:#E6BE55;border-color:rgba(0,0,0,.2)}
+.rl-sixl-dot{width:28px}
 /* split/corner */
-.rl-spl,.rl-cor{display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;border-radius:2px;transition:background .1s}
+.rl-spl,.rl-cor{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;border-radius:2px;transition:background .1s}
+.rl-spl::after,.rl-cor::after{content:'';position:absolute;inset:-8px;z-index:0}
 .rl-spl:hover,.rl-cor:hover{background:rgba(230,190,85,.12)}
-.rl-spl-dot,.rl-cor-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0);border:1.5px solid rgba(255,255,255,0);transition:all .12s}
+.rl-spl-dot,.rl-cor-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0);border:1.5px solid rgba(255,255,255,0);transition:all .12s;position:relative;z-index:1}
 .rl-spl:hover .rl-spl-dot{background:#E6BE55;border-color:rgba(0,0,0,.25)}
 .rl-cor-dot{border-radius:1px;transform:rotate(45deg)}
 .rl-cor:hover .rl-cor-dot{background:#E6BE55;border-color:rgba(0,0,0,.25)}
