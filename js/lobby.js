@@ -329,7 +329,7 @@ const ROWS = [
     {n:'Roulette',  p:'Volt Originals', g:['#1a6a2e','#2dbd54'], corner:'New'},
     {n:'Coinflip',  p:'Volt Originals', g:['#8a6d1c','#d4af37'], corner:'New'},
   ]},
-  {key:'slots', title:'Slots', icon:'M5 4h14v16H5zM9 4v16M15 4v16', games:[
+  {key:'slots', title:'Slots', icon:'M5 4h14v16H5zM9 4v16M15 4v16', img:'images/slots-777.png.png', games:[
     {n:'Sin City',       p:'TaDa Gaming',    g:['#2b1660','#e052b8'], corner:'New', demo:'https://tadagaming.com/PlusTrial/171/en-us'},
     {n:'Berry Rush',     p:'Pragmatic Play', g:['#1c7d4b','#52c66e'], boost:'Boosted RTP 97.9%', demo:'https://demogamesfree.pragmaticplay.net/gs2c/openGame.do?lang=en&cur=USD&gameid=vs20fruitsweets'},
     {n:'Eternal Clash',  p:'Pragmatic Play', g:['#16365c','#3a6db0'], demo:'https://demogamesfree.pragmaticplay.net/gs2c/openGame.do?lang=en&cur=USD&gameid=vs20olympgate'},
@@ -386,7 +386,7 @@ const GAME_ART_LS=(()=>{try{return JSON.parse(localStorage.getItem('volt-game-ar
 document.getElementById('rows').innerHTML = ROWS.map(row=>`
   <div class="row" id="sec-${row.key}">
     <div class="row-head">
-      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="${row.icon}"/></svg></span>
+      <span class="ic">${row.img?`<img src="${row.img}" style="width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4))">`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="${row.icon}"/></svg>`}</span>
       <h2>${row.title}</h2>
       <div class="row-nav">
         <button class="rbtn" data-scroll="${row.key}" data-dir="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 6-6 6 6 6"/></svg></button>
@@ -724,7 +724,7 @@ function renderSearch(q){
     srchCount.textContent='';
     srchGrid.innerHTML=ROWS.map(row=>`
       <div class="srch-section">
-        <div class="srch-sec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="${row.icon}"/></svg><span>${row.title}</span></div>
+        <div class="srch-sec-head">${row.img?`<img src="${row.img}" style="width:18px;height:18px;object-fit:contain">`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="${row.icon}"/></svg>`}<span>${row.title}</span></div>
         <div class="srch-row">${row.games.map(g=>srchCardHTML(row.key+'-'+slugify(g.n),g.n,g.p,g.g)).join('')}</div>
       </div>`).join('');
   }
