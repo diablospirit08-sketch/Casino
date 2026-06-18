@@ -89,10 +89,10 @@ ORIGINALS['originals-roulette']={
   <div class="rl-ap-status" id="rlApStatus"></div>
 </div>`;
 
-    gvStage.style.overflowY='auto';gvStage.style.overflowX='hidden';
+    gvStage.style.overflowY='';gvStage.style.overflowX='';
     gvStage.innerHTML=`
 <div class="rl-wrap">
-  <div class="rl-main">
+  <div class="rl-left">
     <div class="rl-wheel-area">
       ${this._buildWheelSVG()}
       <div class="rl-ptr">▼</div>
@@ -100,6 +100,8 @@ ORIGINALS['originals-roulette']={
       <div class="rl-nb-label" id="rlNbLabel"></div>
     </div>
     <div class="rl-streak" id="rlStreak"></div>
+  </div>
+  <div class="rl-right">
     <div class="rl-limits">
       <span>MIN <b>$1</b></span>
       <span class="rl-limits-name">European Roulette · 97.3% RTP</span>
@@ -713,12 +715,13 @@ ${brushes}
 
   _css(){return`
 /* layout */
-.rl-wrap{display:flex;flex-direction:row;align-items:flex-start;gap:8px;width:100%;padding:10px 10px 10px;
+.rl-wrap{display:flex;flex-direction:row;align-items:stretch;gap:10px;width:100%;padding:10px;
   background:radial-gradient(120% 85% at 50% -5%,#20273A 0%,#161B29 58%,#10141E 100%);
   border-radius:16px;box-sizing:border-box}
-.rl-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.rl-left{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0}
+.rl-right{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;justify-content:center}
 /* wheel */
-.rl-wheel-area{position:relative;display:flex;align-items:center;justify-content:center;width:100%}
+.rl-wheel-area{position:relative;display:flex;align-items:center;justify-content:center}
 .rl-ptr{position:absolute;top:2px;left:50%;transform:translateX(-50%);
   color:#E6BE55;font-size:18px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.9));pointer-events:none;z-index:2}
 .rl-res{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
@@ -730,7 +733,7 @@ ${brushes}
 .rl-res.red{background:#C81E29}
 .rl-res.black{background:#14181F;border:1.5px solid rgba(255,255,255,.2)}
 /* streak */
-.rl-streak{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;padding:0 4px;width:100%}
+.rl-streak{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;padding:0 4px;width:360px;max-width:100%}
 .rl-sdot{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:6.5px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.5)}
 .rl-sdot.green{background:#1E7A3C}
@@ -797,7 +800,7 @@ ${brushes}
 .rl-limits-name{font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.03em}
 /* table */
 .rl-table-wrap{width:100%;display:flex;flex-direction:column;gap:4px}
-.rl-limits{width:100%}
+.rl-limits{width:100%;font-size:10px}
 .rl-tbl{display:flex;flex-direction:column;gap:5px}
 .rl-num-section{display:flex;gap:5px;align-items:stretch}
 .rl-zero-col{flex-shrink:0;width:34px;align-self:stretch;display:flex}
