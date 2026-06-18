@@ -167,6 +167,19 @@ ORIGINALS['originals-roulette']={
       const cell=e.target.closest('[data-bet-key]');if(!cell)return;
       this._addBet(cell.dataset.betType,cell.dataset.betKey,JSON.parse(cell.dataset.betNums));
     });
+    document.getElementById('rlTable').addEventListener('mouseover',e=>{
+      const cell=e.target.closest('[data-bet-key]');if(!cell)return;
+      const nums=new Set(JSON.parse(cell.dataset.betNums||'[]'));
+      if(nums.size<2)return;
+      document.querySelectorAll('#rlTable .rl-num[data-bet-key]').forEach(el=>{
+        const n=+JSON.parse(el.dataset.betNums||'[]')[0];
+        el.classList.toggle('rl-cover-hi',nums.has(n));
+      });
+    });
+    document.getElementById('rlTable').addEventListener('mouseout',e=>{
+      const cell=e.target.closest('[data-bet-key]');if(!cell)return;
+      document.querySelectorAll('.rl-cover-hi').forEach(el=>el.classList.remove('rl-cover-hi'));
+    });
     document.getElementById('rlTable').addEventListener('contextmenu',e=>{
       e.preventDefault();
       if(this.spinning)return;
@@ -1084,6 +1097,7 @@ ${brushes}
 .rl-num.r{background:#C81E29;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 2px 4px rgba(0,0,0,.32)}
 .rl-num.b{background:#14181F;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 4px rgba(0,0,0,.32)}
 .rl-num:hover{filter:brightness(1.28);border:none}
+.rl-cover-hi{filter:brightness(1.45)!important;box-shadow:inset 0 0 0 2px #E6BE55,0 0 10px rgba(230,190,85,.35)!important;z-index:1;position:relative}
 .rl-col{background:rgba(255,255,255,.03);font-size:9px}
 .rl-doz{flex:1;background:rgba(255,255,255,.03);height:28px;min-height:28px;font-size:11px}
 .rl-doz sup{font-size:7px}
