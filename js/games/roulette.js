@@ -93,15 +93,6 @@ ORIGINALS['originals-roulette']={
     gvStage.innerHTML=`
 <div class="rl-wrap">
   <div class="rl-left">
-    <div class="rl-wheel-area">
-      ${this._buildWheelSVG()}
-      <div class="rl-ptr">▼</div>
-      <div class="rl-res" id="rlRes"></div>
-      <div class="rl-nb-label" id="rlNbLabel"></div>
-    </div>
-    <div class="rl-streak" id="rlStreak"></div>
-  </div>
-  <div class="rl-right">
     <div class="rl-limits">
       <span>MIN <b>$1</b></span>
       <span class="rl-limits-name">European Roulette · 97.3% RTP</span>
@@ -110,9 +101,18 @@ ORIGINALS['originals-roulette']={
     <div class="rl-table-wrap">
       ${this._tableHTML()}
     </div>
+    <div class="rl-rt-wrap" id="rlRtWrap" style="display:none">
+      ${this._buildRacetrack()}
+    </div>
   </div>
-  <div class="rl-rt-wrap" id="rlRtWrap" style="display:none">
-    ${this._buildRacetrack()}
+  <div class="rl-right">
+    <div class="rl-wheel-area">
+      ${this._buildWheelSVG()}
+      <div class="rl-ptr">▼</div>
+      <div class="rl-res" id="rlRes"></div>
+      <div class="rl-nb-label" id="rlNbLabel"></div>
+    </div>
+    <div class="rl-streak" id="rlStreak"></div>
   </div>
 </div>`;
 
@@ -489,7 +489,7 @@ ORIGINALS['originals-roulette']={
     for(let i=0;i<5;i++){
       turret+=`<g transform="rotate(${i*72} 250 250)"><polygon points="246.5,250 253.5,250 251,150 249,150" fill="url(#rlGoldArm)" stroke="#7E5E1C" stroke-width="0.4"/><line x1="250" y1="246" x2="250" y2="153" stroke="#FFF4CE" stroke-opacity="0.5" stroke-width="0.8"/><circle cx="250" cy="150" r="7" fill="url(#rlGoldKnob)" stroke="#7E5E1C" stroke-width="0.6"/></g>`;
     }
-    return`<svg id="rlWheelSvg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:360px;filter:drop-shadow(0 20px 52px rgba(0,0,0,.85))">
+    return`<svg id="rlWheelSvg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:400px;filter:drop-shadow(0 20px 52px rgba(0,0,0,.85))">
 <defs>
 <radialGradient id="rlWoodGrad" cx="50%" cy="42%" r="60%"><stop offset="0%" stop-color="#8A552E"/><stop offset="60%" stop-color="#5C3318"/><stop offset="100%" stop-color="#2E1809"/></radialGradient>
 <radialGradient id="rlWoodInner" cx="50%" cy="40%" r="58%"><stop offset="0%" stop-color="#7A4824"/><stop offset="100%" stop-color="#3A2010"/></radialGradient>
@@ -532,23 +532,21 @@ ${brushes}
   _buildRacetrack(){
     const W=this.WHEEL,R=this.RED;
     const n=(v)=>{const cl=v===0?'g':(R.has(v)?'r':'b');return`<div class="rl-rt-n ${cl}" data-n="${v}">${v}</div>`;};
-    /* vertical layout — left col = former top row (W[19..35]), right col = former bottom row reversed (W[1..16])
-       top cap  = W[17]=23, W[18]=10   bottom cap = W[36]=26, W[0]=0 */
-    const leftCol=W.slice(19,36);            // 17 numbers
-    const rightCol=[...W.slice(1,17)].reverse(); // 16 numbers
-    return`<div class="rl-rt-v" id="rlRtEl">
-  <div class="rl-rt-v-cap">${n(W[17])}${n(W[18])}</div>
-  <div class="rl-rt-v-body">
-    <div class="rl-rt-v-col">${leftCol.map(v=>n(v)).join('')}</div>
-    <div class="rl-rt-v-mid">
-      <div class="rl-rt-sec rl-sec-tiers"   data-sector="tiers"     title="Tiers du Cylindre">T</div>
-      <div class="rl-rt-sec rl-sec-orphelins" data-sector="orphelins" title="Orphelins">O</div>
-      <div class="rl-rt-sec rl-sec-voisins"  data-sector="voisins"   title="Voisins du Zéro">V</div>
-      <div class="rl-rt-sec rl-sec-zero"     data-sector="zero"      title="Zero Spiel">Z</div>
+    const top=W.slice(19,36);                    // W[19..35] — 17 numbers
+    const bot=[...W.slice(1,17)].reverse();      // W[1..16] reversed — 16 numbers
+    return`<div class="rl-rt-h" id="rlRtEl">
+  <div class="rl-rt-end">${n(W[18])}${n(W[17])}</div>
+  <div class="rl-rt-body">
+    <div class="rl-rt-row">${top.map(v=>n(v)).join('')}</div>
+    <div class="rl-rt-secs">
+      <div class="rl-rt-sec rl-sec-tiers"    data-sector="tiers">TIERS</div>
+      <div class="rl-rt-sec rl-sec-orphelins" data-sector="orphelins">ORPHELINS</div>
+      <div class="rl-rt-sec rl-sec-voisins"   data-sector="voisins">VOISINS</div>
+      <div class="rl-rt-sec rl-sec-zero"      data-sector="zero">ZERO</div>
     </div>
-    <div class="rl-rt-v-col">${rightCol.map(v=>n(v)).join('')}</div>
+    <div class="rl-rt-row">${bot.map(v=>n(v)).join('')}</div>
   </div>
-  <div class="rl-rt-v-cap">${n(W[36])}${n(W[0])}</div>
+  <div class="rl-rt-end">${n(W[36])}${n(W[0])}</div>
 </div>`;
   },
 
@@ -715,11 +713,11 @@ ${brushes}
 
   _css(){return`
 /* layout */
-.rl-wrap{display:flex;flex-direction:row;align-items:stretch;gap:10px;width:100%;padding:10px;
+.rl-wrap{display:flex;flex-direction:row;align-items:flex-start;gap:12px;width:100%;padding:12px;
   background:radial-gradient(120% 85% at 50% -5%,#20273A 0%,#161B29 58%,#10141E 100%);
   border-radius:16px;box-sizing:border-box}
-.rl-left{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0}
-.rl-right{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;justify-content:center}
+.rl-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+.rl-right{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px}
 /* wheel */
 .rl-wheel-area{position:relative;display:flex;align-items:center;justify-content:center}
 .rl-ptr{position:absolute;top:2px;left:50%;transform:translateX(-50%);
@@ -733,7 +731,7 @@ ${brushes}
 .rl-res.red{background:#C81E29}
 .rl-res.black{background:#14181F;border:1.5px solid rgba(255,255,255,.2)}
 /* streak */
-.rl-streak{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;padding:0 4px;width:360px;max-width:100%}
+.rl-streak{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;padding:0 4px;width:100%;max-width:400px}
 .rl-sdot{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:6.5px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.5)}
 .rl-sdot.green{background:#1E7A3C}
@@ -867,31 +865,32 @@ ${brushes}
 .rl-cell[data-tip]:hover::after{
   content:'';position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);
   border:3px solid transparent;border-top-color:#E6BE55;pointer-events:none;z-index:200}
-/* racetrack — vertical right sidebar */
-.rl-rt-wrap{flex-shrink:0;width:78px;align-self:stretch}
-.rl-rt-v{display:flex;flex-direction:column;align-items:center;gap:3px;
-  background:#0D1322;border-radius:20px;border:1.5px solid #252D3D;
-  padding:6px 4px;height:100%;box-sizing:border-box}
-.rl-rt-v-cap{display:flex;gap:2px}
-.rl-rt-v-body{flex:1;display:flex;gap:2px;align-items:flex-start}
-.rl-rt-v-col{display:flex;flex-direction:column;gap:2px}
-.rl-rt-v-mid{display:flex;flex-direction:column;gap:2px;width:20px}
-.rl-rt-sec{display:flex;align-items:center;justify-content:center;
-  font-size:9px;font-weight:900;letter-spacing:.02em;cursor:pointer;
-  border-radius:3px;transition:all .14s;padding:2px 1px;width:20px}
-.rl-rt-sec:hover{transform:scaleX(1.2);z-index:2}
-.rl-sec-tiers{flex:4;color:#4A90D9;background:rgba(21,101,192,.12)}
-.rl-sec-tiers:hover{background:rgba(21,101,192,.3);color:#7AB8F0}
-.rl-sec-orphelins{flex:3;color:#D94A8A;background:rgba(173,26,87,.12)}
-.rl-sec-orphelins:hover{background:rgba(173,26,87,.3);color:#EC7AB8}
-.rl-sec-voisins{flex:5;color:#C8960F;background:rgba(184,134,11,.12)}
-.rl-sec-voisins:hover{background:rgba(184,134,11,.3);color:#E0B830}
-.rl-sec-zero{flex:3;color:#4CAF66;background:rgba(27,94,32,.15)}
-.rl-sec-zero:hover{background:rgba(27,94,32,.3);color:#6DD98A}
+/* racetrack — horizontal under table */
+.rl-rt-wrap{width:100%}
+.rl-rt-h{display:flex;align-items:stretch;background:#0D1322;border-radius:40px;
+  border:1.5px solid #252D3D;padding:5px 0;overflow:hidden}
+.rl-rt-end{display:flex;flex-direction:column;justify-content:space-around;align-items:center;
+  padding:0 8px;min-width:42px;gap:3px}
+.rl-rt-body{flex:1;display:flex;flex-direction:column;
+  border-left:1px solid #252D3D;border-right:1px solid #252D3D}
+.rl-rt-row{display:flex;justify-content:space-between;padding:3px 4px;gap:2px}
+.rl-rt-secs{display:flex;border-top:1px solid #252D3D;border-bottom:1px solid #252D3D;min-height:24px}
+.rl-rt-sec{display:flex;align-items:center;justify-content:center;flex:1;
+  font-size:9px;font-weight:800;letter-spacing:.06em;cursor:pointer;
+  border-right:1px solid #252D3D;transition:all .14s;padding:0 4px}
+.rl-rt-sec:last-child{border-right:none}
+.rl-sec-tiers{color:#4A90D9}
+.rl-sec-tiers:hover{background:rgba(21,101,192,.2);color:#7AB8F0}
+.rl-sec-orphelins{color:#D94A8A}
+.rl-sec-orphelins:hover{background:rgba(173,26,87,.2);color:#EC7AB8}
+.rl-sec-voisins{color:#C8960F}
+.rl-sec-voisins:hover{background:rgba(184,134,11,.2);color:#E0B830}
+.rl-sec-zero{color:#4CAF66}
+.rl-sec-zero:hover{background:rgba(27,94,32,.25);color:#6DD98A}
 /* racetrack number cells */
-.rl-rt-n{width:24px;height:22px;border-radius:4px;flex-shrink:0;
+.rl-rt-n{width:26px;height:26px;border-radius:5px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-size:8px;font-weight:700;cursor:pointer;user-select:none;
+  font-size:9px;font-weight:700;cursor:pointer;user-select:none;
   transition:transform .1s,filter .1s}
 .rl-rt-n.r{background:#C81E29;color:#fff}
 .rl-rt-n.b{background:#181F2E;color:#fff;border:1px solid #2A3148}
