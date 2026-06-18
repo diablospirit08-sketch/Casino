@@ -89,6 +89,7 @@ ORIGINALS['originals-roulette']={
   <div class="rl-ap-status" id="rlApStatus"></div>
 </div>`;
 
+    gvStage.style.overflowY='auto';gvStage.style.overflowX='hidden';
     gvStage.innerHTML=`
 <div class="rl-wrap">
   <div class="rl-wheel-area">
@@ -476,7 +477,7 @@ ORIGINALS['originals-roulette']={
     for(let i=0;i<5;i++){
       turret+=`<g transform="rotate(${i*72} 250 250)"><polygon points="246.5,250 253.5,250 251,150 249,150" fill="url(#rlGoldArm)" stroke="#7E5E1C" stroke-width="0.4"/><line x1="250" y1="246" x2="250" y2="153" stroke="#FFF4CE" stroke-opacity="0.5" stroke-width="0.8"/><circle cx="250" cy="150" r="7" fill="url(#rlGoldKnob)" stroke="#7E5E1C" stroke-width="0.6"/></g>`;
     }
-    return`<svg id="rlWheelSvg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:360px;filter:drop-shadow(0 20px 52px rgba(0,0,0,.85))">
+    return`<svg id="rlWheelSvg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:300px;filter:drop-shadow(0 20px 52px rgba(0,0,0,.85))">
 <defs>
 <radialGradient id="rlWoodGrad" cx="50%" cy="42%" r="60%"><stop offset="0%" stop-color="#8A552E"/><stop offset="60%" stop-color="#5C3318"/><stop offset="100%" stop-color="#2E1809"/></radialGradient>
 <radialGradient id="rlWoodInner" cx="50%" cy="40%" r="58%"><stop offset="0%" stop-color="#7A4824"/><stop offset="100%" stop-color="#3A2010"/></radialGradient>
@@ -705,7 +706,7 @@ ${brushes}
 
   _css(){return`
 /* layout */
-.rl-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;padding:14px 16px 12px;
+.rl-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;padding:10px 12px 10px;
   background:radial-gradient(120% 85% at 50% -5%,#20273A 0%,#161B29 58%,#10141E 100%);
   border-radius:16px;box-sizing:border-box}
 /* wheel */
@@ -900,5 +901,6 @@ ${brushes}
   unmount(){
     this.bets=[];this.spinning=false;this._ballRadius=null;
     this._autoRunning=false;clearTimeout(this._nbTimer);
+    if(typeof gvStage!=='undefined'&&gvStage){gvStage.style.overflowY='';gvStage.style.overflowX='';}
   }
 };
