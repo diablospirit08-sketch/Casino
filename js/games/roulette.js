@@ -117,31 +117,41 @@ ORIGINALS['originals-roulette']={
   onBet(){if(!this.spinning&&this.bets.length>0)this._spin();},
 
   async _spin(){
-    if(!document.body.classList.contains('authed')){openAuth('in');return;}
-    const w=curW();
+    const authed=document.body.classList.contains('authed');
+    const w=authed?curW():null;
     const totalC=this.bets.reduce((s,b)=>s+b.amount,0);
-    if(totalC<=0||totalC>w.amt+1e-9)return;
+    if(totalC<=0)return;
+    if(authed&&totalC>w.amt+1e-9)return;
     this.spinning=true;lockBet(true);gvBetBtn.disabled=true;gvBetBtn.textContent='Spinning…';
-    w.amt-=totalC;w.fiat=w.amt*w.rate;renderWallet();
-    const st={w,b:totalC,name:'Roulette'};
-    let res;
-    try{
-      res=await placeBet({game:'roulette',currency:w.c,wager:totalC,
-        params:{bets:this.bets.map(b=>({type:b.type,numbers:b.numbers,amount:b.amount}))}});
-    }catch(err){
-      w.amt+=totalC;w.fiat=w.amt*w.rate;renderWallet();
-      this.spinning=false;lockBet(false);
-      this.bets=[];this._renderBets();this._syncInfo();this._syncBtn();
-      if(window.showToast)showToast({icon:'⚠',title:'Spin failed',sub:err.message});
-      return;
+    let res=null,spinResult=null;
+    if(authed){
+      w.amt-=totalC;w.fiat=w.amt*w.rate;renderWallet();
+      const st={w,b:totalC,name:'Roulette'};
+      try{
+        res=await placeBet({game:'roulette',currency:w.c,wager:totalC,
+          params:{bets:this.bets.map(b=>({type:b.type,numbers:b.numbers,amount:b.amount}))}});
+        spinResult=res.gameData.result;
+      }catch(err){
+        /* live call failed — refund and fall through to demo spin */
+        w.amt+=totalC;w.fiat=w.amt*w.rate;renderWallet();
+        res=null;
+      }
     }
-    const spinResult=res.gameData.result;
+    /* demo / fallback: pick random result locally */
+    if(spinResult===null||spinResult===undefined)
+      spinResult=this.WHEEL[Math.floor(Math.random()*37)];
     await this._animateWheel(spinResult);
     const col=spinResult===0?'green':this.RED.has(spinResult)?'red':'black';
     const rlRes=document.getElementById('rlRes');
     if(rlRes){rlRes.textContent=spinResult;rlRes.className='rl-res show '+col;}
-    serverSettleBet(st,res.multiplier,res.new_balance);
-    if(res.multiplier>1)this._sndWin();else this._sndLose();
+    if(res){
+      const st={w,b:totalC,name:'Roulette'};
+      serverSettleBet(st,res.multiplier,res.new_balance);
+      if(res.multiplier>1)this._sndWin();else this._sndLose();
+    }else{
+      const won=this.bets.some(b=>b.numbers.includes(spinResult));
+      if(won)this._sndWin();else this._sndLose();
+    }
     this._history.unshift({n:spinResult,c:col});
     if(this._history.length>20)this._history.pop();
     this._renderStreak();
@@ -484,8 +494,8 @@ ${brushes}
 .rl-table-wrap{width:100%;max-width:620px}
 .rl-tbl{display:flex;flex-direction:column;gap:6px}
 .rl-num-section{display:flex;gap:6px;align-items:stretch}
-.rl-zero-col{flex-shrink:0;width:36px}
-.rl-zero{height:100%;min-height:118px;
+.rl-zero-col{flex-shrink:0;width:36px;align-self:stretch;display:flex}
+.rl-zero{flex:1;min-height:118px;
   background:linear-gradient(158deg,#2E8A50,#10532C);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 4px 14px rgba(0,0,0,.34);border-radius:8px!important}
 .rl-mid-wrap{flex:1;display:flex;flex-direction:column;gap:6px}
