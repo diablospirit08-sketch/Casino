@@ -792,7 +792,7 @@ ${brushes}
     }catch(e){}
   },
   _scheduleBallClicks(dur){
-    if(this._muted)return;
+    if(this._muted||this._ballBuf||this._ballBufRaw)return;
     for(let i=0;i<28;i++){
       const t=i/28;
       setTimeout(()=>{try{if(this.spinning)this._sndClick();}catch(e){}},
