@@ -381,7 +381,7 @@ ORIGINALS['originals-roulette']={
 
   _renderStreak(){
     const el=document.getElementById('rlStreak');if(!el)return;
-    el.innerHTML=this._history.map(h=>`<span class="rl-sdot ${h.c}" title="${h.n}">${h.n}</span>`).join('');
+    el.innerHTML=this._history.map((h,i)=>`<span class="rl-sdot ${h.c}${i===0?' rl-sdot-new':''}" title="Number ${h.n}">${h.n}</span>`).join('');
   },
 
   _syncInfo(){
@@ -1000,12 +1000,16 @@ ${brushes}
 .rl-res.red{background:#C81E29}
 .rl-res.black{background:#14181F;border:1.5px solid rgba(255,255,255,.2)}
 /* streak */
-.rl-streak{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;padding:0 4px;width:100%;max-width:400px}
-.rl-sdot{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:6.5px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.5)}
-.rl-sdot.green{background:#1E7A3C}
-.rl-sdot.red{background:#C81E29}
-.rl-sdot.black{background:#232323;border:1px solid rgba(255,255,255,.18)}
+.rl-streak{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;padding:6px 8px;width:100%;max-width:420px}
+.rl-sdot{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;color:#fff;flex-shrink:0;
+  box-shadow:0 2px 6px rgba(0,0,0,.55);cursor:default;transition:transform .15s}
+.rl-sdot:hover{transform:scale(1.18);z-index:2;position:relative}
+.rl-sdot.green{background:linear-gradient(145deg,#27a34f,#1E7A3C)}
+.rl-sdot.red{background:linear-gradient(145deg,#e02535,#C81E29)}
+.rl-sdot.black{background:linear-gradient(145deg,#2a2f3a,#17191f);border:1px solid rgba(255,255,255,.14)}
+@keyframes sdotIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.rl-sdot-new{box-shadow:0 0 0 2px #E6BE55,0 2px 10px rgba(230,190,85,.45);animation:sdotIn .25s cubic-bezier(.34,1.56,.64,1) both}
 /* left panel tabs */
 .rl-tabs{display:flex;gap:4px;padding:2px;background:rgba(0,0,0,.3);border-radius:8px;margin-bottom:2px}
 .rl-tab{flex:1;padding:5px 8px;background:transparent;border:none;border-radius:6px;
