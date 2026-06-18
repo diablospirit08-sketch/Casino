@@ -256,17 +256,18 @@ ORIGINALS['originals-roulette']={
     this._startIdleSpin();
   },
 
-  _addBet(type,key,numbers){
+  _addBet(type,key,numbers,src='tbl'){
     const w=curW();
     const rate=(w&&w.rate)||1;
     const maxAmt=(w&&w.amt!=null)?w.amt:1e9;
     const chipCrypto=this._chipVal/rate;
     const totalSoFar=this.bets.reduce((s,b)=>s+b.amount,0);
     if(totalSoFar+chipCrypto>maxAmt+1e-9)return;
-    const ex=this.bets.find(b=>b.key===key);
+    const fullKey=src==='rt'?'rt:'+key:key;
+    const ex=this.bets.find(b=>b.key===fullKey);
     if(ex){ex.amount+=chipCrypto;ex.fiat+=this._chipVal;}
-    else this.bets.push({type,key,numbers,amount:chipCrypto,fiat:this._chipVal});
-    this._undoStack.push({key,fiat:this._chipVal,crypto:chipCrypto});
+    else this.bets.push({type,key:fullKey,numbers,amount:chipCrypto,fiat:this._chipVal,src});
+    this._undoStack.push({key:fullKey,fiat:this._chipVal,crypto:chipCrypto});
     this._sndChip();
     this._renderBets();this._syncInfo();this._syncBtn();
   },
@@ -309,7 +310,7 @@ ORIGINALS['originals-roulette']={
     list.forEach(b=>{
       const s=b.nums.slice().sort((a,c)=>a-c);
       const prefix={straight:'str',split:'spl',street:'str',corner:'cor'}[b.type]||b.type;
-      this._addBet(b.type,`${prefix}:${s.join(',')}`,s);
+      this._addBet(b.type,`${prefix}:${s.join(',')}`,s,'rt');
     });
   },
 
@@ -318,7 +319,7 @@ ORIGINALS['originals-roulette']={
     const count=this._nbCount;
     const nums=[];
     for(let d=-count;d<=count;d++) nums.push(W[(idx+d+len)%len]);
-    nums.forEach(ni=>this._addBet('straight',`str:${ni}`,[ni]));
+    nums.forEach(ni=>this._addBet('straight',`str:${ni}`,[ni],'rt'));
     const lbl=document.getElementById('rlNbLabel');
     if(lbl){
       lbl.textContent=nums.join(' · ');
@@ -335,6 +336,7 @@ ORIGINALS['originals-roulette']={
 
     /* table chips — stacked canvases, each offset 3px upward */
     for(const bet of this.bets){
+      if(bet.src==='rt')continue;
       const cell=document.querySelector(`[data-bet-key="${bet.key}"]`);if(!cell)continue;
       const n=stackN(bet.fiat);
       for(let i=0;i<n;i++){
@@ -345,10 +347,11 @@ ORIGINALS['originals-roulette']={
       }
     }
 
-    /* racetrack — total fiat per number */
+    /* racetrack — total fiat per number, racetrack bets only */
     const numAmt={};
     for(const bet of this.bets)
-      for(const n of bet.numbers) numAmt[n]=(numAmt[n]||0)+bet.fiat;
+      if(bet.src==='rt')
+        for(const n of bet.numbers) numAmt[n]=(numAmt[n]||0)+bet.fiat;
 
     document.querySelectorAll('#rlRtEl .rl-rt-n[data-n]').forEach(el=>{
       const n=+el.dataset.n;
