@@ -8,6 +8,7 @@ ORIGINALS['originals-roulette']={
   _undoStack:[],
   _ac:null, _nbTimer:null,
   _nbCount:2, _autoRunning:false, _racetrkVisible:false,
+  _idleRunning:false, _idleRaf:null,
 
   WHEEL:[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26],
   RED:new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]),
@@ -211,6 +212,7 @@ ORIGINALS['originals-roulette']={
 
     this._updateWheelSVG(this._wheelAngle);
     this._renderBets();this._renderStreak();this._syncInfo();this._syncBtn();
+    this._startIdleSpin();
   },
 
   _addBet(type,key,numbers){
@@ -417,18 +419,41 @@ ORIGINALS['originals-roulette']={
     const diff=((target-this._wheelAngle)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
     const wheelEnd=this._wheelAngle+(5+Math.random()*2)*Math.PI*2+diff;
     const wheelStart=this._wheelAngle;
-    const ballStart=-Math.PI/2+(8+Math.random()*2)*Math.PI*2+Math.random()*Math.PI*2;
-    const ballEnd=-Math.PI/2;
-    const BALL_OUT=83,BALL_IN=60;
-    const dur=4800,t0=performance.now();
+
+    /* ball: wide outer orbit → drop → snap into pocket */
+    const BALL_R_OUT=220; /* outside frets (~224), clear outer track */
+    const BALL_R_IN=178;  /* pocket centre, between R2=195 and R1=168  */
+    const ballStart=-Math.PI/2+(7+Math.random()*3)*Math.PI*2+Math.random()*Math.PI*2;
+
+    const dur=5200,t0=performance.now();
     this._sndSpin(dur);this._scheduleBallClicks(dur);
     return new Promise(resolve=>{
       const frame=now=>{
         const t=Math.min((now-t0)/dur,1);
+
+        /* wheel — ease-out cubic */
         this._wheelAngle=wheelStart+(wheelEnd-wheelStart)*(1-Math.pow(1-t,3));
-        const be=1-Math.pow(1-Math.min(t/0.9,1),2.5);
-        this._ballAngle=ballStart+(ballEnd-ballStart)*be;
-        this._ballRadius=t<0.65?BALL_OUT:BALL_OUT-(BALL_OUT-BALL_IN)*Math.pow((t-0.65)/0.35,2);
+
+        /* ball radius — flat outer orbit until 0.62, then sharp pow-0.35 drop */
+        if(t<0.62){
+          this._ballRadius=BALL_R_OUT;
+        } else {
+          const d=(t-0.62)/0.38;
+          this._ballRadius=BALL_R_OUT+(BALL_R_IN-BALL_R_OUT)*Math.pow(d,0.35);
+        }
+
+        /* ball angle — free spin converges toward pocket top, then snap */
+        const be=1-Math.pow(1-Math.min(t/0.88,1),2.8);
+        const freeAngle=ballStart+((-Math.PI/2)-ballStart)*be;
+        if(t<0.78){
+          this._ballAngle=freeAngle;
+        } else {
+          /* pocket SVG angle follows wheel so ball locks into the pocket */
+          const pocketAngle=-Math.PI/2+idx*seg+this._wheelAngle;
+          const snap=Math.pow((t-0.78)/0.22,1.4);
+          this._ballAngle=freeAngle+(pocketAngle-freeAngle)*snap;
+        }
+
         this._updateWheelSVG(this._wheelAngle);
         if(t<1)requestAnimationFrame(frame);else resolve();
       };
@@ -446,9 +471,9 @@ ORIGINALS['originals-roulette']={
     if(!ball)return;
     if(this._ballRadius===null){ball.style.display='none';return;}
     ball.style.display='';
-    const r_svg=181+(210-181)*(this._ballRadius-60)/(83-60);
-    ball.setAttribute('cx',(250+r_svg*Math.cos(this._ballAngle)).toFixed(1));
-    ball.setAttribute('cy',(250+r_svg*Math.sin(this._ballAngle)).toFixed(1));
+    /* _ballRadius is now a direct SVG radius — no mapping needed */
+    ball.setAttribute('cx',(250+this._ballRadius*Math.cos(this._ballAngle)).toFixed(1));
+    ball.setAttribute('cy',(250+this._ballRadius*Math.sin(this._ballAngle)).toFixed(1));
   },
 
   _buildWheelSVG(){
@@ -518,7 +543,7 @@ ${numbers}
 </g>
 <circle cx="250" cy="250" r="232" fill="url(#rlGloss)" pointer-events="none"/>
 <circle cx="250" cy="250" r="249" fill="url(#rlDepth)" pointer-events="none"/>
-<circle id="rlBall" cx="250" cy="98" r="7" fill="url(#rlBallGrad)" style="display:none"/>
+<circle id="rlBall" cx="250" cy="98" r="8" fill="url(#rlBallGrad)" stroke="rgba(255,255,255,0.4)" stroke-width="0.8" style="display:none"/>
 <circle cx="250" cy="250" r="146" fill="url(#rlCenterDisc)" stroke="#7E5E1C" stroke-width="1.5"/>
 <circle cx="250" cy="250" r="146" fill="url(#rlGloss)" pointer-events="none"/>
 ${brushes}
@@ -624,6 +649,27 @@ ${brushes}
       osc.start();osc.stop(ac.currentTime+0.5);
     }catch(e){}
   },
+  _startIdleSpin(){
+    const SPEED=(Math.PI*2)/8000; /* 1 full rotation per 8 seconds */
+    let last=performance.now();
+    const tick=now=>{
+      if(!this._idleRunning)return;
+      const dt=now-last; last=now;
+      if(!this.spinning){
+        this._wheelAngle+=SPEED*dt;
+        this._updateWheelSVG(this._wheelAngle);
+      }
+      this._idleRaf=requestAnimationFrame(tick);
+    };
+    this._idleRunning=true;
+    this._idleRaf=requestAnimationFrame(tick);
+  },
+
+  _stopIdleSpin(){
+    this._idleRunning=false;
+    if(this._idleRaf){cancelAnimationFrame(this._idleRaf);this._idleRaf=null;}
+  },
+
   _sndChip(){
     try{
       const ac=this._getAC();
@@ -909,6 +955,7 @@ ${brushes}
 `},
 
   unmount(){
+    this._stopIdleSpin();
     this.bets=[];this.spinning=false;this._ballRadius=null;
     this._autoRunning=false;clearTimeout(this._nbTimer);
     if(typeof gvStage!=='undefined'&&gvStage){gvStage.style.overflowY='';gvStage.style.overflowX='';}
