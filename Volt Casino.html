@@ -447,6 +447,12 @@
   .coin{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;color:#0a0a0c;flex:none}
   .help{display:flex;flex-direction:column;align-items:center;gap:14px;padding:34px 0 10px;text-align:center}
   .help h3{font-size:16px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+  .rg-strip{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:20px 0;border-bottom:1px solid var(--line)}
+  .rg-strip .lbl{font-size:10.5px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;margin-right:8px;color:var(--muted-2);flex:none}
+  .rg-badge{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;color:var(--muted);text-decoration:none;transition:.15s;white-space:nowrap}
+  .rg-badge:hover{border-color:var(--mint);color:var(--txt)}
+  .rg-badge svg{flex:none}
+  .rg-18{width:30px;height:30px;border-radius:6px;background:#c0392b;display:grid;place-items:center;font-size:13px;font-weight:900;color:#fff;flex:none;letter-spacing:-.5px}
   .fineprint{margin-top:26px;font-size:11px;line-height:1.7;color:#525a6e;max-width:880px}
   .copyright{margin-top:14px;font-size:11px;color:var(--muted-2)}
 
@@ -1155,6 +1161,22 @@
         <div><h4>Support</h4><a href="#" data-act="chat">Live Support</a><a href="#" data-act="help">Help Center</a><a href="#" data-act="responsible">Responsible Gambling</a><a href="#" data-act="complaint">Complaint Form</a></div>
       </div>
       <div class="pay-strip" id="payStrip"><span class="lbl">Payments</span></div>
+      <div class="rg-strip">
+        <span class="lbl">Responsible Gambling</span>
+        <div class="rg-18">18+</div>
+        <a href="https://www.begambleaware.org" target="_blank" rel="noopener" class="rg-badge">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          BeGambleAware
+        </a>
+        <a href="https://www.gamstop.co.uk" target="_blank" rel="noopener" class="rg-badge">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3d9bff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+          GamStop
+        </a>
+        <a href="https://www.gamcare.org.uk" target="_blank" rel="noopener" class="rg-badge">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffd23d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          GamCare
+        </a>
+      </div>
       <div class="help">
         <h3>How can we help?</h3>
         <button class="btn btn-mint" id="contactBtn">Contact Us</button>
