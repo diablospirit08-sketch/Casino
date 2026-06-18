@@ -286,7 +286,7 @@ ORIGINALS['originals-roulette']={
     /* table chips — real chip canvas centred on cell */
     for(const bet of this.bets){
       const cell=document.querySelector(`[data-bet-key="${bet.key}"]`);if(!cell)continue;
-      const cv=makeChipCanvas(Math.max(1,Math.round(bet.fiat)),64);
+      const cv=makeChipCanvas(Math.max(1,Math.round(bet.fiat)),40);
       cv.className='rl-bet-chip';
       cell.appendChild(cv);
     }
@@ -779,10 +779,9 @@ ${brushes}
 
   _css(){return`
 /* layout */
-#gvStage{align-items:stretch!important}
 .rl-wrap{display:flex;flex-direction:row;align-items:flex-start;gap:12px;width:100%;padding:12px;
   background:radial-gradient(120% 85% at 50% -5%,#20273A 0%,#161B29 58%,#10141E 100%);
-  border-radius:16px;box-sizing:border-box;flex:1}
+  border-radius:16px;box-sizing:border-box}
 .rl-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
 .rl-right{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px}
 /* wheel */
@@ -911,7 +910,7 @@ ${brushes}
 .rl-cor:hover .rl-cor-dot{background:#E6BE55;border-color:rgba(0,0,0,.25)}
 /* chip overlay — table */
 .rl-bet-chip{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:30px;height:30px;border-radius:50%;pointer-events:none;z-index:6;
+  width:20px;height:20px;border-radius:50%;pointer-events:none;z-index:6;
   filter:drop-shadow(0 2px 5px rgba(0,0,0,.7))}
 /* chip overlay — racetrack */
 .rl-rt-n{position:relative;overflow:visible}
