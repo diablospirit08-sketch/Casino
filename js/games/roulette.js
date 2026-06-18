@@ -673,10 +673,10 @@ ${brushes}
     const _ST={tiers:new Set([5,8,10,11,13,16,23,24,27,30,33,36]),orphelins:new Set([1,6,9,14,17,20,31,34]),zero:new Set([0,3,12,15,26,32,35])};
     const _sc=v=>_ST.tiers.has(v)?'tiers':_ST.orphelins.has(v)?'orphelins':_ST.zero.has(v)?'zero':'voisins';
     const n=(v)=>{const cl=v===0?'g':(R.has(v)?'r':'b');return`<div class="rl-rt-n ${cl} rl-sc-${_sc(v)}" data-n="${v}">${v}</div>`;};
-    const top=W.slice(19,36);                    // W[19..35] — 17 numbers
+    const top=W.slice(19,35);                    // W[19..34] — 16 numbers
     const bot=[...W.slice(1,17)].reverse();      // W[1..16] reversed — 16 numbers
     return`<div class="rl-rt-h" id="rlRtEl">
-  <div class="rl-rt-end">${n(W[18])}${n(W[17])}</div>
+  <div class="rl-rt-end rl-rt-end-l">${n(W[18])}${n(W[17])}</div>
   <div class="rl-rt-body">
     <div class="rl-rt-row">${top.map(v=>n(v)).join('')}</div>
     <div class="rl-rt-secs">
@@ -687,7 +687,7 @@ ${brushes}
     </div>
     <div class="rl-rt-row">${bot.map(v=>n(v)).join('')}</div>
   </div>
-  <div class="rl-rt-end">${n(W[36])}${n(W[0])}</div>
+  <div class="rl-rt-end rl-rt-end-r">${n(W[35])}${n(W[36])}${n(W[0])}</div>
 </div>`;
   },
 
@@ -1177,8 +1177,9 @@ ${brushes}
 .rl-rt-wrap{width:100%}
 .rl-rt-h{display:flex;align-items:stretch;background:#0D1322;border-radius:100px;
   border:1.5px solid #252D3D;padding:6px 0}
-.rl-rt-end{display:flex;flex-direction:column;justify-content:space-around;align-items:center;
-  padding:0 12px;min-width:50px;gap:3px}
+.rl-rt-end{display:flex;flex-direction:column;justify-content:space-around;align-items:center;gap:3px}
+.rl-rt-end-l{padding:0 10px 0 14px;min-width:48px}
+.rl-rt-end-r{padding:0 14px 0 10px;min-width:58px}
 .rl-rt-body{flex:1;display:flex;flex-direction:column}
 .rl-rt-row{display:flex;justify-content:space-between;padding:3px 4px;gap:2px}
 .rl-rt-secs{display:flex;border-top:1px solid #252D3D;border-bottom:1px solid #252D3D;min-height:24px}
