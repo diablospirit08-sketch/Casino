@@ -35,6 +35,8 @@ function renderVip(){
     <div class="vip-meta"><span>${nx?Math.floor(pct)+'%':'MAX TIER'}</span><div class="vip-dots"></div><span>${nx?'Next: '+nx.n+' · '+nx.xp.toLocaleString('en-US')+' XP':''}</span></div>`;
   $id('avatarBtn').style.borderColor=v.col;
   $id('avatarBtn').style.color=v.col;
+  const badge=$id('vipBadge');
+  if(badge){badge.textContent=v.rn;badge.style.color=v.col;badge.style.borderColor=v.col;badge.style.background=v.col+'22';}
   renderVipTrack();
 }
 
