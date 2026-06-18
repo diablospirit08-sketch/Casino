@@ -302,8 +302,8 @@ function closeRace(){
   raceOverlay.classList.remove('open');
   clearInterval(raceTimer);raceTimer=null;
 }
-$id('promoRace').addEventListener('click',openRace);
-$id('promoRace').addEventListener('keydown',e=>{
+$id('promoRace')?.addEventListener('click',openRace);
+$id('promoRace')?.addEventListener('keydown',e=>{
   if(e.key==='Enter'||e.key===' '){e.preventDefault();openRace();}
 });
 $id('raceClose').addEventListener('click',closeRace);
@@ -354,15 +354,15 @@ const PAGES={
 
     <h3 style="font-size:13px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;margin:22px 0 10px;color:var(--txt)">📞 Free Help & Support</h3>
     <div style="display:grid;gap:8px">
-      <a href="https://www.begambleaware.org" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 16px;color:var(--txt);text-decoration:none;transition:.15s" onmouseover="this.style.borderColor='var(--mint)'" onmouseout="this.style.borderColor='var(--line)'">
-        <div><b style="font-size:13px">BeGambleAware</b><p style="color:var(--muted);font-size:12px;margin-top:2px">Free advice, information & support</p></div>
+      <a href="https://www.begambleaware.org" target="_blank" rel="noopener" class="rg-help-link">
+        <div><b style="font-size:13px">BeGambleAware</b><p style="color:var(--muted);font-size:12px;margin-top:2px">Free advice, information &amp; support</p></div>
         <span style="color:var(--muted);font-size:12px">begambleaware.org →</span>
       </a>
-      <a href="https://www.gamcare.org.uk" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 16px;color:var(--txt);text-decoration:none;transition:.15s" onmouseover="this.style.borderColor='var(--mint)'" onmouseout="this.style.borderColor='var(--line)'">
+      <a href="https://www.gamcare.org.uk" target="_blank" rel="noopener" class="rg-help-link">
         <div><b style="font-size:13px">GamCare</b><p style="color:var(--muted);font-size:12px;margin-top:2px">National Gambling Helpline: 0808 8020 133</p></div>
         <span style="color:var(--muted);font-size:12px">gamcare.org.uk →</span>
       </a>
-      <a href="https://www.gamblersanonymous.org.uk" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 16px;color:var(--txt);text-decoration:none;transition:.15s" onmouseover="this.style.borderColor='var(--mint)'" onmouseout="this.style.borderColor='var(--line)'">
+      <a href="https://www.gamblersanonymous.org.uk" target="_blank" rel="noopener" class="rg-help-link">
         <div><b style="font-size:13px">Gamblers Anonymous</b><p style="color:var(--muted);font-size:12px;margin-top:2px">Peer support meetings worldwide</p></div>
         <span style="color:var(--muted);font-size:12px">gamblersanonymous.org →</span>
       </a>
