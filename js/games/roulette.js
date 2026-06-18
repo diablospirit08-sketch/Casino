@@ -717,7 +717,7 @@ ${brushes}
   },
   _loadBallSnd(){
     this._ballBuf=null;this._ballBufRaw=null;
-    fetch('sounds/roulette/mixkit-casino-roulette-ball-1987.wav')
+    fetch('sounds/mixkit-casino-roulette-ball-1987.wav')
       .then(r=>r.arrayBuffer()).then(ab=>{this._ballBufRaw=ab;}).catch(()=>{});
   },
   _loadChipSnd(){
