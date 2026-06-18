@@ -7,7 +7,7 @@ ORIGINALS['originals-roulette']={
   _history:[], _lastBets:[],
   _undoStack:[],
   _ac:null, _nbTimer:null,
-  _nbCount:2, _autoRunning:false, _racetrkVisible:false,
+  _nbCount:2, _autoRunning:false, _racetrkVisible:true,
   _idleRunning:false, _idleRaf:null,
 
   WHEEL:[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26],
@@ -42,6 +42,7 @@ ORIGINALS['originals-roulette']={
     let s=document.getElementById('rl-css');
     if(!s){s=document.createElement('style');s.id='rl-css';document.head.appendChild(s);}
     s.textContent=this._css();
+    document.querySelector('.gv-panel').classList.add('rl-panel-mode');
 
     engFields.innerHTML=`
 <div class="rl-tabs">
@@ -62,7 +63,7 @@ ORIGINALS['originals-roulette']={
   </div>
   <div class="rl-toggle-row">
     <span>RACETRACK</span>
-    <label class="rl-tog"><input type="checkbox" id="rlRtToggle"><span class="rl-tog-slider"></span></label>
+    <label class="rl-tog"><input type="checkbox" id="rlRtToggle" checked><span class="rl-tog-slider"></span></label>
   </div>
   <div class="rl-nb-row">
     <span>NEIGHBORS</span>
@@ -94,7 +95,7 @@ ORIGINALS['originals-roulette']={
     gvStage.innerHTML=`
 <div class="rl-wrap">
   <div class="rl-left">
-    <div class="rl-rt-wrap" id="rlRtWrap" style="display:none">
+    <div class="rl-rt-wrap" id="rlRtWrap">
       ${this._buildRacetrack()}
     </div>
     <div class="rl-limits">
@@ -152,6 +153,25 @@ ORIGINALS['originals-roulette']={
       if(this.spinning)return;
       const cell=e.target.closest('[data-bet-key]');if(!cell)return;
       this._addBet(cell.dataset.betType,cell.dataset.betKey,JSON.parse(cell.dataset.betNums));
+    });
+    document.getElementById('rlTable').addEventListener('contextmenu',e=>{
+      e.preventDefault();
+      if(this.spinning)return;
+      const cell=e.target.closest('[data-bet-key]');if(!cell)return;
+      const key=cell.dataset.betKey;
+      const bet=this.bets.find(b=>b.key===key);if(!bet)return;
+      let undoIdx=-1;
+      for(let i=this._undoStack.length-1;i>=0;i--){if(this._undoStack[i].key===key){undoIdx=i;break;}}
+      if(undoIdx!==-1){
+        const entry=this._undoStack[undoIdx];
+        bet.fiat-=entry.fiat;bet.amount-=entry.crypto;
+        this._undoStack.splice(undoIdx,1);
+      } else {
+        const w=curW();const rate=(w&&w.rate)||1;
+        bet.fiat-=this._chipVal;bet.amount-=this._chipVal/rate;
+      }
+      if(bet.fiat<0.001)this.bets=this.bets.filter(b=>b.key!==key);
+      this._renderBets();this._syncInfo();this._syncBtn();
     });
 
     /* action buttons */
@@ -244,6 +264,13 @@ ORIGINALS['originals-roulette']={
   _doDouble(){
     if(!this.bets.length)return;
     this.bets.forEach(b=>{b.amount*=2;b.fiat*=2});
+    const w=curW();const maxAmt=(w&&w.amt!=null)?w.amt:1e9;
+    const total=this.bets.reduce((s,b)=>s+b.amount,0);
+    if(total>maxAmt+1e-9){
+      const scale=maxAmt/total;
+      this.bets.forEach(b=>{b.amount*=scale;b.fiat*=scale});
+      this.bets=this.bets.filter(b=>b.fiat>=0.005);
+    }
     this._undoStack=[];
     this._renderBets();this._syncInfo();this._syncBtn();
   },
@@ -283,12 +310,18 @@ ORIGINALS['originals-roulette']={
   _renderBets(){
     document.querySelectorAll('.rl-bet-chip,.rl-rt-chip').forEach(e=>e.remove());
 
-    /* table chips — real chip canvas centred on cell */
+    const stackN=fiat=>fiat>=50?4:fiat>=10?3:fiat>=5?2:1;
+
+    /* table chips — stacked canvases, each offset 3px upward */
     for(const bet of this.bets){
       const cell=document.querySelector(`[data-bet-key="${bet.key}"]`);if(!cell)continue;
-      const cv=makeChipCanvas(Math.max(1,Math.round(bet.fiat)),40);
-      cv.className='rl-bet-chip';
-      cell.appendChild(cv);
+      const n=stackN(bet.fiat);
+      for(let i=0;i<n;i++){
+        const cv=makeChipCanvas(Math.max(1,Math.round(bet.fiat)),40);
+        cv.className='rl-bet-chip';
+        cv.style.setProperty('--si',i);
+        cell.appendChild(cv);
+      }
     }
 
     /* racetrack — total fiat per number */
@@ -416,12 +449,14 @@ ORIGINALS['originals-roulette']={
     if(this._history.length>20)this._history.pop();
     this._renderStreak();
     this._flashWin(spinResult);
+    this._placeDolly(spinResult);
     await new Promise(r=>setTimeout(r,2500));
     this._ballRadius=null;this._updateWheelSVG(this._wheelAngle);
     this.spinning=false;
     this._lastBets=this.bets.map(b=>({...b}));
     this.bets=[];this._undoStack=[];
     this._renderBets();this._syncInfo();
+    this._removeDolly();
     if(rlRes)rlRes.className='rl-res';
     lockBet(false);this._syncBtn();
   },
@@ -595,13 +630,25 @@ ${brushes}
   },
 
   _flashWin(result){
+    const betKeys=new Set(this.bets.map(b=>b.key));
     document.querySelectorAll('[data-bet-key]').forEach(cell=>{
+      if(!betKeys.has(cell.dataset.betKey))return;
       const nums=JSON.parse(cell.dataset.betNums||'[]');
       if(nums.includes(result)){
         cell.classList.add('rl-flash');
         setTimeout(()=>cell.classList.remove('rl-flash'),2200);
       }
     });
+  },
+
+  _placeDolly(result){
+    this._removeDolly();
+    const cell=document.querySelector(`[data-bet-key="str:${result}"]`);if(!cell)return;
+    const d=document.createElement('div');d.className='rl-dolly';d.id='rlDolly';
+    cell.appendChild(d);
+  },
+  _removeDolly(){
+    const d=document.getElementById('rlDolly');if(d)d.remove();
   },
 
   _getAC(){
@@ -778,6 +825,12 @@ ${brushes}
   },
 
   _css(){return`
+/* hide redundant panel fields when roulette is active */
+.rl-panel-mode #gvTabs,
+.rl-panel-mode .gv-field:has(#gvBet),
+.rl-panel-mode #gvMultField,
+.rl-panel-mode #gvProfitField,
+.rl-panel-mode #autoPanel{display:none!important}
 /* layout */
 .rl-wrap{display:flex;flex-direction:row;align-items:flex-start;gap:12px;width:100%;padding:12px;
   background:radial-gradient(120% 85% at 50% -5%,#20273A 0%,#161B29 58%,#10141E 100%);
@@ -909,14 +962,22 @@ ${brushes}
 .rl-cor-dot{border-radius:1px;transform:rotate(45deg)}
 .rl-cor:hover .rl-cor-dot{background:#E6BE55;border-color:rgba(0,0,0,.25)}
 /* chip overlay — table */
-.rl-bet-chip{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:20px;height:20px;border-radius:50%;pointer-events:none;z-index:6;
+.rl-bet-chip{position:absolute;top:calc(50% - var(--si,0)*3px);left:50%;transform:translate(-50%,-50%);
+  width:20px;height:20px;border-radius:50%;pointer-events:none;z-index:calc(6 + var(--si,0));
   filter:drop-shadow(0 2px 5px rgba(0,0,0,.7))}
 /* chip overlay — racetrack */
 .rl-rt-n{position:relative;overflow:visible}
 .rl-rt-chip{position:absolute;top:-6px;right:-6px;
   width:14px;height:14px;border-radius:50%;pointer-events:none;z-index:4;
   filter:drop-shadow(0 1px 3px rgba(0,0,0,.8))}
+/* dolly — winning number marker */
+.rl-dolly{position:absolute;top:4px;right:4px;width:12px;height:12px;border-radius:50%;
+  background:radial-gradient(circle at 35% 32%,#fff 0%,#E6BE55 38%,#A07B2C 100%);
+  border:1.5px solid rgba(255,255,255,.6);
+  box-shadow:0 0 6px 2px rgba(230,190,85,.7),0 2px 6px rgba(0,0,0,.8);
+  pointer-events:none;z-index:10;
+  animation:rl-dolly-in .22s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes rl-dolly-in{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
 /* table action buttons */
 .rl-btns{display:flex;gap:5px;margin-top:2px}
 .rl-rebet,.rl-clr2{flex:1;border-radius:7px;height:26px;font-size:10px;font-weight:700;
@@ -983,6 +1044,7 @@ ${brushes}
     this._stopIdleSpin();
     this.bets=[];this._undoStack=[];this.spinning=false;this._ballRadius=null;
     this._autoRunning=false;clearTimeout(this._nbTimer);
+    document.querySelector('.gv-panel').classList.remove('rl-panel-mode');
     if(typeof gvStage!=='undefined'&&gvStage){gvStage.style.overflowY='';gvStage.style.overflowX='';}
   }
 };
