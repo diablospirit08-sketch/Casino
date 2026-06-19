@@ -1597,7 +1597,7 @@ if(curSlug)mountEngine(curSlug);
     if(Math.abs(dx)>42)goTo(cur+(dx<0?1:-1));else goTo(cur);
   },{passive:true});
 
-  document.getElementById('heroCar')?.addEventListener('mouseenter',()=>clearTimeout(timer));
+  document.getElementById('sec-top')?.addEventListener('mouseenter',()=>clearTimeout(timer));
   document.getElementById('sec-top').addEventListener('mouseleave',()=>{timer=setTimeout(()=>goTo(cur+1),INTERVAL);});
 
   goTo(0);

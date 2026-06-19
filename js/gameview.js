@@ -445,16 +445,21 @@ document.getElementById('pfRotate').addEventListener('click',()=>{
   _pfRender();
 });
 document.getElementById('pfVerifyBtn').addEventListener('click',async()=>{
-  const seed=document.getElementById('pfVerifySeed').value.trim();
-  const cs=document.getElementById('pfVerifyClient').value.trim();
-  const nc=parseInt(document.getElementById('pfVerifyNonce').value)||0;
-  const game=ENG?Object.keys(ORIGINALS).find(k=>ORIGINALS[k]===ENG)||'':'';
-  if(!seed||!cs){document.getElementById('pfVerifyOut').textContent='Enter server seed and client seed.';return;}
-  const hash=await _sha256(seed);
-  const hashEl=document.getElementById('pfVerifyHashOut');
-  hashEl.textContent='SHA-256: '+hash;
-  hashEl.style.color=hash===_pfLastServerHash?'#41f0a4':'#f87171';
-  const params=ENG?{chance:ENG.chance,over:ENG.over,side:ENG.side,rows:ENG.rows,risk:ENG.risk,picks:[...ENG.picks||[]],diff:ENG.diff}:{};
-  const r=await pfVerify(seed,cs,nc,game.replace('originals-',''),params);
-  document.getElementById('pfVerifyOut').textContent=r?JSON.stringify(r,null,2):'Unknown game';
+  try{
+    const seed=document.getElementById('pfVerifySeed').value.trim();
+    const cs=document.getElementById('pfVerifyClient').value.trim();
+    const nc=parseInt(document.getElementById('pfVerifyNonce').value)||0;
+    const game=ENG?Object.keys(ORIGINALS).find(k=>ORIGINALS[k]===ENG)||'':'';
+    if(!seed||!cs){document.getElementById('pfVerifyOut').textContent='Enter server seed and client seed.';return;}
+    const hash=await _sha256(seed);
+    const hashEl=document.getElementById('pfVerifyHashOut');
+    hashEl.textContent='SHA-256: '+hash;
+    hashEl.style.color=hash===_pfLastServerHash?'#41f0a4':'#f87171';
+    const params=ENG?{chance:ENG.chance,over:ENG.over,side:ENG.side,rows:ENG.rows,risk:ENG.risk,picks:[...ENG.picks||[]],diff:ENG.diff}:{};
+    const r=await pfVerify(seed,cs,nc,game.replace('originals-',''),params);
+    document.getElementById('pfVerifyOut').textContent=r?JSON.stringify(r,null,2):'Unknown game';
+  }catch(err){
+    console.error('PF verify error:',err);
+    document.getElementById('pfVerifyOut').textContent='Verification error: '+err.message;
+  }
 });

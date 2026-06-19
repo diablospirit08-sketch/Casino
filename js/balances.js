@@ -91,7 +91,7 @@ async function loadBalances() {
 /* ── auth state changes ── */
 supa.auth.onAuthStateChange((_, session) => {
   if (session) {
-    loadBalances();
+    loadBalances().catch(err => console.warn('loadBalances failed:', err));
   } else {
     WALLETS.forEach(w => { w.amt = 0; w.fiat = 0; });
     renderWallet();
@@ -100,7 +100,7 @@ supa.auth.onAuthStateChange((_, session) => {
 
 /* load immediately if already logged in */
 const { data: { session } } = await supa.auth.getSession();
-if (session) loadBalances();
+if (session) loadBalances().catch(err => console.warn('loadBalances failed:', err));
 
 /* refresh rates every 5 min while tab is open */
 setInterval(async () => {

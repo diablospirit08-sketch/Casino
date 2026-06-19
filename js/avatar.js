@@ -126,8 +126,8 @@ async function loadAvatar() {
 }
 
 supa.auth.onAuthStateChange((_, session) => {
-  if (session) loadAvatar();
+  if (session) loadAvatar().catch(err => console.warn('loadAvatar failed:', err));
   else { resetAvatar(); localStorage.removeItem(LS_AV); }
 });
 
-loadAvatar();
+loadAvatar().catch(err => console.warn('loadAvatar failed:', err));
