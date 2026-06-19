@@ -6,14 +6,29 @@ document.getElementById('payStrip').insertAdjacentHTML('beforeend',
 
 /* ---------- deposit modal ---------- */
 const DEPOSIT={
-  BTC:{addr:'bc1qj9w4ux0e3a8yq2v5tslh7nf06xm3r9c4kzd2e',net:'Bitcoin',min:'0.0001 BTC',conf:'1 confirmation',fee:'0.00005 BTC'},
-  ETH:{addr:'',net:'Ethereum',min:'0.005 ETH',conf:'12 confirmations',fee:'0.0008 ETH'},
-  BNB:{addr:'',net:'BNB Smart Chain · BEP-20',min:'0.01 BNB',conf:'15 confirmations',fee:'0.001 BNB'},
-  LTC:{addr:'ltc1q8v2m4xw9c7t3p5dyh0kn6azfu1rqsje5lg8b3',net:'Litecoin',min:'0.01 LTC',conf:'3 confirmations',fee:'0.001 LTC'},
-  USDT:{addr:'',net:'Ethereum · ERC-20',min:'5 USDT',conf:'12 confirmations',fee:'2 USDT'},
-  SOL:{addr:'9wK3rT7pNxV2mQ8cZ5bL4dF6gH1jY0aEuSnB8XoD2RkM',net:'Solana',min:'0.05 SOL',conf:'~1 min finality',fee:'0.001 SOL'},
+  BTC:{networks:[
+    {id:'BTC', name:'Bitcoin',              addr:'bc1qj9w4ux0e3a8yq2v5tslh7nf06xm3r9c4kzd2e', min:'0.0001 BTC', conf:'1 confirmation',   fee:'0.00005 BTC', evm:false},
+  ]},
+  ETH:{networks:[
+    {id:'ERC20',name:'Ethereum · ERC-20',   addr:'',                                            min:'0.005 ETH',  conf:'12 confirmations', fee:'0.0008 ETH',  evm:true},
+  ]},
+  BNB:{networks:[
+    {id:'BEP20',name:'BNB Chain · BEP-20',  addr:'',                                            min:'0.01 BNB',   conf:'15 confirmations', fee:'0.001 BNB',   evm:true},
+  ]},
+  LTC:{networks:[
+    {id:'LTC', name:'Litecoin',             addr:'ltc1q8v2m4xw9c7t3p5dyh0kn6azfu1rqsje5lg8b3',min:'0.01 LTC',   conf:'3 confirmations',  fee:'0.001 LTC',   evm:false},
+  ]},
+  USDT:{networks:[
+    {id:'ERC20',name:'Ethereum · ERC-20',   addr:'',                                            min:'10 USDT',    conf:'12 confirmations', fee:'2 USDT',      evm:true},
+    {id:'TRC20',name:'Tron · TRC-20',       addr:'TUsdt7vR3mQk9xZ2bP4wN6cF8gH0jL5eA',         min:'1 USDT',     conf:'~1 min',           fee:'0.5 USDT',    evm:false},
+    {id:'BEP20',name:'BNB Chain · BEP-20',  addr:'',                                            min:'1 USDT',     conf:'15 confirmations', fee:'0.5 USDT',    evm:true},
+    {id:'SPL',  name:'Solana · SPL',        addr:'9wK3rT7pNxV2mQ8cZ5bL4dF6gH1jY0aEuSnB8XoD2RkM',min:'1 USDT',  conf:'~1 min',           fee:'0.01 USDT',   evm:false},
+  ]},
+  SOL:{networks:[
+    {id:'SOL', name:'Solana',               addr:'9wK3rT7pNxV2mQ8cZ5bL4dF6gH1jY0aEuSnB8XoD2RkM',min:'0.05 SOL', conf:'~1 min finality',  fee:'0.001 SOL',   evm:false},
+  ]},
 };
-let depCur=voltCur;
+let depCur=voltCur,depNetId=null;
 const depOverlay=document.getElementById('depOverlay'),
       depCoins=document.getElementById('depCoins'),
       depNet=document.getElementById('depNet'),
@@ -42,52 +57,74 @@ function drawQr(text){
   };
   fin(1,1);fin(N-8,1);fin(1,N-8);
 }
-const EVM_CURRENCIES=['ETH','USDT','BNB'];
 const depAddrCache={};
 
-async function fetchDepositAddress(currency){
-  if(depAddrCache[currency])return depAddrCache[currency];
+async function fetchDepositAddress(currency,networkId){
+  const key=currency+':'+networkId;
+  if(depAddrCache[key])return depAddrCache[key];
   const{data:{session}}=await supa.auth.getSession();
   if(!session) return null;
   const res=await fetch(
-    'https://czqqdwmifcqoiyphjqjk.supabase.co/functions/v1/get-deposit-address?currency='+currency,
+    'https://czqqdwmifcqoiyphjqjk.supabase.co/functions/v1/get-deposit-address?currency='+currency+'&network='+networkId,
     {headers:{Authorization:'Bearer '+session.access_token}}
   );
   const json=await res.json();
-  if(json.address){depAddrCache[currency]=json.address;return json.address;}
+  if(json.address){depAddrCache[key]=json.address;return json.address;}
   return null;
 }
 
+function currentNetwork(){
+  const nets=DEPOSIT[depCur].networks;
+  return nets.find(n=>n.id===depNetId)||nets[0];
+}
+
 async function renderDep(){
-  const d=DEPOSIT[depCur];
+  const nets=DEPOSIT[depCur].networks;
+  if(!nets.find(n=>n.id===depNetId)) depNetId=nets[0].id;
+  const net=currentNetwork();
+
   depCoins.innerHTML=WALLETS.map(x=>`
     <button class="dep-coin ${x.c===depCur?'sel':''}" data-c="${x.c}">
       ${coinImg(x.c)}${x.c}</button>`).join('');
-  depNet.textContent=d.net;
-  depMin.textContent=d.min;
-  depConf.textContent=d.conf;
+
+  const netSel=document.getElementById('depNetSel');
+  const netLbl=document.getElementById('depNetLbl');
+  if(nets.length>1){
+    netSel.hidden=false;
+    if(netLbl)netLbl.hidden=false;
+    netSel.innerHTML=nets.map(n=>`
+      <button class="dep-net-chip ${n.id===depNetId?'sel':''}" data-n="${n.id}">${n.name}</button>`).join('');
+  } else {
+    netSel.hidden=true;
+    netSel.innerHTML='';
+    if(netLbl)netLbl.hidden=true;
+  }
+
+  depNet.textContent=net.name;
+  depMin.textContent=net.min;
+  depConf.textContent=net.conf;
   depWarnCur.textContent=depCur;
   clearTimeout(depCopyT);
   depCopyBtn.textContent='Copy';
   depCopyBtn.classList.remove('ok');
 
-  if(EVM_CURRENCIES.includes(depCur)){
+  if(net.evm){
     depAddr.textContent='Fetching address…';
     drawQr('');
-    const addr=await fetchDepositAddress(depCur);
-    if(addr){
-      depAddr.textContent=addr;
-      drawQr(addr);
-      depAddrCache[depCur]=addr;
-    } else {
-      depAddr.textContent='Sign in to get your deposit address';
-    }
+    const addr=await fetchDepositAddress(depCur,net.id);
+    if(addr){depAddr.textContent=addr;drawQr(addr);}
+    else{depAddr.textContent='Sign in to get your deposit address';}
   } else {
-    depAddr.textContent=d.addr;
-    drawQr(d.addr);
+    depAddr.textContent=net.addr||'Sign in to get your deposit address';
+    drawQr(net.addr);
   }
 }
-function openDep(){depCur=voltCur;depMode='dep';renderDep();renderDepMode();depOverlay.classList.add('open');}
+
+document.getElementById('depNetSel').addEventListener('click',e=>{
+  const b=e.target.closest('.dep-net-chip');if(!b)return;
+  depNetId=b.dataset.n;renderDep();
+});
+function openDep(){depCur=voltCur;depNetId=null;depMode='dep';renderDep();renderDepMode();depOverlay.classList.add('open');}
 function closeDep(){depOverlay.classList.remove('open');}
 document.getElementById('walletDep').addEventListener('click',openDep);
 document.getElementById('depClose').addEventListener('click',closeDep);

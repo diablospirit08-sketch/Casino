@@ -240,6 +240,7 @@ function movePill(a,instant){
 /* ---------- rail collapse toggle ---------- */
 const LS_RAIL='volt-rail';
 const railToggle=document.getElementById('railToggle');
+const provRowEl=document.getElementById('provRow');
 function setRailMin(min){
   document.body.classList.toggle('rail-min',min);
   localStorage.setItem(LS_RAIL,min?'min':'full');
@@ -596,19 +597,18 @@ filterMenu.addEventListener('click',e=>{
 renderSortMenu();renderFilterMenu();
 
 /* ---------- promo banner: new releases ---------- */
-document.getElementById('promoNew').addEventListener('click',()=>{
+document.getElementById('promoNew')?.addEventListener('click',()=>{
   const chip=catsEl.querySelector('.cat[data-cat="new"]');
   if(chip&&activeCat!=='new')chip.click();
   window.scrollTo({top:catsEl.getBoundingClientRect().top+window.scrollY-86,behavior:'smooth'});
 });
-document.getElementById('promoNew').addEventListener('keydown',e=>{
+document.getElementById('promoNew')?.addEventListener('keydown',e=>{
   if(e.key==='Enter'||e.key===' '){e.preventDefault();e.target.click();}
 });
 
 /* ---------- providers ---------- */
 const provs=['Volt Originals','Pragmatic Play','TaDa Gaming','Live Studio','Sawtooth','Zenith City','Encore','Ace Roll','Volt Picks'];
-document.getElementById('provRow').innerHTML = provs.map(p=>`<div class="prov-card" data-p="${p}" role="button" tabindex="0">${p}</div>`).join('');
-const provRowEl=document.getElementById('provRow');
+provRowEl.innerHTML = provs.map(p=>`<div class="prov-card" data-p="${p}" role="button" tabindex="0">${p}</div>`).join('');
 provRowEl.addEventListener('click',e=>{
   const c=e.target.closest('.prov-card');if(!c)return;
   activeProv=activeProv===c.dataset.p?null:c.dataset.p;
