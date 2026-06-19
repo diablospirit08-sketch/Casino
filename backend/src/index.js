@@ -1,0 +1,83 @@
+import 'dotenv/config';
+import Fastify from 'fastify';
+import cors from '@fastify/cors';
+import jwt from '@fastify/jwt';
+import rateLimit from '@fastify/rate-limit';
+
+import { authPlugin }   from './middleware/auth.js';
+import { authRoutes }   from './routes/auth.js';
+import { walletRoutes } from './routes/wallet.js';
+import { betsRoutes, verifyRoutes } from './routes/bets.js';
+
+const PORT = parseInt(process.env.PORT ?? '4000', 10);
+const HOST = process.env.HOST ?? '0.0.0.0';
+
+const fastify = Fastify({
+  logger: {
+    level: process.env.LOG_LEVEL ?? 'info',
+    transport: process.env.NODE_ENV !== 'production'
+      ? { target: 'pino-pretty', options: { translateTime: 'HH:MM:ss', ignore: 'pid,hostname' } }
+      : undefined,
+  },
+});
+
+// ─── Plugins ──────────────────────────────────────────────────────────────────
+
+await fastify.register(cors, {
+  origin: process.env.CORS_ORIGIN ?? '*',
+  credentials: true,
+});
+
+await fastify.register(rateLimit, {
+  max: 120,
+  timeWindow: '1 minute',
+  errorResponseBuilder: () => ({
+    error: 'Too many requests',
+    message: 'Rate limit exceeded. Please wait and try again.',
+  }),
+});
+
+if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is not set');
+
+await fastify.register(jwt, {
+  secret: process.env.JWT_SECRET,
+});
+
+// Auth decorators (authenticate, authenticateOptional)
+await fastify.register(authPlugin);
+
+// ─── Routes ───────────────────────────────────────────────────────────────────
+
+await fastify.register(authRoutes,   { prefix: '/api/auth' });
+await fastify.register(walletRoutes, { prefix: '/api/wallet' });
+await fastify.register(betsRoutes,   { prefix: '/api/bets' });
+await fastify.register(verifyRoutes, { prefix: '/api' });
+
+// Health check
+fastify.get('/health', async () => ({ status: 'ok', ts: new Date().toISOString() }));
+
+// ─── Error handler ────────────────────────────────────────────────────────────
+
+fastify.setErrorHandler((err, req, reply) => {
+  const status = err.statusCode ?? 500;
+
+  if (status >= 500) {
+    fastify.log.error({ err, req }, 'Unhandled error');
+  }
+
+  // Don't leak internal errors to the client in production
+  const message = status < 500 || process.env.NODE_ENV !== 'production'
+    ? err.message
+    : 'Internal server error';
+
+  reply.code(status).send({ error: message });
+});
+
+// ─── Start ────────────────────────────────────────────────────────────────────
+
+try {
+  await fastify.listen({ port: PORT, host: HOST });
+} catch (err) {
+  fastify.log.error(err);
+  process.exit(1);
+}
