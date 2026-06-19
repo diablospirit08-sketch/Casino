@@ -11,10 +11,10 @@
 <script src="image-slot.js"></script>
 <style>
   :root{
-    --bg:#0e1118;          /* lifted charcoal */
-    --bg-2:#0a0d13;
-    --panel:#161b24;
-    --panel-2:#1c222e;
+    --bg:#1a1f2e;
+    --bg-2:#151a27;
+    --panel:#232a3b;
+    --panel-2:#2a3347;
     --line:rgba(235,240,255,.11);
     --line-2:rgba(235,240,255,.18);
     --spectrum:linear-gradient(90deg,#3d9bff,#41f0a4 28%,#ffd23d 52%,#ff8a3d 76%,#ff4757);
@@ -37,12 +37,12 @@
   ::selection{background:var(--mint);color:var(--mint-ink)}
   ::-webkit-scrollbar{width:10px;height:8px}
   ::-webkit-scrollbar-track{background:var(--bg)}
-  ::-webkit-scrollbar-thumb{background:#1e232d;border-radius:8px;border:2px solid var(--bg)}
+  ::-webkit-scrollbar-thumb{background:#2e3650;border-radius:8px;border:2px solid var(--bg)}
 
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:11px;cursor:pointer;border:none;transition:.18s;white-space:nowrap;border-radius:999px}
   .btn-mint{background:var(--mint);color:var(--mint-ink);padding:11px 22px;box-shadow:0 6px 20px -8px rgba(65,240,164,.6)}
   .btn-mint:hover{filter:brightness(1.07);transform:translateY(-1px)}
-  .rainbow-border{position:relative;display:inline-flex;align-items:center;justify-content:center;padding:11px 24px;background:#08090c;border:none;border-radius:999px;color:#fff;font-family:inherit;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:transform .18s,filter .18s;z-index:0}
+  .rainbow-border{position:relative;display:inline-flex;align-items:center;justify-content:center;padding:11px 24px;background:#1a1f2e;border:none;border-radius:999px;color:#fff;font-family:inherit;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:transform .18s,filter .18s;z-index:0}
   .rainbow-border:hover{transform:translateY(-1px);filter:brightness(1.15)}
   .rainbow-border::before,.rainbow-border::after{content:'';position:absolute;left:-2px;top:-2px;border-radius:999px;background:linear-gradient(45deg,#fb0094,#0000ff,#00ff00,#ffff00,#ff0000,#fb0094,#0000ff,#00ff00,#ffff00,#ff0000);background-size:400%;width:calc(100% + 4px);height:calc(100% + 4px);z-index:-1;animation:rainbow 20s linear infinite}
   .rainbow-border::after{filter:blur(12px);opacity:.7}
@@ -199,7 +199,7 @@
   #main{position:relative;flex:1;max-width:340px}
   #poda{display:flex;align-items:center;justify-content:center;position:relative}
   .white,.border,.darkBorderBg,.glow{max-height:70px;width:100%;height:100%;position:absolute;overflow:hidden;z-index:-1;border-radius:12px;filter:blur(3px)}
-  .input{background-color:#010201;border:none;width:100%;height:50px;border-radius:10px;color:white;padding-inline:50px 18px;font-size:14px;font-family:inherit}
+  .input{background-color:#0f1420;border:none;width:100%;height:50px;border-radius:10px;color:white;padding-inline:50px 18px;font-size:14px;font-family:inherit}
   .input::placeholder{color:#c0b9c0}
   .input:focus{outline:none}
   #main:focus-within>#input-mask{display:none}
@@ -870,7 +870,7 @@
   .av-name{font-size:9.5px;color:var(--muted);text-align:center;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #avatarBtn>svg{pointer-events:none;width:38px;height:38px}
   #avatarBtn.has-av{padding:0;overflow:hidden}
-  #vipBadge{position:absolute;bottom:1px;right:1px;width:15px;height:15px;border-radius:4px;border:1.5px solid;background:#080c12;display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;pointer-events:none;z-index:2;line-height:1;letter-spacing:-.5px}
+  #vipBadge{position:absolute;bottom:1px;right:1px;width:15px;height:15px;border-radius:4px;border:1.5px solid;background:#1a1f2e;display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;pointer-events:none;z-index:2;line-height:1;letter-spacing:-.5px}
   #vipBadge:empty{display:none}
 </style>
 </head>
