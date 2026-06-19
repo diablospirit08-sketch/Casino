@@ -53,7 +53,14 @@ function syncBetUI(resetAmt){
   if(window.ENG&&ENG&&ENG.onCur)ENG.onCur();
 }
 function gvCurSync(){if(curSlug)syncBetUI(true);}
-let _viewBusy=false;
+let _viewBusy=false,_t1=0,_t2=0;
+function _abortTransition(){
+  clearTimeout(_t1);clearTimeout(_t2);_t1=_t2=0;_viewBusy=false;
+  const gameEl=document.getElementById('gameView');
+  const lobbyEl=document.getElementById('lobbyView');
+  if(gameEl)gameEl.classList.remove('view-out','view-in');
+  if(lobbyEl)lobbyEl.classList.remove('view-out','view-in');
+}
 function openGame(slug){
   const g=GAMES[slug];if(!g||_viewBusy)return;
   if(autoRunning)stopAuto();
@@ -111,12 +118,13 @@ function openGame(slug){
   const gameEl=document.getElementById('gameView');
   _viewBusy=true;
   lobbyEl.classList.add('view-out');
-  setTimeout(()=>{
+  _t1=setTimeout(()=>{
+    _t1=0;
     lobbyEl.classList.remove('view-out');
     document.body.classList.add('ingame');
     window.scrollTo(0,0);
     gameEl.classList.add('view-in');
-    setTimeout(()=>{gameEl.classList.remove('view-in');_viewBusy=false;},280);
+    _t2=setTimeout(()=>{_t2=0;gameEl.classList.remove('view-in');_viewBusy=false;},280);
   },180);
 }
 function closeGame(){
@@ -134,12 +142,13 @@ function closeGame(){
   const lobbyEl=document.getElementById('lobbyView');
   _viewBusy=true;
   gameEl.classList.add('view-out');
-  setTimeout(()=>{
+  _t1=setTimeout(()=>{
+    _t1=0;
     curSlug=null;
     document.body.classList.remove('ingame');
     gameEl.classList.remove('view-out');
     lobbyEl.classList.add('view-in');
-    setTimeout(()=>{lobbyEl.classList.remove('view-in');_viewBusy=false;},280);
+    _t2=setTimeout(()=>{_t2=0;lobbyEl.classList.remove('view-in');_viewBusy=false;},280);
     try{history.pushState('','',location.pathname+location.search);}catch(err){location.hash='';}
     spy();
   },180);
@@ -147,10 +156,24 @@ function closeGame(){
 function applyHash(){
   const m=location.hash.match(/^#play=(.+)$/);
   if(m&&GAMES[m[1]]){if(curSlug!==m[1])openGame(m[1]);}
-  else if(document.body.classList.contains('ingame')){
+  else if(document.body.classList.contains('ingame')||curSlug){
+    // Cancel any in-progress open/close transition first
+    _abortTransition();
     if(autoRunning)stopAuto();
     if(window.unmountEngine)unmountEngine();
-    curSlug=null;document.body.classList.remove('ingame');spy();
+    const iframeEl=document.getElementById('gameIframe');
+    if(iframeEl){iframeEl.src='';iframeEl.hidden=true;}
+    const iframeLoader=document.getElementById('iframeLoader');
+    if(iframeLoader){iframeLoader.hidden=true;iframeLoader.classList.remove('error');}
+    const frameEl=document.querySelector('.gv-frame');
+    if(frameEl)frameEl.classList.remove('real-game');
+    const freeBadge=document.getElementById('gvFreeBadge');
+    if(freeBadge)freeBadge.hidden=true;
+    const fsBtn=document.getElementById('gvFsBtn');
+    if(fsBtn)fsBtn.hidden=true;
+    curSlug=null;
+    document.body.classList.remove('ingame');
+    spy();
   }
 }
 window.addEventListener('hashchange',applyHash);
