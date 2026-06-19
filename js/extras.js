@@ -204,18 +204,54 @@ async function openProfile(){
       $id('profName').textContent=name;
       $id('profSub').textContent='VIP '+v.n+' · member since '+since;
       $id('profFine').textContent='Signed in as '+email;
+      $id('profActions').hidden=false;
     } else {
       $id('profName').textContent='volt_player';
       $id('profSub').textContent='VIP '+v.n+' · member since June 2026';
       $id('profFine').textContent='Demo profile — progress is stored in this browser only.';
+      $id('profActions').hidden=true;
     }
   }catch(_){
     $id('profSub').textContent='VIP '+v.n;
   }
+  /* reset change-password form if it was open from a previous visit */
+  _profChPwReset();
 }
+function _profChPwReset(){
+  $id('profChPwForm').hidden=true;
+  $id('profPwA').value='';$id('profPwB').value='';
+  $id('profPwErr').textContent='';$id('profPwSave').disabled=true;
+}
+$id('profChPwBtn').addEventListener('click',()=>{
+  $id('profChPwForm').hidden=false;
+  $id('profChPwBtn').disabled=true;
+  setTimeout(()=>$id('profPwA').focus(),40);
+});
+$id('profPwCancel').addEventListener('click',()=>{
+  _profChPwReset();
+  $id('profChPwBtn').disabled=false;
+});
+function _profPwValidate(){
+  const a=$id('profPwA').value,b=$id('profPwB').value;
+  const ok=a.length>=6&&b.length>=6;
+  $id('profPwErr').textContent=ok&&a!==b?'Passwords do not match':'';
+  $id('profPwSave').disabled=!(ok&&a===b);
+}
+[$id('profPwA'),$id('profPwB')].forEach(i=>i.addEventListener('input',_profPwValidate));
+$id('profPwSave').addEventListener('click',async()=>{
+  const pw=$id('profPwA').value;
+  $id('profPwSave').disabled=true;$id('profPwSave').textContent='Saving…';
+  const{error}=await supa.auth.updateUser({password:pw});
+  $id('profPwSave').textContent='Update Password';
+  if(error){$id('profPwErr').textContent=error.message;$id('profPwSave').disabled=false;return;}
+  _profChPwReset();
+  $id('profChPwBtn').disabled=false;
+  showToast({icon:'🔒',title:'Password updated',sub:'Your new password is active.'});
+});
 $id('profileBtn').addEventListener('click',openProfile);
-$id('profClose').addEventListener('click',()=>profOverlay.classList.remove('open'));
-profOverlay.addEventListener('click',e=>{if(e.target===profOverlay)profOverlay.classList.remove('open');});
+function _profClose(){profOverlay.classList.remove('open');_profChPwReset();$id('profChPwBtn').disabled=false;}
+$id('profClose').addEventListener('click',_profClose);
+profOverlay.addEventListener('click',e=>{if(e.target===profOverlay)_profClose();});
 
 /* ---------- vault ---------- */
 const vaultOverlay=$id('vaultOverlay'),vaultAmtIn=$id('vaultAmt'),
@@ -223,6 +259,19 @@ const vaultOverlay=$id('vaultOverlay'),vaultAmtIn=$id('vaultAmt'),
 const VAULT={};
 WALLETS.forEach(w=>VAULT[w.c]=0);
 let vaultMode='in';
+/* persistence — scoped to user ID so different accounts don't share a vault */
+const _vpPfx='volt-vault-';let _vpUid=null;
+function _vpKey(){return _vpPfx+(_vpUid||'guest');}
+function _vpSave(){try{localStorage.setItem(_vpKey(),JSON.stringify(VAULT));}catch(_){}}
+function _vpLoad(uid){
+  _vpUid=uid||null;
+  try{
+    const s=JSON.parse(localStorage.getItem(_vpKey())||'{}');
+    Object.keys(VAULT).forEach(c=>{VAULT[c]=Math.max(0,parseFloat(s[c])||0);});
+  }catch(_){}
+}
+(async()=>{const{data:{session}}=await supa.auth.getSession();_vpLoad(session?.user?.id);renderVault();})();
+supa.auth.onAuthStateChange((_,s)=>{_vpLoad(s?.user?.id);renderVault();});
 function renderVault(){
   const w=curW();
   $id('vaultTabs').querySelectorAll('.auth-tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===vaultMode));
@@ -261,6 +310,7 @@ vaultGo.addEventListener('click',()=>{
   if(a<=0)return;
   if(vaultMode==='in'){creditTo(w,-a);VAULT[w.c]+=a;}
   else{VAULT[w.c]-=a;creditTo(w,a);}
+  _vpSave();
   showToast({icon:'🔒',title:vaultMode==='in'?'Moved to vault':'Moved to wallet',sub:fmtW(w,a)+' '+w.c});
   vaultAmtIn.value='';
   renderVault();
@@ -389,6 +439,7 @@ const ACTS={
   bonus:()=>openBonus(),
   vip:()=>vipOverlay.classList.add('open'),
   chat:openChat,
+  responsible:()=>openRg(),
 };
 document.addEventListener('click',e=>{
   const a=e.target.closest('a[data-act]');
@@ -399,9 +450,10 @@ document.addEventListener('click',e=>{
 });
 
 /* ---------- escape closes extras ---------- */
+const rgOverlay=$id('rgOverlay');
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape')return;
-  const open=[raceOverlay,profOverlay,vaultOverlay,infoOverlay].find(o=>o.classList.contains('open'));
+  const open=[raceOverlay,profOverlay,vaultOverlay,infoOverlay,rgOverlay].find(o=>o.classList.contains('open'));
   if(open){
     if(open===raceOverlay)closeRace();
     else open.classList.remove('open');
@@ -410,6 +462,211 @@ document.addEventListener('keydown',e=>{
   }
   if(chatDrawer.classList.contains('open')){closeChat();e.stopPropagation();}
 },true);
+
+/* ---------- profile action: open RG from profile modal ---------- */
+$id('profRgBtn').addEventListener('click',()=>{_profClose();openRg();});
+
+/* ================================================================
+   RESPONSIBLE GAMING
+   State stored in localStorage scoped to user ID so settings
+   survive page reload and are isolated between accounts.
+   ================================================================ */
+const _rgPfx='volt-rg-';let _rgUid=null;
+function _rgKey(){return _rgPfx+(_rgUid||'guest');}
+function _rgGet(){try{return JSON.parse(localStorage.getItem(_rgKey())||'{}');}catch{return{};}}
+function _rgSet(patch){localStorage.setItem(_rgKey(),JSON.stringify({..._rgGet(),...patch}));}
+
+/* ── enforcement: daily wager limit ── */
+function _rgWagKey(){return _rgKey()+'-wag';}
+function _rgTodayMs(){return new Date().toISOString().slice(0,10);}
+function _rgGetWag(){try{const d=JSON.parse(localStorage.getItem(_rgWagKey())||'{}');return d.date===_rgTodayMs()?d.usd:0;}catch{return 0;}}
+function _rgAddWag(usd){
+  const today=_rgTodayMs();
+  const cur=_rgGetWag();
+  localStorage.setItem(_rgWagKey(),JSON.stringify({date:today,usd:cur+usd}));
+}
+/* Called by wrapped debitBet — returns false and toasts if limit would be exceeded */
+function _rgCheckWager(betUsd){
+  const rg=_rgGet();
+  if(!rg.wagLimitDay)return true;
+  const spent=_rgGetWag();
+  if(spent+betUsd>rg.wagLimitDay){
+    showToast({icon:'🛡',title:'Daily wager limit reached',sub:'You\'ve hit your $'+rg.wagLimitDay.toFixed(0)+' limit. Resets at midnight UTC.'});
+    return false;
+  }
+  return true;
+}
+/* Wrap debitBet (defined in engines.js) to enforce the wager limit */
+(function(){
+  const _orig=window.debitBet;
+  window.debitBet=function(){
+    const w=typeof curW==='function'?curW():null;
+    const b=w?Math.min(parseFloat((document.getElementById('gvBet')||{}).value||0),w.amt):0;
+    if(!_rgCheckWager(b*(w?w.rate:0)))return null;
+    const st=_orig.apply(this,arguments);
+    if(st)_rgAddWag(st.b*st.w.rate);
+    return st;
+  };
+})();
+
+/* ── enforcement: self-exclusion / cool-off ── */
+function _rgExclActive(){
+  const rg=_rgGet();
+  if(!rg.exclUntil)return null;
+  if(rg.exclUntil===-1)return new Date(8640000000000000); /* permanent */
+  const d=new Date(rg.exclUntil);
+  if(d>new Date())return d;
+  _rgSet({exclUntil:null}); /* expired — clear it */
+  return null;
+}
+/* Check exclusion on every sign-in */
+supa.auth.onAuthStateChange((_,session)=>{
+  if(!session)return;
+  _rgUid=session.user.id;
+  const till=_rgExclActive();
+  if(!till)return;
+  /* sign out immediately; modals.js setAuth(false) will follow */
+  supa.auth.signOut();
+  const rg2=_rgGet();
+  const msg=rg2.exclUntil===-1?'Your self-exclusion is permanent.':'Your exclusion expires '+till.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+'.';
+  /* show after a tick so signOut's state change fires first */
+  setTimeout(()=>showToast({icon:'🛡',title:'Account excluded',sub:msg,col:'#e2596a'}),120);
+});
+/* Also update _rgUid on sign-in so _rgKey() is correct before auth state fires */
+supa.auth.getSession().then(({data:{session}})=>{if(session)_rgUid=session.user.id;});
+
+/* ── enforcement: session time reminder ── */
+let _rgSessTimer=null;
+const _rgSessStart=Date.now();
+function _rgStartSessTimer(mins){
+  clearInterval(_rgSessTimer);
+  if(!mins)return;
+  _rgSessTimer=setInterval(()=>{
+    const elapsed=Math.round((Date.now()-_rgSessStart)/60000);
+    showToast({icon:'⏱',title:'Session reminder',sub:'You\'ve been playing for '+elapsed+' min. Take a break?'});
+  },mins*60000);
+}
+/* bootstrap timer if one was already set */
+(()=>{const rg=_rgGet();if(rg.sessRemind)_rgStartSessTimer(rg.sessRemind);})();
+
+/* ── modal UI ── */
+let _rgTab='limit';
+function openRg(){
+  const rg=_rgGet();
+  /* render current state into the modal before opening */
+  _rgRenderLimit(rg);_rgRenderSession(rg);_rgRenderExcl(rg);
+  _rgSwitchTab(_rgTab);
+  rgOverlay.classList.add('open');
+}
+$id('rgClose').addEventListener('click',()=>rgOverlay.classList.remove('open'));
+rgOverlay.addEventListener('click',e=>{if(e.target===rgOverlay)rgOverlay.classList.remove('open');});
+
+$id('rgTabs').addEventListener('click',e=>{
+  const b=e.target.closest('.rg-tab');if(!b)return;
+  _rgTab=b.dataset.tab;_rgSwitchTab(_rgTab);
+});
+function _rgSwitchTab(tab){
+  $id('rgTabs').querySelectorAll('.rg-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  ['limit','session','excl'].forEach(t=>$id('rgTab'+t.charAt(0).toUpperCase()+t.slice(1)).hidden=t!==tab);
+}
+
+/* ── wager limit tab ── */
+function _rgRenderLimit(rg){
+  const st=$id('rgLimitStatus'),cl=$id('rgLimitClear'),sv=$id('rgLimitSave');
+  if(rg.wagLimitDay){
+    const spent=_rgGetWag();
+    st.hidden=false;
+    st.className='rg-status '+(spent>=rg.wagLimitDay?'danger':'ok');
+    st.textContent='Limit: $'+rg.wagLimitDay.toFixed(0)+'/day · Wagered today: $'+spent.toFixed(2);
+    $id('rgLimitAmt').value=rg.wagLimitDay;
+    cl.hidden=false;sv.textContent='Update Limit';
+  }else{
+    st.hidden=true;cl.hidden=true;sv.textContent='Set Limit';$id('rgLimitAmt').value='';
+  }
+}
+$id('rgLimitSave').addEventListener('click',()=>{
+  const v=parseFloat($id('rgLimitAmt').value);
+  if(!(v>0))return;
+  _rgSet({wagLimitDay:v});
+  _rgRenderLimit(_rgGet());
+  showToast({icon:'🛡',title:'Daily limit set',sub:'Max $'+v.toFixed(0)+' wagered per day.'});
+});
+$id('rgLimitClear').addEventListener('click',()=>{
+  _rgSet({wagLimitDay:null});
+  _rgRenderLimit(_rgGet());
+  showToast({icon:'🛡',title:'Wager limit removed',sub:'Bet responsibly.'});
+});
+
+/* ── session reminder tab ── */
+let _rgSessSel=null;
+function _rgRenderSession(rg){
+  const st=$id('rgSessStatus'),cl=$id('rgSessClear'),sv=$id('rgSessSave');
+  $id('rgSessChips').querySelectorAll('.rg-chip').forEach(c=>{
+    c.classList.toggle('sel',+c.dataset.m===rg.sessRemind);
+  });
+  _rgSessSel=rg.sessRemind||null;
+  if(rg.sessRemind){
+    st.hidden=false;st.className='rg-status ok';
+    st.textContent='Reminder every '+_minsLabel(rg.sessRemind)+'.';
+    cl.hidden=false;sv.textContent='Update Reminder';
+  }else{
+    st.hidden=true;cl.hidden=true;sv.textContent='Set Reminder';sv.disabled=true;
+  }
+}
+function _minsLabel(m){return m<60?m+' min':(m/60)+(m===60?'hr':'hrs');}
+$id('rgSessChips').addEventListener('click',e=>{
+  const b=e.target.closest('.rg-chip');if(!b)return;
+  $id('rgSessChips').querySelectorAll('.rg-chip').forEach(c=>c.classList.toggle('sel',c===b));
+  _rgSessSel=+b.dataset.m;
+  $id('rgSessSave').disabled=false;
+});
+$id('rgSessSave').addEventListener('click',()=>{
+  if(!_rgSessSel)return;
+  _rgSet({sessRemind:_rgSessSel});
+  _rgStartSessTimer(_rgSessSel);
+  _rgRenderSession(_rgGet());
+  showToast({icon:'⏱',title:'Session reminder set',sub:'You\'ll be reminded every '+_minsLabel(_rgSessSel)+'.'});
+});
+$id('rgSessClear').addEventListener('click',()=>{
+  _rgSet({sessRemind:null});
+  clearInterval(_rgSessTimer);_rgSessTimer=null;_rgSessSel=null;
+  _rgRenderSession(_rgGet());
+  showToast({icon:'⏱',title:'Session reminder cleared',sub:''});
+});
+
+/* ── self-exclusion tab ── */
+let _rgExclSel=null;
+function _rgRenderExcl(rg){
+  const active=_rgExclActive();
+  const st=$id('rgExclStatus'),chips=$id('rgExclChips'),sv=$id('rgExclSave');
+  chips.querySelectorAll('.rg-chip').forEach(c=>c.classList.remove('sel'));
+  if(active){
+    st.hidden=false;
+    const msg=rg.exclUntil===-1?'Permanent exclusion is active.':'Exclusion active until '+active.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+'.';
+    st.textContent=msg;
+    chips.querySelectorAll('.rg-chip').forEach(c=>{c.disabled=true;});
+    sv.disabled=true;sv.textContent='Exclusion Active';
+  }else{
+    st.hidden=true;
+    chips.querySelectorAll('.rg-chip').forEach(c=>{c.disabled=false;});
+    sv.disabled=true;sv.textContent='Activate Self-Exclusion';_rgExclSel=null;
+  }
+}
+$id('rgExclChips').addEventListener('click',e=>{
+  const b=e.target.closest('.rg-chip');if(!b||b.disabled)return;
+  $id('rgExclChips').querySelectorAll('.rg-chip').forEach(c=>c.classList.toggle('sel',c===b));
+  _rgExclSel=+b.dataset.h;
+  $id('rgExclSave').disabled=false;
+});
+$id('rgExclSave').addEventListener('click',async()=>{
+  if(_rgExclSel==null)return;
+  const until=_rgExclSel===-1?-1:new Date(Date.now()+_rgExclSel*3600000).toISOString();
+  _rgSet({exclUntil:until});
+  rgOverlay.classList.remove('open');
+  await supa.auth.signOut();
+  showToast({icon:'🛡',title:'Self-exclusion activated',sub:_rgExclSel===-1?'Your account is permanently excluded.':'You can return in '+_rgHoursLabel(_rgExclSel)+'.',col:'#e2596a'});
+});
+function _rgHoursLabel(h){if(h<48)return h+'h';if(h<336)return Math.round(h/24)+'d';return Math.round(h/720)+'mo';}
 
 /* ---------- game view toolbar ---------- */
 function renderGvCur(){

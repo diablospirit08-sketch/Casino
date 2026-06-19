@@ -76,8 +76,23 @@ function openGame(slug){
   if(g.demo){
     frameEl.classList.add('real-game');
     iframeLoader.hidden=false;
+    iframeLoader.classList.remove('error');
+    iframeLoader.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>Loading game…';
     iframeEl.hidden=false;
-    iframeEl.onload=()=>{iframeLoader.hidden=true;};
+    let _iframeTimer=setTimeout(()=>_iframeError('Game took too long to load.'),15000);
+    function _iframeError(msg){
+      clearTimeout(_iframeTimer);
+      iframeEl.hidden=true;
+      iframeLoader.classList.add('error');
+      iframeLoader.innerHTML=`
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span class="err-msg">Game unavailable</span>
+        <span class="err-sub">${msg}</span>
+        <button class="err-retry">Try Again</button>`;
+      iframeLoader.querySelector('.err-retry').addEventListener('click',()=>openGame(curSlug));
+    }
+    iframeEl.onload=()=>{clearTimeout(_iframeTimer);iframeLoader.hidden=true;};
+    iframeEl.onerror=()=>_iframeError('Failed to connect to the game server.');
     iframeEl.src=g.demo;
     freeBadge.hidden=false;
     fsBtn.href=g.demo;fsBtn.hidden=false;
@@ -111,7 +126,7 @@ function closeGame(){
   const iframeEl=document.getElementById('gameIframe');
   if(iframeEl){iframeEl.src='';iframeEl.hidden=true;}
   const iframeLoader=document.getElementById('iframeLoader');
-  if(iframeLoader)iframeLoader.hidden=true;
+  if(iframeLoader){iframeLoader.hidden=true;iframeLoader.classList.remove('error');}
   document.querySelector('.gv-frame').classList.remove('real-game');
   document.getElementById('gvFreeBadge').hidden=true;
   document.getElementById('gvFsBtn').hidden=true;

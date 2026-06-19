@@ -187,7 +187,8 @@ const authOverlay=document.getElementById('authOverlay'),
       authPass=document.getElementById('authPass'),
       authTermsRow=document.getElementById('authTermsRow'),
       authTermsCb=document.getElementById('authTerms'),
-      authSubmit=document.getElementById('authSubmit');
+      authSubmit=document.getElementById('authSubmit'),
+      forgotBtn=document.getElementById('forgotBtn');
 let authMode='up',ssoBusy=false;
 function validateAuth(){
   const ok=/.+@.+\..+/.test(authEmail.value)&&authPass.value.length>=6&&(authMode==='in'||authTermsCb.checked);
@@ -196,6 +197,7 @@ function validateAuth(){
 function renderAuth(){
   authTabs.querySelectorAll('.auth-tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===authMode));
   authTermsRow.hidden=authMode==='in';
+  forgotBtn.style.display=authMode==='in'?'':'none';
   authSubmit.textContent=authMode==='up'?'Create Account':'Sign In';
   authPass.setAttribute('autocomplete',authMode==='up'?'new-password':'current-password');
   validateAuth();
@@ -250,6 +252,61 @@ authSubmit.addEventListener('click',async()=>{
 });
 authEmail.addEventListener('keydown',e=>{if(e.key==='Enter')authPass.focus();});
 authPass.addEventListener('keydown',e=>{if(e.key==='Enter'&&!authSubmit.disabled)authSubmit.click();});
+
+/* ---------- forgot password ---------- */
+forgotBtn.addEventListener('click',async()=>{
+  const email=authEmail.value.trim();
+  /* If the field is already filled with a valid address, send immediately.
+     Otherwise swap the modal into a minimal reset-email screen. */
+  if(/.+@.+\..+/.test(email)){
+    await sendReset(email);
+    return;
+  }
+  /* Replace modal body with a focused reset screen */
+  const modal=authOverlay.querySelector('.dep-modal');
+  const original=modal.innerHTML;
+  modal.innerHTML=`
+    <div class="dep-head">
+      <h3 style="font-size:15px;font-weight:900;letter-spacing:.14em;text-transform:uppercase">Reset Password</h3>
+      <button class="icon-btn" id="resetClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px">Enter the email address linked to your account and we'll send you a password reset link.</p>
+    <div class="auth-field">
+      <p class="dep-lbl" style="margin-top:0">Email</p>
+      <div class="gv-input"><input id="resetEmail" type="email" placeholder="you@example.com" autocomplete="email" /></div>
+    </div>
+    <button class="auth-submit" id="resetSubmit" disabled>Send Reset Link</button>
+    <p class="auth-fine" style="margin-top:10px"><button id="resetBack" style="background:none;border:none;font:inherit;font-size:10.5px;color:var(--mint);cursor:pointer;padding:0">← Back to Sign In</button></p>`;
+  const resetEmail=modal.querySelector('#resetEmail');
+  const resetSubmit=modal.querySelector('#resetSubmit');
+  const validate=()=>{resetSubmit.disabled=!/.+@.+\..+/.test(resetEmail.value);};
+  resetEmail.addEventListener('input',validate);
+  resetEmail.addEventListener('keydown',e=>{if(e.key==='Enter'&&!resetSubmit.disabled)resetSubmit.click();});
+  resetSubmit.addEventListener('click',async()=>{
+    resetSubmit.disabled=true;
+    resetSubmit.textContent='Sending…';
+    await sendReset(resetEmail.value.trim());
+    modal.innerHTML=original;
+    authMode='in';
+    renderAuth();
+  });
+  modal.querySelector('#resetClose').addEventListener('click',()=>{modal.innerHTML=original;authMode='in';renderAuth();closeAuth();});
+  modal.querySelector('#resetBack').addEventListener('click',()=>{modal.innerHTML=original;authMode='in';renderAuth();});
+  setTimeout(()=>resetEmail.focus(),60);
+});
+
+async function sendReset(email){
+  try{
+    const{error}=await supa.auth.resetPasswordForEmail(email,{
+      redirectTo:location.origin+location.pathname+'?reset=1',
+    });
+    if(error)throw error;
+    closeAuth();
+    showToast({icon:'📧',title:'Reset link sent',sub:'Check your inbox — the link expires in 1 hour.'});
+  }catch(err){
+    showToast({icon:'⚠',title:'Reset failed',sub:err.message});
+  }
+}
 [['ssoGoogle','Continue with Google']].forEach(([id,label])=>{
   const btn=document.getElementById(id);
   btn.addEventListener('click',async()=>{
