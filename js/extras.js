@@ -140,12 +140,7 @@ async function refreshUmHead(){
   const total=WALLETS.reduce((s,w)=>s+w.fiat,0);
   $id('umBal').textContent='$'+total.toFixed(2);
 
-  /* mirror avatar into menu header */
-  const avId=document.getElementById('avatarBtn').dataset.avId;
-  const umAv=$id('umAv');
-  const av=typeof AVATARS!=='undefined'&&AVATARS.find(a=>a.id===avId);
-  if(av){umAv.innerHTML=av.svg;}
-  else{umAv.innerHTML=`<svg class="av-placeholder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.2 3.8-5 7-5s5.8 1.8 7 5"/></svg>`;}
+  /* rank fills umAv — avatar SVG no longer shown here */
 
   try{
     const{data:{user}}=await supa.auth.getUser();

@@ -33,12 +33,14 @@ function renderVip(){
     </div>
     <div class="vip-bar"><i style="width:${pct}%"></i></div>
     <div class="vip-meta"><span>${nx?Math.floor(pct)+'%':'MAX TIER'}</span><div class="vip-dots"></div><span>${nx?'Next: '+nx.n+' · '+nx.xp.toLocaleString('en-US')+' XP':''}</span></div>`;
-  $id('avatarBtn').style.borderColor=v.col;
-  $id('avatarBtn').style.color=v.col;
+  const btn=$id('avatarBtn');
+  btn.style.borderColor=v.col;
+  btn.style.color=v.col;
+  btn.innerHTML=`<span class="av-rank-num">${v.rn}</span>`;
   const badge=$id('vipBadge');
   if(badge){badge.textContent=v.rn;badge.style.color=v.col;badge.style.borderColor=v.col;badge.style.background=v.col+'22';}
   const umAv=$id('umAv');
-  if(umAv){umAv.style.borderColor=v.col;}
+  if(umAv){umAv.style.borderColor=v.col;umAv.innerHTML=`<span class="av-rank-num">${v.rn}</span>`;}
   const umBadge=$id('umRankBadge');
   if(umBadge){umBadge.textContent=v.rn;umBadge.style.color=v.col;umBadge.style.borderColor=v.col;umBadge.style.background=v.col+'22';}
   renderVipTrack();

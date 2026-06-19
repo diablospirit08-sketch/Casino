@@ -47,16 +47,12 @@ function applyAvatar(id) {
   if (!av) return;
   const btn = $id('avatarBtn');
   if (!btn) return;
-  btn.innerHTML = av.svg;
   btn.dataset.avId = id;
-  btn.classList.add('has-av');
 }
 
 function resetAvatar() {
   const btn = $id('avatarBtn');
   if (!btn) return;
-  btn.innerHTML = DEFAULT_AVB_SVG;
-  btn.classList.remove('has-av');
   delete btn.dataset.avId;
 }
 
