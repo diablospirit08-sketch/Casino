@@ -6,6 +6,7 @@ const WALLETS=[
   {c:'BNB',  s:'B', col:'#f0b90b', amt:0.5,         fiat:300.00},
   {c:'LTC',  s:'Ł', col:'#9aa0ad', amt:2.4407,     fiat:227.18},
   {c:'USDT', s:'₮', col:'#26a17b', amt:318.02,     fiat:318.02},
+  {c:'USDC', s:'$', col:'#2775ca', amt:150.00,     fiat:150.00},
   {c:'SOL',  s:'S', col:'#9945ff', amt:1.0871,     fiat:189.40},
 ];
 const LS_AUTH='volt-auth', LS_CUR='volt-wallet-cur';
@@ -18,7 +19,7 @@ const walletEl=document.getElementById('wallet'),
       walletCurEl=document.getElementById('walletCur'),
       walletMenu=document.getElementById('walletMenu'),
       avatarWrap=document.getElementById('avatarWrap');
-const fmtAmt=w=> w.c==='USDT' ? w.amt.toFixed(2) : (w.amt>0&&w.amt<0.001?w.amt.toFixed(6):w.amt.toFixed(4));
+const fmtAmt=w=> (w.c==='USDT'||w.c==='USDC') ? w.amt.toFixed(2) : (w.amt>0&&w.amt<0.001?w.amt.toFixed(6):w.amt.toFixed(4));
 function timeAgo(iso){
   const s=Math.floor((Date.now()-new Date(iso))/1000);
   if(s<60)return s+'s ago';
@@ -38,6 +39,7 @@ const COIN_ICONS={
   BNB:'https://coin-images.coingecko.com/coins/images/825/small/bnb-icon2_2x.png',
   LTC:'https://coin-images.coingecko.com/coins/images/2/small/litecoin.png',
   USDT:'https://coin-images.coingecko.com/coins/images/325/small/Tether.png',
+  USDC:'https://coin-images.coingecko.com/coins/images/6319/small/usdc.png',
   SOL:'https://coin-images.coingecko.com/coins/images/4128/small/solana.png',
   XRP:'https://coin-images.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png',
   TRX:'https://coin-images.coingecko.com/coins/images/1094/small/tron-logo.png',

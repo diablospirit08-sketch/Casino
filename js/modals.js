@@ -24,6 +24,12 @@ const DEPOSIT={
     {id:'BEP20',name:'BNB Chain · BEP-20',  addr:'',                                            min:'1 USDT',     conf:'15 confirmations', fee:'0.5 USDT',    evm:true},
     {id:'SPL',  name:'Solana · SPL',        addr:'9wK3rT7pNxV2mQ8cZ5bL4dF6gH1jY0aEuSnB8XoD2RkM',min:'1 USDT',  conf:'~1 min',           fee:'0.01 USDT',   evm:false},
   ]},
+  USDC:{networks:[
+    {id:'ERC20',name:'Ethereum · ERC-20',   addr:'',                                            min:'10 USDC',    conf:'12 confirmations', fee:'1.5 USDC',    evm:true},
+    {id:'SOL',  name:'Solana · SPL',        addr:'9wK3rT7pNxV2mQ8cZ5bL4dF6gH1jY0aEuSnB8XoD2RkM',min:'1 USDC',  conf:'~1 min',           fee:'0.01 USDC',   evm:false},
+    {id:'BEP20',name:'BNB Chain · BEP-20',  addr:'',                                            min:'1 USDC',     conf:'15 confirmations', fee:'0.5 USDC',    evm:true},
+    {id:'TRC20',name:'Tron · TRC-20',       addr:'TUsdc8wR4mQk9xZ2bP4wN6cF8gH0jL5eB',         min:'1 USDC',     conf:'~1 min',           fee:'0.5 USDC',    evm:false},
+  ]},
   SOL:{networks:[
     {id:'SOL', name:'Solana',               addr:'9wK3rT7pNxV2mQ8cZ5bL4dF6gH1jY0aEuSnB8XoD2RkM',min:'0.05 SOL', conf:'~1 min finality',  fee:'0.001 SOL',   evm:false},
   ]},
