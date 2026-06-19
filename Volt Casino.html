@@ -456,6 +456,10 @@
   .cert-logo{display:inline-flex;align-items:center;opacity:.7;transition:.15s;text-decoration:none;flex:none}
   .cert-logo:hover{opacity:1}
   .cert-logo img{height:28px;width:auto;object-fit:contain}
+  /* cert-strip logos have white backgrounds — give them a pill so it looks intentional */
+  .cert-strip .cert-logo{background:#fff;border-radius:7px;padding:5px 10px;opacity:.85}
+  .cert-strip .cert-logo:hover{opacity:1}
+  .cert-strip .cert-logo img{height:26px}
   .fineprint{margin-top:26px;font-size:11px;line-height:1.7;color:#525a6e;max-width:880px}
   .copyright{margin-top:14px;font-size:11px;color:var(--muted-2)}
 
