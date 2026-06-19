@@ -1,20 +1,18 @@
-(async function(){
+(async function () {
 'use strict';
-
-const CURRENCIES = ['BTC','ETH','BNB','LTC','USDT','SOL'];
 
 /* ── live price fetch (CoinGecko free tier) ── */
 const CG_IDS = {
   BTC:'bitcoin', ETH:'ethereum', BNB:'binancecoin', LTC:'litecoin',
-  USDT:'tether', SOL:'solana',
+  USDT:'tether', USDC:'usd-coin', SOL:'solana',
 };
-const LS_RATES = 'volt-rates';
+const LS_RATES    = 'volt-rates';
 const LS_RATES_TS = 'volt-rates-ts';
-const RATE_TTL = 5 * 60 * 1000; // 5 min cache
+const RATE_TTL    = 5 * 60 * 1000;
 
 async function fetchRates() {
   const now = Date.now();
-  const ts = parseInt(localStorage.getItem(LS_RATES_TS) || '0');
+  const ts  = parseInt(localStorage.getItem(LS_RATES_TS) || '0');
   if (now - ts < RATE_TTL) {
     try { return JSON.parse(localStorage.getItem(LS_RATES) || '{}'); } catch {}
   }
@@ -28,7 +26,7 @@ async function fetchRates() {
     for (const [sym, cgId] of Object.entries(CG_IDS)) {
       rates[sym] = json[cgId]?.usd ?? 0;
     }
-    rates.USDT = 1;
+    rates.USDT = 1; rates.USDC = 1;
     localStorage.setItem(LS_RATES, JSON.stringify(rates));
     localStorage.setItem(LS_RATES_TS, String(now));
     return rates;
@@ -45,48 +43,30 @@ function applyRates(rates) {
   });
 }
 
-/* ── load balances from Supabase ── */
+/* ── load balances from backend ── */
 async function loadBalances() {
-  const { data: { user } } = await supa.auth.getUser();
-  if (!user) return;
+  const { data: { session } } = await supa.auth.getSession();
+  if (!session) return;
 
-  /* fetch live rates first */
   const rates = await fetchRates();
   applyRates(rates);
 
-  /* fetch wallet rows */
-  const { data, error } = await supa.from('wallets')
-    .select('currency, balance')
-    .eq('user_id', user.id);
+  const res = await window.voltApi._fetch('/api/wallet/balances');
+  if (!res.ok) { console.warn('Balance fetch failed:', res.status); return; }
+  const balances = await res.json();
 
-  if (error) { console.warn('Balance fetch failed:', error.message); return; }
-
-  const rows = data || [];
-  const existing = rows.map(r => r.currency);
-  const missing = CURRENCIES.filter(c => !existing.includes(c));
-
-  /* create missing wallet rows */
-  if (missing.length) {
-    await supa.from('wallets').insert(
-      missing.map(c => ({ user_id: user.id, currency: c, balance: 0 }))
-    );
-  }
-
-  /* apply to WALLETS array */
-  rows.forEach(row => {
-    const w = WALLETS.find(x => x.c === row.currency);
-    if (w) { w.amt = parseFloat(row.balance) || 0; w.fiat = w.amt * (w.rate || 0); }
-  });
-  missing.forEach(c => {
-    const w = WALLETS.find(x => x.c === c);
-    if (w) { w.amt = 0; w.fiat = 0; }
+  WALLETS.forEach(w => {
+    if (balances[w.c] !== undefined) {
+      w.amt  = parseFloat(balances[w.c]) || 0;
+      w.fiat = w.amt * (w.rate || 0);
+    }
   });
 
   renderWallet();
 }
 
-/* Balance changes are now owned exclusively by the place-bet Edge Function
-   via settle_bet() (SECURITY DEFINER). No direct wallet UPDATE from the browser. */
+/* Expose so place-bet.js can refresh balance after settlement */
+window.loadBalances = loadBalances;
 
 /* ── auth state changes ── */
 supa.auth.onAuthStateChange((_, session) => {
@@ -98,7 +78,7 @@ supa.auth.onAuthStateChange((_, session) => {
   }
 });
 
-/* load immediately if already logged in */
+/* load immediately if already signed in */
 const { data: { session } } = await supa.auth.getSession();
 if (session) loadBalances().catch(err => console.warn('loadBalances failed:', err));
 

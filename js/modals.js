@@ -70,9 +70,8 @@ async function fetchDepositAddress(currency,networkId){
   if(depAddrCache[key])return depAddrCache[key];
   const{data:{session}}=await supa.auth.getSession();
   if(!session) return null;
-  const res=await fetch(
-    'https://czqqdwmifcqoiyphjqjk.supabase.co/functions/v1/get-deposit-address?currency='+currency+'&network='+networkId,
-    {headers:{Authorization:'Bearer '+session.access_token}}
+  const res=await window.voltApi._fetch(
+    '/api/wallet/deposit-address/'+currency+'/'+networkId
   );
   const json=await res.json();
   if(json.address){depAddrCache[key]=json.address;return json.address;}
@@ -207,20 +206,28 @@ document.getElementById('wdMax').addEventListener('click',()=>{
   wdAmt.value=fmtW(w,floorW(w,w.amt));validateWd();
 });
 [wdAddr,wdAmt].forEach(i=>i.addEventListener('input',validateWd));
-wdSubmit.addEventListener('click',()=>{
+wdSubmit.addEventListener('click',async()=>{
   if(wdSubmit.disabled)return;
   const w=depW(),a=Math.min(parseFloat(wdAmt.value)||0,w.amt);
   if(a<=0)return;
   const addr=wdAddr.value.trim();
-  creditTo(w,-a);
-  if(window.recordTransaction) recordTransaction({
-    type:'withdraw', currency:w.c, amount:a,
-    status:'pending', address:addr,
-    note:'Withdrawal requested by user',
-  });
-  showToast({icon:'↗',title:'Withdrawal requested',sub:'-'+fmtW(w,a)+' '+w.c+' · simulated, nothing is sent'});
-  wdAmt.value='';wdAddr.value='';
-  renderWd();
+  const net=currentNetwork();
+  wdSubmit.disabled=true;wdSubmit.textContent='Submitting…';
+  try{
+    const res=await window.voltApi._fetch('/api/wallet/withdraw',{
+      method:'POST',
+      body:JSON.stringify({currency:w.c,network:net.id,amount:a,address:addr}),
+    });
+    const json=await res.json();
+    if(!res.ok)throw new Error(json.error||'Withdrawal failed');
+    if(window.loadBalances)loadBalances().catch(()=>{});
+    showToast({icon:'↗',title:'Withdrawal submitted',sub:'-'+fmtW(w,a)+' '+w.c+' · processing'});
+    wdAmt.value='';wdAddr.value='';renderWd();
+  }catch(err){
+    showToast({icon:'⚠',title:'Withdrawal failed',sub:err.message});
+  }finally{
+    wdSubmit.disabled=false;wdSubmit.textContent='Withdraw';
+  }
 });
 
 /* ---------- auth modal ---------- */
@@ -350,21 +357,13 @@ async function sendReset(email){
     showToast({icon:'⚠',title:'Reset failed',sub:err.message});
   }
 }
-[['ssoGoogle','Continue with Google']].forEach(([id,label])=>{
-  const btn=document.getElementById(id);
-  btn.addEventListener('click',async()=>{
-    if(ssoBusy)return;
-    ssoBusy=true;
-    const sp=btn.querySelector('span');
-    sp.textContent='Connecting…';
-    const{error}=await supa.auth.signInWithOAuth({
-      provider:'google',
-      options:{redirectTo:location.origin+location.pathname}
-    });
-    if(error){sp.textContent=label;ssoBusy=false;showToast({icon:'⚠',title:'Google auth failed',sub:error.message});}
-  });
-});
-/* Supabase auth state — keeps UI in sync with real session */
+/* Google SSO not available — hide the button */
+const _ssoBtn=document.getElementById('ssoGoogle');
+if(_ssoBtn)_ssoBtn.style.display='none';
+const _ssoDiv=_ssoBtn&&_ssoBtn.nextElementSibling;
+if(_ssoDiv&&_ssoDiv.classList.contains('auth-div'))_ssoDiv.style.display='none';
+
+/* Auth state — keeps UI in sync with real session */
 supa.auth.onAuthStateChange((_,session)=>{
   if(session){
     if(authOverlay.classList.contains('open'))finishAuth();

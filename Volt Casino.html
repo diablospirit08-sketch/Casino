@@ -1619,7 +1619,7 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/api.js"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/lobby.js"></script>
 <script src="js/gameview.js"></script>
@@ -1647,9 +1647,7 @@ $id('loyaltyBtn').addEventListener('click',()=>{
   $id('vipOverlay').classList.add('open');
 });
 
-/* ── password-reset redirect handler ──
-   Supabase appends #access_token=...&type=recovery to the redirectTo URL.
-   Detect that fragment, exchange it for a session, then show a new-password form. */
+/* ── password-reset redirect handler — not supported in current backend ── */
 (function(){
   const hash=new URLSearchParams(location.hash.replace(/^#/,''));
   if(hash.get('type')!=='recovery')return;
