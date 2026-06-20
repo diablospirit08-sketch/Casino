@@ -134,7 +134,7 @@ function openDep(mode){depCur=voltCur;depNetId=null;depMode=mode||'dep';if(depMo
 function closeDep(){depOverlay.classList.remove('open');}
 function openTxnModal(){openDep('txn');}
 window.openTxnModal=openTxnModal;
-document.getElementById('walletDep').addEventListener('click',openDep);
+document.getElementById('walletDep').addEventListener('click',()=>openDep());
 document.getElementById('depClose').addEventListener('click',closeDep);
 depOverlay.addEventListener('click',e=>{if(e.target===depOverlay)closeDep();});
 document.addEventListener('keydown',e=>{
