@@ -79,11 +79,12 @@ async function fetchDepositAddress(currency,networkId){
 }
 
 function currentNetwork(){
-  const nets=DEPOSIT[depCur].networks;
+  const nets=(DEPOSIT[depCur]||DEPOSIT.BTC).networks;
   return nets.find(n=>n.id===depNetId)||nets[0];
 }
 
 async function renderDep(){
+  if(!DEPOSIT[depCur]){depCur='BTC';}
   const nets=DEPOSIT[depCur].networks;
   if(!nets.find(n=>n.id===depNetId)) depNetId=nets[0].id;
   const net=currentNetwork();
@@ -184,14 +185,14 @@ function renderDepMode(){
   if(depMode==='txn')window.loadInlineTxnPage&&window.loadInlineTxnPage(true);
 }
 function renderWd(){
-  const w=depW(),d=DEPOSIT[depCur];
+  const w=depW();
   wdCoins.innerHTML=WALLETS.map(x=>`
     <button class="dep-coin ${x.c===depCur?'sel':''}" data-c="${x.c}">
       ${coinImg(x.c)}${x.c}</button>`).join('');
   wdAvail.textContent=fmtAmt(w)+' '+w.c;
   wdCoinIc.style.background='none';wdCoinIc.innerHTML=`<img src="${coinIconUrl(depCur)}" style="width:22px;height:22px;object-fit:cover" alt="${depCur}">`;
   wdAddr.placeholder='Paste your '+depCur+' address';
-  wdFee.textContent=d.fee;
+  wdFee.textContent=currentNetwork().fee||'—';
   validateWd();
 }
 function validateWd(){

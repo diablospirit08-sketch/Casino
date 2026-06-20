@@ -46,7 +46,7 @@ var nativeW=WALLETS.find(function(w){return w.c==='BNB';});
 
 function setLedgerBnb(amt){
   if(!nativeW)return;
-  nativeW.amt=amt;nativeW.fiat=amt*nativeW.rate;
+  nativeW.amt=amt;nativeW.fiat=amt*(nativeW.rate||0);
   renderWallet();if(window.gvCurSync)gvCurSync();
 }
 
