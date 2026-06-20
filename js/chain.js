@@ -127,10 +127,21 @@ function connectInjected(){
 }
 
 /* ── connect via WalletConnect (mobile wallets) ──────────────────────────── */
+function loadScript(src){
+  return new Promise(function(resolve,reject){
+    if(document.querySelector('script[src="'+src+'"]')){resolve();return;}
+    var s=document.createElement('script');
+    s.src=src; s.onload=resolve; s.onerror=function(){reject(new Error('Failed to load '+src));};
+    document.head.appendChild(s);
+  });
+}
+var WC_CDN='https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.17.3/dist/index.umd.js';
 function connectWalletConnect(){
-  return import('https://esm.sh/@walletconnect/ethereum-provider@2.17.0')
-    .then(function(mod){
-      return (mod.default||mod.EthereumProvider).init({
+  return loadScript(WC_CDN)
+    .then(function(){
+      var Provider=window.WalletConnectEthereumProvider||window.EthereumProvider;
+      if(!Provider)throw new Error('WalletConnect failed to load');
+      return Provider.init({
         projectId:PROJECT_ID,
         chains:[97],
         optionalChains:[56],
@@ -144,10 +155,7 @@ function connectWalletConnect(){
         },
       });
     })
-    .then(function(wcp){
-      _provider=wcp;
-      return wcp.enable();
-    })
+    .then(function(wcp){_provider=wcp;return wcp.enable();})
     .then(function(accs){return afterConnect(accs[0]);});
 }
 
@@ -160,6 +168,24 @@ function connectCoinbase(){
     return Promise.reject(new Error('Coinbase Wallet not installed'));
   }
   _provider=cbProvider;
+  return fetchVaultConfig()
+    .then(function(){return rpc('eth_requestAccounts');})
+    .then(function(accs){return afterConnect(accs[0]);});
+}
+
+/* ── connect Trust Wallet ────────────────────────────────────────────────── */
+function connectTrust(){
+  /* Trust Wallet injects window.trustwallet, or sets isTrust on window.ethereum */
+  var provider=window.trustwallet
+    ||(window.ethereum&&window.ethereum.isTrust?window.ethereum:null);
+  if(!provider&&window.ethereum&&window.ethereum.providers){
+    provider=window.ethereum.providers.find(function(p){return p.isTrust;})||null;
+  }
+  if(!provider){
+    showToast({icon:'⚠',title:'Trust Wallet not found',sub:'Please install the Trust Wallet browser extension.'});
+    return Promise.reject(new Error('Trust Wallet not installed'));
+  }
+  _provider=provider;
   return fetchVaultConfig()
     .then(function(){return rpc('eth_requestAccounts');})
     .then(function(accs){return afterConnect(accs[0]);});
@@ -232,7 +258,7 @@ var WALLET_OPTS=[
   {id:'metamask',  label:'MetaMask',        icon:'https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg',       fn:connectInjected},
   {id:'wc',        label:'WalletConnect',   icon:'https://avatars.githubusercontent.com/u/37784886?s=48',                     fn:connectWalletConnect},
   {id:'coinbase',  label:'Coinbase Wallet', icon:'https://avatars.githubusercontent.com/u/18060234?s=48',                     fn:connectCoinbase},
-  {id:'trust',     label:'Trust Wallet',    icon:'https://trustwallet.com/assets/images/media/assets/TWT.png',                fn:connectInjected},
+  {id:'trust',     label:'Trust Wallet',    icon:'https://trustwallet.com/assets/images/media/assets/TWT.png',                fn:connectTrust},
 ];
 
 function pickerHTML(){
