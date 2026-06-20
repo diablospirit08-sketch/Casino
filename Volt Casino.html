@@ -1646,17 +1646,7 @@
 <script src="js/bets.js"></script>
 <script src="js/place-bet.js"></script>
 <script src="js/avatar.js"></script>
-<script>
-/* bridge: expose let/const globals from lobby.js to the chain.js ES module */
-window.WALLETS = WALLETS;
-window.LS_CUR  = LS_CUR;
-Object.defineProperty(window, 'voltCur', {
-  get(){ return voltCur; },
-  set(v){ voltCur = v; },
-  configurable: true,
-});
-</script>
-<script type="module" src="js/chain.js"></script>
+<script src="js/chain.js"></script>
 <script>
 $id('loyaltyBtn').addEventListener('click',()=>{
   if(typeof avatarWrap!=='undefined')avatarWrap.classList.remove('open');
