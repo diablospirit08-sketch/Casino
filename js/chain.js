@@ -341,31 +341,43 @@ function selectedCoinIn(id) {
   return sel ? sel.dataset.c : null;
 }
 
+/* ── MutationObserver: render BSC section whenever the cashier modal opens ── */
+new MutationObserver(() => {
+  const overlay = document.getElementById('depOverlay');
+  if (!overlay.classList.contains('open')) return;
+  if (selectedCoinIn('depCoins') === 'BNB') renderBscDeposit();
+  if (selectedCoinIn('wdCoins')  === 'BNB') renderBscWithdraw();
+}).observe(document.getElementById('depOverlay'), { attributes: true, attributeFilter: ['class'] });
+
+/* ── coin selection & tab switches ──────────────────────────────────────── */
 document.getElementById('walletDep').addEventListener('click', () => {
   setTimeout(() => { if (selectedCoinIn('depCoins') === 'BNB') renderBscDeposit(); }, 50);
 });
 
-const depCoinsEl = document.getElementById('depCoins');
-depCoinsEl && depCoinsEl.addEventListener('click', e => {
+document.getElementById('depCoins').addEventListener('click', e => {
   const b = e.target.closest('.dep-coin'); if (!b) return;
   const sec = document.getElementById(BSC_DEP_ID);
   if (b.dataset.c === 'BNB') setTimeout(renderBscDeposit, 50);
   else if (sec) sec.innerHTML = '';
 });
 
-const wdCoinsEl = document.getElementById('wdCoins');
-wdCoinsEl && wdCoinsEl.addEventListener('click', e => {
+document.getElementById('wdCoins').addEventListener('click', e => {
   const b = e.target.closest('.dep-coin'); if (!b) return;
   const sec = document.getElementById(BSC_WD_ID);
   if (b.dataset.c === 'BNB') setTimeout(renderBscWithdraw, 50);
   else if (sec) sec.innerHTML = '';
 });
 
-const depTabsEl = document.getElementById('depTabs');
-depTabsEl && depTabsEl.addEventListener('click', e => {
+document.getElementById('depTabs').addEventListener('click', e => {
   const t = e.target.closest('.auth-tab'); if (!t) return;
   setTimeout(() => {
     if (t.dataset.mode === 'dep' && selectedCoinIn('depCoins') === 'BNB') renderBscDeposit();
     if (t.dataset.mode === 'wd'  && selectedCoinIn('wdCoins')  === 'BNB') renderBscWithdraw();
   }, 50);
 });
+
+/* ── if modal is already open when module finishes loading ───────────────── */
+if (document.getElementById('depOverlay').classList.contains('open')) {
+  if (selectedCoinIn('depCoins') === 'BNB') renderBscDeposit();
+  if (selectedCoinIn('wdCoins')  === 'BNB') renderBscWithdraw();
+}
