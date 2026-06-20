@@ -128,6 +128,10 @@ function connectInjected(){
 
 /* ── connect via WalletConnect (mobile wallets) ──────────────────────────── */
 function connectWalletConnect(){
+  /* hide deposit modal so the WC QR overlay isn't buried behind it */
+  var depOverlay=document.getElementById('depOverlay');
+  depOverlay&&depOverlay.classList.remove('open');
+
   /* dynamic import() works in regular scripts — only top-level import fails */
   return import('https://esm.sh/@walletconnect/ethereum-provider@2.17.3')
     .then(function(mod){
@@ -148,7 +152,16 @@ function connectWalletConnect(){
       });
     })
     .then(function(wcp){_provider=wcp;return wcp.enable();})
-    .then(function(accs){return afterConnect(accs[0]);});
+    .then(function(accs){
+      /* reopen deposit modal after successful connection */
+      depOverlay&&depOverlay.classList.add('open');
+      return afterConnect(accs[0]);
+    })
+    .catch(function(e){
+      /* reopen deposit modal if user cancels or error occurs */
+      depOverlay&&depOverlay.classList.add('open');
+      throw e;
+    });
 }
 
 /* ── connect Coinbase Wallet ─────────────────────────────────────────────── */
