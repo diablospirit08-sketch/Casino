@@ -127,20 +127,12 @@ function connectInjected(){
 }
 
 /* ── connect via WalletConnect (mobile wallets) ──────────────────────────── */
-function loadScript(src){
-  return new Promise(function(resolve,reject){
-    if(document.querySelector('script[src="'+src+'"]')){resolve();return;}
-    var s=document.createElement('script');
-    s.src=src; s.onload=resolve; s.onerror=function(){reject(new Error('Failed to load '+src));};
-    document.head.appendChild(s);
-  });
-}
-var WC_CDN='https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.17.3/dist/index.umd.js';
 function connectWalletConnect(){
-  return loadScript(WC_CDN)
-    .then(function(){
-      var Provider=window.WalletConnectEthereumProvider||window.EthereumProvider;
-      if(!Provider)throw new Error('WalletConnect failed to load');
+  /* dynamic import() works in regular scripts — only top-level import fails */
+  return import('https://esm.sh/@walletconnect/ethereum-provider@2.17.3')
+    .then(function(mod){
+      var Provider=mod.default||mod.EthereumProvider;
+      if(!Provider)throw new Error('WalletConnect library unavailable');
       return Provider.init({
         projectId:PROJECT_ID,
         chains:[97],
