@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  const API    = 'http://localhost:4000';
+  const API    = 'https://casino-production-2759.up.railway.app';
   const LS_AT  = 'volt-access-token';
   const LS_RT  = 'volt-refresh-token';
   const LS_USR = 'volt-user';
