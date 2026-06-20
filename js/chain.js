@@ -58,7 +58,7 @@ const modal = createAppKit({
 
 /* ── state ───────────────────────────────────────────────────────────────── */
 let account = null, vaultAddr = null, chainIdHex = null;
-const nativeW = WALLETS.find(w => w.c === 'BNB');
+const nativeW = window.WALLETS.find(w => w.c === 'BNB');
 
 function setLedgerBnb(amt) {
   if (!nativeW) return;
@@ -128,9 +128,9 @@ async function afterConnect() {
   await saveWalletAddress(account);
   await refreshBalance();
   if (!document.body.classList.contains('authed')) setAuth(true);
-  if (voltCur !== 'BNB') {
-    voltCur = 'BNB';
-    localStorage.setItem(LS_CUR, voltCur);
+  if (window.voltCur !== 'BNB') {
+    window.voltCur = 'BNB';
+    localStorage.setItem(window.LS_CUR, 'BNB');
     renderWallet();
     if (window.gvCurSync) gvCurSync();
   }
