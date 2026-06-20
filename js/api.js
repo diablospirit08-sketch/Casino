@@ -65,6 +65,7 @@
 
   window.voltApi = {
     _fetch,
+    _setSession,
 
     auth: {
       async getSession() {
@@ -134,8 +135,14 @@
         return { error: { message: 'Password reset is not yet available. Contact support.' } };
       },
 
-      async signInWithOAuth() {
-        return { error: { message: 'Social login is not yet available.' } };
+      async signInWithOAuth({ provider, options = {} } = {}) {
+        if (window._supaReal) {
+          return window._supaReal.auth.signInWithOAuth({
+            provider,
+            options: { redirectTo: location.origin + location.pathname, ...options },
+          });
+        }
+        return { error: { message: 'OAuth not ready' } };
       },
     },
   };

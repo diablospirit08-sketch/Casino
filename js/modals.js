@@ -363,11 +363,19 @@ async function sendReset(email){
     showToast({icon:'⚠',title:'Reset failed',sub:err.message});
   }
 }
-/* Google SSO not available — hide the button */
+/* Google SSO */
 const _ssoBtn=document.getElementById('ssoGoogle');
-if(_ssoBtn)_ssoBtn.style.display='none';
-const _ssoDiv=_ssoBtn&&_ssoBtn.nextElementSibling;
-if(_ssoDiv&&_ssoDiv.classList.contains('auth-div'))_ssoDiv.style.display='none';
+if(_ssoBtn){
+  _ssoBtn.addEventListener('click',async()=>{
+    const orig=_ssoBtn.innerHTML;
+    _ssoBtn.disabled=true;_ssoBtn.textContent='Redirecting to Google…';
+    const{error}=await supa.auth.signInWithOAuth({provider:'google'});
+    if(error){
+      _ssoBtn.disabled=false;_ssoBtn.innerHTML=orig;
+      showToast({icon:'⚠',title:'Google sign-in failed',sub:error.message});
+    }
+  });
+}
 
 /* Auth state — keeps UI in sync with real session */
 supa.auth.onAuthStateChange((_,session)=>{
