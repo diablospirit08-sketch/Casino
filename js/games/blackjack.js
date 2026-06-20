@@ -1,12 +1,11 @@
 /* --- blackjack v2 --- */
-const DEAL_BJ_URL='https://czqqdwmifcqoiyphjqjk.supabase.co/functions/v1/deal-blackjack';
 ORIGINALS['originals-blackjack']={
   rtp:'99.5%',auto:false,
   h:null,
   ruleMode:'H17',
   _T:[],_kh:null,_betChips:[],
   /* server-committed deck state */
-  _serverCards:[],_serverCardIdx:0,_deckId:null,_actions:[],
+  _serverCards:[],_serverCardIdx:0,_serverSeedHash:null,_clientSeed:null,_nonce:0,_actions:[],
 
   /* ── sound ── */
   sndOn:localStorage.getItem('volt-snd')!=='off',
@@ -521,11 +520,7 @@ ORIGINALS['originals-blackjack']={
     /* fetch server-committed deck before touching local balance */
     let deckData;
     try{
-      const{data:{session}}=await supa.auth.getSession();
-      if(!session)throw new Error('Not signed in');
-      const res=await fetch(DEAL_BJ_URL,{method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-        body:'{}'});
+      const res=await window.voltApi._fetch('/api/games/blackjack/deal',{method:'POST',body:'{}'});
       deckData=await res.json();
       if(!res.ok)throw new Error(deckData.error||'Deal failed');
     }catch(err){
@@ -537,7 +532,9 @@ ORIGINALS['originals-blackjack']={
     const st=debitBet();if(!st){lockBet(false);return;}
     this._serverCards=deckData.cards;
     this._serverCardIdx=0;
-    this._deckId=deckData.deckId;
+    this._serverSeedHash=deckData.serverSeedHash;
+    this._clientSeed=deckData.clientSeed;
+    this._nonce=deckData.nonce||0;
     this._actions=[];
     this._T.forEach(clearTimeout);this._T=[];
     this._deck=[];
@@ -715,22 +712,31 @@ ORIGINALS['originals-blackjack']={
     this.h=null;
     gvBetBtn.disabled=true;gvBetBtn.textContent='Settling…';
 
-    // server settlement — outcome is computed server-side from deckId + actions
+    // server settlement — calls /api/bets/place directly using the seeds from the deal
+    // so the server re-derives the same deck and verifies the outcome.
+    // wager = totalWagered so server debit+credit matches what the client locally deducted.
     try{
-      const res=await placeBet({
-        game:'blackjack',
-        currency:w.c,
-        wager:h.handBets[0], /* initial bet; server computes totalWagered from replay */
-        params:{
-          deckId:this._deckId,
-          actions:this._actions,
-          ruleMode:this.ruleMode,
-          insTook:!!h.insBet,
-          insBet:h.insBet||0,
-        }
+      const res=await window.voltApi._fetch('/api/bets/place',{
+        method:'POST',
+        body:JSON.stringify({
+          game:'blackjack',
+          currency:w.c,
+          wager:totalWagered,
+          serverSeedHash:this._serverSeedHash,
+          clientSeed:this._clientSeed,
+          nonce:this._nonce,
+          params:{
+            actions:this._actions,
+            ruleMode:this.ruleMode,
+            insBet:h.insBet||0,
+            initialWager:h.handBets[0],
+          },
+        }),
       });
-      // server is source of truth for balance
-      w.amt=res.new_balance;w.fiat=w.amt*w.rate;renderWallet();
+      const json=await res.json();
+      if(!res.ok)throw new Error(json.error||'Settlement failed');
+      if(window.pfRecordServer)pfRecordServer(json.serverSeed,json.serverSeedHash,json.clientSeed,json.nonce);
+      if(window.loadBalances)loadBalances().catch(()=>{});
     }catch(err){
       // server unreachable — apply payout client-side so player isn't stuck
       if(totalPayout>0)creditTo(w,totalPayout);
@@ -1107,14 +1113,15 @@ ORIGINALS['originals-blackjack']={
     this._betChips=[];
     const h=this.h;
     if(h){
-      // Restore locally-deducted amounts. Supabase balance was never touched
-      // (settle_bet only runs on _finish), so the real balance is unchanged.
-      // The orphaned bj_rounds row auto-expires without harm.
+      // Restore locally-deducted amounts — server settlement never ran, so the
+      // server balance is unchanged. The pending seed row auto-expires.
       const totalWagered=h.handBets.reduce((a,b)=>a+b,0)+(h.insBet||0);
       creditTo(h.st.w,totalWagered);
     }
     this.h=null;
-    this._deckId=null;
+    this._serverSeedHash=null;
+    this._clientSeed=null;
+    this._nonce=0;
     this._serverCards=[];
     this._serverCardIdx=0;
     this._actions=[];

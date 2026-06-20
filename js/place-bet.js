@@ -5,7 +5,7 @@ async function placeBet({ game, currency, wager, params = {} }) {
   if (!session) throw new Error('Not authenticated');
 
   // Step 1: reserve a server seed
-  const prepRes = await window.voltApi._fetch('/api/bets/prepare', { method: 'POST' });
+  const prepRes = await window.voltApi._fetch('/api/bets/prepare', { method: 'POST', body: '{}' });
   if (!prepRes.ok) throw new Error('Failed to prepare bet');
   const { serverSeedHash, clientSeed: suggestedSeed } = await prepRes.json();
 

@@ -97,10 +97,16 @@ const GAMES = {
   },
 
   'originals-blackjack': ({ serverSeed, clientSeed, nonce, params }) => {
-    const { actions = [] } = params; // ['hit','hit','stand'] etc.
-    const deck   = shuffleDeck(serverSeed, clientSeed, nonce);
-    const outcome = resolveBlackjack(deck, actions);
-    return { result: outcome, multiplier: outcome.multiplier };
+    // actions: ['H'=hit, 'S'=stand, 'D'=double, 'P'=split, 'I'=insurance, 'NI'=no insurance]
+    // wager here is totalWagered (initial + doubles + splits + insurance) sent by the client.
+    const { actions = [], ruleMode = 'H17', insBet = 0, initialWager = 1 } = params;
+    const deck    = shuffleDeck(serverSeed, clientSeed, nonce);
+    const outcome = resolveBlackjack(deck, { actions, ruleMode, insBet, initialWager });
+    // multiplier is relative to totalWagered (server debits totalWagered, credits totalPayout)
+    const mult = outcome.totalWagered > 0
+      ? +(outcome.totalPayout / outcome.totalWagered).toFixed(6)
+      : 0;
+    return { result: outcome, multiplier: mult };
   },
 
   'originals-roulette': ({ serverSeed, clientSeed, nonce, params }) => {
@@ -360,38 +366,131 @@ function plinkoMultiplier(rows, risk, bucket) {
   return table[Math.min(bucket, table.length - 1)] ?? 0;
 }
 
-function resolveBlackjack(deck, actions) {
-  const rankOf = c => Math.min(c % 13 + 1, 10);
-  const isAce  = c => c % 13 === 0;
+function resolveBlackjack(deck, params) {
+  const { actions = [], ruleMode = 'H17', insBet = 0, initialWager = 1 } = params;
 
-  function handValue(cards) {
-    let sum = 0, aces = 0;
-    for (const c of cards) { sum += rankOf(c); if (isAce(c)) aces++; }
-    while (sum > 21 && aces > 0) { sum -= 10; aces--; }
-    return sum;
+  // Card helpers
+  const rv    = i => { const r = i % 13; return r === 0 ? 11 : r >= 9 ? 10 : r + 1; };
+  const isAce = i => (i % 13) === 0;
+
+  function hv(hand) {
+    let t = 0, aces = 0;
+    for (const c of hand) { t += rv(c); if (isAce(c)) aces++; }
+    while (t > 21 && aces > 0) { t -= 10; aces--; }
+    return t;
   }
 
+  function isSoft(hand) {
+    let t = 0, a = 0;
+    for (const c of hand) { t += rv(c); if (isAce(c)) a++; }
+    let soft = a;
+    while (t > 21 && soft > 0) { t -= 10; soft--; }
+    return t <= 21 && soft > 0;
+  }
+
+  const isNat = h => h.length === 2 && hv(h) === 21;
+
+  // Client deal order: dealer gets the first two cards, player gets the next two
   let di = 0;
-  const player = [deck[di++], deck[di++]];
-  const dealer = [deck[di++], deck[di++]];
+  const dealer   = [deck[di++], deck[di++]];
+  const initHand = [deck[di++], deck[di++]];
 
-  for (const action of actions) {
-    if (action === 'hit') { player.push(deck[di++]); if (handValue(player) > 21) break; }
-    else break; // stand
+  let ai = 0;
+
+  // Insurance decision (optional first action)
+  let insWager = 0;
+  if (actions[ai] === 'I')       { ai++; insWager = insBet; }
+  else if (actions[ai] === 'NI') { ai++; }
+
+  // Split?
+  let hands    = [[...initHand]];
+  let bets     = [initialWager];
+  const isSplitAces = actions[ai] === 'P' && isAce(initHand[0]);
+
+  if (actions[ai] === 'P') {
+    ai++;
+    hands = [[initHand[0], deck[di++]], [initHand[1], deck[di++]]];
+    bets  = [initialWager, initialWager];
   }
 
-  // Dealer hits on soft 17
-  while (handValue(dealer) < 17) dealer.push(deck[di++]);
+  // Play each hand (split aces get one card each, no further actions)
+  if (!isSplitAces) {
+    for (let hi = 0; hi < hands.length; hi++) {
+      const hand = hands[hi];
+      let done = false;
+      while (!done && ai < actions.length) {
+        const act = actions[ai];
+        if (act === 'H') {
+          ai++;
+          hand.push(deck[di++]);
+          if (hv(hand) >= 21) done = true;
+        } else if (act === 'S') {
+          ai++; done = true;
+        } else if (act === 'D') {
+          ai++;
+          bets[hi] *= 2;
+          hand.push(deck[di++]);
+          done = true;
+        } else {
+          done = true;
+        }
+      }
+    }
+  }
 
-  const pv = handValue(player);
-  const dv = handValue(dealer);
-  const bust = pv > 21;
-  const dealerBust = dv > 21;
-  const win = !bust && (dealerBust || pv > dv);
-  const push = !bust && !dealerBust && pv === dv;
+  // Dealer plays (skip if all hands bust)
+  const allBust = hands.every(h => hv(h) > 21);
+  if (!allBust) {
+    const shouldHit = h => {
+      const v = hv(h);
+      return v < 17 || (v === 17 && ruleMode === 'H17' && isSoft(h));
+    };
+    while (shouldHit(dealer)) dealer.push(deck[di++]);
+  }
 
-  const multiplier = bust ? 0 : push ? 1 : win ? 2 : 0;
-  return { player, dealer, playerValue: pv, dealerValue: dv, bust, dealerBust, win, push, multiplier };
+  const dealerNat = isNat(dealer);
+  const dv = hv(dealer);
+
+  // Settle each hand
+  let totalPayout = 0;
+  const handResults = hands.map((hand, hi) => {
+    const pv  = hv(hand);
+    const bet = bets[hi];
+
+    if (pv > 21) return { result: 'bust', payout: 0 };
+
+    // Natural BJ only on un-split first hand
+    if (!bets[1] && isNat(hand) && !dealerNat) {
+      const p = +(bet * 2.5).toFixed(8);
+      totalPayout += p;
+      return { result: 'blackjack', payout: p };
+    }
+
+    if (dealerNat && !isNat(hand)) return { result: 'lose', payout: 0 };
+
+    if (dv > 21 || pv > dv) {
+      const p = +(bet * 2).toFixed(8);
+      totalPayout += p;
+      return { result: 'win', payout: p };
+    }
+    if (pv === dv) { totalPayout += bet; return { result: 'push', payout: bet }; }
+    return { result: 'lose', payout: 0 };
+  });
+
+  // Insurance pays 2:1 when dealer has natural
+  if (insWager > 0 && dealerNat) {
+    totalPayout += +(insWager * 3).toFixed(8);
+  }
+
+  const totalWagered = bets.reduce((a, b) => a + b, 0) + insWager;
+
+  return {
+    hands: handResults,
+    dealerValue: dv,
+    dealerNatural: dealerNat,
+    totalPayout: +totalPayout.toFixed(8),
+    totalWagered: +totalWagered.toFixed(8),
+  };
 }
 
 function rouletteWin(pocket, betList) {

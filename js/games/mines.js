@@ -1,8 +1,6 @@
 /* --- mines --- */
 const MINE_IMG='<img class="mine-img" src="art/mine/mine.webp.webp" alt="mine">';
 const GEM_IMG='<img class="mine-img" src="art/mine/gem.png.png" alt="gem">';
-const DEAL_MINES_URL='https://czqqdwmifcqoiyphjqjk.supabase.co/functions/v1/deal-mines';
-const PICK_MINES_URL='https://czqqdwmifcqoiyphjqjk.supabase.co/functions/v1/pick-mines-tile';
 
 ORIGINALS['originals-mines']={
   rtp:'99%',auto:false,m:3,round:null,
@@ -38,7 +36,7 @@ ORIGINALS['originals-mines']={
     $id('mnNextPay').textContent=this.multAt(k+1).toFixed(2)+'×';
     $id('mnMult').textContent=r&&r.k>0?this.multAt(r.k).toFixed(2)+'×':'—';
     $id('mnProf').textContent=r&&r.k>0?fmtW(r.st.w,r.st.b*(this.multAt(r.k)-1))+' '+r.st.w.c:'—';
-    if(!autoRunning){syncBetBtn();gvBetBtn.disabled=!!r&&r.k===0&&!r.picking;}
+    if(!autoRunning){syncBetBtn();gvBetBtn.disabled=!!r&&r.k===0;}
   },
   label(){
     const r=this.round;
@@ -50,125 +48,101 @@ ORIGINALS['originals-mines']={
     if(this.round){if(this.round.k>0)this.cashout();return;}
     this._deal();
   },
-  async _deal(){
+  _deal(){
     if(!document.body.classList.contains('authed')){openAuth('in');return;}
     const w=curW(),b=Math.min(parseFloat(gvBetIn.value)||0,w.amt);
     if(b<=0)return;
 
-    gvBetBtn.disabled=true;gvBetBtn.textContent='Dealing…';
+    const st=debitBet();
+    if(!st)return;
+
     lockBet(true);
     $id('mnSegs').querySelectorAll('.auto-seg').forEach(btn=>btn.disabled=true);
 
-    /* get server-committed round before debiting */
-    let dealData;
-    try{
-      const{data:{session}}=await supa.auth.getSession();
-      if(!session)throw new Error('Not signed in');
-      const res=await fetch(DEAL_MINES_URL,{method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-        body:JSON.stringify({mines:this.m})});
-      dealData=await res.json();
-      if(!res.ok)throw new Error(dealData.error||'Deal failed');
-    }catch(err){
-      lockBet(false);gvBetBtn.disabled=false;
-      $id('mnSegs').querySelectorAll('.auto-seg').forEach(btn=>btn.disabled=false);
-      this.sync();
-      if(window.showToast)showToast({icon:'⚠',title:'Deal failed',sub:err.message});
-      return;
-    }
-
-    /* debit only after server committed to a layout */
-    const st=debitBet();
-    if(!st){
-      lockBet(false);gvBetBtn.disabled=false;
-      $id('mnSegs').querySelectorAll('.auto-seg').forEach(btn=>btn.disabled=false);
-      this.sync();
-      return;
-    }
-
-    this.round={st,roundId:dealData.roundId,k:0,done:false,picking:false};
-    const grid=$id('mnGrid');grid.classList.add('live');
-    grid.querySelectorAll('.mtile').forEach(t=>{t.className='mtile hid';t.textContent='';});
+    this.round={st, cells:[], k:0, done:false};
+    const grid=$id('mnGrid');
+    grid.classList.add('live');
+    grid.querySelectorAll('.mtile').forEach(t=>{t.className='mtile hid';t.innerHTML='';});
     this.sync();
   },
-  async pick(t){
+  pick(t){
     const r=this.round;
-    if(!r||r.done||r.picking||!t.classList.contains('hid'))return;
-    const tileIndex=+t.dataset.i;
-    r.picking=true;
-    t.classList.add('picking');
+    if(!r||r.done||!t.classList.contains('hid'))return;
 
-    let pickData;
-    try{
-      const{data:{session}}=await supa.auth.getSession();
-      if(!session)throw new Error('Not signed in');
-      const res=await fetch(PICK_MINES_URL,{method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-        body:JSON.stringify({roundId:r.roundId,tile:tileIndex})});
-      pickData=await res.json();
-      if(!res.ok)throw new Error(pickData.error||'Pick failed');
-    }catch(err){
-      t.classList.remove('picking');
-      r.picking=false;
-      if(window.showToast)showToast({icon:'⚠',title:'Pick failed',sub:err.message});
-      return;
-    }
+    const idx=+t.dataset.i;
+    t.classList.remove('hid');
+    t.classList.add('safe');
+    t.innerHTML=GEM_IMG;
 
-    t.classList.remove('picking','hid');
-    r.picking=false;
+    r.cells.push(idx);
+    r.k=r.cells.length;
 
-    if(pickData.result==='mine'){
-      t.classList.add('boom');t.innerHTML=MINE_IMG;
-      /* server already deleted the round; reveal positions it returned */
-      if(Array.isArray(pickData.mines)){
-        $id('mnGrid').querySelectorAll('.mtile.hid').forEach(tile=>{
-          const i=+tile.dataset.i;
-          tile.classList.remove('hid');tile.classList.add('dim');
-          tile.innerHTML=pickData.mines.includes(i)?MINE_IMG:GEM_IMG;
-        });
-      }
-      r.done=true;
-      const grid=$id('mnGrid');grid.classList.remove('live');
-      /* settle loss — round already deleted by pick-mines-tile, use wager=0 path */
-      settleBet(r.st,0);
-      this.round=null;lockBet(false);
-      $id('mnSegs').querySelectorAll('.auto-seg').forEach(btn=>btn.disabled=false);
-      this.sync();
+    if(r.k===25-this.m){
+      // all safe tiles revealed — auto-cashout
+      this.cashout();
     }else{
-      t.classList.add('safe');t.innerHTML=GEM_IMG;
-      r.k=pickData.safeCount;
-      if(r.k===25-this.m){
-        /* all safe tiles revealed — auto-cashout */
-        this.cashout();
-      }else{
-        this.sync();
-      }
+      this.sync();
     }
   },
   cashout(){
-    const r=this.round;if(!r||r.done||r.k===0||r.picking)return;
-    this._settle(this.multAt(r.k));
+    const r=this.round;if(!r||r.done||r.k===0)return;
+    this._settle();
   },
-  async _settle(mult){
-    const r=this.round;r.done=true;
-    const grid=$id('mnGrid');grid.classList.remove('live');
+  async _settle(){
+    const r=this.round;
+    r.done=true;
+    const mult=this.multAt(r.k);
+    const grid=$id('mnGrid');
+    grid.classList.remove('live');
+
+    // Show ? on un-revealed tiles while awaiting server
     grid.querySelectorAll('.mtile.hid').forEach(t=>{
       t.classList.remove('hid');t.classList.add('dim');
-      /* positions not known client-side — show question mark placeholders */
       t.innerHTML='<span class="mtile-unk">?</span>';
     });
+
     let res;
     try{
-      res=await placeBet({game:'mines',currency:r.st.w.c,wager:r.st.b,
-        params:{roundId:r.roundId}});
+      res=await placeBet({
+        game:'mines',
+        currency:r.st.w.c,
+        wager:r.st.b,
+        params:{mineCount:this.m, revealedCells:r.cells},
+      });
     }catch(err){
       /* server unreachable — apply payout locally */
       settleBet(r.st,mult);
       this.round=null;lockBet(false);
       $id('mnSegs').querySelectorAll('.auto-seg').forEach(btn=>btn.disabled=false);
-      this.sync();return;
+      this.sync();
+      if(window.showToast)showToast({icon:'⚠',title:'Settlement error',sub:err.message});
+      return;
     }
-    serverSettleBet(r.st,mult,res.new_balance);
+
+    const outcome=res.outcome||res.result||{};
+    const hitMine=!!outcome.hitMine;
+    const mines=outcome.mines||[];
+
+    if(hitMine){
+      /* reveal mine positions returned by server */
+      const mineSet=new Set(mines);
+      grid.querySelectorAll('.mtile').forEach(tile=>{
+        const i=+tile.dataset.i;
+        const picked=r.cells.includes(i);
+        const isMine=mineSet.has(i);
+        if(picked&&isMine){
+          tile.classList.remove('safe','dim');tile.classList.add('boom');
+          tile.innerHTML=MINE_IMG;
+        }else if(tile.classList.contains('dim')&&!picked){
+          tile.innerHTML=isMine?MINE_IMG:GEM_IMG;
+        }
+      });
+      settleBet(r.st,0);
+    }else{
+      const actualMult=res.multiplier||mult;
+      serverSettleBet(r.st,actualMult,null);
+    }
+
     this.round=null;lockBet(false);
     $id('mnSegs').querySelectorAll('.auto-seg').forEach(btn=>btn.disabled=false);
     this.sync();
@@ -177,13 +151,18 @@ ORIGINALS['originals-mines']={
     const r=this.round;
     if(r&&!r.done){
       if(r.k>0){
-        /* cashout what's been earned */
-        placeBet({game:'mines',currency:r.st.w.c,wager:r.st.b,params:{roundId:r.roundId}})
-          .then(res=>serverSettleBet(r.st,this.multAt(r.k),res.new_balance))
+        /* attempt cashout; fire-and-forget — balance refreshed by loadBalances */
+        placeBet({game:'mines',currency:r.st.w.c,wager:r.st.b,
+          params:{mineCount:this.m, revealedCells:r.cells}})
+          .then(res=>{
+            const outcome=res.outcome||res.result||{};
+            if(!outcome.hitMine) serverSettleBet(r.st,res.multiplier||this.multAt(r.k),null);
+            else settleBet(r.st,0);
+          })
           .catch(()=>settleBet(r.st,this.multAt(r.k)));
       }else{
-        /* no tiles revealed yet — forfeit the bet (round still in DB, will expire) */
-        settleBet(r.st,0);
+        /* no tiles revealed — refund the local debit; server was never involved */
+        creditTo(r.st.w,r.st.b);
       }
     }
     this.round=null;
