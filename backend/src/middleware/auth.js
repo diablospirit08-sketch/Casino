@@ -8,7 +8,9 @@
  * JWT payload shape: { sub: userId, email, username, iat, exp }
  */
 
-export async function authPlugin(fastify) {
+import fp from 'fastify-plugin';
+
+export const authPlugin = fp(async function authPlugin(fastify) {
   // @fastify/jwt must be registered on the root instance before this plugin.
   // It is registered in src/index.js.
 
@@ -38,4 +40,4 @@ export async function authPlugin(fastify) {
       req.user = null;
     }
   });
-}
+});

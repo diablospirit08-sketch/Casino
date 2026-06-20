@@ -85,13 +85,13 @@ export async function credit(tx, { userId, type, currency, amount, refId, meta =
 export async function debit(tx, { userId, type, currency, amount, refId, meta = {} }) {
   if (amount <= 0) throw new Error('debit amount must be positive');
 
-  // Lock all ledger rows for this user+currency so no concurrent
-  // debit can run until this transaction commits or rolls back.
+  // Lock the user row to prevent concurrent debits on the same account.
+  await tx.query(`SELECT id FROM users WHERE id = $1 FOR UPDATE`, [userId]);
+
   const balRow = await tx.query(
     `SELECT COALESCE(SUM(amount), 0)::NUMERIC AS balance
      FROM ledger
-     WHERE user_id = $1 AND currency = $2
-     FOR UPDATE`,
+     WHERE user_id = $1 AND currency = $2`,
     [userId, currency]
   );
   const balanceBefore = parseFloat(balRow.rows[0].balance);

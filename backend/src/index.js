@@ -1,13 +1,19 @@
 import 'dotenv/config';
+import { fileURLToPath } from 'url';
+import { join, dirname } from 'path';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import rateLimit from '@fastify/rate-limit';
+import staticFiles from '@fastify/static';
 
-import { authPlugin }   from './middleware/auth.js';
-import { authRoutes }   from './routes/auth.js';
-import { walletRoutes } from './routes/wallet.js';
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+import { authPlugin }    from './middleware/auth.js';
+import { authRoutes }    from './routes/auth.js';
+import { walletRoutes }  from './routes/wallet.js';
 import { betsRoutes, verifyRoutes } from './routes/bets.js';
+import { depositRoutes } from './routes/deposits.js';
 
 const PORT = parseInt(process.env.PORT ?? '4000', 10);
 const HOST = process.env.HOST ?? '0.0.0.0';
@@ -48,13 +54,21 @@ await fastify.register(authPlugin);
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
-await fastify.register(authRoutes,   { prefix: '/api/auth' });
-await fastify.register(walletRoutes, { prefix: '/api/wallet' });
-await fastify.register(betsRoutes,   { prefix: '/api/bets' });
-await fastify.register(verifyRoutes, { prefix: '/api' });
+await fastify.register(authRoutes,    { prefix: '/api/auth' });
+await fastify.register(walletRoutes,  { prefix: '/api/wallet' });
+await fastify.register(betsRoutes,    { prefix: '/api/bets' });
+await fastify.register(verifyRoutes,  { prefix: '/api' });
+await fastify.register(depositRoutes, { prefix: '/api/deposits' });
 
 // Health check
 fastify.get('/health', async () => ({ status: 'ok', ts: new Date().toISOString() }));
+
+// Public config (vault address + chain for the frontend)
+fastify.get('/api/config', async () => ({
+  vaultAddress: process.env.VAULT_CONTRACT_ADDRESS ?? '',
+  network:      process.env.BSC_NETWORK ?? 'bsc_testnet',
+  chainId:      process.env.BSC_NETWORK === 'bsc' ? 56 : 97,
+}));
 
 // ─── Error handler ────────────────────────────────────────────────────────────
 
@@ -71,6 +85,14 @@ fastify.setErrorHandler((err, req, reply) => {
     : 'Internal server error';
 
   reply.code(status).send({ error: message });
+});
+
+// Serve frontend static files — registered last so API routes take priority
+await fastify.register(staticFiles, {
+  root: join(__dirname, '..', '..'),
+  prefix: '/',
+  index: 'Volt Casino.html',
+  decorateReply: false,
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────

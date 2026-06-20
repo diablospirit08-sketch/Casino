@@ -5,12 +5,17 @@
  * GET  /api/wallet/balance/:currency     — single currency balance
  * GET  /api/wallet/deposit-address/:currency/:network — get/create deposit address
  * GET  /api/wallet/history               — paginated ledger history
- * POST /api/wallet/withdraw              — request a withdrawal
+ * POST /api/wallet/connect-wallet        — link on-chain wallet address to account
+ * GET  /api/wallet/connected-wallets     — list connected wallets
+ * POST /api/wallet/sign-withdrawal       — get EIP-712 voucher for on-chain withdrawal
+ * POST /api/wallet/withdraw              — request a withdrawal (off-chain record)
  * GET  /api/wallet/withdrawals           — withdrawal history
  */
 
 import { randomBytes } from 'crypto';
+import { verifyMessage, getAddress } from 'ethers';
 import { query, transaction } from '../db.js';
+import { signWithdrawal, cashierAddress } from '../services/vault.js';
 import {
   getBalance,
   getAllBalances,
@@ -225,6 +230,174 @@ export async function walletRoutes(fastify) {
     );
     return { withdrawals: rows, limit, offset };
   });
+
+  // ── Connect wallet ─────────────────────────────────────────────────────────
+  // User proves ownership of their BSC wallet by signing a message with MetaMask.
+  // The signed message links their wallet to their casino account.
+  fastify.post('/connect-wallet', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['address', 'network', 'signature'],
+        properties: {
+          address:   { type: 'string', pattern: '^0x[0-9a-fA-F]{40}$' },
+          network:   { type: 'string', enum: ['bsc', 'bsc_testnet'] },
+          signature: { type: 'string' },
+        },
+        additionalProperties: false,
+      },
+    },
+  }, async (req, reply) => {
+    const { address, network, signature } = req.body;
+
+    // The message the frontend asked the user to sign
+    const message = connectWalletMessage(req.user.id, address);
+
+    // Verify the signature recovers to the claimed address
+    let recovered;
+    try {
+      recovered = verifyMessage(message, signature);
+    } catch {
+      return reply.code(400).send({ error: 'Invalid signature' });
+    }
+
+    if (getAddress(recovered) !== getAddress(address)) {
+      return reply.code(400).send({ error: 'Signature does not match address' });
+    }
+
+    await query(
+      `INSERT INTO wallet_addresses (user_id, address, network, verified)
+       VALUES ($1, $2, $3, true)
+       ON CONFLICT (address, network) DO UPDATE SET user_id = $1, verified = true`,
+      [req.user.id, address.toLowerCase(), network]
+    );
+
+    return { ok: true, address, network };
+  });
+
+  // ── Connect wallet message (frontend calls this to know what to sign) ───────
+  fastify.get('/connect-wallet-message', {
+    schema: {
+      querystring: {
+        type: 'object',
+        required: ['address'],
+        properties: { address: { type: 'string' } },
+      },
+    },
+  }, async (req) => {
+    const message = connectWalletMessage(req.user.id, req.query.address);
+    return { message };
+  });
+
+  // ── Connected wallets ──────────────────────────────────────────────────────
+  fastify.get('/connected-wallets', async (req) => {
+    const rows = await query(
+      `SELECT address, network, verified, created_at
+       FROM wallet_addresses WHERE user_id = $1 ORDER BY created_at DESC`,
+      [req.user.id]
+    );
+    return { wallets: rows };
+  });
+
+  // ── Sign withdrawal voucher (EIP-712) ──────────────────────────────────────
+  // Frontend calls this, gets a signature, then calls VoltVault.withdraw() on-chain.
+  fastify.post('/sign-withdrawal', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['amountBnb', 'playerAddress', 'network'],
+        properties: {
+          amountBnb:     { type: 'number', exclusiveMinimum: 0 },
+          playerAddress: { type: 'string', pattern: '^0x[0-9a-fA-F]{40}$' },
+          network:       { type: 'string', enum: ['bsc', 'bsc_testnet'] },
+        },
+        additionalProperties: false,
+      },
+    },
+  }, async (req, reply) => {
+    const { amountBnb, playerAddress, network } = req.body;
+
+    // Verify the wallet address belongs to this user
+    const walletRows = await query(
+      `SELECT id FROM wallet_addresses
+       WHERE user_id = $1 AND address = $2 AND network = $3 AND verified = true`,
+      [req.user.id, playerAddress.toLowerCase(), network]
+    );
+    if (!walletRows.length) {
+      return reply.code(400).send({ error: 'Wallet address not connected to your account' });
+    }
+
+    // Get and increment nonce atomically
+    await query(
+      `INSERT INTO withdrawal_nonces (user_id, network, nonce)
+       VALUES ($1, $2, 1)
+       ON CONFLICT (user_id, network) DO UPDATE SET nonce = withdrawal_nonces.nonce + 1`,
+      [req.user.id, network]
+    );
+    const nonceRows = await query(
+      `SELECT nonce FROM withdrawal_nonces WHERE user_id = $1 AND network = $2`,
+      [req.user.id, network]
+    );
+    const nonce = nonceRows[0].nonce;
+
+    // Debit the ledger before signing — if debit fails the voucher is never issued
+    const amountWei = BigInt(Math.round(amountBnb * 1e18)).toString();
+    const wRows = await query(
+      `INSERT INTO withdrawals (user_id, currency, network, amount, fee, address)
+       VALUES ($1,'BNB',$2,$3,0,$4) RETURNING id`,
+      [req.user.id, network, amountBnb, playerAddress]
+    );
+    const withdrawalId = wRows[0].id;
+
+    try {
+      await debitWithdrawal({
+        userId: req.user.id,
+        currency: 'BNB',
+        amount: amountBnb,
+        withdrawalId,
+        address: playerAddress,
+        network,
+        fee: 0,
+      });
+    } catch (err) {
+      await query(`UPDATE withdrawals SET status='failed' WHERE id=$1`, [withdrawalId]);
+      if (err instanceof InsufficientFundsError) {
+        return reply.code(402).send({ error: err.message });
+      }
+      throw err;
+    }
+
+    // Voucher valid for 30 minutes
+    const deadline = Math.floor(Date.now() / 1000) + 30 * 60;
+
+    const signature = await signWithdrawal({
+      player: playerAddress,
+      amountWei,
+      nonce,
+      deadline,
+      network,
+    });
+
+    await query(
+      `UPDATE withdrawals SET status='processing', updated_at=NOW() WHERE id=$1`,
+      [withdrawalId]
+    );
+
+    return {
+      vaultAddress: process.env.VAULT_CONTRACT_ADDRESS,
+      player:       playerAddress,
+      amountWei,
+      nonce,
+      deadline,
+      signature,
+    };
+  });
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function connectWalletMessage(userId, address) {
+  return `Connect wallet to Volt Casino\n\nAccount: ${userId}\nAddress: ${address}\n\nThis signature proves you own this wallet. No funds will be moved.`;
 }
 
 // ─── Placeholder — replace with real custody provider call ───────────────────

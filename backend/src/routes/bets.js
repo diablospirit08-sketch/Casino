@@ -125,19 +125,12 @@ export async function betsRoutes(fastify) {
     const clientSeed = generateClientSeed();
 
     // Store server seed temporarily keyed by hash so we can look it up at settle time.
-    // In production use Redis with a TTL. Here: store in the DB as a placeholder bet.
+    // wager=0.00000001 satisfies the CHECK (wager > 0) constraint; overwritten at /place time.
     await query(
-      `INSERT INTO bets (user_id, game, currency, wager, server_seed_hash, client_seed, nonce)
-       VALUES ($1, 'pending', 'BTC', 0, $2, $3, 0)
+      `INSERT INTO bets (user_id, game, currency, wager, server_seed_hash, client_seed, nonce, result)
+       VALUES ($1, 'pending', 'BNB', 0.00000001, $2, $3, 0, jsonb_build_object('_server_seed', $4::text))
        ON CONFLICT DO NOTHING`,
-      [req.user.id, serverSeedHash, clientSeed]
-    );
-
-    // Persist encrypted server seed (in prod: encrypt with AES before storing)
-    await query(
-      `UPDATE bets SET result = jsonb_set(result, '{_server_seed}', $1::jsonb)
-       WHERE server_seed_hash = $2 AND user_id = $3 AND status = 'pending' AND game = 'pending'`,
-      [JSON.stringify(serverSeed), serverSeedHash, req.user.id]
+      [req.user.id, serverSeedHash, clientSeed, serverSeed]
     );
 
     return { serverSeedHash, clientSeed };
@@ -162,7 +155,11 @@ export async function betsRoutes(fastify) {
       },
     },
   }, async (req, reply) => {
-    const { game, currency, wager, serverSeedHash, clientSeed, nonce, params = {} } = req.body;
+    const { currency, wager, serverSeedHash, clientSeed, nonce, params = {} } = req.body;
+    // Accept both 'dice' and 'originals-dice' formats
+    const game = GAMES[req.body.game] ? req.body.game
+                : GAMES['originals-' + req.body.game] ? 'originals-' + req.body.game
+                : req.body.game;
 
     if (!GAMES[game]) {
       return reply.code(400).send({ error: `Unknown game: ${game}` });
@@ -175,6 +172,8 @@ export async function betsRoutes(fastify) {
        WHERE server_seed_hash = $1 AND user_id = $2 AND status = 'pending' AND game = 'pending'`,
       [serverSeedHash, req.user.id]
     );
+
+    req.log.info({ serverSeedHash, userId: req.user.id, found: seedRows.length }, 'seed lookup');
 
     if (!seedRows.length || !seedRows[0].server_seed) {
       return reply.code(400).send({ error: 'Unknown or expired serverSeedHash. Call /bets/prepare first.' });
