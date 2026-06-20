@@ -681,7 +681,10 @@ renderGvCur();
     if(menu){closeMenu();return;}
     const r=btn.getBoundingClientRect();
     menu=document.createElement('div');
-    menu.style.cssText='position:fixed;z-index:9999;top:'+(r.bottom+6)+'px;left:'+r.left+'px;min-width:180px;background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:5px;box-shadow:0 16px 40px -8px rgba(0,0,0,.8)';
+    /* estimate menu height: 7 items × 38px + 10px padding */
+    const estH=WALLETS.length*38+10;
+    const top=r.bottom+6+estH>window.innerHeight ? r.top-estH-6 : r.bottom+6;
+    menu.style.cssText='position:fixed;z-index:9999;top:'+top+'px;left:'+r.left+'px;min-width:180px;background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:5px;box-shadow:0 16px 40px -8px rgba(0,0,0,.8)';
     menu.innerHTML=WALLETS.map(w=>`
       <button data-c="${w.c}" style="display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;background:${w.c===voltCur?'rgba(65,240,164,.08)':'transparent'};border:none;border-radius:8px;color:${w.c===voltCur?'var(--mint)':'var(--txt)'};font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;transition:.12s" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='${w.c===voltCur?'rgba(65,240,164,.08)':'transparent'}'">
         <img src="${coinIconUrl(w.c)}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex:none" onerror="this.style.display='none'">
