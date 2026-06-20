@@ -37,8 +37,6 @@ function renderVip(){
   btn.style.borderColor=v.col;
   btn.style.color=v.col;
   btn.innerHTML=`<span class="av-rank-num">${v.rn}</span>`;
-  const badge=$id('vipBadge');
-  if(badge){badge.textContent=v.rn;badge.style.color=v.col;badge.style.borderColor=v.col;badge.style.background=v.col+'22';}
   const umAv=$id('umAv');
   if(umAv){umAv.style.borderColor=v.col;umAv.innerHTML=`<span class="av-rank-num">${v.rn}</span>`;}
   renderVipTrack();
