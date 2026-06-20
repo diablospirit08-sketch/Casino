@@ -12,40 +12,34 @@ window._supaReal = supabase.createClient(SUPA_URL, SUPA_ANON);
 // operations continue to work normally.
 window._supaReal.auth.onAuthStateChange(async (event, session) => {
   if (event !== 'SIGNED_IN' || !session) return;
-  // Only handle OAuth (Google) sign-ins — email/password goes through voltApi directly
   const provider = session.user?.app_metadata?.provider;
   if (provider !== 'google') return;
 
   const u = session.user;
-  try {
-    // Try Railway endpoint for OAuth exchange
-    const res = await fetch(`${API}/api/auth/google-oauth`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + session.access_token,
-      },
-      body: JSON.stringify({
-        supabaseToken: session.access_token,
-        email: u.email,
-        name: u.user_metadata?.full_name || u.user_metadata?.name || u.email?.split('@')[0],
-        avatarUrl: u.user_metadata?.avatar_url,
-      }),
-    });
-    if (res.ok) {
-      const j = await res.json();
-      window.voltApi._setSession(j.accessToken, j.refreshToken, j.user);
-      return;
-    }
-  } catch {}
+  const username = (u.user_metadata?.full_name || u.user_metadata?.name || u.email?.split('@')[0] || 'Player')
+    .replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 32);
+  // Deterministic Railway password tied to the Supabase user ID
+  const googlePw = 'google_oauth_' + u.id;
 
-  // Fallback: use Supabase token directly as Railway Bearer.
-  // Works when Railway validates against the same Supabase JWT secret.
-  window.voltApi._setSession(session.access_token, session.refresh_token, {
-    id: u.id,
-    email: u.email,
-    username: u.user_metadata?.full_name || u.email?.split('@')[0] || 'Player',
+  // Try login first; if the account doesn't exist yet, register it
+  let res = await fetch(`${API}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: u.email, password: googlePw }),
   });
+  if (!res.ok) {
+    res = await fetch(`${API}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: u.email, password: googlePw, username }),
+    });
+  }
+  if (res.ok) {
+    const j = await res.json();
+    window.voltApi._setSession(j.accessToken, j.refreshToken, j.user);
+  } else {
+    console.warn('Google→Railway bridge failed:', await res.text());
+  }
 });
 
 // supa stays as the voltApi alias for all non-OAuth operations
