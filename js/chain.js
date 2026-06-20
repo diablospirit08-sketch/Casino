@@ -1,6 +1,6 @@
 /* VOLT — on-chain cashier bridge (BSC / VoltVault).
    Requires MetaMask + backend running at http://localhost:4000.
-   No MetaMask → widget never appears; demo behaves as before. */
+   No MetaMask → bscCashier never defined; deposit modal works as normal. */
 (function(){
 'use strict';
 
@@ -43,7 +43,6 @@ var _provider=(function(){
 /* ── state ──────────────────────────────────────────────────────────────── */
 var account=null,vaultAddr=null,chainIdHex=null;
 var nativeW=WALLETS.find(function(w){return w.c==='BNB';});
-var ethW=nativeW;
 
 function setLedgerBnb(amt){
   if(!nativeW)return;
@@ -94,39 +93,30 @@ function waitForReceipt(txHash){
 
 /* ── connect wallet ──────────────────────────────────────────────────────── */
 function connect(){
-  /* 1. fetch vault address + chainId from backend */
   return fetch(API+'/api/config').then(function(r){return r.json();})
     .then(function(cfg){
       vaultAddr=cfg.vaultAddress;
       chainIdHex='0x'+cfg.chainId.toString(16);
       if(!vaultAddr)throw new Error('Vault not configured on backend');
     })
-    /* 2. switch MetaMask to the right chain */
     .then(ensureChain)
-    /* 3. request accounts */
     .then(function(){return rpc('eth_requestAccounts');})
     .then(function(accs){
       account=accs[0];
       _provider.on&&_provider.on('accountsChanged',function(accs){
         account=accs[0]||null;
         if(account){saveWalletAddress(account).then(function(){refreshBalance();});}
-        else ui.disconnected();
-        ui.render();
+        if(window.bscCashier)window.bscCashier._onAccountChange();
       });
     })
-    /* 4. link wallet to casino account (sign a message) */
     .then(function(){return saveWalletAddress(account);})
-    /* 5. load balance */
     .then(function(){return refreshBalance();})
     .then(function(){
       if(!document.body.classList.contains('authed'))setAuth(true);
       if(voltCur!=='BNB'){voltCur='BNB';localStorage.setItem(LS_CUR,voltCur);renderWallet();if(window.gvCurSync)gvCurSync();}
-      ui.render();
-      ui.flash('Wallet connected — BNB balance is live');
     });
 }
 
-/* sign a message to prove wallet ownership, then POST to backend */
 function saveWalletAddress(addr){
   var network='bsc_testnet';
   return voltFetch('/api/wallet/connect-wallet-message?address='+addr)
@@ -142,10 +132,7 @@ function saveWalletAddress(addr){
         body:JSON.stringify({address:addr,network:network,signature:signature}),
       });
     })
-    .catch(function(e){
-      /* non-fatal: user rejected sign or already linked */
-      console.warn('saveWalletAddress:',e.message);
-    });
+    .catch(function(e){console.warn('saveWalletAddress:',e.message);});
 }
 
 /* ── deposit ─────────────────────────────────────────────────────────────── */
@@ -155,18 +142,15 @@ function depositEth(amountEth){
   return rpc('eth_sendTransaction',[{from:account,to:vaultAddr,value:toHexWei(wei)}])
     .then(function(hash){txHash=hash;return waitForReceipt(hash);})
     .then(function(){
-      /* Submit tx hash directly — backend verifies on-chain and credits ledger */
       return voltFetch('/api/deposits/verify-tx',{
         method:'POST',
         body:JSON.stringify({txHash:txHash,network:'bsc_testnet'}),
       });
     })
-    .then(function(j){
-      setLedgerBnb(parseFloat(j.balance)||0);
-    });
+    .then(function(j){setLedgerBnb(parseFloat(j.balance)||0);});
 }
 
-/* ── cash out (EIP-712 voucher) ──────────────────────────────────────────── */
+/* ── cash out ────────────────────────────────────────────────────────────── */
 function cashOut(amountEth){
   var network='bsc_testnet';
   return voltFetch('/api/wallet/sign-withdrawal',{
@@ -184,53 +168,168 @@ function cashOut(amountEth){
   });
 }
 
-/* ── widget ──────────────────────────────────────────────────────────────── */
-var ui=(function(){
-  var css='#chainBar{position:fixed;right:16px;bottom:16px;z-index:400;background:#141a26;border:1px solid #2a3447;border-radius:12px;padding:10px 12px;font:12px/1.5 Inter,system-ui,sans-serif;color:#dbe2ef;box-shadow:0 8px 28px rgba(0,0,0,.45);min-width:208px}'
-    +'#chainBar b{color:#8a93a6;font-weight:600;letter-spacing:.4px;font-size:10px;text-transform:uppercase;display:block;margin-bottom:6px}'
-    +'#chainBar .cb-row{display:flex;gap:6px;margin-top:6px}'
-    +'#chainBar input{flex:1;min-width:0;background:#0d121c;border:1px solid #2a3447;border-radius:8px;color:#fff;padding:5px 8px;font-size:12px}'
-    +'#chainBar button{background:#1fff8f;color:#06281a;border:0;border-radius:8px;padding:5px 10px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap}'
-    +'#chainBar button.alt{background:#222c3e;color:#dbe2ef}'
-    +'#chainBar button:disabled{opacity:.45;cursor:default}'
-    +'#chainBar .cb-msg{margin-top:6px;color:#8a93a6;min-height:14px}'
-    +'#chainBar .cb-addr{color:#1fff8f}';
-  var style=document.createElement('style');style.textContent=css;document.head.appendChild(style);
-  var el=document.createElement('div');el.id='chainBar';document.body.appendChild(el);
-  var msgT=null;
-  function flash(m){var n=el.querySelector('.cb-msg');if(n){n.textContent=m;clearTimeout(msgT);msgT=setTimeout(function(){n.textContent='';},6000);}}
-  function busy(b){el.querySelectorAll('button').forEach(function(x){x.disabled=b;});}
-  function short(a){return a.slice(0,6)+'…'+a.slice(-4);}
-  function render(){
-    if(!account){
-      el.innerHTML='<b>BSC Cashier</b>'
-        +'<div class="cb-row"><button id="cbConnect">Connect Wallet</button></div>'
-        +'<div class="cb-msg"></div>';
-      el.querySelector('#cbConnect').addEventListener('click',function(){
-        busy(true);
-        connect().catch(function(e){flash(e.message);}).then(function(){busy(false);render();});
+/* ── cashier section injected into BNB deposit / withdraw views ──────────── */
+var BSC_DEP_ID='bscDepSection';
+var BSC_WD_ID='bscWdSection';
+
+function short(a){return a.slice(0,6)+'…'+a.slice(-4);}
+
+function renderBscDeposit(){
+  var el=document.getElementById(BSC_DEP_ID);
+  if(!el)return;
+  if(!account){
+    el.innerHTML='<hr style="border:none;border-top:1px solid var(--line-2);margin:16px 0"><p class="dep-lbl" style="margin-top:0">MetaMask — Live BNB Deposit</p>'
+      +'<button id="bscConnectBtn" class="auth-submit" style="margin-top:0">Connect Wallet</button>'
+      +'<p id="bscMsg" style="font-size:11px;color:var(--muted);margin-top:8px;min-height:14px"></p>';
+    var btn=el.querySelector('#bscConnectBtn');
+    btn.addEventListener('click',function(){
+      btn.disabled=true;btn.textContent='Connecting…';
+      connect().then(function(){
+        renderBscDeposit();
+        showToast({icon:'🔗',title:'Wallet connected',sub:'BNB balance is live'});
+      }).catch(function(e){
+        btn.disabled=false;btn.textContent='Connect Wallet';
+        el.querySelector('#bscMsg').textContent=e.message;
       });
-      return;
-    }
-    el.innerHTML='<b>BSC · <span class="cb-addr">'+short(account)+'</span></b>'
-      +'<div class="cb-row"><input id="cbAmt" type="number" min="0.001" step="0.001" placeholder="BNB amount"><button id="cbDep">Deposit</button><button id="cbWd" class="alt">Cash out</button></div>'
-      +'<div class="cb-msg"></div>';
-    var amt=el.querySelector('#cbAmt');
-    function val(){return parseFloat(amt.value)||0;}
-    el.querySelector('#cbDep').addEventListener('click',function(){
-      if(val()<=0)return flash('Enter a BNB amount first');
-      busy(true);
-      depositEth(val()).then(function(){flash('Deposited — BNB balance updated');amt.value='';},function(e){flash(e.message);}).then(function(){busy(false);});
     });
-    el.querySelector('#cbWd').addEventListener('click',function(){
-      var a=val()||(nativeW?nativeW.amt:0);
-      if(a<=0)return flash('Nothing to cash out');
-      busy(true);
-      cashOut(Math.min(a,nativeW?nativeW.amt:0)).then(function(){flash('Cashed out to your wallet');amt.value='';},function(e){flash(e.message);}).then(function(){busy(false);});
+  } else {
+    var bnbBal=nativeW?nativeW.amt:0;
+    el.innerHTML='<hr style="border:none;border-top:1px solid var(--line-2);margin:16px 0"><p class="dep-lbl" style="margin-top:0">MetaMask — Live BNB Deposit</p>'
+      +'<p style="font-size:12px;color:var(--muted);margin-bottom:10px">Connected: <span style="color:var(--mint)">'+short(account)+'</span></p>'
+      +'<div class="gv-input" style="margin-bottom:10px">'
+      +'<input id="bscDepAmt" type="number" min="0.001" step="0.001" placeholder="BNB amount" style="background:transparent;border:none;outline:none;color:var(--txt);font-family:inherit;font-size:14px;width:100%;padding:0"/>'
+      +'<button class="mod" id="bscDepMax">Max</button>'
+      +'</div>'
+      +'<button id="bscDepBtn" class="auth-submit" style="margin-top:0">Deposit BNB</button>'
+      +'<p id="bscMsg" style="font-size:11px;color:var(--muted);margin-top:8px;min-height:14px"></p>';
+    var amtEl=el.querySelector('#bscDepAmt');
+    el.querySelector('#bscDepMax').addEventListener('click',function(){amtEl.value=bnbBal.toFixed(4);});
+    el.querySelector('#bscDepBtn').addEventListener('click',function(){
+      var a=parseFloat(amtEl.value)||0;
+      if(a<=0){el.querySelector('#bscMsg').textContent='Enter a BNB amount';return;}
+      var depBtn=el.querySelector('#bscDepBtn');
+      depBtn.disabled=true;depBtn.textContent='Sending…';
+      depositEth(a).then(function(){
+        depBtn.disabled=false;depBtn.textContent='Deposit BNB';
+        amtEl.value='';
+        el.querySelector('#bscMsg').textContent='';
+        showToast({icon:'↙',title:'Deposit confirmed',sub:'BNB balance updated'});
+      }).catch(function(e){
+        depBtn.disabled=false;depBtn.textContent='Deposit BNB';
+        el.querySelector('#bscMsg').textContent=e.message;
+      });
     });
   }
-  function disconnected(){account=null;flash('Wallet disconnected');}
-  render();
-  return{render:render,flash:flash,disconnected:disconnected};
+}
+
+function renderBscWithdraw(){
+  var el=document.getElementById(BSC_WD_ID);
+  if(!el)return;
+  if(!account){
+    el.innerHTML='<hr style="border:none;border-top:1px solid var(--line-2);margin:16px 0"><p class="dep-lbl" style="margin-top:0">MetaMask — Live BNB Withdrawal</p>'
+      +'<button id="bscWdConnectBtn" class="auth-submit" style="margin-top:0">Connect Wallet</button>'
+      +'<p id="bscWdMsg" style="font-size:11px;color:var(--muted);margin-top:8px;min-height:14px"></p>';
+    var btn=el.querySelector('#bscWdConnectBtn');
+    btn.addEventListener('click',function(){
+      btn.disabled=true;btn.textContent='Connecting…';
+      connect().then(function(){
+        renderBscWithdraw();
+        showToast({icon:'🔗',title:'Wallet connected',sub:'BNB balance is live'});
+      }).catch(function(e){
+        btn.disabled=false;btn.textContent='Connect Wallet';
+        el.querySelector('#bscWdMsg').textContent=e.message;
+      });
+    });
+  } else {
+    var bnbBal=nativeW?nativeW.amt:0;
+    el.innerHTML='<hr style="border:none;border-top:1px solid var(--line-2);margin:16px 0"><p class="dep-lbl" style="margin-top:0">MetaMask — Live BNB Withdrawal</p>'
+      +'<p style="font-size:12px;color:var(--muted);margin-bottom:10px">Connected: <span style="color:var(--mint)">'+short(account)+'</span> · Available: <b style="color:var(--txt)">'+bnbBal.toFixed(4)+' BNB</b></p>'
+      +'<div class="gv-input" style="margin-bottom:10px">'
+      +'<input id="bscWdAmt" type="number" min="0.001" step="0.001" placeholder="BNB amount" style="background:transparent;border:none;outline:none;color:var(--txt);font-family:inherit;font-size:14px;width:100%;padding:0"/>'
+      +'<button class="mod" id="bscWdMax">Max</button>'
+      +'</div>'
+      +'<button id="bscWdBtn" class="auth-submit" style="margin-top:0">Cash Out BNB</button>'
+      +'<p id="bscWdMsg" style="font-size:11px;color:var(--muted);margin-top:8px;min-height:14px"></p>';
+    var amtEl=el.querySelector('#bscWdAmt');
+    el.querySelector('#bscWdMax').addEventListener('click',function(){amtEl.value=bnbBal.toFixed(4);});
+    el.querySelector('#bscWdBtn').addEventListener('click',function(){
+      var a=Math.min(parseFloat(amtEl.value)||0,bnbBal);
+      if(a<=0){el.querySelector('#bscWdMsg').textContent='Enter a BNB amount';return;}
+      var wdBtn=el.querySelector('#bscWdBtn');
+      wdBtn.disabled=true;wdBtn.textContent='Processing…';
+      cashOut(a).then(function(){
+        wdBtn.disabled=false;wdBtn.textContent='Cash Out BNB';
+        amtEl.value='';
+        el.querySelector('#bscWdMsg').textContent='';
+        showToast({icon:'↗',title:'Withdrawal sent',sub:'BNB sent to your wallet'});
+      }).catch(function(e){
+        wdBtn.disabled=false;wdBtn.textContent='Cash Out BNB';
+        el.querySelector('#bscWdMsg').textContent=e.message;
+      });
+    });
+  }
+}
+
+/* ── inject BSC sections into the deposit modal ──────────────────────────── */
+(function injectSections(){
+  var depView=document.getElementById('depView');
+  var wdView=document.getElementById('wdView');
+  if(depView&&!document.getElementById(BSC_DEP_ID)){
+    var sec=document.createElement('div');
+    sec.id=BSC_DEP_ID;
+    depView.appendChild(sec);
+  }
+  if(wdView&&!document.getElementById(BSC_WD_ID)){
+    var sec2=document.createElement('div');
+    sec2.id=BSC_WD_ID;
+    wdView.appendChild(sec2);
+  }
 })();
+
+/* ── public API ──────────────────────────────────────────────────────────── */
+window.bscCashier={
+  isConnected:function(){return !!account;},
+  getAccount:function(){return account;},
+  connect:connect,
+  depositEth:depositEth,
+  cashOut:cashOut,
+  refreshBalance:refreshBalance,
+  renderBscDeposit:renderBscDeposit,
+  renderBscWithdraw:renderBscWithdraw,
+  _onAccountChange:function(){renderBscDeposit();renderBscWithdraw();},
+};
+
+/* render sections when BNB is selected and modal opens */
+function selectedCoinIn(coinsId){
+  var sel=document.querySelector('#'+coinsId+' .dep-coin.sel');
+  return sel?sel.dataset.c:null;
+}
+document.getElementById('walletDep').addEventListener('click',function(){
+  setTimeout(function(){
+    if(selectedCoinIn('depCoins')==='BNB')renderBscDeposit();
+  },50);
+});
+document.getElementById('depCoins')&&document.getElementById('depCoins').addEventListener('click',function(e){
+  var b=e.target.closest('.dep-coin');
+  if(!b)return;
+  var sec=document.getElementById(BSC_DEP_ID);
+  if(b.dataset.c==='BNB'){setTimeout(renderBscDeposit,50);}
+  else if(sec){sec.innerHTML='';}
+});
+document.getElementById('wdCoins')&&document.getElementById('wdCoins').addEventListener('click',function(e){
+  var b=e.target.closest('.dep-coin');
+  if(!b)return;
+  var sec=document.getElementById(BSC_WD_ID);
+  if(b.dataset.c==='BNB'){setTimeout(renderBscWithdraw,50);}
+  else if(sec){sec.innerHTML='';}
+});
+var depTabsEl=document.getElementById('depTabs');
+depTabsEl&&depTabsEl.addEventListener('click',function(e){
+  var t=e.target.closest('.auth-tab');
+  if(!t)return;
+  setTimeout(function(){
+    if(t.dataset.mode==='dep'&&selectedCoinIn('depCoins')==='BNB')renderBscDeposit();
+    if(t.dataset.mode==='wd'&&selectedCoinIn('wdCoins')==='BNB')renderBscWithdraw();
+  },50);
+});
 })();

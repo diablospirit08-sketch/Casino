@@ -129,8 +129,10 @@ document.getElementById('depNetSel').addEventListener('click',e=>{
   const b=e.target.closest('.dep-net-chip');if(!b)return;
   depNetId=b.dataset.n;renderDep();
 });
-function openDep(){depCur=voltCur;depNetId=null;depMode='dep';renderDep();renderDepMode();depOverlay.classList.add('open');}
+function openDep(mode){depCur=voltCur;depNetId=null;depMode=mode||'dep';if(depMode!=='txn')renderDep();renderDepMode();depOverlay.classList.add('open');}
 function closeDep(){depOverlay.classList.remove('open');}
+function openTxnModal(){openDep('txn');}
+window.openTxnModal=openTxnModal;
 document.getElementById('walletDep').addEventListener('click',openDep);
 document.getElementById('depClose').addEventListener('click',closeDep);
 depOverlay.addEventListener('click',e=>{if(e.target===depOverlay)closeDep();});
@@ -159,10 +161,11 @@ depCopyBtn.addEventListener('click',()=>{
   else flash();
 });
 
-/* ---------- withdraw tab ---------- */
+/* ---------- deposit / withdraw / transactions tabs ---------- */
 const depTabsEl=document.getElementById('depTabs'),
       depView=document.getElementById('depView'),
       wdView=document.getElementById('wdView'),
+      txnViewInline=document.getElementById('txnViewInline'),
       wdCoins=document.getElementById('wdCoins'),
       wdAvail=document.getElementById('wdAvail'),
       wdAddr=document.getElementById('wdAddr'),
@@ -176,7 +179,9 @@ function renderDepMode(){
   depTabsEl.querySelectorAll('.auth-tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===depMode));
   depView.hidden=depMode!=='dep';
   wdView.hidden=depMode!=='wd';
+  txnViewInline.hidden=depMode!=='txn';
   if(depMode==='wd')renderWd();
+  if(depMode==='txn')window.loadInlineTxnPage&&window.loadInlineTxnPage(true);
 }
 function renderWd(){
   const w=depW(),d=DEPOSIT[depCur];
@@ -373,3 +378,82 @@ supa.auth.onAuthStateChange((_,session)=>{
   }
 });
 supa.auth.getSession().then(({data:{session}})=>{if(session)setAuth(true);});
+
+/* ---------- inline transactions tab ---------- */
+(function(){
+  const iTxnList=document.getElementById('iTxnList');
+  const iTxnMore=document.getElementById('iTxnMore');
+  const TXN_CFG_I={
+    deposit:{bg:'rgba(65,240,164,.12)',stroke:'#41f0a4',icon:'<path d="M12 3v14m-7-7 7 7 7-7"/>'},
+    withdraw:{bg:'rgba(248,113,113,.12)',stroke:'#f87171',icon:'<path d="M12 21V7m-7 7 7-7 7 7"/>'},
+    win:{bg:'rgba(65,240,164,.12)',stroke:'#41f0a4',icon:'<path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>'},
+    bet:{bg:'rgba(100,116,139,.12)',stroke:'#94a3b8',icon:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/>'},
+  };
+  function iTxnRow(t){
+    const cfg=TXN_CFG_I[t.type]||TXN_CFG_I.bet;
+    const sign=t.amt>0?'+':'−';
+    const fmtC=t.cur==='USDT'?Math.abs(t.amt).toFixed(2):Math.abs(t.amt).toFixed(4);
+    const col=t.amt>0?'#41f0a4':t.type==='bet'?'var(--txt)':'#f87171';
+    return `<div class="txn">
+      <div class="txn-ic" style="background:${cfg.bg}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="${cfg.stroke}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${cfg.icon}</svg>
+      </div>
+      <div class="txn-meta">
+        <div class="txn-lbl">${t.label}</div>
+        <div class="txn-time">${t.time}</div>
+      </div>
+      <div class="txn-right">
+        <div class="txn-amt" style="color:${col}">${sign}${fmtC} ${t.cur}</div>
+      </div>
+    </div>`;
+  }
+  let iTxnFilter='all',iBetsOff=0,iTxnsOff=0,iTxnLoading=false;
+  const PAGE=20;
+  async function loadInlineTxnPage(reset){
+    if(iTxnLoading)return;
+    iTxnLoading=true;
+    if(reset){iBetsOff=0;iTxnsOff=0;}
+    if(reset)iTxnList.innerHTML='<div class="txn-empty">Loading…</div>';
+    const{data:{user}}=await supa.auth.getUser();
+    if(!user){iTxnList.innerHTML='<div class="txn-empty">Sign in to view transactions</div>';iTxnLoading=false;return;}
+    const rows=[];
+    let betsHasMore=false,txnsHasMore=false;
+    if(iTxnFilter!=='txns'){
+      const{data:bets}=await supa.from('bets').select('game,currency,wager,profit,outcome,created_at')
+        .eq('user_id',user.id).order('created_at',{ascending:false}).range(iBetsOff,iBetsOff+PAGE-1);
+      betsHasMore=(bets||[]).length===PAGE;
+      (bets||[]).forEach(b=>{
+        const win=b.outcome==='win';
+        const gameName=(b.game||'Game').replace('originals-','').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+        rows.push({type:win?'win':'bet',label:gameName,cur:b.currency,
+          amt:win?+(b.profit||0):-(b.wager||0),time:timeAgo(b.created_at),_ts:new Date(b.created_at).getTime()});
+      });
+      iBetsOff+=(bets||[]).length;
+    }
+    if(iTxnFilter!=='bets'){
+      const{data:txns}=await supa.from('transactions').select('type,currency,amount,created_at')
+        .eq('user_id',user.id).order('created_at',{ascending:false}).range(iTxnsOff,iTxnsOff+PAGE-1);
+      txnsHasMore=(txns||[]).length===PAGE;
+      (txns||[]).forEach(t=>{
+        const sign=t.type==='deposit'?1:-1;
+        rows.push({type:t.type,label:t.type==='deposit'?'Deposit':'Withdraw',cur:t.currency,
+          amt:sign*(t.amount||0),time:timeAgo(t.created_at),_ts:new Date(t.created_at).getTime()});
+      });
+      iTxnsOff+=(txns||[]).length;
+    }
+    rows.sort((a,b)=>b._ts-a._ts);
+    if(reset)iTxnList.innerHTML='';
+    if(!rows.length&&reset){iTxnList.innerHTML='<div class="txn-empty">No transactions yet</div>';}
+    else rows.forEach(r=>iTxnList.insertAdjacentHTML('beforeend',iTxnRow(r)));
+    iTxnMore.style.display=(betsHasMore||txnsHasMore)?'block':'none';
+    iTxnLoading=false;
+  }
+  window.loadInlineTxnPage=loadInlineTxnPage;
+  iTxnMore.addEventListener('click',()=>loadInlineTxnPage(false));
+  txnViewInline.addEventListener('click',e=>{
+    const b=e.target.closest('.auto-seg[data-itxf]');if(!b)return;
+    iTxnFilter=b.dataset.itxf;
+    txnViewInline.querySelectorAll('.auto-seg[data-itxf]').forEach(x=>x.classList.toggle('active',x===b));
+    loadInlineTxnPage(true);
+  });
+})();
