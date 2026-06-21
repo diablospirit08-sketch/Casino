@@ -405,36 +405,32 @@ function selectedCoinIn(id){
 new MutationObserver(function(){
   var overlay=document.getElementById('depOverlay');
   if(!overlay.classList.contains('open'))return;
-  if(selectedCoinIn('depCoins')==='BNB')renderBscDeposit();
-  if(selectedCoinIn('wdCoins')==='BNB')renderBscWithdraw();
+  renderBscDeposit();
+  renderBscWithdraw();
 }).observe(document.getElementById('depOverlay'),{attributes:true,attributeFilter:['class']});
 
 document.getElementById('depCoins').addEventListener('click',function(e){
   var b=e.target.closest('.dep-coin');if(!b)return;
-  var sec=document.getElementById(BSC_DEP_ID);
-  if(b.dataset.c==='BNB')setTimeout(renderBscDeposit,50);
-  else if(sec)sec.innerHTML='';
+  setTimeout(renderBscDeposit,50);
 });
 
 document.getElementById('wdCoins').addEventListener('click',function(e){
   var b=e.target.closest('.dep-coin');if(!b)return;
-  var sec=document.getElementById(BSC_WD_ID);
-  if(b.dataset.c==='BNB')setTimeout(renderBscWithdraw,50);
-  else if(sec)sec.innerHTML='';
+  setTimeout(renderBscWithdraw,50);
 });
 
 document.getElementById('depTabs').addEventListener('click',function(e){
   var t=e.target.closest('.auth-tab');if(!t)return;
   setTimeout(function(){
-    if(t.dataset.mode==='dep'&&selectedCoinIn('depCoins')==='BNB')renderBscDeposit();
-    if(t.dataset.mode==='wd'&&selectedCoinIn('wdCoins')==='BNB')renderBscWithdraw();
+    if(t.dataset.mode==='dep')renderBscDeposit();
+    if(t.dataset.mode==='wd')renderBscWithdraw();
   },50);
 });
 
 /* handle case where modal is already open when script runs */
 if(document.getElementById('depOverlay').classList.contains('open')){
-  if(selectedCoinIn('depCoins')==='BNB')renderBscDeposit();
-  if(selectedCoinIn('wdCoins')==='BNB')renderBscWithdraw();
+  renderBscDeposit();
+  renderBscWithdraw();
 }
 
 })();
