@@ -33,7 +33,8 @@ ORIGINALS['originals-mines']={
     if(!$id('mnLbl'))return;
     $id('mnLbl').textContent=this.m+' of 25';
     const r=this.round,k=r?r.k:0;
-    $id('mnNextPay').textContent=this.multAt(k+1).toFixed(2)+'×';
+    const nextK=k+1;
+    $id('mnNextPay').textContent=nextK<=25-this.m?this.multAt(nextK).toFixed(2)+'×':'—';
     $id('mnMult').textContent=r&&r.k>0?this.multAt(r.k).toFixed(2)+'×':'—';
     $id('mnProf').textContent=r&&r.k>0?fmtW(r.st.w,r.st.b*(this.multAt(r.k)-1))+' '+r.st.w.c:'—';
     if(!autoRunning){syncBetBtn();gvBetBtn.disabled=!!(r&&r._checking);}
@@ -125,6 +126,9 @@ ORIGINALS['originals-mines']={
       t.innerHTML='<span class="mtile-unk">?</span>';
     });
 
+    /* restore the optimistic local debit so placeBet's relative calc starts from correct baseline */
+    creditTo(r.st.w,r.st.b);
+
     let res;
     try{
       res=await placeBet({
@@ -134,8 +138,7 @@ ORIGINALS['originals-mines']={
         params:{mineCount:this.m,revealedCells:r.cells},
       });
     }catch(err){
-      /* server unreachable — refund the local debit, do not pay out */
-      creditTo(r.st.w,r.st.b);
+      /* server unreachable — debit already restored above, just reset */
       this.round=null;lockBet(false);
       $id('mnSegs').querySelectorAll('.auto-seg').forEach(btn=>btn.disabled=false);
       this.sync();
@@ -174,6 +177,7 @@ ORIGINALS['originals-mines']={
     const r=this.round;
     if(r&&!r.done){
       if(r.k>0){
+        creditTo(r.st.w,r.st.b); // restore optimistic debit before server call
         placeBet({game:'mines',currency:r.st.w.c,wager:r.st.b,
           params:{mineCount:this.m,revealedCells:r.cells}})
           .then(res=>{
@@ -181,7 +185,7 @@ ORIGINALS['originals-mines']={
             if(!outcome.hitMine)serverSettleBet(r.st,res.multiplier||this.multAt(r.k),null);
             else settleBet(r.st,0);
           })
-          .catch(()=>creditTo(r.st.w,r.st.b));
+          .catch(()=>{}); // debit already restored; server error just means no payout
       }else{
         creditTo(r.st.w,r.st.b);
       }
