@@ -144,34 +144,45 @@ async function loadTxnPage(reset){
   if(reset)txnPage=0;
   const list=document.getElementById('txnList');
   if(reset)list.innerHTML='<div class="txn-empty">Loading…</div>';
-  const{data:{user}}=await supa.auth.getUser();
-  if(!user){list.innerHTML='<div class="txn-empty">Sign in to view transactions</div>';txnLoading=false;return;}
-  const from=txnPage*txnPageSize,to=from+txnPageSize-1;
-  const rows=[];
-  if(txnFilter!=='txns'){
-    const{data:bets}=await supa.from('bets').select('game,currency,wager,profit,outcome,created_at')
-      .eq('user_id',user.id).order('created_at',{ascending:false}).range(from,to);
-    (bets||[]).forEach(b=>{
-      const win=b.outcome==='win';
-      const gameName=(b.game||'Game').replace('originals-','').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-      rows.push({type:win?'win':'bet',label:gameName,cur:b.currency,
-        amt:win?+(b.profit||0):-(b.wager||0),time:timeAgo(b.created_at),_ts:new Date(b.created_at).getTime()});
-    });
+  if(!document.body.classList.contains('authed')){
+    list.innerHTML='<div class="txn-empty">Sign in to view transactions</div>';
+    txnLoading=false;return;
   }
-  if(txnFilter!=='bets'){
-    const{data:txns}=await supa.from('transactions').select('type,currency,amount,created_at')
-      .eq('user_id',user.id).order('created_at',{ascending:false}).range(from,to);
-    (txns||[]).forEach(t=>{
-      const sign=t.type==='deposit'?1:-1;
-      rows.push({type:t.type,label:t.type==='deposit'?'Deposit':'Withdraw',cur:t.currency,
-        amt:sign*(t.amount||0),time:timeAgo(t.created_at),_ts:new Date(t.created_at).getTime()});
-    });
+  const off=txnPage*txnPageSize;
+  const rows=[];
+  let hasMore=false;
+  try{
+    if(txnFilter!=='txns'){
+      const r=await voltApi._fetch('/api/bets/history?limit='+txnPageSize+'&offset='+off);
+      const j=r.ok?await r.json():{bets:[]};
+      const bets=j.bets||[];
+      if(bets.length===txnPageSize)hasMore=true;
+      bets.forEach(b=>{
+        const win=b.status==='won';
+        const gameName=(b.game||'Game').replace('originals-','').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+        rows.push({type:win?'win':'bet',label:gameName,cur:b.currency,
+          amt:win?+(b.payout-b.wager):-(b.wager||0),time:timeAgo(b.created_at),_ts:new Date(b.created_at).getTime()});
+      });
+    }
+    if(txnFilter!=='bets'){
+      const r=await voltApi._fetch('/api/wallet/history?limit='+txnPageSize+'&offset='+off);
+      const j=r.ok?await r.json():{entries:[]};
+      const entries=(j.entries||[]).filter(e=>e.type==='deposit'||e.type==='withdrawal');
+      if(j.entries&&j.entries.length===txnPageSize)hasMore=true;
+      entries.forEach(t=>{
+        rows.push({type:t.type,label:t.type==='deposit'?'Deposit':'Withdraw',cur:t.currency,
+          amt:t.type==='deposit'?+(t.amount||0):-(t.amount||0),time:timeAgo(t.created_at),_ts:new Date(t.created_at).getTime()});
+      });
+    }
+  }catch(e){
+    list.innerHTML='<div class="txn-empty">Failed to load transactions</div>';
+    txnLoading=false;return;
   }
   rows.sort((a,b)=>b._ts-a._ts);
   if(reset)list.innerHTML='';
-  if(!rows.length&&reset){list.innerHTML='<div class="txn-empty">No transactions yet</div>';}
+  if(!rows.length&&reset)list.innerHTML='<div class="txn-empty">No transactions yet</div>';
   else rows.forEach(r=>list.insertAdjacentHTML('beforeend',txnRow(r)));
-  document.getElementById('txnMore').style.display=rows.length<txnPageSize?'none':'block';
+  document.getElementById('txnMore').style.display=hasMore?'block':'none';
   txnPage++;
   txnLoading=false;
 }
@@ -270,7 +281,7 @@ const railLinks = [...document.querySelectorAll('#railNav a[data-target]')];
 railLinks.forEach(a=>{
   a.addEventListener('click',e=>{
     e.preventDefault();
-    if(a.title==='Transactions'){if(typeof openTxnModal==='function')openTxnModal();return;}
+    if(a.title==='Transactions'){txnOverlay.classList.add('open');loadTxnPage(true);return;}
     if(document.body.classList.contains('ingame')&&window.closeGame)closeGame();
     const cat=a.dataset.cat;
     if(cat){
