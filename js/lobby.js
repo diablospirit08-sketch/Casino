@@ -231,7 +231,8 @@ function _ic(paths){
   if(paths.startsWith('<img')) return `<span class="it">${paths}</span>`;
   return `<span class="it"><svg viewBox="0 0 24 24" fill="currentColor">${paths}</svg></span>`;
 }
-document.getElementById('railNav').innerHTML = railItems.map((r,i)=>`
+document.getElementById('railNav').innerHTML = `<a class="rail-logo" href="#"><span class="bolt"><svg viewBox="0 0 24 24" fill="#08090c"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"></path></svg></span><span class="wordmark">volt</span></a>`
+  + railItems.map((r,i)=>`
   <a href="#${r.t}" data-target="${r.t}" ${r.cat?`data-cat="${r.cat}"`:''} title="${r.l}" class="${i===0?'active':''}">
     ${_ic(r.ic)}<span class="lbl">${r.l}</span></a>
   ${i===2||i===5?'<span class="sep"></span>':''}
