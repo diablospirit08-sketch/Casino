@@ -9,6 +9,7 @@
  */
 
 import { createHash, randomBytes, timingSafeEqual } from 'crypto';
+import { checkExclusion, RGLimitError } from '../services/rg.js';
 import { query, transaction } from '../db.js';
 
 // ─── Password hashing (scrypt, no external dep) ───────────────────────────────
@@ -118,6 +119,16 @@ export async function authRoutes(fastify) {
     }
     if (user.is_banned) {
       return reply.code(403).send({ error: 'Account suspended' });
+    }
+
+    // Self-exclusion check — blocks login if excluded
+    try {
+      await checkExclusion(user.id);
+    } catch (err) {
+      if (err instanceof RGLimitError) {
+        return reply.code(403).send({ error: err.message, code: err.code });
+      }
+      throw err;
     }
 
     const { accessToken, refreshToken } = await issueTokens(fastify, user);

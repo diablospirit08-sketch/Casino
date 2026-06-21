@@ -10,6 +10,7 @@
 
 import { query, transaction } from '../db.js';
 import { debitBet, creditBet, InsufficientFundsError } from '../services/ledger.js';
+import { checkExclusion, checkWagerLimits, checkLossLimits, RGLimitError } from '../services/rg.js';
 import {
   generateServerSeed,
   generateClientSeed,
@@ -170,6 +171,18 @@ export async function betsRoutes(fastify) {
 
     if (!GAMES[game]) {
       return reply.code(400).send({ error: `Unknown game: ${game}` });
+    }
+
+    // RG checks — run before any DB writes
+    try {
+      await checkExclusion(req.user.id);
+      await checkWagerLimits(req.user.id, currency, wager);
+      await checkLossLimits(req.user.id, currency, wager);
+    } catch (err) {
+      if (err instanceof RGLimitError) {
+        return reply.code(403).send({ error: err.message, code: err.code });
+      }
+      throw err;
     }
 
     // Retrieve the server seed we stored at /prepare time

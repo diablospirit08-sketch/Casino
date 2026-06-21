@@ -463,74 +463,53 @@ $id('profRgBtn').addEventListener('click',()=>{_profClose();openRg();});
 
 /* ================================================================
    RESPONSIBLE GAMING
-   State stored in localStorage scoped to user ID so settings
-   survive page reload and are isolated between accounts.
+   Limits are stored server-side (POST /api/rg/limits).
+   We keep a local cache (_rgCache) so the pre-flight wager check
+   gives instant feedback without waiting for a server round-trip.
+   Session timer remains localStorage-only (not a security control).
    ================================================================ */
-const _rgPfx='volt-rg-';let _rgUid=null;
-function _rgKey(){return _rgPfx+(_rgUid||'guest');}
-function _rgGet(){try{return JSON.parse(localStorage.getItem(_rgKey())||'{}');}catch{return{};}}
-function _rgSet(patch){localStorage.setItem(_rgKey(),JSON.stringify({..._rgGet(),...patch}));}
 
-/* ── enforcement: daily wager limit ── */
-function _rgWagKey(){return _rgKey()+'-wag';}
-function _rgTodayMs(){return new Date().toISOString().slice(0,10);}
-function _rgGetWag(){try{const d=JSON.parse(localStorage.getItem(_rgWagKey())||'{}');return d.date===_rgTodayMs()?d.usd:0;}catch{return 0;}}
-function _rgAddWag(usd){
-  const today=_rgTodayMs();
-  const cur=_rgGetWag();
-  localStorage.setItem(_rgWagKey(),JSON.stringify({date:today,usd:cur+usd}));
+/* Current user ID from voltApi session — used only for localStorage session timer key */
+function _rgUid(){try{return JSON.parse(localStorage.getItem('volt-user')||'{}').id||'guest';}catch{return'guest';}}
+function _rgSessKey(){return'volt-rg-sess-'+_rgUid();}
+
+/* In-memory cache of limits fetched from server */
+let _rgCache=null; /* null=not loaded yet; {} means no limits set */
+
+async function _rgLoadFromServer(){
+  try{
+    const w=typeof curW==='function'?curW():null;
+    const cur=w?w.c:'BNB';
+    const res=await voltApi._fetch('/api/rg/limits?currency='+cur);
+    _rgCache=res;
+  }catch(e){_rgCache={};}
 }
-/* Called by wrapped debitBet — returns false and toasts if limit would be exceeded */
-function _rgCheckWager(betUsd){
-  const rg=_rgGet();
-  if(!rg.wagLimitDay)return true;
-  const spent=_rgGetWag();
-  if(spent+betUsd>rg.wagLimitDay){
-    showToast({icon:'🛡',title:'Daily wager limit reached',sub:'You\'ve hit your $'+rg.wagLimitDay.toFixed(0)+' limit. Resets at midnight UTC.'});
+
+/* ── enforcement: daily wager limit (pre-flight client-side check) ── */
+/* The real enforcement is server-side in bets.js; this gives instant UX feedback */
+function _rgCheckWager(wager){
+  if(!_rgCache||!_rgCache.wager||!_rgCache.wager.daily)return true;
+  const limit=parseFloat(_rgCache.wager.daily);
+  const spent=(_rgCache.usage&&_rgCache.usage.wageredToday)||0;
+  if(spent+wager>limit){
+    const c=(_rgCache.currency||'');
+    showToast({icon:'🛡',title:'Daily wager limit reached',sub:'Limit: '+limit+' '+c+'/day. Resets at midnight UTC.'});
     return false;
   }
   return true;
 }
-/* Wrap debitBet (defined in engines.js) to enforce the wager limit */
+/* Wrap debitBet to run the pre-flight wager check */
 (function(){
   const _orig=window.debitBet;
   window.debitBet=function(){
     const w=typeof curW==='function'?curW():null;
     const b=w?Math.min(parseFloat((document.getElementById('gvBet')||{}).value||0),w.amt):0;
-    if(!_rgCheckWager(b*(w?w.rate:0)))return null;
-    const st=_orig.apply(this,arguments);
-    if(st)_rgAddWag(st.b*st.w.rate);
-    return st;
+    if(!_rgCheckWager(b))return null;
+    return _orig.apply(this,arguments);
   };
 })();
 
-/* ── enforcement: self-exclusion / cool-off ── */
-function _rgExclActive(){
-  const rg=_rgGet();
-  if(!rg.exclUntil)return null;
-  if(rg.exclUntil===-1)return new Date(8640000000000000); /* permanent */
-  const d=new Date(rg.exclUntil);
-  if(d>new Date())return d;
-  _rgSet({exclUntil:null}); /* expired — clear it */
-  return null;
-}
-/* Check exclusion on every sign-in */
-supa.auth.onAuthStateChange((_,session)=>{
-  if(!session)return;
-  _rgUid=session.user.id;
-  const till=_rgExclActive();
-  if(!till)return;
-  /* sign out immediately; modals.js setAuth(false) will follow */
-  supa.auth.signOut();
-  const rg2=_rgGet();
-  const msg=rg2.exclUntil===-1?'Your self-exclusion is permanent.':'Your exclusion expires '+till.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+'.';
-  /* show after a tick so signOut's state change fires first */
-  setTimeout(()=>showToast({icon:'🛡',title:'Account excluded',sub:msg,col:'#e2596a'}),120);
-});
-/* Also update _rgUid on sign-in so _rgKey() is correct before auth state fires */
-supa.auth.getSession().then(({data:{session}})=>{if(session)_rgUid=session.user.id;});
-
-/* ── enforcement: session time reminder ── */
+/* ── enforcement: session time reminder (localStorage-only — UX, not security) ── */
 let _rgSessTimer=null;
 const _rgSessStart=Date.now();
 function _rgStartSessTimer(mins){
@@ -541,17 +520,16 @@ function _rgStartSessTimer(mins){
     showToast({icon:'⏱',title:'Session reminder',sub:'You\'ve been playing for '+elapsed+' min. Take a break?'});
   },mins*60000);
 }
-/* bootstrap timer if one was already set */
-(()=>{const rg=_rgGet();if(rg.sessRemind)_rgStartSessTimer(rg.sessRemind);})();
+(()=>{const s=localStorage.getItem(_rgSessKey());if(s)_rgStartSessTimer(+s);})();
 
 /* ── modal UI ── */
 let _rgTab='limit';
-function openRg(){
-  const rg=_rgGet();
-  /* render current state into the modal before opening */
-  _rgRenderLimit(rg);_rgRenderSession(rg);_rgRenderExcl(rg);
-  _rgSwitchTab(_rgTab);
+async function openRg(){
   rgOverlay.classList.add('open');
+  _rgSwitchTab(_rgTab);
+  /* load fresh data from server then render */
+  await _rgLoadFromServer();
+  _rgRenderLimit();_rgRenderSession();_rgRenderExcl();
 }
 $id('rgClose').addEventListener('click',()=>rgOverlay.classList.remove('open'));
 rgOverlay.addEventListener('click',e=>{if(e.target===rgOverlay)rgOverlay.classList.remove('open');});
@@ -566,43 +544,52 @@ function _rgSwitchTab(tab){
 }
 
 /* ── wager limit tab ── */
-function _rgRenderLimit(rg){
+function _rgRenderLimit(){
+  const d=_rgCache||{};
+  const limit=d.wager&&d.wager.daily!=null?parseFloat(d.wager.daily):null;
+  const spent=(d.usage&&d.usage.wageredToday)||0;
+  const c=d.currency||'';
   const st=$id('rgLimitStatus'),cl=$id('rgLimitClear'),sv=$id('rgLimitSave');
-  if(rg.wagLimitDay){
-    const spent=_rgGetWag();
+  if(limit!=null){
     st.hidden=false;
-    st.className='rg-status '+(spent>=rg.wagLimitDay?'danger':'ok');
-    st.textContent='Limit: $'+rg.wagLimitDay.toFixed(0)+'/day · Wagered today: $'+spent.toFixed(2);
-    $id('rgLimitAmt').value=rg.wagLimitDay;
+    st.className='rg-status '+(spent>=limit?'danger':'ok');
+    st.textContent='Limit: '+limit+' '+c+'/day · Wagered today: '+spent.toFixed(8).replace(/\.?0+$/,'')+' '+c;
+    $id('rgLimitAmt').value=limit;
     cl.hidden=false;sv.textContent='Update Limit';
   }else{
     st.hidden=true;cl.hidden=true;sv.textContent='Set Limit';$id('rgLimitAmt').value='';
   }
 }
-$id('rgLimitSave').addEventListener('click',()=>{
+$id('rgLimitSave').addEventListener('click',async()=>{
   const v=parseFloat($id('rgLimitAmt').value);
   if(!(v>0))return;
-  _rgSet({wagLimitDay:v});
-  _rgRenderLimit(_rgGet());
-  showToast({icon:'🛡',title:'Daily limit set',sub:'Max $'+v.toFixed(0)+' wagered per day.'});
+  try{
+    await voltApi._fetch('/api/rg/limits',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({wager_daily:v})});
+    await _rgLoadFromServer();_rgRenderLimit();
+    showToast({icon:'🛡',title:'Daily wager limit set',sub:'Max '+v+' '+(_rgCache&&_rgCache.currency||'')+' wagered per day.'});
+  }catch(e){showToast({icon:'⚠',title:'Failed to save limit',sub:e.message});}
 });
-$id('rgLimitClear').addEventListener('click',()=>{
-  _rgSet({wagLimitDay:null});
-  _rgRenderLimit(_rgGet());
-  showToast({icon:'🛡',title:'Wager limit removed',sub:'Bet responsibly.'});
+$id('rgLimitClear').addEventListener('click',async()=>{
+  try{
+    await voltApi._fetch('/api/rg/limits',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({keys:['wager_daily']})});
+    await _rgLoadFromServer();_rgRenderLimit();
+    showToast({icon:'🛡',title:'Daily wager limit removed',sub:'Bet responsibly.'});
+  }catch(e){showToast({icon:'⚠',title:'Failed to remove limit',sub:e.message});}
 });
 
-/* ── session reminder tab ── */
+/* ── session reminder tab (localStorage — UX only) ── */
 let _rgSessSel=null;
-function _rgRenderSession(rg){
+function _rgRenderSession(){
+  const stored=localStorage.getItem(_rgSessKey());
+  const mins=stored?+stored:null;
   const st=$id('rgSessStatus'),cl=$id('rgSessClear'),sv=$id('rgSessSave');
   $id('rgSessChips').querySelectorAll('.rg-chip').forEach(c=>{
-    c.classList.toggle('sel',+c.dataset.m===rg.sessRemind);
+    c.classList.toggle('sel',+c.dataset.m===mins);
   });
-  _rgSessSel=rg.sessRemind||null;
-  if(rg.sessRemind){
+  _rgSessSel=mins||null;
+  if(mins){
     st.hidden=false;st.className='rg-status ok';
-    st.textContent='Reminder every '+_minsLabel(rg.sessRemind)+'.';
+    st.textContent='Reminder every '+_minsLabel(mins)+'.';
     cl.hidden=false;sv.textContent='Update Reminder';
   }else{
     st.hidden=true;cl.hidden=true;sv.textContent='Set Reminder';sv.disabled=true;
@@ -617,27 +604,29 @@ $id('rgSessChips').addEventListener('click',e=>{
 });
 $id('rgSessSave').addEventListener('click',()=>{
   if(!_rgSessSel)return;
-  _rgSet({sessRemind:_rgSessSel});
+  localStorage.setItem(_rgSessKey(),_rgSessSel);
   _rgStartSessTimer(_rgSessSel);
-  _rgRenderSession(_rgGet());
+  _rgRenderSession();
   showToast({icon:'⏱',title:'Session reminder set',sub:'You\'ll be reminded every '+_minsLabel(_rgSessSel)+'.'});
 });
 $id('rgSessClear').addEventListener('click',()=>{
-  _rgSet({sessRemind:null});
+  localStorage.removeItem(_rgSessKey());
   clearInterval(_rgSessTimer);_rgSessTimer=null;_rgSessSel=null;
-  _rgRenderSession(_rgGet());
+  _rgRenderSession();
   showToast({icon:'⏱',title:'Session reminder cleared',sub:''});
 });
 
 /* ── self-exclusion tab ── */
 let _rgExclSel=null;
-function _rgRenderExcl(rg){
-  const active=_rgExclActive();
+function _rgRenderExcl(){
+  const d=_rgCache||{};
+  const excl=d.excluded; /* null | 'permanent' | ISO date string */
   const st=$id('rgExclStatus'),chips=$id('rgExclChips'),sv=$id('rgExclSave');
   chips.querySelectorAll('.rg-chip').forEach(c=>c.classList.remove('sel'));
-  if(active){
+  if(excl){
     st.hidden=false;
-    const msg=rg.exclUntil===-1?'Permanent exclusion is active.':'Exclusion active until '+active.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+'.';
+    const msg=excl==='permanent'?'Permanent exclusion is active.':
+      'Exclusion active until '+new Date(excl).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+'.';
     st.textContent=msg;
     chips.querySelectorAll('.rg-chip').forEach(c=>{c.disabled=true;});
     sv.disabled=true;sv.textContent='Exclusion Active';
@@ -655,11 +644,15 @@ $id('rgExclChips').addEventListener('click',e=>{
 });
 $id('rgExclSave').addEventListener('click',async()=>{
   if(_rgExclSel==null)return;
-  const until=_rgExclSel===-1?-1:new Date(Date.now()+_rgExclSel*3600000).toISOString();
-  _rgSet({exclUntil:until});
-  rgOverlay.classList.remove('open');
-  await supa.auth.signOut();
-  showToast({icon:'🛡',title:'Self-exclusion activated',sub:_rgExclSel===-1?'Your account is permanently excluded.':'You can return in '+_rgHoursLabel(_rgExclSel)+'.',col:'#e2596a'});
+  const period=_rgExclSel===-1?'permanent':_rgExclSel;
+  try{
+    const res=await voltApi._fetch('/api/rg/exclude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({period})});
+    rgOverlay.classList.remove('open');
+    /* log out client-side — server already revoked all refresh tokens */
+    if(typeof voltApi.logout==='function')voltApi.logout();
+    else{localStorage.removeItem('volt-access-token');localStorage.removeItem('volt-refresh-token');localStorage.removeItem('volt-user');window.location.reload();}
+    showToast({icon:'🛡',title:'Self-exclusion activated',sub:res.message||'Account excluded.',col:'#e2596a'});
+  }catch(e){showToast({icon:'⚠',title:'Failed to exclude',sub:e.message});}
 });
 function _rgHoursLabel(h){if(h<48)return h+'h';if(h<336)return Math.round(h/24)+'d';return Math.round(h/720)+'mo';}
 

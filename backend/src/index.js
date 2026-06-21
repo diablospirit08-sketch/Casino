@@ -16,6 +16,7 @@ import { depositRoutes } from './routes/deposits.js';
 import { gamesRoutes }   from './routes/games.js';
 import { adminRoutes }    from './routes/admin.js';
 import { rakebackRoutes } from './routes/rakeback.js';
+import { rgRoutes }       from './routes/rg.js';
 
 const PORT = parseInt(process.env.PORT ?? '4000', 10);
 const HOST = process.env.HOST ?? '0.0.0.0';
@@ -64,6 +65,7 @@ await fastify.register(depositRoutes, { prefix: '/api/deposits' });
 await fastify.register(gamesRoutes,   { prefix: '/api/games' });
 await fastify.register(adminRoutes,    { prefix: '/api/admin' });
 await fastify.register(rakebackRoutes, { prefix: '/api/rakeback' });
+await fastify.register(rgRoutes,       { prefix: '/api/rg' });
 
 // Health check
 fastify.get('/health', async () => ({ status: 'ok', ts: new Date().toISOString() }));
