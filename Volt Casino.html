@@ -61,7 +61,7 @@
   header{position:fixed;top:0;left:0;right:0;z-index:70;height:62px;display:flex;align-items:center;background:rgba(14,17,24,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
   header::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;background:var(--spectrum)}
   .hdr-inner{width:100%;display:flex;align-items:center;gap:16px;padding:0 22px}
-  .logo{display:flex;align-items:center;gap:8px;font-weight:900;font-size:19px;letter-spacing:.06em;text-transform:lowercase}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:900;font-size:19px;letter-spacing:.06em;text-transform:lowercase;position:absolute;left:50%;transform:translateX(-50%);pointer-events:auto}
   .logo .wordmark{background:var(--spectrum);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   .logo .bolt{width:34px;height:34px;border-radius:9px;background:var(--spectrum);display:grid;place-items:center;flex:none}
   .logo .bolt svg{width:20px;height:20px}
@@ -926,6 +926,7 @@
 <header>
   <div class="hdr-inner">
     <button class="rail-toggle" id="railToggle" aria-label="Toggle sidebar" aria-expanded="true"><span class="bars" id="bar1"></span><span class="bars" id="bar2"></span><span class="bars" id="bar3"></span></button>
+    <a class="logo" href="#"><span class="bolt"><svg viewBox="0 0 24 24" fill="#08090c"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></span><span class="wordmark">volt</span></a>
 
     <!-- wallet module (logged-in) -->
     <div class="wallet" id="wallet">
@@ -940,7 +941,6 @@
     </div>
 
     <div class="hdr-right">
-      <a class="logo" href="#"><span class="bolt"><svg viewBox="0 0 24 24" fill="#08090c"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></span><span class="wordmark">volt</span></a>
       <span class="auth-out">
         <button class="btn btn-dark" id="loginBtn">Log In</button>
         <button class="rainbow-border" id="signupBtn">Sign Up</button>
