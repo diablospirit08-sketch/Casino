@@ -390,6 +390,10 @@ window.bscCashier={
   renderBscDeposit:renderBscDeposit,
   renderBscWithdraw:renderBscWithdraw,
   _onAccountChange:function(){renderBscDeposit();renderBscWithdraw();},
+  connectMetaMask:connectInjected,
+  connectWalletConnect:connectWalletConnect,
+  connectCoinbase:connectCoinbase,
+  connectTrust:connectTrust,
 };
 
 /* ── MutationObserver: render when cashier modal opens ───────────────────── */
