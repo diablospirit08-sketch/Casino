@@ -1,14 +1,11 @@
--- Revoke public/anon/authenticated execute rights on SECURITY DEFINER
--- functions. These are only called by the backend via direct TCP connection
--- (service role), never via PostgREST RPC.
+-- Revoke execute on all public-schema functions from anon/authenticated roles.
+-- The backend connects via direct TCP (service role) so it is unaffected.
+-- This covers add_balance, create_withdrawal, claim_deposit_address_slot,
+-- admin_stats, is_admin, set_updated_at, and any future functions.
 
-REVOKE EXECUTE ON FUNCTION public.add_balance(uuid, text, numeric)               FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.claim_deposit_address_slot(uuid, text)         FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.create_withdrawal(uuid, text, numeric, text)   FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.admin_stats()                                  FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.is_admin()                                     FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON ALL FUNCTIONS IN SCHEMA public FROM anon, authenticated;
 
--- Fix mutable search_path on set_updated_at trigger function.
+-- Fix mutable search_path on the set_updated_at trigger function.
 CREATE OR REPLACE FUNCTION public.set_updated_at()
   RETURNS trigger
   LANGUAGE plpgsql
@@ -20,6 +17,3 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-
--- Revoke execute on set_updated_at from public too.
-REVOKE EXECUTE ON FUNCTION public.set_updated_at() FROM PUBLIC, anon, authenticated;
