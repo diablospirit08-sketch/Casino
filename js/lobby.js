@@ -322,7 +322,6 @@ const cats = [
   {l:'Live Casino', key:'live', cnt:312, rows:['live'], ic:'<circle cx="12" cy="12" r="8.5"/><circle class="fl" cx="12" cy="12" r="2.6"/><path d="M12 3.5v6M12 14.6v5.9M3.5 12h6M14.6 12h5.9M6.2 6.2l4 4M13.8 13.8l4 4"/>'},
   {l:'Game Shows', key:'shows', cnt:38, rows:['shows'], ic:'<circle cx="12" cy="13.5" r="7.3"/><path d="M12 6.2v7.3M5.9 10.1l6.1 3.4M18.1 10.1 12 13.5M8.6 19.9 12 13.5M15.4 19.9 12 13.5"/><path class="fl" d="M9.8 2h4.4L12 5.4 9.8 2Z"/>'},
   {l:'Table Games', key:'table', cnt:146, match:'baccarat|blackjack|roulette|board bonanza', ic:'<path class="fl" d="M12 2.5 18.5 12 12 21.5 5.5 12 12 2.5Z"/>'},
-  {l:'Boosted RTP', key:'boost', cnt:57, boost:true, ic:'<path d="M3 17l6-6 4 4 8-8"/><path class="fl" d="M15 7h6v6"/>'},
   {l:'New Arrivals', key:'new', cnt:89, rows:['new'], ic:'<path class="fl" d="M11 4l1.6 5.4L18 11l-5.4 1.6L11 18l-1.6-5.4L4 11l5.4-1.6L11 4Z"/><path d="M18.5 16.5v4M16.5 18.5h4"/>'},
 ];
 document.getElementById('cats').innerHTML = cats.map(c=>`
