@@ -84,10 +84,6 @@ $id('avSaveBtn').addEventListener('click', async () => {
   $id('avSaveBtn').textContent = 'Saving…';
   localStorage.setItem(LS_AV, _pendingAvId);
   applyAvatar(_pendingAvId);
-  const { data: { user } } = await supa.auth.getUser();
-  if (user && window._supaReal) {
-    await window._supaReal.from('profiles').update({ avatar_url: 'volt-av:' + _pendingAvId }).eq('id', user.id);
-  }
   closeAvPick();
   $id('avSaveBtn').textContent = 'Save Avatar';
   const av = AVATARS.find(a => a.id === _pendingAvId);
@@ -108,17 +104,9 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && $id('avatarPickOverlay').classList.contains('open')) { closeAvPick(); e.stopPropagation(); }
 }, true);
 
-async function loadAvatar() {
+function loadAvatar() {
   const local = localStorage.getItem(LS_AV);
   if (local) applyAvatar(local);
-  const { data: { user } } = await supa.auth.getUser();
-  if (!user || !window._supaReal) return;
-  const { data } = await window._supaReal.from('profiles').select('avatar_url').eq('id', user.id).single();
-  if (data?.avatar_url?.startsWith('volt-av:')) {
-    const id = data.avatar_url.replace('volt-av:', '');
-    localStorage.setItem(LS_AV, id);
-    applyAvatar(id);
-  }
 }
 
 supa.auth.onAuthStateChange((_, session) => {
