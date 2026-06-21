@@ -428,27 +428,31 @@ supa.auth.getSession().then(({data:{session}})=>{if(session)setAuth(true);});
     const rows=[];
     let betsHasMore=false,txnsHasMore=false;
     if(iTxnFilter!=='txns'){
-      const{data:bets}=await supa.from('bets').select('game,currency,wager,profit,outcome,created_at')
-        .eq('user_id',user.id).order('created_at',{ascending:false}).range(iBetsOff,iBetsOff+PAGE-1);
-      betsHasMore=(bets||[]).length===PAGE;
-      (bets||[]).forEach(b=>{
-        const win=b.outcome==='win';
+      const betsRes=await voltApi._fetch('/api/bets/history?limit='+PAGE+'&offset='+iBetsOff);
+      const betsJson=betsRes.ok?await betsRes.json():{bets:[]};
+      const bets=betsJson.bets||[];
+      betsHasMore=bets.length===PAGE;
+      bets.forEach(b=>{
+        const win=b.status==='won';
+        const profit=(b.payout||0)-(b.wager||0);
         const gameName=(b.game||'Game').replace('originals-','').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
         rows.push({type:win?'win':'bet',label:gameName,cur:b.currency,
-          amt:win?+(b.profit||0):-(b.wager||0),time:timeAgo(b.created_at),_ts:new Date(b.created_at).getTime()});
+          amt:win?+profit:-(b.wager||0),time:timeAgo(b.created_at),_ts:new Date(b.created_at).getTime()});
       });
-      iBetsOff+=(bets||[]).length;
+      iBetsOff+=bets.length;
     }
     if(iTxnFilter!=='bets'){
-      const{data:txns}=await supa.from('transactions').select('type,currency,amount,created_at')
-        .eq('user_id',user.id).order('created_at',{ascending:false}).range(iTxnsOff,iTxnsOff+PAGE-1);
-      txnsHasMore=(txns||[]).length===PAGE;
-      (txns||[]).forEach(t=>{
+      const txnRes=await voltApi._fetch('/api/wallet/history?limit='+PAGE+'&offset='+iTxnsOff);
+      const txnJson=txnRes.ok?await txnRes.json():{entries:[]};
+      const allEntries=txnJson.entries||[];
+      const txns=allEntries.filter(e=>e.type==='deposit'||e.type==='withdrawal');
+      txnsHasMore=allEntries.length===PAGE;
+      txns.forEach(t=>{
         const sign=t.type==='deposit'?1:-1;
         rows.push({type:t.type,label:t.type==='deposit'?'Deposit':'Withdraw',cur:t.currency,
-          amt:sign*(t.amount||0),time:timeAgo(t.created_at),_ts:new Date(t.created_at).getTime()});
+          amt:sign*Math.abs(t.amount||0),time:timeAgo(t.created_at),_ts:new Date(t.created_at).getTime()});
       });
-      iTxnsOff+=(txns||[]).length;
+      iTxnsOff+=allEntries.length;
     }
     rows.sort((a,b)=>b._ts-a._ts);
     if(reset)iTxnList.innerHTML='';

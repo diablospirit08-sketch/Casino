@@ -131,6 +131,17 @@
         };
       },
 
+      async updateUser({ password } = {}) {
+        if (!password) return { data: {}, error: null };
+        const res = await _fetch('/api/auth/change-password', {
+          method: 'POST',
+          body: JSON.stringify({ password }),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) return { error: { message: json.error || 'Update failed' } };
+        return { data: {}, error: null };
+      },
+
       async resetPasswordForEmail() {
         return { error: { message: 'Password reset is not yet available. Contact support.' } };
       },

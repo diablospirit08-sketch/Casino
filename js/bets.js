@@ -11,42 +11,12 @@ supa.auth.getSession().then(({ data: { session } }) => {
   _userId = session?.user?.id ?? null;
 });
 
-/* ── record a single bet to Supabase ── */
-async function _recordBet({ game, currency, wager, multiplier, profit, outcome, gameData = {} }) {
-  if (!_userId) return;
-  try {
-    await supa.from('bets').insert({
-      user_id:    _userId,
-      game,
-      currency,
-      wager:      Math.abs(wager),
-      multiplier: multiplier ?? null,
-      profit:     profit ?? null,
-      outcome,
-      game_data:  gameData,
-    });
-  } catch (e) {
-    console.warn('Bet record failed:', e.message);
-  }
-}
+/* ── record a single bet — no-op; backend records via /api/bets/place ── */
+async function _recordBet() {}
 
-/* ── record a transaction (deposit/withdraw/bonus) ── */
-window.recordTransaction = async function({ type, currency, amount, status = 'completed', txHash, address, note }) {
-  if (!_userId) return;
-  try {
-    await supa.from('transactions').insert({
-      user_id:  _userId,
-      type,
-      currency,
-      amount:   Math.abs(amount),
-      status,
-      tx_hash:  txHash ?? null,
-      address:  address ?? null,
-      note:     note ?? null,
-    });
-  } catch (e) {
-    console.warn('Transaction record failed:', e.message);
-  }
+/* ── record a transaction — server ledger is authoritative; refresh balance display ── */
+window.recordTransaction = async function() {
+  if (window.loadBalances) loadBalances().catch(() => {});
 };
 
 /* ── wrap settleBet — intercepts every game outcome ── */

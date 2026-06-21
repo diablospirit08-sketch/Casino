@@ -185,6 +185,23 @@ export async function authRoutes(fastify) {
     return { ok: true };
   });
 
+  // ── Change password ───────────────────────────────────────────────────────
+  fastify.post('/change-password', {
+    onRequest: [fastify.authenticate],
+    schema: {
+      body: {
+        type: 'object',
+        required: ['password'],
+        properties: { password: { type: 'string', minLength: 8, maxLength: 128 } },
+        additionalProperties: false,
+      },
+    },
+  }, async (req) => {
+    const passwordHash = await hashPassword(req.body.password);
+    await query('UPDATE users SET password_hash = $1 WHERE id = $2', [passwordHash, req.user.id]);
+    return { ok: true };
+  });
+
   // ── Me ────────────────────────────────────────────────────────────────────
   fastify.get('/me', {
     onRequest: [fastify.authenticate],
