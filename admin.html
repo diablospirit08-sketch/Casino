@@ -818,7 +818,7 @@ const GDEFS=[
 ];
 
 async function loadGames(){
-  const {bets}=await aFetch('/api/admin/bets?limit=500&since='+todayStr()+'T00:00:00Z');
+  const {bets}=await aFetch('/api/admin/bets?limit=200&since='+todayStr()+'T00:00:00Z');
   const gmap={};
   (bets||[]).forEach(b=>{
     const k=b.game.replace(/^originals-/i,'').replace(/^\w/,c=>c.toUpperCase());
