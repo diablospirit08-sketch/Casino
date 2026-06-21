@@ -365,6 +365,23 @@ var BSC_DEP_ID='bscDepSection', BSC_WD_ID='bscWdSection';
 function renderBscDeposit(){renderSection(document.getElementById(BSC_DEP_ID),'dep');}
 function renderBscWithdraw(){renderSection(document.getElementById(BSC_WD_ID),'wd');}
 
+/* ── dedicated wallet connect modal ─────────────────────────────────────── */
+function openWalletModal(){
+  var overlay=document.getElementById('walletPickerOverlay');
+  var body=document.getElementById('walletPickerBody');
+  if(!overlay||!body)return;
+  body.innerHTML='';
+  var el=document.createElement('div');
+  body.appendChild(el);
+  renderSection(el,'dep');
+  overlay.classList.add('open');
+}
+function closeWalletModal(){
+  var overlay=document.getElementById('walletPickerOverlay');
+  if(overlay)overlay.classList.remove('open');
+}
+window.openWalletModal=openWalletModal;
+
 /* ── public API ──────────────────────────────────────────────────────────── */
 window.bscCashier={
   isConnected:function(){return !!account;},

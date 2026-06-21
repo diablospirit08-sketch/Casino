@@ -1262,6 +1262,21 @@
   </footer>
 </main>
 
+<!-- ===== WALLET CONNECT MODAL ===== -->
+<div class="dep-overlay" id="walletPickerOverlay" role="dialog" aria-modal="true" aria-label="Connect Wallet">
+  <div class="dep-modal" style="max-width:400px">
+    <div class="dep-head">
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8L2 7h20l-6-4Z"/><circle cx="16" cy="14" r="2"/></svg>
+        <span style="font-weight:800;font-size:15px">Connect Wallet</span>
+      </div>
+      <button class="icon-btn" id="walletPickerClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:4px">Choose your wallet to connect to VOLT.</p>
+    <div id="walletPickerBody"></div>
+  </div>
+</div>
+
 <!-- ===== SEARCH OVERLAY ===== -->
 <div id="searchOverlay" role="dialog" aria-modal="true" aria-label="Search games">
   <div class="srch-wrap">

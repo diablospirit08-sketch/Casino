@@ -75,11 +75,13 @@ setAuth(false); /* initial state; Supabase session restore runs in modals.js aft
 document.getElementById('loginBtn').addEventListener('click',()=>openAuth('in'));
 document.getElementById('signupBtn').addEventListener('click',()=>openAuth('up'));
 document.getElementById('connectWalletBtn').addEventListener('click',()=>{
-  openDep();
-  setTimeout(()=>{
-    const bnbBtn=document.querySelector('#depCoins .dep-coin[data-c="BNB"]');
-    if(bnbBtn){bnbBtn.click();}
-  },50);
+  if(typeof openWalletModal==='function')openWalletModal();
+});
+document.getElementById('walletPickerClose').addEventListener('click',()=>{
+  if(typeof closeWalletModal==='function')closeWalletModal();
+});
+document.getElementById('walletPickerOverlay').addEventListener('click',e=>{
+  if(e.target===document.getElementById('walletPickerOverlay')&&typeof closeWalletModal==='function')closeWalletModal();
 });
 document.getElementById('logoutBtn').addEventListener('click',()=>{supa.auth.signOut();setAuth(false);});
 walletBal.addEventListener('click',e=>{
