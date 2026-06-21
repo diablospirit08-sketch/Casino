@@ -94,6 +94,13 @@ await fastify.register(staticFiles, {
   prefix: '/',
   index: 'Volt Casino.html',
   decorateReply: false,
+  setHeaders(res, filePath) {
+    if (/\.(js|css|png|jpg|jpeg|gif|svg|ico|mp3|wav|ogg|woff2?)$/.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+    } else {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  },
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────
