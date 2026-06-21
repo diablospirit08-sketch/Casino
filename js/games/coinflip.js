@@ -106,7 +106,10 @@ ORIGINALS['originals-coinflip']={
       return;
     }
     window._sbActive=false;
-    const outcome=res.gameData.result,win=res.outcome==='win',m=res.multiplier;
+    const gameResult=res.gameData||{};
+    const outcome=gameResult.side||'don';
+    const win=!!gameResult.win;
+    const m=res.multiplier||0;
     /* snap to final face after spin */
     this._t=setTimeout(()=>{
       void coin.offsetHeight;

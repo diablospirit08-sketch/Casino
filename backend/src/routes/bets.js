@@ -42,10 +42,11 @@ const GAMES = {
   },
 
   'originals-coinflip': ({ serverSeed, clientSeed, nonce, params }) => {
-    const { pick } = params; // 'heads' | 'tails'
-    const side = flipCoin(serverSeed, clientSeed, nonce);
-    const win  = side === pick;
-    return { result: { side, pick, win }, multiplier: win ? 1.98 : 0 };
+    const { side: clientPick } = params; // 'don' | 'snitch'
+    const flip = flipCoin(serverSeed, clientSeed, nonce); // 'heads' | 'tails'
+    const side = flip === 'heads' ? 'don' : 'snitch';
+    const win  = side === clientPick;
+    return { result: { side, pick: clientPick, win }, multiplier: win ? 1.98 : 0 };
   },
 
   'originals-mines': ({ serverSeed, clientSeed, nonce, params }) => {

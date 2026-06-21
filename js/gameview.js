@@ -409,10 +409,14 @@ function pfInit(){
 }
 
 async function _pfHmacFloat(serverSeed, clientSeed, nonce, index){
+  /* Match backend deriveFloats: one HMAC per base nonce, read 4-byte chunk at index*4.
+     Overflow (index >= 8, beyond 32 bytes): new HMAC with extended nonce suffix. */
+  const msg = index < 8 ? `${clientSeed}:${nonce}` : `${clientSeed}:${nonce}-${index}`;
+  const byteOff = index < 8 ? index * 4 : 0;
   const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(serverSeed),{name:'HMAC',hash:'SHA-256'},false,['sign']);
-  const sig=await crypto.subtle.sign('HMAC',key,new TextEncoder().encode(`${clientSeed}:${nonce}:${index}`));
+  const sig=await crypto.subtle.sign('HMAC',key,new TextEncoder().encode(msg));
   const b=new Uint8Array(sig);
-  return((b[0]<<24|b[1]<<16|b[2]<<8|b[3])>>>0)/0x100000000;
+  return((b[byteOff]<<24|b[byteOff+1]<<16|b[byteOff+2]<<8|b[byteOff+3])>>>0)/0x100000000;
 }
 
 async function pfVerify(serverSeed, clientSeed, nonce, game, params){
@@ -426,7 +430,8 @@ async function pfVerify(serverSeed, clientSeed, nonce, game, params){
     return{roll,target,over,win,mult:win?+(99/chance).toFixed(4):0};
   }
   if(game==='coinflip'){
-    const result=(await rnd(0))<0.5?'don':'snitch';
+    const flip=(await rnd(0))<0.5?'heads':'tails';
+    const result=flip==='heads'?'don':'snitch';
     const win=result===(params.side||'don');
     return{result,win,mult:win?1.98:0};
   }
@@ -449,8 +454,23 @@ async function pfVerify(serverSeed, clientSeed, nonce, game, params){
   }
   if(game==='crash'){
     const r=await rnd(0);
-    const bust=+Math.min(1000,Math.max(1,0.99/Math.max(1e-9,r))).toFixed(2);
+    const bust=r<0.01?1.00:+Math.min(1000,Math.max(1,0.99/(1-r))).toFixed(2);
     return{bust};
+  }
+  if(game==='mines'){
+    const mineCount=Math.max(1,Math.min(24,Number(params.mineCount)||3));
+    const revealedCells=(params.revealedCells||[]).map(Number);
+    const gridSize=25;
+    const positions=Array.from({length:gridSize},(_,i)=>i);
+    for(let i=0;i<mineCount;i++){
+      const f=await rnd(i);
+      const j=i+Math.floor(f*(gridSize-i));
+      [positions[i],positions[j]]=[positions[j],positions[i]];
+    }
+    const mines=positions.slice(0,mineCount).sort((a,b)=>a-b);
+    const mineSet=new Set(mines);
+    const hitMine=revealedCells.some(c=>mineSet.has(c));
+    return{mines,revealedCells,hitMine,win:!hitMine&&revealedCells.length>0};
   }
   return null;
 }
