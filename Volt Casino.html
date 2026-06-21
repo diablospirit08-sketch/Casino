@@ -569,6 +569,9 @@
   .mtile.safe{background:rgba(65,240,164,.13);border-color:rgba(65,240,164,.55);cursor:default;animation:mpop .24s ease}
   .mtile.boom{background:rgba(226,89,106,.2);border-color:#e2596a;cursor:default;animation:mshake .3s ease}
   .mtile.dim{opacity:.4;cursor:default}
+  .mtile.checking{background:rgba(255,200,60,.08);border-color:rgba(255,200,60,.4);cursor:default}
+  .mtile-spin{display:block;width:22px;height:22px;border:3px solid rgba(255,200,60,.25);border-top-color:#ffc83c;border-radius:50%;animation:mspin .6s linear infinite}
+  @keyframes mspin{to{transform:rotate(360deg)}}
   @keyframes mpop{from{transform:scale(.7)}60%{transform:scale(1.12)}to{transform:scale(1)}}
   @keyframes mshake{0%,100%{transform:none}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
   .mines-pot{display:flex;gap:22px;font-size:12px;color:var(--muted);font-weight:700}

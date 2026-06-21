@@ -1,6 +1,6 @@
 /* --- mines --- */
-const MINE_IMG='<img class="mine-img" src="art/mine/mine.webp.webp" alt="mine">';
-const GEM_IMG='<img class="mine-img" src="art/mine/gem.png.png" alt="gem">';
+const MINE_IMG='<img class="mine-img" src="art/mine/mine.webp" alt="mine">';
+const GEM_IMG='<img class="mine-img" src="art/mine/gem.png" alt="gem">';
 
 ORIGINALS['originals-mines']={
   rtp:'99%',auto:false,m:3,round:null,
@@ -36,17 +36,33 @@ ORIGINALS['originals-mines']={
     $id('mnNextPay').textContent=this.multAt(k+1).toFixed(2)+'×';
     $id('mnMult').textContent=r&&r.k>0?this.multAt(r.k).toFixed(2)+'×':'—';
     $id('mnProf').textContent=r&&r.k>0?fmtW(r.st.w,r.st.b*(this.multAt(r.k)-1))+' '+r.st.w.c:'—';
-    if(!autoRunning){syncBetBtn();gvBetBtn.disabled=!!r&&r.k===0;}
+    if(!autoRunning){syncBetBtn();gvBetBtn.disabled=!!(r&&r._checking);}
   },
   label(){
     const r=this.round;
     if(!r)return'Bet';
-    return r.k>0?'Cash Out '+fmtW(r.st.w,r.st.b*this.multAt(r.k))+' '+r.st.w.c:'Pick a tile…';
+    if(r.k===0)return'Cancel Bet';
+    return'Cash Out '+fmtW(r.st.w,r.st.b*this.multAt(r.k))+' '+r.st.w.c;
   },
   onCur(){this.sync();},
   onBet(){
-    if(this.round){if(this.round.k>0)this.cashout();return;}
+    if(this.round){
+      if(this.round.k===0){this._cancel();return;}
+      if(this.round.k>0)this.cashout();
+      return;
+    }
     this._deal();
+  },
+  _cancel(){
+    const r=this.round;
+    if(!r||r.done||r.k!==0)return;
+    r.done=true;
+    creditTo(r.st.w,r.st.b);
+    const grid=$id('mnGrid');
+    grid.classList.remove('live');
+    grid.querySelectorAll('.mtile').forEach(t=>{t.className='mtile hid';t.innerHTML='';});
+    $id('mnSegs').querySelectorAll('.auto-seg').forEach(btn=>btn.disabled=false);
+    this.round=null;lockBet(false);this.sync();
   },
   _deal(){
     if(!document.body.classList.contains('authed')){openAuth('in');return;}
@@ -59,7 +75,7 @@ ORIGINALS['originals-mines']={
     lockBet(true);
     $id('mnSegs').querySelectorAll('.auto-seg').forEach(btn=>btn.disabled=true);
 
-    this.round={st, cells:[], k:0, done:false};
+    this.round={st,cells:[],k:0,done:false,_checking:false};
     const grid=$id('mnGrid');
     grid.classList.add('live');
     grid.querySelectorAll('.mtile').forEach(t=>{t.className='mtile hid';t.innerHTML='';});
@@ -67,22 +83,31 @@ ORIGINALS['originals-mines']={
   },
   pick(t){
     const r=this.round;
-    if(!r||r.done||!t.classList.contains('hid'))return;
+    if(!r||r.done||r._checking||!t.classList.contains('hid'))return;
 
     const idx=+t.dataset.i;
-    t.classList.remove('hid');
-    t.classList.add('safe');
-    t.innerHTML=GEM_IMG;
-
+    r._checking=true;
     r.cells.push(idx);
     r.k=r.cells.length;
 
-    if(r.k===25-this.m){
-      // all safe tiles revealed — auto-cashout
-      this.cashout();
-    }else{
-      this.sync();
-    }
+    t.classList.remove('hid');
+    t.classList.add('checking');
+    t.innerHTML='<span class="mtile-spin"></span>';
+    this.sync();
+
+    setTimeout(()=>{
+      if(!this.round||this.round.done)return;
+      r._checking=false;
+      t.classList.remove('checking');
+      t.classList.add('safe');
+      t.innerHTML=GEM_IMG;
+
+      if(r.k===25-this.m){
+        this.cashout();
+      }else{
+        this.sync();
+      }
+    },350);
   },
   cashout(){
     const r=this.round;if(!r||r.done||r.k===0)return;
@@ -95,7 +120,6 @@ ORIGINALS['originals-mines']={
     const grid=$id('mnGrid');
     grid.classList.remove('live');
 
-    // Show ? on un-revealed tiles while awaiting server
     grid.querySelectorAll('.mtile.hid').forEach(t=>{
       t.classList.remove('hid');t.classList.add('dim');
       t.innerHTML='<span class="mtile-unk">?</span>';
@@ -107,15 +131,15 @@ ORIGINALS['originals-mines']={
         game:'mines',
         currency:r.st.w.c,
         wager:r.st.b,
-        params:{mineCount:this.m, revealedCells:r.cells},
+        params:{mineCount:this.m,revealedCells:r.cells},
       });
     }catch(err){
-      /* server unreachable — apply payout locally */
-      settleBet(r.st,mult);
+      /* server unreachable — refund the local debit, do not pay out */
+      creditTo(r.st.w,r.st.b);
       this.round=null;lockBet(false);
       $id('mnSegs').querySelectorAll('.auto-seg').forEach(btn=>btn.disabled=false);
       this.sync();
-      if(window.showToast)showToast({icon:'⚠',title:'Settlement error',sub:err.message});
+      if(window.showToast)showToast({icon:'⚠',title:'Server error — bet refunded',sub:err.message});
       return;
     }
 
@@ -124,7 +148,6 @@ ORIGINALS['originals-mines']={
     const mines=outcome.mines||[];
 
     if(hitMine){
-      /* reveal mine positions returned by server */
       const mineSet=new Set(mines);
       grid.querySelectorAll('.mtile').forEach(tile=>{
         const i=+tile.dataset.i;
@@ -151,17 +174,15 @@ ORIGINALS['originals-mines']={
     const r=this.round;
     if(r&&!r.done){
       if(r.k>0){
-        /* attempt cashout; fire-and-forget — balance refreshed by loadBalances */
         placeBet({game:'mines',currency:r.st.w.c,wager:r.st.b,
-          params:{mineCount:this.m, revealedCells:r.cells}})
+          params:{mineCount:this.m,revealedCells:r.cells}})
           .then(res=>{
             const outcome=res.outcome||res.result||{};
-            if(!outcome.hitMine) serverSettleBet(r.st,res.multiplier||this.multAt(r.k),null);
+            if(!outcome.hitMine)serverSettleBet(r.st,res.multiplier||this.multAt(r.k),null);
             else settleBet(r.st,0);
           })
-          .catch(()=>settleBet(r.st,this.multAt(r.k)));
+          .catch(()=>creditTo(r.st.w,r.st.b));
       }else{
-        /* no tiles revealed — refund the local debit; server was never involved */
         creditTo(r.st.w,r.st.b);
       }
     }
