@@ -668,15 +668,19 @@ renderGvCur();
 /* currency dropdown */
 (function(){
   const btn=$id('gvCurBtn');
-  let menu=null;
-  function closeMenu(){if(menu){menu.remove();menu=null;}}
+  let menu=null,scrollEl=null;
+  function closeMenu(){
+    if(menu){menu.remove();menu=null;}
+    if(scrollEl){scrollEl.removeEventListener('scroll',closeMenu);scrollEl=null;}
+    window.removeEventListener('scroll',closeMenu);
+  }
   function openMenu(){
     if(menu){closeMenu();return;}
     const r=btn.getBoundingClientRect();
     menu=document.createElement('div');
-    /* estimate menu height: 7 items × 38px + 10px padding */
     const estH=WALLETS.length*38+10;
     const top=r.bottom+6+estH>window.innerHeight ? r.top-estH-6 : r.bottom+6;
+    /* use position:absolute on document.documentElement to avoid body overflow-x:hidden breaking fixed */
     menu.style.cssText='position:fixed;z-index:9999;top:'+top+'px;left:'+r.left+'px;min-width:180px;background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:5px;box-shadow:0 16px 40px -8px rgba(0,0,0,.8)';
     menu.innerHTML=WALLETS.map(w=>`
       <button data-c="${w.c}" style="display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;background:${w.c===voltCur?'rgba(65,240,164,.08)':'transparent'};border:none;border-radius:8px;color:${w.c===voltCur?'var(--mint)':'var(--txt)'};font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;transition:.12s" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='${w.c===voltCur?'rgba(65,240,164,.08)':'transparent'}'">
@@ -692,9 +696,14 @@ renderGvCur();
       if(window.gvCurSync)gvCurSync();
       closeMenu();
     });
-    document.body.appendChild(menu);
+    /* append to <html> so body's overflow-x:hidden doesn't trap fixed positioning */
+    document.documentElement.appendChild(menu);
+    /* close on any scroll */
+    window.addEventListener('scroll',closeMenu,{passive:true});
+    const main=document.querySelector('.main-wrap')||document.querySelector('main');
+    if(main){scrollEl=main;main.addEventListener('scroll',closeMenu,{passive:true});}
     setTimeout(()=>document.addEventListener('click',function h(e){
-      if(!btn.contains(e.target)&&!menu.contains(e.target)){closeMenu();document.removeEventListener('click',h);}
+      if(!btn.contains(e.target)&&(!menu||!menu.contains(e.target))){closeMenu();document.removeEventListener('click',h);}
     }),0);
   }
   btn.addEventListener('click',openMenu);
