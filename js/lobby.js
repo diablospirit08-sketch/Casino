@@ -74,7 +74,13 @@ function setAuth(on){
 setAuth(false); /* initial state; Supabase session restore runs in modals.js after load */
 document.getElementById('loginBtn').addEventListener('click',()=>openAuth('in'));
 document.getElementById('signupBtn').addEventListener('click',()=>openAuth('up'));
-document.getElementById('connectWalletBtn').addEventListener('click',()=>openDep());
+document.getElementById('connectWalletBtn').addEventListener('click',()=>{
+  openDep();
+  setTimeout(()=>{
+    const bnbBtn=document.querySelector('#depCoins .dep-coin[data-c="BNB"]');
+    if(bnbBtn){bnbBtn.click();}
+  },50);
+});
 document.getElementById('logoutBtn').addEventListener('click',()=>{supa.auth.signOut();setAuth(false);});
 walletBal.addEventListener('click',e=>{
   e.stopPropagation();
