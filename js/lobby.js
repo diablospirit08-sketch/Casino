@@ -85,7 +85,6 @@ function wpConnect(fn,btn){
   fn().then(()=>{closeWalletPicker();showToast({icon:'🔗',title:'Wallet connected',sub:'BNB balance is live'});})
      .catch(e=>{btn.disabled=false;btn.innerHTML=orig;walletPickerMsg.textContent=e.message;});
 }
-document.getElementById('connectWalletBtn').addEventListener('click',openWalletPicker);
 document.getElementById('walletPickerClose').addEventListener('click',closeWalletPicker);
 walletPickerOverlay.addEventListener('click',e=>{if(e.target===walletPickerOverlay)closeWalletPicker();});
 document.getElementById('wpMetaMask').addEventListener('click',function(){wpConnect(()=>window.bscCashier.connectMetaMask(),this);});
@@ -175,13 +174,6 @@ async function loadTxnPage(reset){
   document.getElementById('txnMore').style.display=rows.length<txnPageSize?'none':'block';
   txnPage++;
   txnLoading=false;
-}
-
-function openTxnModal(){
-  txnFilter='all';
-  document.querySelectorAll('#txnOverlay .auto-seg').forEach(b=>b.classList.toggle('active',b.dataset.txf==='all'));
-  txnOverlay.classList.add('open');
-  loadTxnPage(true);
 }
 
 document.getElementById('txnClose').addEventListener('click',()=>txnOverlay.classList.remove('open'));
@@ -719,7 +711,6 @@ function openSearch(){
 function closeSearch(){
   searchOverlay.classList.remove('open');
 }
-document.getElementById('hdrSearchBtn').addEventListener('click',openSearch);
 document.getElementById('srchClose').addEventListener('click',closeSearch);
 searchOverlay.addEventListener('click',e=>{if(e.target===searchOverlay)closeSearch();});
 document.addEventListener('keydown',e=>{

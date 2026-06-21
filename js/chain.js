@@ -302,11 +302,12 @@ function wireSection(el,section){
     disconnect(); renderSection(el,section);
   });
   var amtEl=el.querySelector('#bscAmt');
-  var bnbBal=nativeW?nativeW.amt:0;
   el.querySelector('#bscMax')&&el.querySelector('#bscMax').addEventListener('click',function(){
+    var bnbBal=nativeW?nativeW.amt:0;
     amtEl.value=bnbBal.toFixed(4);
   });
   el.querySelector('#bscAction')&&el.querySelector('#bscAction').addEventListener('click',function(){
+    var bnbBal=nativeW?nativeW.amt:0;
     var a=parseFloat(amtEl.value)||0;
     if(a<=0){el.querySelector('#bscMsg').textContent='Enter a BNB amount';return;}
     var btn=el.querySelector('#bscAction');
@@ -368,12 +369,7 @@ function renderBscWithdraw(){renderSection(document.getElementById(BSC_WD_ID),'w
 /* ── dedicated wallet connect modal ─────────────────────────────────────── */
 function openWalletModal(){
   var overlay=document.getElementById('walletPickerOverlay');
-  var body=document.getElementById('walletPickerBody');
-  if(!overlay||!body)return;
-  body.innerHTML='';
-  var el=document.createElement('div');
-  body.appendChild(el);
-  renderSection(el,'dep');
+  if(!overlay)return;
   overlay.classList.add('open');
 }
 function closeWalletModal(){

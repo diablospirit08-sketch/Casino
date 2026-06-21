@@ -428,7 +428,7 @@ supa.auth.getSession().then(({data:{session}})=>{if(session)setAuth(true);});
     const rows=[];
     let betsHasMore=false,txnsHasMore=false;
     if(iTxnFilter!=='txns'){
-      const betsRes=await voltApi._fetch('/api/bets/history?limit='+PAGE+'&offset='+iBetsOff);
+      const betsRes=await window.voltApi._fetch('/api/bets/history?limit='+PAGE+'&offset='+iBetsOff);
       const betsJson=betsRes.ok?await betsRes.json():{bets:[]};
       const bets=betsJson.bets||[];
       betsHasMore=bets.length===PAGE;
@@ -442,7 +442,7 @@ supa.auth.getSession().then(({data:{session}})=>{if(session)setAuth(true);});
       iBetsOff+=bets.length;
     }
     if(iTxnFilter!=='bets'){
-      const txnRes=await voltApi._fetch('/api/wallet/history?limit='+PAGE+'&offset='+iTxnsOff);
+      const txnRes=await window.voltApi._fetch('/api/wallet/history?limit='+PAGE+'&offset='+iTxnsOff);
       const txnJson=txnRes.ok?await txnRes.json():{entries:[]};
       const allEntries=txnJson.entries||[];
       const txns=allEntries.filter(e=>e.type==='deposit'||e.type==='withdrawal');
