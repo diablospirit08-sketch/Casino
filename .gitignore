@@ -1,5 +1,7 @@
 # Dependencies
+node_modules/
 chain/node_modules/
+backend/node_modules/
 
 # Hardhat build artifacts
 chain/artifacts/

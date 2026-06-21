@@ -1,0 +1,12 @@
+chain/
+fonts/
+screenshots/
+uploads/
+supabase/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp3
+*.wav
+*.ogg
