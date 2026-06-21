@@ -579,10 +579,12 @@ tbody tr:last-child td{border-bottom:none}
   </div><!-- /content -->
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="js/supabase-client.js"></script>
+<script src="js/api.js"></script>
 <script>
 'use strict';
+const API='https://casino-production-2759.up.railway.app';
+const supa=window.voltApi;
+
 /* ── helpers ── */
 const $=id=>document.getElementById(id);
 const fmtDate=ts=>new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(ts));
@@ -590,6 +592,12 @@ const fmtN=n=>(+n||0).toLocaleString('en-US',{maximumFractionDigits:4});
 const ACOLS=['#7b6cf6','#3d9bff','#41f0a4','#ff8a3d','#ff4757','#ffd23d','#f0b90b','#9945ff'];
 const acol=s=>ACOLS[(s||'?').charCodeAt(0)%ACOLS.length];
 const todayStr=()=>new Date().toISOString().split('T')[0];
+async function aFetch(path,opts){
+  const r=await supa._fetch(path,opts);
+  const j=await r.json();
+  if(!r.ok) throw Object.assign(new Error(j.error||'Request failed'),{status:r.status});
+  return j;
+}
 
 /* ── tab switching ── */
 const TITLES={dashboard:'Dashboard',users:'Users',transactions:'Transactions',games:'Games',bets:'Live Bets',promos:'Promotions'};
@@ -634,16 +642,6 @@ function showAuthError(msg){
                style="padding:11px;border-radius:9px;border:none;background:var(--mint);color:var(--mint-ink);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;width:100%">
                Sign In
              </button>
-             <div style="display:flex;align-items:center;gap:10px;margin:2px 0">
-               <div style="flex:1;height:1px;background:var(--line)"></div>
-               <span style="font-size:11px;color:var(--muted-2)">or</span>
-               <div style="flex:1;height:1px;background:var(--line)"></div>
-             </div>
-             <button id="adminGoogleBtn"
-               style="padding:11px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--txt);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:9px">
-               <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-               Continue with Google
-             </button>
            </div>
            <a href="Volt Casino.html" style="font-size:12px;color:var(--muted);text-decoration:none">← Back to Casino</a>`
       }
@@ -668,83 +666,61 @@ function showAuthError(msg){
   };
   btn.addEventListener('click', doLogin);
   document.getElementById('adminPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-
-  const gBtn = document.getElementById('adminGoogleBtn');
-  if (gBtn) {
-    gBtn.addEventListener('click', async () => {
-      gBtn.textContent = 'Connecting…'; gBtn.disabled = true;
-      const { error } = await supa.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: location.href }
-      });
-      if (error) {
-        gBtn.textContent = 'Continue with Google'; gBtn.disabled = false;
-        document.getElementById('adminLoginErr').textContent = error.message;
-      }
-    });
-  }
-}
-
-/* ── fetch rows + join profile usernames ── */
-async function withProfiles(rows){
-  if(!rows?.length) return [];
-  const ids=[...new Set(rows.map(r=>r.user_id))];
-  const {data:profiles}=await supa.from('profiles').select('id,username').in('id',ids);
-  const pmap=Object.fromEntries((profiles||[]).map(p=>[p.id,p]));
-  return rows.map(r=>({...r,_profile:pmap[r.user_id]}));
 }
 
 /* ══ DASHBOARD ══════════════════════════════════════════════ */
-async function loadDashboard(){
-  /* stats */
-  const {data:stats,error:se}=await supa.rpc('admin_stats');
-  if(!se&&stats){
-    const vals=document.querySelectorAll('#tab-dashboard .stat-val');
-    if(vals[0]) vals[0].textContent='$'+fmtN(Math.abs(stats.house_profit));
-    if(vals[1]) vals[1].textContent=fmtN(stats.total_users);
-    if(vals[2]) vals[2].textContent=fmtN(stats.bets_today);
-    if(vals[3]) vals[3].textContent=fmtN(stats.wagered_today);
-    const badge=document.querySelector('[data-tab="transactions"] .badge');
-    if(badge) badge.textContent=stats.pending_tx;
-  }
+const GICONS={crash:'💥',mines:'💎',dice:'🎲',plinko:'🔮',coinflip:'🪙',keno:'🎯',blackjack:'🃏'};
+const gicon=n=>GICONS[n.toLowerCase()]||'🎮';
 
-  /* recent bets */
-  const {data:bets}=await supa.from('bets').select('*').order('created_at',{ascending:false}).limit(5);
-  const enriched=await withProfiles(bets);
+async function loadDashboard(){
+  const [stats,{bets}]=await Promise.all([
+    aFetch('/api/admin/stats'),
+    aFetch('/api/admin/bets?limit=5'),
+  ]);
+
+  const vals=document.querySelectorAll('#tab-dashboard .stat-val');
+  if(vals[0]) vals[0].textContent=fmtN(stats.house_profit)+' BNB';
+  if(vals[1]) vals[1].textContent=fmtN(stats.total_users);
+  if(vals[2]) vals[2].textContent=fmtN(stats.bets_today);
+  if(vals[3]) vals[3].textContent=fmtN(stats.wagered_today)+' BNB';
+  const badge=document.querySelector('[data-tab="transactions"] .badge');
+  if(badge) badge.textContent=stats.pending_withdrawals||0;
+
   const dashTbody=document.querySelector('#tab-dashboard .two-col .tbl-wrap:first-child tbody');
   if(dashTbody){
-    dashTbody.innerHTML=enriched.length
-      ? enriched.map(b=>`
-          <tr>
-            <td><div class="td-user"><div class="u-avatar" style="background:${acol(b._profile?.username||'?')}">${esc((b._profile?.username||'?')[0].toUpperCase())}</div><div class="u-name">${esc(b._profile?.username||'—')}</div></div></td>
+    dashTbody.innerHTML=bets.length
+      ? bets.map(b=>{
+          const win=b.status==='won';
+          const profit=(b.payout||0)-(b.wager||0);
+          return `<tr>
+            <td><div class="td-user"><div class="u-avatar" style="background:${acol(b.username||'?')}">${esc((b.username||'?')[0].toUpperCase())}</div><div class="u-name">${esc(b.username||'—')}</div></div></td>
             <td>${esc(b.game)}</td>
             <td class="amt-neg">${fmtN(b.wager)} ${esc(b.currency)}</td>
-            <td><span class="badge-status ${b.outcome==='win'?'active':b.outcome==='push'?'pending':'suspended'}">${esc(b.outcome)}</span></td>
-            <td class="${(+b.profit||0)>0?'amt-pos':'amt-neg'}">${(+b.profit||0)>0?'+':''}${fmtN(b.profit)} ${esc(b.currency)}</td>
-          </tr>`).join('')
+            <td><span class="badge-status ${win?'active':'suspended'}">${win?'win':'loss'}</span></td>
+            <td class="${profit>0?'amt-pos':'amt-neg'}">${profit>0?'+':''}${fmtN(profit)} ${esc(b.currency)}</td>
+          </tr>`;
+        }).join('')
       : `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No bets yet</td></tr>`;
   }
 
-  /* top games */
-  const {data:todayBets}=await supa.from('bets').select('game,wager,profit,outcome').gte('created_at',todayStr());
+  /* top games from today's bets */
+  const {bets:todayBets}=await aFetch('/api/admin/bets?limit=200&since='+todayStr()+'T00:00:00Z');
   const gmap={};
   (todayBets||[]).forEach(b=>{
     const k=b.game.replace(/^originals-/i,'').replace(/^\w/,c=>c.toUpperCase());
     if(!gmap[k]) gmap[k]={count:0,rev:0};
     gmap[k].count++;
-    gmap[k].rev+=b.outcome==='loss'?+b.wager:-(+b.profit||0);
+    gmap[k].rev+=(b.wager||0)-(b.payout||0);
   });
   const sorted=Object.entries(gmap).sort((a,b)=>b[1].rev-a[1].rev).slice(0,5);
   const maxRev=sorted[0]?.[1]?.rev||1;
-  const GICONS={crash:'💥',mines:'💎',dice:'🎲',plinko:'🔮',coinflip:'🪙',keno:'🎯',blackjack:'🃏'};
-  const gicon=n=>GICONS[n.toLowerCase()]||'🎮';
   $('dashTopGames').innerHTML=sorted.length
     ? sorted.map(([name,s],i)=>`
         <div class="tg-item">
           <div class="tg-rank">${i+1}</div>
           <div class="tg-ic" style="background:rgba(65,240,164,.1)">${gicon(name)}</div>
           <div class="tg-info"><b>${name}</b><span>${s.count} bets today</span></div>
-          <div class="tg-rev"><b>${fmtN(s.rev)}</b><span>${Math.round(s.rev/maxRev*100)}%</span>
+          <div class="tg-rev"><b>${fmtN(s.rev)} BNB</b><span>${Math.round(s.rev/maxRev*100)}%</span>
             <div class="tg-bar-wrap"><div class="tg-bar" style="width:${Math.round(s.rev/maxRev*100)}%"></div></div>
           </div>
         </div>`).join('')
@@ -755,39 +731,38 @@ async function loadDashboard(){
 let _users=[], _uFilter='all', _uQ='';
 
 async function loadUsers(){
-  const [{data:profiles},{data:wallets},{data:betRows}]=await Promise.all([
-    supa.from('profiles').select('id,username,email,is_admin,vip_level,created_at').order('created_at',{ascending:false}).limit(200),
-    supa.from('wallets').select('user_id,currency,balance'),
-    supa.from('bets').select('user_id,wager'),
-  ]);
-  const wmap={};
-  (wallets||[]).forEach(w=>{if(!wmap[w.user_id])wmap[w.user_id]={};wmap[w.user_id][w.currency]=+w.balance;});
-  const wagMap={};
-  (betRows||[]).forEach(b=>{wagMap[b.user_id]=(wagMap[b.user_id]||0)+(+b.wager);});
-  _users=(profiles||[]).map(p=>({...p,_wallets:wmap[p.id]||{},_wagered:wagMap[p.id]||0}));
+  const {users}=await aFetch('/api/admin/users?limit=100');
+  _users=users||[];
   renderUsers();
 }
 
 function renderUsers(){
   const q=_uQ.toLowerCase();
   const rows=_users.filter(u=>
-    (_uFilter==='all'||(_uFilter==='active'&&!u.is_admin)||(_uFilter==='suspended'&&u.is_admin))
+    (_uFilter==='all'||(_uFilter==='active'&&!u.is_banned)||(_uFilter==='suspended'&&u.is_banned))
     &&(!q||(u.username||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q))
   );
   $('usersTbody').innerHTML=rows.map(u=>{
     const name=u.username||'—';
-    const bal=fmtN(u._wallets.USDT||0);
+    const status=u.is_banned?'suspended':u.is_admin?'pending':'active';
+    const statusLabel=u.is_banned?'Banned':u.is_admin?'Admin':'Active';
     return `<tr>
       <td><div class="td-user"><div class="u-avatar" style="background:${acol(name)}">${esc(name[0].toUpperCase())}</div><div><div class="u-name">${esc(name)}</div><div class="u-email">${esc(u.email||'—')}</div></div></div></td>
-      <td style="font-weight:700">${bal} USDT</td>
-      <td style="color:var(--muted)">${fmtN(u._wagered)}</td>
-      <td><span class="badge-status ${u.is_admin?'pending':'active'}">${u.is_admin?'Admin':'Active'}</span></td>
+      <td style="font-weight:700">${fmtN(u.bnb_balance)} BNB</td>
+      <td style="color:var(--muted)">${fmtN(u.total_wagered)} BNB</td>
+      <td><span class="badge-status ${status}">${statusLabel}</span></td>
       <td style="color:var(--muted)">${u.created_at?fmtDate(u.created_at):'—'}</td>
-      <td><button class="filter-btn" style="padding:4px 10px;font-size:11px">View</button></td>
+      <td><button class="filter-btn" style="padding:4px 10px;font-size:11px;color:${u.is_banned?'var(--mint)':'var(--red)'}"
+          onclick="toggleBan('${esc(u.id)}',${!u.is_banned})">${u.is_banned?'Unban':'Ban'}</button></td>
     </tr>`;
   }).join('')||`<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">No users found</td></tr>`;
   $('usersCount').textContent=`Showing ${rows.length} user${rows.length!==1?'s':''}`;
 }
+
+window.toggleBan=async(id,banned)=>{
+  await aFetch('/api/admin/users/'+id+'/ban',{method:'POST',body:JSON.stringify({banned})});
+  loadUsers();
+};
 
 document.querySelectorAll('[data-uf]').forEach(btn=>{
   btn.addEventListener('click',()=>{
@@ -801,29 +776,26 @@ $('userSearch').addEventListener('input',e=>{_uQ=e.target.value.trim();renderUse
 let _txs=[], _txFilter='all';
 
 async function loadTransactions(){
-  const {data}=await supa.from('transactions').select('*').order('created_at',{ascending:false}).limit(100);
-  _txs=await withProfiles(data||[]);
+  const {transactions}=await aFetch('/api/admin/transactions?limit=100');
+  _txs=transactions||[];
   renderTx();
 }
 
 function renderTx(){
-  const rows=_txFilter==='all'?_txs:_txFilter==='pending'?_txs.filter(t=>t.status==='pending'):_txs.filter(t=>t.type===_txFilter);
-  $('txTbody').innerHTML=rows.map(t=>`
-    <tr>
+  const rows=_txFilter==='all'?_txs:_txs.filter(t=>t.type===_txFilter);
+  $('txTbody').innerHTML=rows.map(t=>{
+    const pos=parseFloat(t.amount)>0;
+    return `<tr>
       <td style="font-family:monospace;font-size:11px;color:var(--muted)">${esc(t.id.slice(0,8))}…</td>
-      <td style="font-weight:700">${esc(t._profile?.username||'—')}</td>
-      <td><span class="badge-type ${esc(t.type)}">${esc(t.type)}</span></td>
-      <td class="${t.type==='deposit'?'amt-pos':'amt-neg'}">${t.type==='deposit'?'+':'-'}${fmtN(t.amount)} ${esc(t.currency)}</td>
-      <td style="color:var(--muted)">—</td>
-      <td><span class="badge-status ${esc(t.status)}">${esc(t.status)}</span></td>
+      <td style="font-weight:700">${esc(t.username||'—')}</td>
+      <td><span class="badge-type ${esc(t.type)}">${esc(t.type.replace(/_/g,' '))}</span></td>
+      <td class="${pos?'amt-pos':'amt-neg'}">${pos?'+':''}${fmtN(Math.abs(t.amount))} ${esc(t.currency)}</td>
+      <td style="color:var(--muted)">${esc(t.ref_id||'—')}</td>
+      <td><span class="badge-status active">recorded</span></td>
       <td style="color:var(--muted);font-size:12px">${fmtDate(t.created_at)}</td>
-      <td><div style="display:flex;gap:6px">
-        ${t.status==='pending'
-          ?`<button class="filter-btn" style="padding:4px 10px;font-size:11px;color:var(--mint)" onclick="approveTx('${esc(t.id)}')">Approve</button>
-             <button class="filter-btn" style="padding:4px 10px;font-size:11px;color:var(--red)" onclick="rejectTx('${esc(t.id)}')">Reject</button>`
-          :`<button class="filter-btn" style="padding:4px 10px;font-size:11px">View</button>`}
-      </div></td>
-    </tr>`).join('')||`<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">No transactions found</td></tr>`;
+      <td></td>
+    </tr>`;
+  }).join('')||`<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">No transactions found</td></tr>`;
   $('txCount').textContent=`Showing ${rows.length} transaction${rows.length!==1?'s':''}`;
 }
 
@@ -833,9 +805,6 @@ document.querySelectorAll('[data-tf]').forEach(btn=>{
     btn.classList.add('active');_txFilter=btn.dataset.tf;renderTx();
   });
 });
-
-window.approveTx=async id=>{await supa.from('transactions').update({status:'completed'}).eq('id',id);loadTransactions();};
-window.rejectTx =async id=>{await supa.from('transactions').update({status:'failed'}).eq('id',id);loadTransactions();};
 
 /* ══ GAMES ══════════════════════════════════════════════════ */
 const GDEFS=[
@@ -849,13 +818,13 @@ const GDEFS=[
 ];
 
 async function loadGames(){
-  const {data}=await supa.from('bets').select('game,wager,profit,outcome').gte('created_at',todayStr());
+  const {bets}=await aFetch('/api/admin/bets?limit=500&since='+todayStr()+'T00:00:00Z');
   const gmap={};
-  (data||[]).forEach(b=>{
+  (bets||[]).forEach(b=>{
     const k=b.game.replace(/^originals-/i,'').replace(/^\w/,c=>c.toUpperCase());
     if(!gmap[k]) gmap[k]={bets:0,rev:0};
     gmap[k].bets++;
-    gmap[k].rev+=b.outcome==='loss'?+b.wager:-(+b.profit||0);
+    gmap[k].rev+=(b.wager||0)-(b.payout||0);
   });
   $('gamesTbody').innerHTML=GDEFS.map(g=>{
     const s=gmap[g.name]||{bets:0,rev:0};
@@ -864,7 +833,7 @@ async function loadGames(){
       <td style="color:var(--muted)">${g.cat}</td>
       <td style="color:var(--yellow);font-weight:700">${g.edge}</td>
       <td style="color:var(--muted)">${s.bets.toLocaleString()}</td>
-      <td class="amt-pos">${fmtN(s.rev)}</td>
+      <td class="amt-pos">${fmtN(s.rev)} BNB</td>
       <td><span class="badge-status active">Active</span></td>
       <td>
         <label style="position:relative;display:inline-block;width:38px;height:22px;cursor:pointer">
@@ -884,41 +853,35 @@ async function loadGames(){
 let _liveBets=[];
 
 async function loadLiveBets(){
-  const {data}=await supa.from('bets').select('*').order('created_at',{ascending:false}).limit(25);
-  _liveBets=await withProfiles(data||[]);
+  const {bets}=await aFetch('/api/admin/bets?limit=25');
+  _liveBets=bets||[];
   renderLiveBets();
 }
 
 function renderLiveBets(){
   $('liveBetsTbody').innerHTML=_liveBets.map(b=>{
-    const win=b.outcome==='win',push=b.outcome==='push';
+    const win=b.status==='won';
+    const profit=(b.payout||0)-(b.wager||0);
     const t=new Date(b.created_at).toLocaleTimeString('en-US',{hour12:false});
     return `<tr>
       <td style="font-family:monospace;font-size:12px;color:var(--muted)">${esc(t)}</td>
-      <td style="font-weight:700">${esc(b._profile?.username||'—')}</td>
+      <td style="font-weight:700">${esc(b.username||'—')}</td>
       <td>${esc(b.game)}</td>
       <td style="color:var(--muted);font-variant-numeric:tabular-nums">${fmtN(b.wager)} ${esc(b.currency)}</td>
-      <td style="font-weight:800;color:${win?'var(--mint)':push?'var(--yellow)':'var(--muted)'}">${b.multiplier!=null?esc(b.multiplier)+'×':'—'}</td>
-      <td class="${win?'amt-pos':'amt-neg'}">${win?'+':''}${fmtN(b.profit)} ${esc(b.currency)}</td>
-      <td><span class="badge-status ${win?'active':push?'pending':'suspended'}">${esc(b.outcome)}</span></td>
+      <td style="font-weight:800;color:${win?'var(--mint)':'var(--muted)'}">${b.multiplier!=null?fmtN(b.multiplier)+'×':'—'}</td>
+      <td class="${win?'amt-pos':'amt-neg'}">${win?'+':''}${fmtN(profit)} ${esc(b.currency)}</td>
+      <td><span class="badge-status ${win?'active':'suspended'}">${win?'won':'lost'}</span></td>
     </tr>`;
   }).join('')||`<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">No bets yet</td></tr>`;
 }
 
-/* ══ REALTIME ═══════════════════════════════════════════════ */
-function subscribeRealtime(){
-  supa.channel('admin-live')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'bets'},async({new:b})=>{
-      const {data:p}=await supa.from('profiles').select('id,username').eq('id',b.user_id).single();
-      _liveBets=[{...b,_profile:p},..._liveBets].slice(0,50);
-      renderLiveBets();
-      if($('tab-dashboard').classList.contains('active')) loadDashboard();
-    })
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'transactions'},()=>{
-      if($('tab-transactions').classList.contains('active')) loadTransactions();
-      loadDashboard(); // refresh pending count
-    })
-    .subscribe();
+/* ══ POLLING (replaces Supabase realtime) ═══════════════════ */
+let _pollInterval=null;
+function startPolling(){
+  _pollInterval=setInterval(()=>{
+    if($('tab-bets').classList.contains('active')) loadLiveBets();
+    if($('tab-dashboard').classList.contains('active')) loadDashboard();
+  },10000);
 }
 
 /* ══ PROMO EDITOR ═══════════════════════════════════════════ */
@@ -1054,29 +1017,21 @@ initGameArtEditor();
 
 /* ══ INIT ═══════════════════════════════════════════════════ */
 async function initAdmin(){
-  const {data:{user}}=await supa.auth.getUser();
-  if(!user){ showAuthError(); return; }
+  let me;
+  try{ me=await aFetch('/api/auth/me'); }
+  catch(e){ showAuthError(); return; }
 
-  /* try fetching profile — is_admin may not exist if admin-schema.sql wasn't run */
-  const {data:profile,error:pe}=await supa.from('profiles').select('username,email,is_admin').eq('id',user.id).single();
-
-  /* schema not migrated yet */
-  if(pe?.message?.includes('is_admin')){
-    showAuthError('Run supabase/admin-schema.sql first, then set your account as admin.');
+  if(!me?.is_admin){
+    showAuthError('Your account does not have admin privileges. Ask a super-admin to set <code>is_admin=true</code> for your user in the database.');
     return;
   }
 
-  if(!profile?.is_admin){
-    showAuthError('Your account does not have admin privileges. Run this in Supabase SQL editor:<br><br><code style="font-family:monospace;font-size:12px;background:var(--panel-2);padding:6px 10px;border-radius:6px;display:inline-block">UPDATE profiles SET is_admin=true<br>WHERE email=\''+esc(user.email)+'\';</code>');
-    return;
-  }
-
-  document.querySelector('.sb-user-info b').textContent=profile.username||'Admin';
-  document.querySelector('.sb-user-info span').textContent=profile.email||user.email||'admin';
-  document.querySelector('.sb-avatar').textContent=(profile.username||'A')[0].toUpperCase();
+  document.querySelector('.sb-user-info b').textContent=me.username||'Admin';
+  document.querySelector('.sb-user-info span').textContent=me.email||'admin';
+  document.querySelector('.sb-avatar').textContent=(me.username||'A')[0].toUpperCase();
 
   await Promise.all([loadDashboard(),loadUsers(),loadTransactions(),loadGames(),loadLiveBets()]);
-  subscribeRealtime();
+  startPolling();
 }
 
 initAdmin().catch(e=>{ console.error(e); showAuthError('Connection failed: '+esc(e.message)); });

@@ -207,7 +207,7 @@ export async function authRoutes(fastify) {
     onRequest: [fastify.authenticate],
   }, async (req) => {
     const rows = await query(
-      `SELECT id, email, username, kyc_status, created_at FROM users WHERE id = $1`,
+      `SELECT id, email, username, kyc_status, is_admin, created_at FROM users WHERE id = $1`,
       [req.user.id]
     );
     return rows[0] ?? null;
