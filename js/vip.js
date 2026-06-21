@@ -142,57 +142,80 @@ renderVip();
 syncGift();
 
 /* ===== rakeback ===== */
-const LS_RB='volt-rakeback';
-let rakebackAccum=parseFloat(localStorage.getItem(LS_RB))||0;
-
-window.addRakeback=function addRakeback(usdWagered){
-  if(!(usdWagered>0))return;
-  const rate=VIP_LEVELS[vipLevel()].rb/100;
-  rakebackAccum+=usdWagered*rate;
-  localStorage.setItem(LS_RB,rakebackAccum);
-  syncRakebackDot();
-};
+var _rbClaimable = 0;
+var _rbRate = 0.10;
 
 function syncRakebackDot(){
-  const dot=$id('rbDot');
-  if(dot)dot.hidden=rakebackAccum<0.01;
+  var dot = $id('rbDot');
+  if (dot) dot.hidden = _rbClaimable < 0.000001;
 }
 
+window.refreshRakeback = function refreshRakeback() {
+  if (!window.voltApi || !window.voltApi.auth.getSession()) return;
+  window.voltApi._fetch('/api/rakeback')
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if (!j) return;
+      _rbClaimable = parseFloat(j.claimable) || 0;
+      _rbRate = j.rate || 0.10;
+      syncRakebackDot();
+    })
+    .catch(function(){});
+};
+
 function renderRakeback(){
-  const v=VIP_LEVELS[vipLevel()];
-  const w=curW();
-  $id('rbRate').textContent=v.rb+'%';
-  $id('rbLevel').textContent=v.n;
-  $id('rbLevel').style.color=v.col;
-  $id('rbAmt').textContent='$'+rakebackAccum.toFixed(4);
-  $id('rbCoin').textContent='≈ '+fmtW(w,rakebackAccum/w.rate)+' '+w.c;
-  const claim=$id('rbClaim');
-  claim.disabled=rakebackAccum<0.0001;
-  claim.textContent=rakebackAccum>=0.0001?'Claim $'+rakebackAccum.toFixed(4):'Nothing to claim yet';
-  /* fill bar: show how far to the next $1 milestone */
-  const fill=$id('rbBarFill');
-  if(fill)fill.style.width=Math.min(100,(rakebackAccum%1)*100)+'%';
+  var v = VIP_LEVELS[vipLevel()];
+  $id('rbRate').textContent = Math.round(_rbRate * 100) + '%';
+  $id('rbLevel').textContent = v.n;
+  $id('rbLevel').style.color = v.col;
+  $id('rbAmt').textContent = _rbClaimable.toFixed(6) + ' BNB';
+  $id('rbCoin').textContent = '';
+  var claim = $id('rbClaim');
+  claim.disabled = _rbClaimable < 0.000001;
+  claim.textContent = _rbClaimable >= 0.000001
+    ? 'Claim ' + _rbClaimable.toFixed(6) + ' BNB'
+    : 'Nothing to claim yet';
+  var fill = $id('rbBarFill');
+  if (fill) fill.style.width = Math.min(100, (_rbClaimable % 0.01) / 0.01 * 100) + '%';
 }
 
 function claimRakeback(){
-  if(rakebackAccum<0.0001)return;
-  const v=VIP_LEVELS[vipLevel()],w=curW();
-  const usd=rakebackAccum;
-  creditTo(w,usd/w.rate);
-  showToast({icon:'♻',col:'#41f0a4',title:'Rakeback claimed',sub:'+$'+usd.toFixed(4)+' · '+v.rb+'% · VIP '+v.n});
-  rakebackAccum=0;
-  localStorage.setItem(LS_RB,0);
-  syncRakebackDot();
-  renderRakeback();
+  if (_rbClaimable < 0.000001) return;
+  var btn = $id('rbClaim');
+  btn.disabled = true;
+  btn.textContent = 'Claiming…';
+  window.voltApi._fetch('/api/rakeback/claim', { method: 'POST', body: '{}' })
+    .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+    .then(function(res){
+      if (!res.ok) { showToast({icon:'⚠',col:'#ff4757',title:'Claim failed',sub:res.j.error||'Try again'}); return; }
+      var amt = _rbClaimable;
+      _rbClaimable = 0;
+      syncRakebackDot();
+      renderRakeback();
+      showToast({icon:'♻',col:'#41f0a4',title:'Rakeback claimed',sub:'+'+amt.toFixed(6)+' BNB'});
+      if (window.loadBalances) window.loadBalances();
+    })
+    .catch(function(){ showToast({icon:'⚠',col:'#ff4757',title:'Claim failed',sub:'Network error'}); })
+    .finally(function(){ renderRakeback(); });
 }
 
-const rbOverlay=$id('rbOverlay');
-function openRakeback(){renderRakeback();rbOverlay.classList.add('open');}
-$id('rbBtn').addEventListener('click',()=>{avatarWrap.classList.remove('open');openRakeback();});
-$id('rbClose').addEventListener('click',()=>rbOverlay.classList.remove('open'));
-rbOverlay.addEventListener('click',e=>{if(e.target===rbOverlay)rbOverlay.classList.remove('open');});
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'&&rbOverlay.classList.contains('open')){rbOverlay.classList.remove('open');e.stopPropagation();}
-},true);
-$id('rbClaim').addEventListener('click',claimRakeback);
-syncRakebackDot();
+/* remove stale localStorage rakeback */
+localStorage.removeItem('volt-rakeback');
+
+const rbOverlay = $id('rbOverlay');
+function openRakeback(){
+  window.refreshRakeback();
+  renderRakeback();
+  rbOverlay.classList.add('open');
+}
+$id('rbBtn').addEventListener('click', function(){ avatarWrap.classList.remove('open'); openRakeback(); });
+$id('rbClose').addEventListener('click', function(){ rbOverlay.classList.remove('open'); });
+rbOverlay.addEventListener('click', function(e){ if (e.target === rbOverlay) rbOverlay.classList.remove('open'); });
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape' && rbOverlay.classList.contains('open')){ rbOverlay.classList.remove('open'); e.stopPropagation(); }
+}, true);
+$id('rbClaim').addEventListener('click', claimRakeback);
+
+/* poll every 60s when logged in */
+setInterval(function(){ window.refreshRakeback(); }, 60000);
+window.refreshRakeback();
