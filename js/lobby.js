@@ -193,9 +193,9 @@ document.addEventListener('click',()=>{
 /* ---------- nav rail ---------- */
 /* cat: rail item activates the matching category chip; items without one scroll to their lobby section */
 const railItems = [
-  {l:'Lobby',        t:'sec-top',       cat:'lobby',     ic:'<img src="images/house.png (2).png" style="width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4))">'},
+  {l:'Lobby',        t:'sec-top',       cat:'lobby',     ic:'<img src="images/house.png" style="width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4))">'},
   {l:'Originals',    t:'sec-originals', cat:'originals', ic:'<path d="M7 2v11h3v9l7-12h-4l4-8z"/>'},
-  {l:'Slots',        t:'sec-slots',     cat:'slots',     ic:'<img src="images/slots-777.png.png" style="width:36px;height:36px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4))">'},
+  {l:'Slots',        t:'sec-slots',     cat:'slots',     ic:'<img src="images/slots-777.png" style="width:36px;height:36px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4))">'},
   {l:'Hot Picks',    t:'sec-hot',                        ic:'<path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>'},
   {l:'Live Casino',  t:'sec-live',      cat:'live',      ic:'<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>'},
   {l:'Game Shows',   t:'sec-shows',     cat:'shows',     ic:'<path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/>'},
