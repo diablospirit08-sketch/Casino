@@ -92,12 +92,11 @@ ORIGINALS['originals-coinflip']={
     hop.style.animationDuration=shadow.style.animationDuration=dur+'ms';
     hop.classList.add('toss');shadow.classList.add('toss');
     this.beep(220,0.18,0.05,'triangle');
+    creditTo(st.w,st.b);
     let res;
     try{
       res=await placeBet({game:'coinflip',currency:st.w.c,wager:st.b,params:{side:this.side}});
     }catch(err){
-      /* rollback */
-      st.w.amt+=st.b;st.w.fiat=st.w.amt*st.w.rate;renderWallet();
       window._sbActive=false;this.busy=false;gvBetBtn.disabled=false;
       $id('cfSide').querySelectorAll('.auto-seg').forEach(b=>b.disabled=false);
       msg.textContent='Toss the coin, wiseguy.';

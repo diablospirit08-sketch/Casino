@@ -145,11 +145,11 @@ ORIGINALS['originals-plinko']={
     const st=debitBet();
     if(!st){window._sbActive=false;if(done)stopAuto();return;}
     if(!this.W)this.sizeCv();
+    creditTo(st.w,st.b);
     let res;
     try{
       res=await placeBet({game:'plinko',currency:st.w.c,wager:st.b,params:{rows:this.rows,risk:this.risk}});
     }catch(err){
-      st.w.amt+=st.b;st.w.fiat=st.w.amt*st.w.rate;renderWallet();
       window._sbActive=false;
       showToast({icon:'⚠',title:'Bet failed',sub:err.message});
       if(done)stopAuto();

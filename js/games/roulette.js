@@ -478,10 +478,9 @@ ORIGINALS['originals-roulette']={
     let res=null;
     let serverPromise=null;
     if(authed){
-      w.amt-=totalC;w.fiat=w.amt*w.rate;renderWallet();
       serverPromise=placeBet({game:'roulette',currency:w.c,wager:totalC,
         params:{bets:this.bets.map(b=>({type:b.type,numbers:b.numbers,amount:b.amount}))}})
-        .catch(err=>{w.amt+=totalC;w.fiat=w.amt*w.rate;renderWallet();return null;});
+        .catch(err=>{return null;});
     }
     /* animation and server call run in parallel */
     const[,serverRes]=await Promise.all([this._animateWheel(spinResult),serverPromise||Promise.resolve(null)]);

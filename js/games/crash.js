@@ -54,21 +54,21 @@ ORIGINALS['originals-crash']={
     $id('crMult').className='crash-mult cash';
     $id('crSub').textContent='Verifying…';
     if(!autoRunning)gvBetBtn.disabled=true;
+    creditTo(r.st.w,r.st.b);
     let res;
     try{
       res=await placeBet({game:'crash',currency:r.st.w.c,wager:r.st.b,params:{cashout}});
     }catch(err){
-      /* server rejected — treat as bust */
       r.cashed=0;
       $id('crMult').className='crash-mult bust';
-      $id('crSub').textContent='Server bust: '+err.message;
+      $id('crSub').textContent='Server error: '+err.message;
       serverSettleBet(r.st,0,r.st.w.amt);
       window._sbActive=false;
       this.endSoon(900,false);
       return;
     }
     window._sbActive=false;
-    const win=res.outcome==='win';
+    const win=res.gameData?.win===true;
     if(win){
       serverSettleBet(r.st,cashout,res.new_balance);
       $id('crSub').textContent='Cashed out — +'+fmtW(r.st.w,r.st.b*(cashout-1))+' '+r.st.w.c;
@@ -155,12 +155,13 @@ ORIGINALS['originals-crash']={
     if(r&&!r.cashed){
       /* player navigated away mid-round — cashout at current multiplier;
          server will settle as win or loss depending on the server's bust point */
+      creditTo(r.st.w,r.st.b);
       placeBet({game:'crash',currency:r.st.w.c,wager:r.st.b,params:{cashout:r.m}})
         .then(res=>{
-          const win=res.outcome==='win';
+          const win=res.gameData?.win===true;
           serverSettleBet(r.st,win?r.m:0,res.new_balance);
         })
-        .catch(()=>serverSettleBet(r.st,0,r.st.w.amt));
+        .catch(()=>{});
     }
     window._sbActive=false;
     this.run=null;

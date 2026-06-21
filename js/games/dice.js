@@ -54,13 +54,12 @@ ORIGINALS['originals-dice']={
     let spinning=true;
     const spinFn=()=>{if(spinning){rollEl.textContent=rnd(0,100).toFixed(2);this._raf=requestAnimationFrame(spinFn);}};
     this._raf=requestAnimationFrame(spinFn);
+    creditTo(st.w,st.b);
     let res;
     try{
       res=await placeBet({game:'dice',currency:st.w.c,wager:st.b,params:{chance:this.chance,over:this.over}});
     }catch(err){
       spinning=false;cancelAnimationFrame(this._raf);
-      /* rollback optimistic deduction */
-      st.w.amt+=st.b;st.w.fiat=st.w.amt*st.w.rate;renderWallet();
       window._sbActive=false;this.busy=false;gvBetBtn.disabled=false;
       showToast({icon:'⚠',title:'Bet failed',sub:err.message});
       if(done)stopAuto();
@@ -68,7 +67,7 @@ ORIGINALS['originals-dice']={
     }
     spinning=false;cancelAnimationFrame(this._raf);
     window._sbActive=false;
-    const{roll:r,target:t}=res.gameData,win=res.outcome==='win',m=res.multiplier;
+    const{roll:r,target:t}=res.gameData,win=res.gameData?.win===true,m=res.multiplier;
     rollEl.textContent=r.toFixed(2);
     rollEl.classList.add(win?'win':'lose');
     pin.classList.add('show');pin.style.left=r+'%';pin.textContent=r.toFixed(0);
