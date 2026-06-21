@@ -2,7 +2,7 @@
 /* ---------- payments ---------- */
 const PAY_COINS=['BTC','ETH','BNB','LTC','USDT','SOL','XRP','TRX','DOGE','MATIC'];
 document.getElementById('payStrip').insertAdjacentHTML('beforeend',
-  PAY_COINS.map(c=>`<img src="${coinIconUrl(c)}" title="${c}" alt="${c}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;flex:none" onerror="this.style.display='none'">`).join(''));
+  PAY_COINS.map(c=>`<img src="${coinIconUrl(c)}" title="${c}" alt="${c}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex:none" onerror="this.style.display='none'">`).join(''));
 
 /* ---------- deposit modal ---------- */
 const DEPOSIT={
