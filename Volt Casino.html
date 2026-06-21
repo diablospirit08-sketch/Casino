@@ -724,30 +724,45 @@
   .vip-sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:14px}
   .vip-kicker{display:block;font-size:9.5px;font-weight:900;letter-spacing:.24em;text-transform:uppercase;color:var(--mint);margin-bottom:5px}
   .vip-sec-head h2{font-size:24px;font-weight:900;text-transform:uppercase;letter-spacing:.01em;line-height:1}
-  .vip-how{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);transition:.15s}
-  .vip-how:hover{color:var(--mint)}
+  .vip-how{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#c8a86b;transition:.15s}
+  .vip-how:hover{color:#f0d090}
   .vip-how svg{width:11px;height:11px}
-  .vip-card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:36px 26px 28px}
+  /* card */
+  .vip-card{position:relative;background:linear-gradient(160deg,#0e1a12 0%,#0a1118 45%,#14100a 100%);border:1px solid rgba(120,100,60,.35);border-radius:16px;padding:44px 32px 32px;overflow:hidden}
+  .vip-card::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 90% 55% at 50% 0%,rgba(80,110,50,.2) 0%,transparent 65%);pointer-events:none}
+  /* track */
   .vip-trackwrap{position:relative}
-  .vip-trackline{position:absolute;top:31px;left:10%;right:10%;height:2px;background:var(--line-2);border-radius:2px}
-  .vip-trackline i{display:block;height:100%;width:0%;background:var(--spectrum);border-radius:2px;box-shadow:0 0 12px rgba(255,180,80,.45);transition:width .5s}
+  .vip-trackline{position:absolute;top:54px;left:10%;right:10%;height:3px;background:rgba(255,255,255,.06);border-radius:2px}
+  .vip-trackline i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#c98b4a,#f0c05a 60%,#c98b4a);border-radius:2px;box-shadow:0 0 16px rgba(240,192,90,.55);transition:width .6s ease}
   .vip-tiers{position:relative;display:grid;grid-template-columns:repeat(5,1fr);z-index:1}
-  .vt{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center}
-  .vt-badge{position:relative;width:64px;height:64px;border-radius:50%;background:var(--bg-2);border:2px solid var(--line-2);display:grid;place-items:center;font-size:19px;font-weight:900;color:var(--muted-2);transition:.25s}
-  .vt-badge::before{content:"";position:absolute;inset:5px;border-radius:50%;border:1px dashed var(--line-2)}
-  .vt.reached .vt-badge{color:var(--tc);border-color:var(--tc);box-shadow:0 0 20px -4px var(--tc)}
-  .vt.reached .vt-badge::before{border-color:var(--tc);opacity:.45}
-  .vt.current .vt-badge{box-shadow:0 0 26px -2px var(--tc)}
-  .vt-name{font-size:12px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;margin-top:4px}
-  .vt.reached .vt-name{color:var(--txt)}
-  .vt:not(.reached) .vt-name{color:var(--muted-2)}
-  .vt-perk{font-size:10.5px;color:var(--muted-2);font-weight:600}
-  .vt-here{font-size:9px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:var(--mint);border:1px solid var(--mint);border-radius:99px;padding:3px 10px;margin-top:3px;box-shadow:0 0 12px -3px var(--mint)}
+  /* tier item */
+  .vt{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center}
+  /* medallion */
+  .vt-medal{position:relative;width:108px;height:108px;border-radius:50%;display:grid;place-items:center;flex:none;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.06) 0%,rgba(0,0,0,.4) 100%);border:2px solid rgba(255,255,255,.07);transition:.35s}
+  .vt-medal::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid rgba(255,255,255,.05);transition:.35s}
+  .vt-medal svg{width:54px;height:54px;transition:.3s;opacity:.35;filter:drop-shadow(0 3px 6px rgba(0,0,0,.7))}
+  .vt.reached .vt-medal{background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--tc) 22%,#1a1208) 0%,color-mix(in srgb,var(--tc) 5%,#0a0e14) 100%);border-color:color-mix(in srgb,var(--tc) 55%,transparent)}
+  .vt.reached .vt-medal svg{opacity:1}
+  .vt.reached .vt-medal::after{border-color:color-mix(in srgb,var(--tc) 25%,transparent)}
+  .vt.current .vt-medal::after{border-color:var(--tc);box-shadow:0 0 0 4px color-mix(in srgb,var(--tc) 20%,transparent),0 0 40px -6px var(--tc)}
+  .vt.current .vt-medal{animation:medalGlow 2.6s ease-in-out infinite}
+  @keyframes medalGlow{0%,100%{box-shadow:0 0 18px -6px var(--tc)}50%{box-shadow:0 0 36px -4px var(--tc)}}
+  /* roman numeral badge */
+  .vt-rn{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.1);background:rgba(8,10,16,.9);display:grid;place-items:center;font-size:9.5px;font-weight:900;color:rgba(255,255,255,.25);margin-top:-4px;transition:.25s;letter-spacing:.04em}
+  .vt.reached .vt-rn{border-color:var(--tc);color:var(--tc);box-shadow:0 0 10px -3px var(--tc)}
+  /* name */
+  .vt-name{font-size:10.5px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.28);transition:.2s;white-space:nowrap}
+  .vt.reached .vt-name{color:rgba(255,255,255,.85)}
+  .vt.current .vt-name{color:#fff}
+  .vt-perk{font-size:9.5px;color:var(--muted-2);font-weight:600;max-width:110px;line-height:1.35}
+  .vt-here{font-size:8.5px;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:#41f0a4;margin-top:1px;text-shadow:0 0 12px rgba(65,240,164,.9)}
   @media(max-width:760px){
-    .vip-card{padding:24px 10px 18px}
-    .vip-trackline{top:21px}
-    .vt-badge{width:44px;height:44px;font-size:14px}
-    .vt-name{font-size:8.5px;letter-spacing:.08em}
+    .vip-card{padding:24px 6px 20px}
+    .vip-trackline{top:36px}
+    .vt-medal{width:68px;height:68px}
+    .vt-medal svg{width:34px;height:34px}
+    .vt-name{font-size:7.5px;letter-spacing:.08em}
+    .vt-rn{width:22px;height:22px;font-size:8px}
     .vt-perk{display:none}
   }
   .vip-rules{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
@@ -1667,7 +1682,7 @@
 <script src="js/games/roulette.js"></script>
 <script src="js/games/keno.js"></script>
 <script src="js/games/coinflip.js"></script>
-<script src="js/vip.js"></script>
+<script src="js/vip.js?v=2"></script>
 <script src="js/modals.js?v=2"></script>
 <script src="js/extras.js?v=3"></script>
 <script src="js/balances.js"></script>

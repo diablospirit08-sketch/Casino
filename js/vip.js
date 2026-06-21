@@ -43,13 +43,28 @@ function renderVip(){
 }
 
 /* --- lobby loyalty track ("Climb the Family") --- */
+const VIP_ICONS=[
+  /* Associate — shield */
+  `<path d="M12 2 4 5.5v5.5c0 5 3.5 9.6 8 11 4.5-1.4 8-6 8-11V5.5Z" fill="currentColor"/>`,
+  /* Soldier — crossed blades */
+  `<path d="M5 3l7 7-5 5a2 2 0 002.8 2.8l5-5 7-7-2-2-7 7-3-3 7-7L15 1 8 8 3 5zm14 14l-4-4-1.4 1.4 4 4a1 1 0 001.4-1.4z" fill="currentColor"/>`,
+  /* Capo — diamond gem */
+  `<path d="M6 3h12l4 6-10 13L2 9zm2.5 6h7L14 6H10zm-1.4 0L3.7 9 8 17.5zm10.3 0l3.8 0L17.5 17zm-8.9 0l3.5 8.7L14.5 9z" fill="currentColor"/>`,
+  /* Underboss — crown */
+  `<path d="M5 16h14v3H5zm0-1l2.5-9 4.5 5 4.5-9 4.5 9L23 15H1z" fill="currentColor"/>`,
+  /* Don — star */
+  `<path d="M12 2l2.9 6.26L22 9.27l-5 5.14 1.18 7.22L12 18.77l-6.18 2.86L7 14.41 2 9.27l7.11-1z" fill="currentColor"/>`,
+];
 function renderVipTrack(){
   const el=$id('vipTiers');if(!el)return;
   const li=vipLevel(),v=VIP_LEVELS[li],nx=VIP_LEVELS[li+1];
   const frac=nx?Math.min(1,Math.max(0,(vipXp-v.xp)/(nx.xp-v.xp))):0;
   el.innerHTML=VIP_LEVELS.map((t,i)=>`
     <div class="vt${i<=li?' reached':''}${i===li?' current':''}" style="--tc:${t.col}">
-      <span class="vt-badge">${t.rn}</span>
+      <div class="vt-medal">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="color:${i<=li?t.col:'rgba(255,255,255,.25)'}">${VIP_ICONS[i]}</svg>
+      </div>
+      <div class="vt-rn">${t.rn}</div>
       <span class="vt-name">${t.n}</span>
       <span class="vt-perk">${t.perk}</span>
       ${i===li?'<span class="vt-here">You are here</span>':''}
