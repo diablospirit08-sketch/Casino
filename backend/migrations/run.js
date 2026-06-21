@@ -1,6 +1,5 @@
 // Run all migrations in order against the configured DATABASE_URL.
 // Usage: node migrations/run.js
-import 'dotenv/config';
 import { readFileSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
