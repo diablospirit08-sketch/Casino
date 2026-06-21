@@ -1069,6 +1069,18 @@
       </div>
     </div>
 
+    <!-- provably fair banner -->
+    <div id="pfBanner" style="display:flex;align-items:center;justify-content:space-between;background:linear-gradient(110deg,#0b2a1a,#0f3d26);border:1px solid rgba(65,240,164,.18);border-radius:14px;padding:14px 20px;margin-bottom:20px;cursor:pointer" onclick="document.getElementById('pfOverlay').classList.add('open')">
+      <div style="display:flex;align-items:center;gap:12px">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#41f0a4" stroke-width="1.8"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7l-9-5z"/><path d="m9 12 2 2 4-4"/></svg>
+        <div>
+          <div style="font-weight:800;font-size:13px;color:#e8edf5;letter-spacing:.04em">PROVABLY FAIR</div>
+          <div style="font-size:11px;color:#6b82a0;margin-top:2px">Every game outcome is cryptographically verifiable</div>
+        </div>
+      </div>
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#41f0a4" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
+    </div>
+
     <!-- bets -->
     <div class="bets" id="sec-bets">
       <div class="bets-tabs" id="betTabs">
