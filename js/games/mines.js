@@ -1,5 +1,5 @@
 /* --- mines --- */
-const MINE_IMG='<img class="mine-img" src="art/mine/mine-lose.png" alt="mine">';
+const MINE_IMG='<img class="mine-img" src="art/mine/mine-lose.jpg" alt="mine">';
 const GEM_IMG='<img class="mine-img" src="art/mine/gem.png" alt="gem">';
 
 ORIGINALS['originals-mines']={
