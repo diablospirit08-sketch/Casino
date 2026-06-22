@@ -124,14 +124,69 @@ async function renderDep(){
     depAddr.textContent=net.addr||'Sign in to get your deposit address';
     drawQr(net.addr);
   }
+  if(typeof updateCalc==='function')updateCalc();
+  if(document.getElementById('depCalcEq'))document.getElementById('depCalcEq').textContent='≈ — '+depCur;
 }
 
 document.getElementById('depNetSel').addEventListener('click',e=>{
   const b=e.target.closest('.dep-net-chip');if(!b)return;
   depNetId=b.dataset.n;renderDep();
 });
-function openDep(mode){depCur=voltCur;depNetId=null;depMode=mode||'dep';if(depMode!=='txn')renderDep();renderDepMode();depOverlay.classList.add('open');}
-function closeDep(){depOverlay.classList.remove('open');}
+/* ── amount calculator ── */
+const depUsdAmt=document.getElementById('depUsdAmt');
+const depCalcEq=document.getElementById('depCalcEq');
+function updateCalc(){
+  const usd=parseFloat(depUsdAmt.value);
+  const w=WALLETS.find(x=>x.c===depCur);
+  const rate=w?.rate||0;
+  if(!usd||!rate){depCalcEq.textContent='≈ — '+depCur;return;}
+  const amt=usd/rate;
+  const fmt=amt<0.0001?amt.toFixed(8):amt<0.01?amt.toFixed(6):amt<1?amt.toFixed(4):amt.toFixed(2);
+  depCalcEq.textContent='≈ '+fmt+' '+depCur;
+}
+depUsdAmt.addEventListener('input',updateCalc);
+
+/* ── deposit monitor (polls balance while modal open) ── */
+const depMonitor=document.getElementById('depMonitor');
+const depMonMsg=document.getElementById('depMonMsg');
+let _depMonBase=null,_depMonTimer=null;
+function startDepMonitor(){
+  const w=WALLETS.find(x=>x.c===depCur);
+  _depMonBase=w?.amt??null;
+  depMonitor.hidden=false;
+  depMonitor.classList.remove('credited');
+  depMonMsg.textContent='Monitoring for incoming deposit…';
+  clearInterval(_depMonTimer);
+  _depMonTimer=setInterval(async()=>{
+    if(!depOverlay.classList.contains('open')){clearInterval(_depMonTimer);return;}
+    await window.loadBalances?.();
+    const w2=WALLETS.find(x=>x.c===depCur);
+    if(w2&&_depMonBase!==null&&w2.amt>_depMonBase+0.000001){
+      clearInterval(_depMonTimer);
+      depMonitor.classList.add('credited');
+      depMonMsg.textContent='Deposit received and credited to your account!';
+      _depMonBase=w2.amt;
+    }
+  },10000);
+}
+function stopDepMonitor(){clearInterval(_depMonTimer);_depMonTimer=null;depMonitor.hidden=true;}
+
+/* ── buy crypto button ── */
+document.getElementById('depBuyBtn').addEventListener('click',()=>{
+  const addr=depAddr.textContent;
+  const coin=depCur.toLowerCase();
+  const url='https://global.transak.com/?defaultCryptoCurrency='+coin+(addr&&addr.length>10?'&walletAddress='+encodeURIComponent(addr):'');
+  window.open(url,'_blank','noopener,noreferrer');
+});
+
+function openDep(mode){
+  depCur=voltCur;depNetId=null;depMode=mode||'dep';
+  if(depMode!=='txn')renderDep();
+  renderDepMode();
+  depOverlay.classList.add('open');
+  if(depMode==='dep')startDepMonitor();
+}
+function closeDep(){depOverlay.classList.remove('open');stopDepMonitor();}
 function openTxnModal(){openDep('txn');}
 window.openTxnModal=openTxnModal;
 document.getElementById('walletDep').addEventListener('click',()=>openDep());
