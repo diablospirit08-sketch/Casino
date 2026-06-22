@@ -608,7 +608,14 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 
 /* ── auth error / login screen ── */
 function showAuthError(msg){
-  document.querySelector('.main').innerHTML=`
+  /* hide Railway-dependent sections but keep localStorage-only tools (promo editor etc.) */
+  document.querySelectorAll('.tab-btn:not([data-tab="promo"])').forEach(b=>b.style.opacity='.35');
+  ['secDash','secUsers','secTx','secGames','secLive'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<p style="padding:32px;color:var(--muted);font-size:13px">⚠ Requires Railway connection.</p>';});
+  const banner=document.createElement('div');
+  banner.style.cssText='position:sticky;top:0;z-index:99;background:#7f1d1d;color:#fca5a5;padding:10px 20px;font-size:12px;font-weight:700;text-align:center';
+  banner.textContent='⚠ '+(msg||'Railway connection failed — dashboard features unavailable. Promo editor works offline.');
+  document.querySelector('.main').prepend(banner);
+  if(false)document.querySelector('.main').innerHTML=`
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:20px;text-align:center;padding:40px">
       <div style="font-size:44px">🔒</div>
       <h2 style="font-size:18px;font-weight:800;color:var(--txt)">${msg||'Admin access required'}</h2>
@@ -636,7 +643,7 @@ function showAuthError(msg){
       }
     </div>`;
 
-  /* wire login form if rendered */
+  /* wire login form if rendered — unreachable when showAuthError shows banner only */
   const btn = document.getElementById('adminLoginBtn');
   if (!btn) return;
   const doLogin = async () => {
