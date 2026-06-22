@@ -230,7 +230,7 @@
 
   class ImageSlot extends HTMLElement {
     static get observedAttributes() {
-      return ['shape', 'radius', 'mask', 'fit', 'position', 'placeholder', 'src', 'id'];
+      return ['shape', 'radius', 'mask', 'fit', 'position', 'placeholder', 'src', 'id', 'aspect'];
     }
 
     constructor() {
@@ -541,21 +541,33 @@
     _applyView() {
       const g = this._geom();
       const fit = this.getAttribute('fit') || 'cover';
-      if (fit !== 'cover' || !g) {
-        // Non-cover, or dimensions not known yet (before img load).
+      const inReframe = this.hasAttribute('data-reframe');
+
+      if (fit !== 'cover' || !inReframe) {
+        // Native object-fit path: no overflow, no magic percentages in the inspector.
+        // For cover+pan: stored x/y (frame-% offsets from center) map to object-position.
+        // Zoom (s>1) can only be shown inside reframe mode — pan is preserved, zoom resets
+        // to the cover baseline when not reframing.
+        const objPos = (fit === 'cover' && g)
+          ? `${50 + this._view.x}% ${50 + this._view.y}%`
+          : (this.getAttribute('position') || '50% 50%');
         this._img.style.width = '100%';
         this._img.style.height = '100%';
-        this._img.style.left = '50%';
-        this._img.style.top = '50%';
+        this._img.style.left = '0';
+        this._img.style.top = '0';
+        this._img.style.transform = 'none';
         this._img.style.objectFit = fit;
-        this._img.style.objectPosition = this.getAttribute('position') || '50% 50%';
+        this._img.style.objectPosition = objPos;
         return;
       }
-      // Cover baseline: img fills the frame on its tighter axis at s=1, so
-      // pan works immediately on the overflowing axis without zooming first.
-      // Width/height and left/top are all frame-% — depends only on the
-      // frame aspect ratio, so a responsive resize keeps the same crop. The
-      // spill layer mirrors the same box so its corners = image corners.
+
+      // Reframe mode: overflow-based pan + zoom. The img spills past the frame's
+      // overflow:hidden, sized in frame-% so the crop survives responsive resize.
+      // The spill layer mirrors the same box so its corners are the resize handles.
+      if (!g) return;
+      this._img.style.transform = 'translate(-50%,-50%)';
+      this._img.style.objectFit = '';
+      this._img.style.objectPosition = '';
       const k = g.base * this._view.s;
       const w = (g.iw * k / g.fw * 100) + '%';
       const h = (g.ih * k / g.fh * 100) + '%';
@@ -563,7 +575,6 @@
       const t = (50 + this._view.y) + '%';
       this._img.style.width = w; this._img.style.height = h;
       this._img.style.left = l; this._img.style.top = t;
-      this._img.style.objectFit = '';
       this._spill.style.width = w; this._spill.style.height = h;
       this._spill.style.left = l; this._spill.style.top = t;
     }
@@ -578,6 +589,9 @@
     }
 
     _render() {
+      // Aspect-ratio lock: `aspect="3/4"` (or "0.75") lets authors omit height.
+      this.style.aspectRatio = this.getAttribute('aspect') || '';
+
       // Shape / mask. Presets use border-radius so the dashed ring can
       // follow the rounded outline; clip-path is only applied for an
       // explicit `mask` (the ring is hidden there since a rectangle
