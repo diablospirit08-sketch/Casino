@@ -174,7 +174,7 @@
   .hcar-track{display:flex;transition:transform .48s cubic-bezier(.4,0,.2,1);will-change:transform}
   .hcar-slide{flex:none;width:100%;min-height:260px;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:28px 32px 48px}
   .hcar-slide::before{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(10,16,35,.72) 0%,rgba(10,16,35,.28) 58%,rgba(10,16,35,.04) 100%);z-index:1;pointer-events:none}
-  .hcar-deco{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;pointer-events:none;opacity:.85;transition:.4s}
+  .hcar-deco{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right center;pointer-events:none;opacity:.85;transition:.4s}
   .hcar-slide:hover .hcar-deco{opacity:1}
   .hcar-tag{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;background:rgba(0,0,0,.38);backdrop-filter:blur(6px);padding:5px 11px;border-radius:99px;width:max-content;position:relative;z-index:2;margin-bottom:10px}
   .hcar-head{font-size:28px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;line-height:1;position:relative;z-index:2;font-family:'Inter',sans-serif}
@@ -1913,10 +1913,10 @@ if(curSlug)mountEngine(curSlug);
 (function(){
   const INTERVAL=5200;
   const DEFAULTS=[
-    {tag:'🎁 New Players',head:'Welcome Bonus',sub:'Get up to $1,000 + 150 Free Spins on your first deposit',grad:'linear-gradient(110deg,#0b3320 0%,#165c3a 55%,#1e8a56 110%)',img:''},
+    {tag:'🎁 New Players',head:'Welcome Bonus',sub:'Get up to $1,000 + 150 Free Spins on your first deposit',grad:'linear-gradient(110deg,#0b3320 0%,#165c3a 55%,#1e8a56 110%)',img:'art/poster-made-man.webp'},
     {tag:'⭐ Featured',head:'New Releases',sub:'Discover and play the latest games on VOLT.',grad:'linear-gradient(110deg,#0b1340 0%,#162060 60%,#1e2d80 100%)',img:'images/slots-777.png'},
-    {tag:'🏁 Promotion',head:'$75,000 Weekly Race',sub:'Climb the leaderboard. Earn your spot.',grad:'linear-gradient(110deg,#2a1a8a 0%,#4433cc 55%,#5b40e8 120%)',img:''},
-    {tag:'⚡ Sports',head:'Sports Cashback',sub:'Get 10% back on every sports bet, every week.',grad:'linear-gradient(110deg,#3d1000 0%,#8b2e00 55%,#c84a0a 120%)',img:''},
+    {tag:'🏁 Promotion',head:'$75,000 Weekly Race',sub:'Climb the leaderboard. Earn your spot.',grad:'linear-gradient(110deg,#2a1a8a 0%,#4433cc 55%,#5b40e8 120%)',img:'art/poster-wiseguys.webp'},
+    {tag:'⚡ Sports',head:'Sports Cashback',sub:'Get 10% back on every sports bet, every week.',grad:'linear-gradient(110deg,#3d1000 0%,#8b2e00 55%,#c84a0a 120%)',img:'art/art-slots-sin-city.webp'},
   ];
   try{
     const saved=JSON.parse(localStorage.getItem('volt-promos')||'{}');
