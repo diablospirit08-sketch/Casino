@@ -23,7 +23,8 @@ function renderVip(){
   const li=vipLevel(),v=VIP_LEVELS[li],nx=VIP_LEVELS[li+1];
   const pct=nx?Math.min(100,Math.floor((vipXp-v.xp)/(nx.xp-v.xp)*100)):100;
   const nameEl=$id('umName');
-  const initial=(nameEl&&nameEl.textContent.trim()||'?')[0].toUpperCase();
+  const rawName=nameEl&&nameEl.textContent.trim()||'';
+  const initial=(/[A-Za-z0-9]/.test(rawName[0])?rawName[0]:'?').toUpperCase();
   $id('vipBlock').innerHTML=`
     <div class="um-hero">
       <div class="um-hero-medal" style="border-color:${v.col};box-shadow:0 0 28px ${v.col}44;background:${v.col}18">

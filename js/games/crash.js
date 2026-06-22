@@ -15,6 +15,10 @@ ORIGINALS['originals-crash']={
     this._szT=setTimeout(()=>{this.sizeCv();this.drawIdle();},520);
     this._rs=()=>{this.sizeCv();if(!this.run)this.drawIdle();};
     window.addEventListener('resize',this._rs);
+    $id('crAc').addEventListener('blur',()=>{
+      const v=parseFloat($id('crAc').value);
+      if(isNaN(v)||v<1.01)$id('crAc').value='';
+    });
   },
   sizeCv(){
     const r=gvStage.getBoundingClientRect();

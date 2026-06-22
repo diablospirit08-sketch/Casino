@@ -69,11 +69,14 @@ async function fetchDepositAddress(currency,networkId){
   if(depAddrCache[key])return depAddrCache[key];
   const{data:{session}}=await supa.auth.getSession();
   if(!session) return null;
-  const res=await window.voltApi._fetch(
-    '/api/wallet/deposit-address/'+currency+'/'+networkId
-  );
-  const json=await res.json();
-  if(json.address){depAddrCache[key]=json.address;return json.address;}
+  try{
+    const res=await window.voltApi._fetch(
+      '/api/wallet/deposit-address/'+currency+'/'+networkId
+    );
+    if(!res.ok)return null;
+    const json=await res.json();
+    if(json.address){depAddrCache[key]=json.address;return json.address;}
+  }catch(e){}
   return null;
 }
 
