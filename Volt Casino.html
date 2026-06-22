@@ -380,7 +380,25 @@
   .dep-net-warn svg{width:16px;height:16px;flex:none;margin-top:1px;color:#f5c842}
 
   /* ===== AUTH MODAL ===== */
-  .auth-modal{width:400px}
+  .auth-modal{
+    width:420px;
+    background:#0f1320 padding-box,linear-gradient(163deg,#41f0a4 0%,#3d9bff 55%,#8b5cf6 100%) border-box;
+    border:2px solid transparent!important;
+    border-radius:24px!important;
+    transition:box-shadow .35s;
+  }
+  .auth-modal:hover{box-shadow:0 0 38px 2px rgba(65,240,164,.22),0 30px 80px -20px rgba(0,0,0,.9)!important}
+  /* auth brand header */
+  .auth-brand{text-align:center;padding:10px 0 18px;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .auth-brand-ic{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#41f0a4,#3d9bff);display:grid;place-items:center;box-shadow:0 6px 20px -6px rgba(65,240,164,.55)}
+  .auth-brand-ic svg{width:24px;height:24px;fill:#08090c}
+  .auth-brand-name{font-size:13px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;background:linear-gradient(90deg,#41f0a4,#3d9bff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  /* icon input fields */
+  .auth-input-wrap{display:flex;align-items:center;gap:10px;border-radius:14px;padding:13px 16px;background:#171c2d;box-shadow:inset 2px 4px 12px rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.06);transition:border-color .2s}
+  .auth-input-wrap:focus-within{border-color:rgba(65,240,164,.35)}
+  .auth-input-ic{width:16px;height:16px;color:#5a6a8a;flex:none;stroke:currentColor;fill:none}
+  .auth-input-wrap input{background:none;border:none;outline:none;width:100%;color:var(--txt);font-family:inherit;font-size:14px}
+  .auth-input-wrap input::placeholder{color:#3d4a62}
   /* username step */
   .uname-icon{width:64px;height:64px;border-radius:50%;background:rgba(65,240,164,.1);border:2px solid rgba(65,240,164,.3);display:grid;place-items:center;margin:0 auto 18px}
   .uname-icon svg{width:30px;height:30px;color:var(--mint)}
@@ -1498,6 +1516,11 @@
       </div>
       <button class="icon-btn" id="authClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
     </div>
+    <!-- brand -->
+    <div class="auth-brand">
+      <div class="auth-brand-ic"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></div>
+      <span class="auth-brand-name">VOLT Casino</span>
+    </div>
     <button class="auth-sso" id="ssoGoogle">
       <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.27c0-.85-.08-1.66-.22-2.45H12v4.64h6.46a5.53 5.53 0 0 1-2.4 3.63v3h3.87c2.27-2.09 3.57-5.17 3.57-8.82Z"></path><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.94-2.91l-3.87-3c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.29v3.1A12 12 0 0 0 12 24Z"></path><path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.37-2.28v-3.1H1.29a12 12 0 0 0 0 10.76l3.98-3.1Z"></path><path fill="#EA4335" d="M12 4.77c1.76 0 3.34.6 4.58 1.79l3.44-3.44A11.97 11.97 0 0 0 12 0 12 12 0 0 0 1.29 6.62l3.98 3.1C6.22 6.88 8.87 4.77 12 4.77Z"></path></svg>
       <span>Continue with Google</span>
@@ -1505,11 +1528,17 @@
     <div class="auth-div">or</div>
     <div class="auth-field">
       <p class="dep-lbl" style="margin-top:0">Email</p>
-      <div class="gv-input"><input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email" /></div>
+      <div class="auth-input-wrap">
+        <svg class="auth-input-ic" viewBox="0 0 24 24" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+        <input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+      </div>
     </div>
     <div class="auth-field">
       <p class="dep-lbl" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">Password <button id="forgotBtn" style="display:none;background:none;border:none;font:inherit;font-size:10.5px;color:var(--mint);cursor:pointer;padding:0;letter-spacing:.04em;font-weight:700">Forgot password?</button></p>
-      <div class="gv-input"><input id="authPass" type="password" placeholder="••••••••" autocomplete="new-password" /></div>
+      <div class="auth-input-wrap">
+        <svg class="auth-input-ic" viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input id="authPass" type="password" placeholder="••••••••" autocomplete="new-password" />
+      </div>
     </div>
     <label class="auth-terms" id="authTermsRow">
       <input type="checkbox" id="authTerms" />
@@ -1829,11 +1858,11 @@ $id('loyaltyBtn').addEventListener('click',()=>{
       <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px">Choose a new password for your account. It must be at least 6 characters long.</p>
       <div class="auth-field">
         <p class="dep-lbl" style="margin-top:0">New Password</p>
-        <div class="gv-input"><input id="newPassA" type="password" placeholder="New password" autocomplete="new-password" minlength="6"/></div>
+        <div class="auth-input-wrap"><svg class="auth-input-ic" viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><input id="newPassA" type="password" placeholder="New password" autocomplete="new-password" minlength="6"/></div>
       </div>
       <div class="auth-field">
         <p class="dep-lbl" style="margin-top:0">Confirm Password</p>
-        <div class="gv-input"><input id="newPassB" type="password" placeholder="Repeat password" autocomplete="new-password" minlength="6"/></div>
+        <div class="auth-input-wrap"><svg class="auth-input-ic" viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><input id="newPassB" type="password" placeholder="Repeat password" autocomplete="new-password" minlength="6"/></div>
       </div>
       <p id="newPassErr" style="font-size:11px;color:#e2596a;min-height:16px;margin-bottom:8px"></p>
       <button class="auth-submit" id="newPassSubmit" disabled>Update Password</button>`;
