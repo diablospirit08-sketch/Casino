@@ -42,7 +42,10 @@ function renderVip(){
   const btn=$id('avatarBtn');
   btn.style.borderColor=v.col;
   btn.style.color=v.col;
-  btn.innerHTML=`<span class="av-rank-num">${v.rn}</span>`;
+  /* only set initial if no real photo already loaded */
+  if(!btn.dataset.avImg){
+    btn.innerHTML=`<span class="av-circle" style="color:${v.col}">${initial}</span>`;
+  }
   const umAv=$id('umAv');
   if(umAv){umAv.style.borderColor=v.col;umAv.innerHTML=`<span class="av-rank-num">${v.rn}</span>`;}
   renderVipTrack();

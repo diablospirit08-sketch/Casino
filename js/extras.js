@@ -149,6 +149,18 @@ async function refreshUmHead(){
       const shortId=user.id.slice(0,8).toUpperCase();
       $id('umName').textContent=name;
       $id('umIdTxt').textContent='#'+shortId;
+      /* upgrade topbar avatar to real photo if available */
+      const photoUrl=user.user_metadata?.avatar_url||user.user_metadata?.picture||null;
+      const btn=$id('avatarBtn');
+      if(photoUrl&&btn.dataset.avImg!==photoUrl){
+        btn.dataset.avImg=photoUrl;
+        btn.innerHTML=`<span class="av-circle"><img src="${photoUrl}" alt="avatar"/></span>`;
+      } else if(!photoUrl&&!btn.dataset.avImg){
+        /* refresh initial in case name loaded after renderVip */
+        const ini=name[0].toUpperCase();
+        const circle=btn.querySelector('.av-circle');
+        if(circle&&!circle.querySelector('img'))circle.textContent=ini;
+      }
     } else {
       $id('umName').textContent='Guest';
       $id('umIdTxt').textContent='#DEMO';
