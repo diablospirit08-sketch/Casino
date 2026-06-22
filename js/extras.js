@@ -226,8 +226,8 @@ async function openProfile(){
     if(user){
       const email=user.email||'';
       const name=user.user_metadata?.full_name||user.user_metadata?.name||email.split('@')[0]||'Player';
-      const since=new Date(user.created_at);
-      const sinceStr=since.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+      const since=user.created_at?new Date(user.created_at):null;
+      const sinceStr=(since&&!isNaN(since))?since.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';
       $id('profName').textContent=name;
       $id('profEmail').value=email;
       $id('profUsername').value=name;
