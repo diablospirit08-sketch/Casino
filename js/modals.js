@@ -110,6 +110,16 @@ async function renderDep(){
   depMin.textContent=net.min;
   depConf.textContent=net.conf;
   depWarnCur.textContent=depCur;
+  /* network warning — only for multi-network coins */
+  const netWarn=document.getElementById('depNetWarn');
+  const netWarnMsg=document.getElementById('depNetWarnMsg');
+  if(netWarn){
+    const multiNet=nets.length>1;
+    netWarn.hidden=!multiNet;
+    if(multiNet&&netWarnMsg){
+      netWarnMsg.textContent='Your deposit must be sent on the '+net.name+' network to be processed. Sending on the wrong network will result in lost funds.';
+    }
+  }
   clearTimeout(depCopyT);
   depCopyBtn.textContent='Copy';
   depCopyBtn.classList.remove('ok');

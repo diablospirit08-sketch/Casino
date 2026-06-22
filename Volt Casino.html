@@ -370,6 +370,8 @@
   .dep-buy-btn{width:100%;margin-top:10px;padding:11px 14px;background:rgba(255,255,255,.04);border:1px solid var(--line-2);border-radius:10px;color:var(--txt);font:800 12px/1 inherit;letter-spacing:.04em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.15s}
   .dep-buy-btn:hover{background:rgba(255,255,255,.08);border-color:var(--line)}
   .dep-buy-btn svg{width:14px;height:14px;flex:none;opacity:.7}
+  .dep-net-warn{display:flex;align-items:flex-start;gap:10px;background:rgba(255,180,0,.08);border:1px solid rgba(255,180,0,.35);border-radius:10px;padding:11px 13px;margin-top:12px;font-size:11.5px;font-weight:700;color:#f5c842;line-height:1.5}
+  .dep-net-warn svg{width:16px;height:16px;flex:none;margin-top:1px;color:#f5c842}
 
   /* ===== AUTH MODAL ===== */
   .auth-modal{width:400px}
@@ -1360,6 +1362,10 @@
       <div class="dep-coins" id="depCoins"></div>
       <p class="dep-lbl" id="depNetLbl">Network</p>
       <div class="dep-net-sel" id="depNetSel" hidden></div>
+      <div class="dep-net-warn" id="depNetWarn" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span id="depNetWarnMsg">Your deposit must be sent on the correct network to be processed.</span>
+      </div>
       <p class="dep-lbl">Deposit Address</p>
       <div class="dep-qr-row">
         <div class="dep-qr"><canvas id="depQr" width="33" height="33"></canvas></div>
@@ -1729,7 +1735,7 @@
 <script src="js/games/keno.js"></script>
 <script src="js/games/coinflip.js"></script>
 <script src="js/vip.js?v=2"></script>
-<script src="js/modals.js?v=5"></script>
+<script src="js/modals.js?v=6"></script>
 <script src="js/extras.js?v=4"></script>
 <script src="js/balances.js"></script>
 <script src="js/bets.js"></script>
