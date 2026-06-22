@@ -508,7 +508,7 @@ tbody tr:last-child td{border-bottom:none}
             <span class="pce-preview-title" id="previewTitleA">Take on the Challenge!</span>
           </div>
           <div class="pce-body">
-            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlA" type="text" placeholder="https://… or leave blank for default"/></div>
+            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlA" type="text" placeholder="https://… or leave blank for default" autocomplete="off" spellcheck="false" data-gramm="false"/></div>
             <div class="pce-field"><label>Heading</label><input class="pce-input" id="headA" type="text" value="Take on the Challenge!"/></div>
             <div class="pce-field"><label>Subtext</label><input class="pce-input" id="subA" type="text" value="Play, progress, and earn rewards across a range of challenges."/></div>
             <div class="pce-field"><label>Button Text</label><input class="pce-input" id="btnA" type="text" value="View Challenges →"/></div>
@@ -540,7 +540,7 @@ tbody tr:last-child td{border-bottom:none}
             <span class="pce-preview-title" id="previewTitleB">Compete &amp; Win</span>
           </div>
           <div class="pce-body">
-            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlB" type="text" placeholder="https://… or leave blank for default"/></div>
+            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlB" type="text" placeholder="https://… or leave blank for default" autocomplete="off" spellcheck="false" data-gramm="false"/></div>
             <div class="pce-field"><label>Heading</label><input class="pce-input" id="headB" type="text" value="Compete &amp; Win"/></div>
             <div class="pce-field"><label>Subtext</label><input class="pce-input" id="subB" type="text" value="Compete in tournaments and climb the leaderboard for rewards."/></div>
             <div class="pce-field"><label>Button Text</label><input class="pce-input" id="btnB" type="text" value="View Tournaments →"/></div>
@@ -881,6 +881,9 @@ const PROMO_DEFAULTS={
 };
 function loadPairState(){try{return JSON.parse(localStorage.getItem(LS_PROMO_PAIR)||'{}');}catch{return{};}}
 
+/* store uploaded data URLs in a plain object — immune to Grammarly/autofill */
+const _pendingImg={a:null,b:null};
+
 function initPromoPairEditor(){
   const saved=loadPairState();
   ['a','b'].forEach(k=>{
@@ -893,7 +896,7 @@ function initPromoPairEditor(){
     /* restore saved values */
     if(d.img){
       previewImg.src=lpImg.src=d.img;
-      if(d.img.startsWith('data:')){urlEl.value='(uploaded file)';urlEl.dataset.dataUrl=d.img;}
+      if(d.img.startsWith('data:')){urlEl.value='(uploaded file)';_pendingImg[k]=d.img;}
       else urlEl.value=d.img;
     }
     if(d.head){headEl.value=d.head;$('previewTitle'+K).textContent=d.head;$('lpHead'+K).textContent=d.head;}
@@ -903,8 +906,9 @@ function initPromoPairEditor(){
     /* live wiring */
     urlEl.addEventListener('input',e=>{
       const v=e.target.value.trim();
-      previewImg.src=lpImg.src=v||def.img;
-      delete urlEl.dataset.dataUrl;
+      if(!v||v==='(uploaded file)')return; /* ignore Grammarly/autofill noise */
+      previewImg.src=lpImg.src=v;
+      _pendingImg[k]=null; /* user typed a real URL — clear any pending upload */
     });
     headEl.addEventListener('input',e=>{
       const v=e.target.value||def.head;
@@ -926,7 +930,8 @@ function initPromoPairEditor(){
       reader.onload=ev=>{
         const url=ev.target.result;
         previewImg.src=lpImg.src=url;
-        urlEl.value='(uploaded file)';urlEl.dataset.dataUrl=url;
+        _pendingImg[k]=url;
+        urlEl.value='(uploaded file)';
       };
       reader.readAsDataURL(f);
     });
@@ -936,7 +941,7 @@ function initPromoPairEditor(){
 window.savePromoPair=function(k){
   const K=k.toUpperCase();
   const urlEl=$('url'+K);
-  const img=urlEl.dataset.dataUrl||urlEl.value.trim();
+  const img=_pendingImg[k]||(urlEl.value.trim()==='(uploaded file)'?null:urlEl.value.trim())||'';
   const head=$('head'+K).value.trim();
   const sub=$('sub'+K).value.trim();
   const btn=$('btn'+K).value.trim();
