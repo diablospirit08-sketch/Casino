@@ -85,8 +85,8 @@ function currentNetwork(){
 async function renderDep(){
   if(!DEPOSIT[depCur]){depCur='BTC';}
   const nets=DEPOSIT[depCur].networks;
-  /* auto-select only when there's exactly one network; otherwise wait for user */
-  if(!nets.find(n=>n.id===depNetId)) depNetId=nets.length===1?nets[0].id:null;
+  /* keep depNetId as-is; caller is responsible for setting it */
+  if(depNetId&&!nets.find(n=>n.id===depNetId)) depNetId=null;
 
   /* currency dropdown */
   const curDdIc=document.getElementById('depCurDdIc'),curDdLbl=document.getElementById('depCurDdLbl');
@@ -181,7 +181,10 @@ async function renderDep(){
   });
   document.getElementById('depCurPanel').addEventListener('click',e=>{
     const b=e.target.closest('[data-dc]');if(!b)return;
-    depCur=b.dataset.dc;depNetId=null;closeAll();renderDep();
+    depCur=b.dataset.dc;
+    const nets=(DEPOSIT[depCur]||DEPOSIT.BTC).networks;
+    depNetId=nets.length===1?nets[0].id:null;
+    closeAll();renderDep();
   });
   document.getElementById('depNetPanel').addEventListener('click',e=>{
     const b=e.target.closest('[data-dn]');if(!b)return;
