@@ -1,0 +1,103 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>
+<div id="tab-promos">
+  <div id="previewImgA-wrap"><img id="previewImgA" src="art/art-slots-eternal-clash.webp"></div>
+  <span id="previewTitleA">Take on the Challenge!</span>
+  <input id="urlA" type="text" value="">
+  <input id="headA" type="text" value="Take on the Challenge!">
+  <input id="subA" type="text" value="Sub A">
+  <input id="btnA" type="text" value="View Challenges">
+  <input type="file" id="fileA">
+  <div id="toastA"></div>
+  <img id="lpImgA" src="art/art-slots-eternal-clash.webp">
+  <div id="lpHeadA">Take on the Challenge!</div>
+  <div id="lpSubA">Sub A</div>
+  <div id="lpBtnA">View Challenges</div>
+  <button onclick="savePromoPair('a')">Save A</button>
+
+  <img id="previewImgB" src="art/poster-made-man.webp">
+  <span id="previewTitleB">Compete &amp; Win</span>
+  <input id="urlB" type="text" value="">
+  <input id="headB" type="text" value="Compete & Win">
+  <input id="subB" type="text" value="Sub B">
+  <input id="btnB" type="text" value="View Tournaments">
+  <input type="file" id="fileB">
+  <div id="toastB"></div>
+  <img id="lpImgB" src="art/poster-made-man.webp">
+  <div id="lpHeadB">Compete &amp; Win</div>
+  <div id="lpSubB">Sub B</div>
+  <div id="lpBtnB">View Tournaments</div>
+  <button onclick="savePromoPair('b')">Save B</button>
+</div>
+<script>const $=id=>document.getElementById(id);</script>
+<script>/* ══ PROMO PAIR EDITOR ══════════════════════════════════════ */
+const LS_PROMO_PAIR='volt-promo-pair';
+const PROMO_DEFAULTS={
+  a:{img:'art/art-slots-eternal-clash.webp',head:'Take on the Challenge!',sub:'Play, progress, and earn rewards across a range of challenges.',btn:'View Challenges →'},
+  b:{img:'art/poster-made-man.webp',        head:'Compete & Win',         sub:'Compete in tournaments and climb the leaderboard for rewards.',  btn:'View Tournaments →'},
+};
+function loadPairState(){try{return JSON.parse(localStorage.getItem(LS_PROMO_PAIR)||'{}');}catch{return{};}}
+
+function initPromoPairEditor(){
+  const saved=loadPairState();
+  ['a','b'].forEach(k=>{
+    const K=k.toUpperCase();
+    const def=PROMO_DEFAULTS[k];
+    const d=saved[k]||{};
+    const previewImg=$('previewImg'+K), lpImg=$('lpImg'+K);
+    const urlEl=$('url'+K), headEl=$('head'+K), subEl=$('sub'+K), btnEl=$('btn'+K);
+
+    /* restore saved values */
+    if(d.img){
+      previewImg.src=lpImg.src=d.img;
+      if(d.img.startsWith('data:')){urlEl.value='(uploaded file)';urlEl.dataset.dataUrl=d.img;}
+      else urlEl.value=d.img;
+    }
+    if(d.head){headEl.value=d.head;$('previewTitle'+K).textContent=d.head;$('lpHead'+K).textContent=d.head;}
+    if(d.sub){subEl.value=d.sub;$('lpSub'+K).textContent=d.sub;}
+    if(d.btn){btnEl.value=d.btn;$('lpBtn'+K).textContent=d.btn;}
+
+    /* live wiring */
+    urlEl.addEventListener('input',e=>{
+      const v=e.target.value.trim();
+      previewImg.src=lpImg.src=v||def.img;
+      delete urlEl.dataset.dataUrl;
+    });
+    headEl.addEventListener('input',e=>{
+      const v=e.target.value||def.head;
+      $('previewTitle'+K).textContent=v;$('lpHead'+K).textContent=v;
+    });
+    subEl.addEventListener('input',e=>{$('lpSub'+K).textContent=e.target.value||def.sub;});
+    btnEl.addEventListener('input',e=>{$('lpBtn'+K).textContent=e.target.value||def.btn;});
+    $('file'+K).addEventListener('change',e=>{
+      const f=e.target.files[0];if(!f)return;
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        const url=ev.target.result;
+        previewImg.src=lpImg.src=url;
+        urlEl.value='(uploaded file)';urlEl.dataset.dataUrl=url;
+      };
+      reader.readAsDataURL(f);
+    });
+  });
+}
+
+window.savePromoPair=function(k){
+  const K=k.toUpperCase();
+  const urlEl=$('url'+K);
+  const img=urlEl.dataset.dataUrl||urlEl.value.trim();
+  const head=$('head'+K).value.trim();
+  const sub=$('sub'+K).value.trim();
+  const btn=$('btn'+K).value.trim();
+  const state=loadPairState();state[k]={img,head,sub,btn};
+  const toast=$('toast'+K);
+  try{
+    localStorage.setItem(LS_PROMO_PAIR,JSON.stringify(state));
+    toast.textContent='✓ Saved — reload the casino page to see changes';
+  }catch(e){
+    toast.textContent='⚠ Image too large — use a URL instead';
+    toast.style.color='#f87171';
+  }
+  setTimeout(()=>{toast.textContent='';toast.style.color='';},4000);
+};
+initPromoPairEditor();</script>
+</body></html>
