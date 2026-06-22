@@ -405,7 +405,8 @@ new MutationObserver(function(){
   renderBscWithdraw();
 }).observe(document.getElementById('depOverlay'),{attributes:true,attributeFilter:['class']});
 
-document.getElementById('depCoins').addEventListener('click',function(e){
+var _depCoins=document.getElementById('depCoins');
+if(_depCoins)_depCoins.addEventListener('click',function(e){
   var b=e.target.closest('.dep-coin');if(!b)return;
   setTimeout(renderBscDeposit,50);
 });
