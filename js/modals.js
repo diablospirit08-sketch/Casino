@@ -181,13 +181,6 @@ function startDepMonitor(){
 }
 function stopDepMonitor(){clearInterval(_depMonTimer);_depMonTimer=null;depMonitor.hidden=true;}
 
-/* ── buy crypto button ── */
-document.getElementById('depBuyBtn').addEventListener('click',()=>{
-  const addr=depAddr.textContent;
-  const coin=depCur.toLowerCase();
-  const url='https://global.transak.com/?defaultCryptoCurrency='+coin+(addr&&addr.length>10?'&walletAddress='+encodeURIComponent(addr):'');
-  window.open(url,'_blank','noopener,noreferrer');
-});
 
 function openDep(mode){
   depCur=voltCur;depNetId=null;depMode=mode||'dep';
