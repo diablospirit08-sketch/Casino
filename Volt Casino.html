@@ -890,19 +890,39 @@
   .race-row.you .ru{color:var(--mint)}
 
   /* ===== PROFILE MODAL ===== */
-  .prof-top{display:flex;align-items:center;gap:14px}
-  .prof-av{width:54px;height:54px;border-radius:50%;background:var(--panel-2);border:2px solid var(--mint);display:grid;place-items:center;color:var(--mint);flex:none}
-  .prof-av svg{width:26px;height:26px}
-  .prof-name{font-size:16px;font-weight:900;letter-spacing:.02em}
-  .prof-sub{font-size:10.5px;color:var(--muted);font-weight:600;margin-top:2px}
-  .prof-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
-  .prof-stat{background:var(--bg-2);border:1px solid var(--line);border-radius:11px;padding:12px 13px}
-  .prof-stat span{display:block;font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2);margin-bottom:5px}
-  .prof-stat b{font-size:15px;font-weight:900;font-variant-numeric:tabular-nums}
-  .prof-actions{display:flex;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
-  .prof-actions button{flex:1;padding:11px 0;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-family:inherit;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:.15s}
-  .prof-actions button:hover{border-color:var(--mint);color:var(--mint)}
-  .prof-chpw{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+  /* ===== USER PREFERENCES MODAL ===== */
+  .prof-modal{max-width:640px!important}
+  .prof-tabs{display:flex;gap:4px;margin-bottom:20px}
+  .prof-tab{padding:8px 20px;border-radius:8px;border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
+  .prof-tab.active{background:var(--accent);color:#fff}
+  .prof-tab-body{display:flex;flex-direction:column;gap:14px}
+  .prof-section-lbl{font-size:16px;font-weight:800;color:var(--txt);margin:0 0 4px}
+  .prof-sub-lbl{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:4px 0 0}
+  .prof-vip-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .prof-vip-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .prof-av-row{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .prof-av{width:48px;height:48px;border-radius:50%;background:var(--panel-2);border:2px solid var(--accent);display:grid;place-items:center;color:var(--accent);flex:none}
+  .prof-name{font-size:15px;font-weight:900;letter-spacing:.02em}
+  .prof-rank-badge{font-size:11px;color:var(--muted);margin-top:3px;font-weight:600}
+  .prof-prog-track{height:6px;background:var(--panel-2);border-radius:99px;overflow:hidden;margin-bottom:8px}
+  .prof-prog-fill{height:100%;background:var(--accent-grad);border-radius:99px;transition:width .4s ease}
+  .prof-prog-row{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:600}
+  .prof-prog-row span:last-child{color:var(--txt);font-weight:800}
+  .prof-stats-card{display:flex;align-items:center}
+  .prof-stat3{display:flex;align-items:center;gap:0;width:100%}
+  .prof-stat3-item{flex:1;text-align:center;padding:4px 8px}
+  .prof-stat3-item span{display:block;font-size:10px;color:var(--muted);font-weight:600;margin-bottom:6px}
+  .prof-stat3-item b{font-size:14px;font-weight:900;font-variant-numeric:tabular-nums}
+  .prof-stat3-sep{width:1px;height:40px;background:var(--line);flex:none}
+  .prof-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .prof-field label{display:block;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  .prof-verified{color:#4ade80;font-weight:700;text-transform:none;letter-spacing:0;font-size:10px}
+  .prof-input-wrap{display:flex;align-items:center;gap:8px;background:var(--bg-2);border:1px solid var(--line);border-radius:9px;padding:10px 13px}
+  .prof-input-wrap input{background:none;border:none;outline:none;color:var(--txt);font-family:inherit;font-size:13px;flex:1;min-width:0}
+  .prof-input-wrap svg{flex:none;color:var(--muted)}
+  @media(max-width:600px){.prof-vip-grid,.prof-field-grid{grid-template-columns:1fr}.prof-modal{max-width:100%!important}}
+  /* legacy stubs — kept for JS compat */
+  .prof-top,.prof-sub,.prof-stats,.prof-stat,.prof-actions,.prof-chpw{}
   /* ===== RESPONSIBLE GAMING MODAL ===== */
   .rg-tab-wrap{display:flex;background:var(--bg-2);border:1px solid var(--line);border-radius:99px;padding:3px;margin-bottom:18px}
   .rg-tab{flex:1;border:none;background:none;border-radius:99px;padding:9px 0;font-family:inherit;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:.14s}
@@ -1643,30 +1663,97 @@
 
 <!-- ===== PROFILE MODAL ===== -->
 <div class="dep-overlay" id="profOverlay" data-screen-label="Profile Modal">
-  <div class="dep-modal" role="dialog" aria-modal="true" aria-label="Profile">
+  <div class="dep-modal prof-modal" role="dialog" aria-modal="true" aria-label="User Preferences">
     <div class="dep-head">
-      <h3>Profile</h3>
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18" style="vertical-align:-3px;margin-right:7px;color:#4287f5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>User Preferences</h3>
       <button class="icon-btn" id="profClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
     </div>
-    <div class="prof-top">
-      <span class="prof-av" id="profAv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.2 3.8-5 7-5s5.8 1.8 7 5"/></svg></span>
-      <div>
-        <div class="prof-name" id="profName">volt_player</div>
-        <div class="prof-sub" id="profSub">—</div>
+    <!-- Tabs -->
+    <div class="prof-tabs">
+      <button class="prof-tab active" data-ptab="profile">User Profile</button>
+      <button class="prof-tab" data-ptab="sessions">Sessions</button>
+    </div>
+    <!-- User Profile Tab -->
+    <div class="prof-tab-body" id="profTabProfile">
+      <p class="prof-section-lbl">User Information</p>
+      <p class="prof-sub-lbl">VIP Progress</p>
+      <div class="prof-vip-grid">
+        <!-- Left: avatar + rank + progress -->
+        <div class="prof-vip-card">
+          <div class="prof-av-row">
+            <span class="prof-av" id="profAv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="28" height="28"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.2 3.8-5 7-5s5.8 1.8 7 5"/></svg></span>
+            <div style="flex:1;min-width:0">
+              <div class="prof-name" id="profName">volt_player</div>
+              <div class="prof-rank-badge" id="profRankBadge">Current Rank: Associate</div>
+            </div>
+          </div>
+          <div class="prof-prog-track"><div class="prof-prog-fill" id="profProgFill"></div></div>
+          <div class="prof-prog-row">
+            <span id="profProgPct">0% to next rank</span>
+            <span id="profProgNext">Soldier</span>
+          </div>
+        </div>
+        <!-- Right: stats -->
+        <div class="prof-vip-card prof-stats-card">
+          <div class="prof-stat3">
+            <div class="prof-stat3-item"><span>Date Joined</span><b id="profJoined">—</b></div>
+            <div class="prof-stat3-sep"></div>
+            <div class="prof-stat3-item"><span>Total Bets</span><b id="profBets">0</b></div>
+            <div class="prof-stat3-sep"></div>
+            <div class="prof-stat3-item"><span>Session Wagered</span><b id="profWagered">$0.00</b></div>
+          </div>
+        </div>
+      </div>
+      <p class="prof-sub-lbl">Account Details</p>
+      <div class="prof-vip-card">
+        <div class="prof-field-grid">
+          <div class="prof-field">
+            <label>Email <span class="prof-verified" id="profVerifiedBadge" hidden>&#10003; Verified</span></label>
+            <div class="prof-input-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+              <input type="email" id="profEmail" placeholder="—" readonly data-gramm="false"/>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14" style="color:var(--muted)"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+          </div>
+          <div class="prof-field">
+            <label>Username</label>
+            <div class="prof-input-wrap">
+              <input type="text" id="profUsername" placeholder="—" data-gramm="false"/>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:14px">
+          <button class="auth-submit" id="profSaveBtn" style="width:auto;padding:10px 32px">Save</button>
+        </div>
+        <p class="auth-fine" id="profFine" style="margin-top:8px">Demo profile — progress is stored in this browser only.</p>
+      </div>
+      <!-- Change password (shown inline when triggered) -->
+      <div class="prof-chpw" id="profChPwForm" hidden style="margin-top:14px">
+        <p class="prof-sub-lbl">Change Password</p>
+        <div class="prof-vip-card" style="display:flex;flex-direction:column;gap:10px">
+          <div class="gv-input"><input id="profPwA" type="password" placeholder="New password" autocomplete="new-password"/></div>
+          <div class="gv-input"><input id="profPwB" type="password" placeholder="Confirm password" autocomplete="new-password"/></div>
+          <p id="profPwErr" style="font-size:11px;color:#e2596a;min-height:14px;margin:0"></p>
+          <div style="display:flex;gap:8px">
+            <button class="auth-submit" id="profPwSave" disabled style="flex:1">Update Password</button>
+            <button class="auth-submit" id="profPwCancel" style="flex:1;background:var(--panel-2);color:var(--muted);box-shadow:none;border:1px solid var(--line-2)">Cancel</button>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="prof-stats" id="profStats"></div>
-    <p class="auth-fine" id="profFine">Demo profile — progress is stored in this browser only.</p>
-    <div class="prof-actions" id="profActions" hidden>
-      <button id="profChPwBtn">Change Password</button>
-      <button id="profRgBtn">Responsible Gaming</button>
+    <!-- Sessions Tab -->
+    <div class="prof-tab-body" id="profTabSessions" hidden>
+      <div class="prof-vip-card" style="text-align:center;padding:32px;color:var(--muted);font-size:13px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32" style="margin-bottom:10px;opacity:.4"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        <p>Session tracking coming soon.</p>
+      </div>
     </div>
-    <div class="prof-chpw" id="profChPwForm" hidden>
-      <div class="gv-input"><input id="profPwA" type="password" placeholder="New password" autocomplete="new-password"/></div>
-      <div class="gv-input"><input id="profPwB" type="password" placeholder="Confirm password" autocomplete="new-password"/></div>
-      <p id="profPwErr" style="font-size:11px;color:#e2596a;min-height:14px"></p>
-      <button class="auth-submit" id="profPwSave" disabled>Update Password</button>
-      <button class="auth-submit" id="profPwCancel" style="background:var(--panel-2);color:var(--muted);box-shadow:none;border:1px solid var(--line-2);margin-top:-4px">Cancel</button>
+    <!-- Hidden stubs for JS compat -->
+    <div id="profSub" hidden></div>
+    <div id="profStats" hidden></div>
+    <div id="profActions" hidden>
+      <button id="profChPwBtn" hidden></button>
+      <button id="profRgBtn" hidden></button>
     </div>
   </div>
 </div>
@@ -1850,7 +1937,7 @@
 <script src="js/games/coinflip.js"></script>
 <script src="js/vip.js?v=3"></script>
 <script src="js/modals.js?v=16"></script>
-<script src="js/extras.js?v=5"></script>
+<script src="js/extras.js?v=6"></script>
 <script src="js/balances.js"></script>
 <script src="js/bets.js"></script>
 <script src="js/place-bet.js"></script>

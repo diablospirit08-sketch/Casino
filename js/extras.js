@@ -207,39 +207,42 @@ $id('supportMenuBtn').addEventListener('click',()=>{
 const profOverlay=$id('profOverlay');
 async function openProfile(){
   avatarWrap.classList.remove('open');
-  const v=VIP_LEVELS[vipLevel()];
-  const total=WALLETS.reduce((s,w)=>s+w.fiat,0);
-  const streak=bonusState().streak;
+  const li=vipLevel(),v=VIP_LEVELS[li],nx=VIP_LEVELS[li+1];
+  const pct=nx?Math.min(100,Math.floor((vipXp-v.xp)/(nx.xp-v.xp)*100)):100;
+  /* VIP progress */
   $id('profAv').style.borderColor=v.col;
   $id('profAv').style.color=v.col;
-  $id('profStats').innerHTML=[
-    ['Total balance','$'+total.toFixed(2)],
-    ['Lifetime XP',Math.floor(vipXp).toLocaleString('en-US')],
-    ['Session wagered','$'+gsession.wag.toFixed(2)],
-    ['Daily streak',streak+(streak===1?' day':' days')],
-  ].map(([l,vv])=>`<div class="prof-stat"><span>${l}</span><b>${vv}</b></div>`).join('');
+  $id('profRankBadge').textContent='Current Rank: '+v.n;
+  $id('profRankBadge').style.color=v.col;
+  $id('profProgFill').style.width=pct+'%';
+  $id('profProgPct').textContent=pct+'% to next rank';
+  $id('profProgNext').textContent=nx?nx.n:'Max Rank';
+  /* stats */
+  $id('profWagered').textContent='$'+gsession.wag.toFixed(2);
   profOverlay.classList.add('open');
-  /* populate real user data from Supabase */
+  /* populate real user data */
   try{
     const{data:{user}}=await supa.auth.getUser();
     if(user){
       const email=user.email||'';
       const name=user.user_metadata?.full_name||user.user_metadata?.name||email.split('@')[0]||'Player';
-      const since=new Date(user.created_at).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+      const since=new Date(user.created_at);
+      const sinceStr=since.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
       $id('profName').textContent=name;
-      $id('profSub').textContent='VIP '+v.n+' · member since '+since;
+      $id('profEmail').value=email;
+      $id('profUsername').value=name;
+      $id('profJoined').textContent=sinceStr;
+      $id('profVerifiedBadge').hidden=false;
       $id('profFine').textContent='Signed in as '+email;
-      $id('profActions').hidden=false;
     } else {
       $id('profName').textContent='volt_player';
-      $id('profSub').textContent='VIP '+v.n+' · member since June 2026';
+      $id('profEmail').value='';
+      $id('profUsername').value='volt_player';
+      $id('profJoined').textContent='—';
+      $id('profVerifiedBadge').hidden=true;
       $id('profFine').textContent='Demo profile — progress is stored in this browser only.';
-      $id('profActions').hidden=true;
     }
-  }catch(_){
-    $id('profSub').textContent='VIP '+v.n;
-  }
-  /* reset change-password form if it was open from a previous visit */
+  }catch(_){}
   _profChPwReset();
 }
 function _profChPwReset(){
@@ -274,9 +277,32 @@ $id('profPwSave').addEventListener('click',async()=>{
   showToast({icon:'🔒',title:'Password updated',sub:'Your new password is active.'});
 });
 $id('profileBtn').addEventListener('click',openProfile);
-function _profClose(){profOverlay.classList.remove('open');_profChPwReset();$id('profChPwBtn').disabled=false;}
+function _profClose(){profOverlay.classList.remove('open');_profChPwReset();}
 $id('profClose').addEventListener('click',_profClose);
 profOverlay.addEventListener('click',e=>{if(e.target===profOverlay)_profClose();});
+/* prof tab switching */
+document.querySelectorAll('.prof-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.prof-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab=btn.dataset.ptab;
+    $id('profTabProfile').hidden=tab!=='profile';
+    $id('profTabSessions').hidden=tab!=='sessions';
+  });
+});
+/* prof save username */
+$id('profSaveBtn').addEventListener('click',async()=>{
+  const btn=$id('profSaveBtn');
+  const name=$id('profUsername').value.trim();
+  if(!name)return;
+  btn.textContent='Saving…';btn.disabled=true;
+  try{
+    await supa.auth.updateUser({data:{full_name:name}});
+    $id('profName').textContent=name;
+    showToast({icon:'✓',title:'Profile updated',col:'#4287f5'});
+  }catch(_){showToast({icon:'⚠',title:'Could not save',col:'#f87171'});}
+  btn.textContent='Save';btn.disabled=false;
+});
 
 /* ---------- vault ---------- */
 const vaultOverlay=$id('vaultOverlay'),vaultAmtIn=$id('vaultAmt'),
