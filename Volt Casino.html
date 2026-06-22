@@ -61,7 +61,8 @@
   header{position:fixed;top:0;left:0;right:0;z-index:70;height:62px;display:flex;align-items:center;background:rgba(14,17,24,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
   header::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;background:var(--spectrum)}
   .hdr-inner{width:100%;display:flex;align-items:center;gap:16px;padding:0 22px}
-  .logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:23px;letter-spacing:.06em;text-transform:lowercase;text-decoration:none;flex:none}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:23px;letter-spacing:.06em;text-transform:lowercase;text-decoration:none;flex:none;margin-left:calc(var(--rail) - 56px);transition:margin-left .23s}
+  body.rail-min .logo{margin-left:0}
   .logo .wordmark{background:var(--spectrum);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   .logo .bolt{width:40px;height:40px;border-radius:11px;background:var(--spectrum);display:grid;place-items:center;flex:none}
   .logo .bolt svg{width:23px;height:23px}
