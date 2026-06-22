@@ -34,7 +34,7 @@ const DEPOSIT={
     {id:'SOL', name:'Solana',               addr:'9wK3rT7pNxV2mQ8cZ5bL4dF6gH1jY0aEuSnB8XoD2RkM',min:'0.05 SOL', conf:'~1 min finality',  fee:'0.001 SOL',   evm:false},
   ]},
 };
-let depCur=voltCur,depNetId=(DEPOSIT[voltCur]||DEPOSIT.BTC).networks[0].id;
+let depCur=voltCur,depNetId=null;
 const depOverlay=document.getElementById('depOverlay'),
       depNet=document.getElementById('depNet'),
       depMin=document.getElementById('depMin'),
@@ -89,7 +89,7 @@ async function renderDep(){
   if(!DEPOSIT[depCur]){depCur='BTC';}
   const nets=DEPOSIT[depCur].networks;
   /* keep depNetId as-is; caller is responsible for setting it */
-  if(!depNetId||!nets.find(n=>n.id===depNetId)) depNetId=nets[0].id;
+  if(depNetId&&!nets.find(n=>n.id===depNetId)) depNetId=null;
 
   /* currency dropdown */
   const curDdIc=document.getElementById('depCurDdIc'),curDdLbl=document.getElementById('depCurDdLbl');
@@ -187,7 +187,7 @@ async function renderDep(){
     depCur=b.dataset.dc;
     localStorage.setItem('volt-dep-cur',depCur);
     const nets=(DEPOSIT[depCur]||DEPOSIT.BTC).networks;
-    depNetId=nets[0].id;
+    depNetId=nets.length===1?nets[0].id:null;
     closeAll();renderDep();
   });
   document.getElementById('depNetPanel').addEventListener('click',e=>{
@@ -248,7 +248,7 @@ function stopDepMonitor(){clearInterval(_depMonTimer);_depMonTimer=null;depMonit
 function openDep(mode){
   const saved=localStorage.getItem('volt-dep-cur');
   depCur=(saved&&DEPOSIT[saved])?saved:voltCur;
-  depNetId=(DEPOSIT[depCur]||DEPOSIT.BTC).networks[0].id;depMode=mode||'dep';
+  const _onets=(DEPOSIT[depCur]||DEPOSIT.BTC).networks;depNetId=_onets.length===1?_onets[0].id:null;depMode=mode||'dep';
   if(depMode==='dep')renderDep();
   if(depMode==='wd')renderDep();
   renderDepMode();
