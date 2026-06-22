@@ -185,6 +185,7 @@ async function renderDep(){
   document.getElementById('depCurPanel').addEventListener('click',e=>{
     const b=e.target.closest('[data-dc]');if(!b)return;
     depCur=b.dataset.dc;
+    localStorage.setItem('volt-dep-cur',depCur);
     const nets=(DEPOSIT[depCur]||DEPOSIT.BTC).networks;
     depNetId=nets.length===1?nets[0].id:null;
     closeAll();renderDep();
@@ -245,7 +246,9 @@ function stopDepMonitor(){clearInterval(_depMonTimer);_depMonTimer=null;depMonit
 
 
 function openDep(mode){
-  depCur=voltCur;depNetId=null;depMode=mode||'dep';
+  const saved=localStorage.getItem('volt-dep-cur');
+  depCur=(saved&&DEPOSIT[saved])?saved:voltCur;
+  depNetId=null;depMode=mode||'dep';
   if(depMode==='dep')renderDep();
   if(depMode==='wd')renderDep();
   renderDepMode();
