@@ -238,6 +238,10 @@ document.getElementById('railNav').innerHTML = railItems.map((r,i)=>`
 `).join('')+`
   <div class="rail-foot">
     <span class="sep"></span>
+    <button class="auth-in" id="giftBtn" title="Daily Bonus">
+      <span class="it" style="position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8M12 8v13"/><path d="M12 8c-4.5 0-5.5-2-5.5-3.2C6.5 3.7 7.4 3 8.5 3c2.2 0 3.5 2.5 3.5 5Zm0 0c4.5 0 5.5-2 5.5-3.2C17.5 3.7 16.6 3 15.5 3 13.3 3 12 5.5 12 8Z"/></svg><i class="dot" id="giftDot" hidden></i></span>
+      <span class="lbl">Daily Bonus</span>
+    </button>
     <a href="#" id="railChat" title="Live support">
       ${_ic(_IC_SUPPORT)}<span class="lbl">Support</span></a>
     <span class="rail-lang" id="railLang">
