@@ -1933,7 +1933,7 @@ $id('loyaltyBtn').addEventListener('click',()=>{
 /* if the page loaded directly on an originals game via #play= hash */
 if(curSlug)mountEngine(curSlug);
 /* ── promo pair — apply admin overrides from localStorage ── */
-(function(){
+function applyPromoPair(){
   try{
     const s=JSON.parse(localStorage.getItem('volt-promo-pair')||'{}');
     ['a','b'].forEach(k=>{
@@ -1945,7 +1945,11 @@ if(curSlug)mountEngine(curSlug);
       if(d.btn){const el=document.getElementById('promoPairBtn'+K);if(el)el.textContent=d.btn;}
     });
   }catch(e){}
-}());
+}
+applyPromoPair();
+window.addEventListener('storage',function(e){
+  if(e.key==='volt-promo-pair')applyPromoPair();
+});
 
 /* ── hero carousel — removed ── */
 if(false)(function(){
