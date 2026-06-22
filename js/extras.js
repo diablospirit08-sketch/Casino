@@ -173,6 +173,24 @@ $id('walletMenuBtn').addEventListener('click',()=>{avatarWrap.classList.remove('
 /* transactions shortcut */
 $id('txnMenuBtn').addEventListener('click',()=>{avatarWrap.classList.remove('open');if(typeof openTxnModal==='function')openTxnModal();});
 
+/* user preferences → opens profile modal */
+$id('prefBtn').addEventListener('click',()=>{avatarWrap.classList.remove('open');openProfile();});
+
+/* inbox → opens notifications panel */
+$id('inboxBtn').addEventListener('click',e=>{
+  e.stopPropagation();
+  avatarWrap.classList.remove('open');
+  const w=document.getElementById('notifWrap');
+  if(w)w.classList.toggle('open');
+});
+
+/* live support → scrolls rail support link */
+$id('supportMenuBtn').addEventListener('click',()=>{
+  avatarWrap.classList.remove('open');
+  const s=document.getElementById('railChat');
+  if(s)s.click();
+});
+
 /* ---------- profile modal ---------- */
 const profOverlay=$id('profOverlay');
 async function openProfile(){

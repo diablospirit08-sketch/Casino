@@ -935,21 +935,25 @@
   .srch-flat{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
   .srch-empty{color:var(--muted);font-size:13px;padding:32px 0;text-align:center;line-height:1.7}
   .srch-empty b{color:var(--txt)}
-  /* user menu header */
-  .um-head{display:flex;align-items:center;gap:14px;padding:16px 16px 12px}
+  /* user menu header — kept hidden for JS compat */
+  .um-head{display:none}
   .um-av-wrap{position:relative;flex:none}
   .um-av{width:54px;height:54px;border-radius:50%;background:var(--panel-2);border:2.5px solid var(--line);overflow:hidden;display:grid;place-items:center;transition:border-color .2s}
-  .um-av svg{width:54px;height:54px;border-radius:50%}
-  .um-av .av-placeholder{width:24px;height:24px;color:var(--muted)}
-  .um-info{flex:1;min-width:0}
-  .um-name{font-size:15px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .um-id{display:flex;align-items:center;gap:5px;margin-top:3px}
-  .um-id span{font-size:11px;color:var(--muted);font-family:monospace;letter-spacing:.04em}
-  .um-copy{background:none;border:none;padding:2px;cursor:pointer;color:var(--muted);display:grid;place-items:center;border-radius:4px;transition:.14s}
-  .um-copy:hover{color:var(--mint)}
-  .um-copy svg{width:12px;height:12px}
-  .um-bal{font-size:13px;color:var(--mint);font-weight:700;margin-top:4px}
+  .um-name,.um-id,.um-bal{display:none}
+  .um-copy{display:none}
   .um-divider{height:1px;background:var(--line);margin:4px 10px}
+  /* user menu hero */
+  .um-hero{padding:22px 16px 0;text-align:center}
+  .um-hero-medal{width:88px;height:88px;border-radius:50%;border:3px solid;display:grid;place-items:center;margin:0 auto 12px;transition:border-color .3s,box-shadow .3s}
+  .um-hero-medal span{font-size:34px;font-weight:900;line-height:1;pointer-events:none}
+  .um-hero-rank-lbl{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+  .um-hero-rank-name{font-size:20px;font-weight:800;margin-bottom:14px}
+  .um-hero-prog{padding:0 16px 14px}
+  .um-hero-bar{height:5px;background:var(--panel-2);border-radius:3px;margin-bottom:8px;overflow:hidden}
+  .um-hero-bar i{display:block;height:100%;border-radius:3px;transition:width .5s}
+  .um-hero-meta{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:600}
+  .um-hero-next{display:flex;align-items:center;gap:6px}
+  .um-hero-next-badge{font-size:10px;font-weight:900;padding:2px 6px;border-radius:5px;letter-spacing:.02em}
   /* notification bell ring */
   #notifBtn:hover svg{animation:bellRing .9s both;transform-origin:top center}
   #notifBtn:active{transform:scale(.8)}
@@ -1001,32 +1005,31 @@
       <span class="auth-in avatar-wrap" id="avatarWrap">
         <button class="icon-btn avatar" id="avatarBtn" aria-label="Account" aria-haspopup="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.2 3.8-5 7-5s5.8 1.8 7 5"/></svg></button>
         <div class="hdr-menu" id="userMenu">
-          <!-- user header -->
-          <div class="um-head">
-            <div class="um-av-wrap">
-              <div class="um-av" id="umAv"></div>
-            </div>
+          <!-- hidden stubs kept for JS compat -->
+          <div class="um-head" hidden>
+            <div class="um-av-wrap"><div class="um-av" id="umAv"></div></div>
             <div class="um-info">
               <div class="um-name" id="umName">—</div>
-              <div class="um-id" id="umId"><span id="umIdTxt">—</span><button class="um-copy" id="umCopy" title="Copy ID"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+              <div class="um-id" id="umId"><span id="umIdTxt">—</span><button class="um-copy" id="umCopy"></button></div>
               <div class="um-bal" id="umBal">$0.00</div>
             </div>
           </div>
-          <!-- vipBlock kept for vip.js compatibility (hidden) -->
-          <div id="vipBlock" hidden></div>
+          <!-- VIP hero — rendered by vip.js renderVip() -->
+          <div id="vipBlock"></div>
           <div class="um-divider"></div>
-          <!-- primary actions -->
-          <button class="umi" id="walletMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8L2 7h20l-6-4Z"/><circle cx="16" cy="14" r="2"/></svg>Wallet</button>
-          <button class="umi" id="vaultBtn"><i class="fi fi-rs-sack-dollar"></i>Vault</button>
-          <div class="um-divider"></div>
-          <!-- stats & history -->
-          <button class="umi" id="profileBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm14 3h-3m3 4h-3m1-2H14"/></svg>Statistics</button>
+          <!-- menu items -->
+          <button class="umi" id="prefBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>User Preferences</button>
+          <button class="umi" id="inboxBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>Inbox</button>
           <button class="umi" id="txnMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>Transactions</button>
-          <button class="umi" id="rbBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg>Rakeback<span class="umi-dot" id="rbDot" hidden></span></button>
+          <button class="umi" id="profileBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>History</button>
+          <button class="umi" id="supportMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>Live Support</button>
           <div class="um-divider"></div>
-          <!-- account -->
-          <button class="umi" id="loyaltyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.5 6H21l-5 4 2 7-6-4.5L6 20l2-7-5-4h6.5L12 3Z"/></svg>Loyalty Program</button>
           <button class="umi out" id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 4h4v16h-4"/><path d="M11 8l-4 4 4 4M7 12h10"/></svg>Log Out</button>
+          <!-- hidden stubs for JS compat -->
+          <button id="walletMenuBtn" hidden></button>
+          <button id="vaultBtn" hidden></button>
+          <button id="rbBtn" hidden><span class="umi-dot" id="rbDot" hidden></span></button>
+          <button id="loyaltyBtn" hidden></button>
         </div>
       </span>
     </div>
@@ -1767,9 +1770,9 @@
 <script src="js/games/roulette.js"></script>
 <script src="js/games/keno.js"></script>
 <script src="js/games/coinflip.js"></script>
-<script src="js/vip.js?v=2"></script>
+<script src="js/vip.js?v=3"></script>
 <script src="js/modals.js?v=11"></script>
-<script src="js/extras.js?v=4"></script>
+<script src="js/extras.js?v=5"></script>
 <script src="js/balances.js"></script>
 <script src="js/bets.js"></script>
 <script src="js/place-bet.js"></script>

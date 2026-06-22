@@ -21,18 +21,24 @@ function showToast(o){
 
 function renderVip(){
   const li=vipLevel(),v=VIP_LEVELS[li],nx=VIP_LEVELS[li+1];
-  const pct=nx?Math.min(100,(vipXp-v.xp)/(nx.xp-v.xp)*100):100;
+  const pct=nx?Math.min(100,Math.floor((vipXp-v.xp)/(nx.xp-v.xp)*100)):100;
+  const nameEl=$id('umName');
+  const initial=(nameEl&&nameEl.textContent.trim()||'?')[0].toUpperCase();
   $id('vipBlock').innerHTML=`
-    <div class="vip-top">
-      <span class="vip-badge" style="background:${v.col}1f;border:1px solid ${v.col}">
-        <svg viewBox="0 0 24 24" fill="${v.col}"><path d="M12 3l2.5 6H21l-5 4 2 7-6-4.5L6 20l2-7-5-4h6.5L12 3Z"/></svg></span>
-      <div>
-        <div class="vip-name" style="color:${v.col}">${v.n}</div>
-        <div class="vip-sub">VIP · ${Math.floor(vipXp).toLocaleString('en-US')} XP</div>
+    <div class="um-hero">
+      <div class="um-hero-medal" style="border-color:${v.col};box-shadow:0 0 28px ${v.col}44;background:${v.col}18">
+        <span style="color:${v.col}">${initial}</span>
       </div>
+      <div class="um-hero-rank-lbl">Rank</div>
+      <div class="um-hero-rank-name" style="color:${v.col}">${v.n}</div>
     </div>
-    <div class="vip-bar"><i style="width:${pct}%"></i></div>
-    <div class="vip-meta"><span>${nx?Math.floor(pct)+'%':'MAX TIER'}</span><div class="vip-dots"></div><span>${nx?'Next: '+nx.n+' · '+nx.xp.toLocaleString('en-US')+' XP':''}</span></div>`;
+    <div class="um-hero-prog">
+      <div class="um-hero-bar"><i style="width:${pct}%;background:${v.col}"></i></div>
+      <div class="um-hero-meta">
+        <span>${pct}% to next rank</span>
+        ${nx?`<span class="um-hero-next" style="color:${nx.col}">${nx.n}<span class="um-hero-next-badge" style="background:${nx.col}22;border:1px solid ${nx.col}">${nx.rn}</span></span>`:'<span>MAX RANK</span>'}
+      </div>
+    </div>`;
   const btn=$id('avatarBtn');
   btn.style.borderColor=v.col;
   btn.style.color=v.col;
