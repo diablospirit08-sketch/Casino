@@ -188,6 +188,20 @@
   .hcar-dot.active{background:#fff;width:20px}
   .hcar-bar{display:none}
 
+  /* ===== PROMO PAIR ===== */
+  .promo-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+  .promo-card{position:relative;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.1);min-height:200px;display:flex;flex-direction:column;justify-content:flex-end;padding:28px 28px 26px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+  .promo-card:hover{border-color:rgba(255,255,255,.22);box-shadow:0 8px 32px -10px rgba(0,0,0,.6)}
+  .promo-card::before{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(6,8,18,.88) 0%,rgba(6,8,18,.55) 52%,rgba(6,8,18,.06) 100%);z-index:1}
+  .promo-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right center;transition:transform .4s ease}
+  .promo-card:hover img{transform:scale(1.05)}
+  .promo-card-body{position:relative;z-index:2;max-width:60%}
+  .promo-card h3{font-size:21px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;line-height:1.1;color:#fff;margin-bottom:8px}
+  .promo-card p{font-size:13px;color:rgba(255,255,255,.7);line-height:1.55;margin-bottom:18px}
+  .btn-promo{display:inline-flex;align-items:center;gap:7px;background:#f0a020;color:#0a0600;font-family:inherit;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:10px 20px;border-radius:99px;border:none;cursor:pointer;transition:.16s;white-space:nowrap}
+  .btn-promo:hover{filter:brightness(1.1);transform:translateY(-1px)}
+  @media(max-width:760px){.promo-pair{grid-template-columns:1fr}.promo-card{min-height:170px}.promo-card-body{max-width:72%}}
+
   /* category chips */
   .cats{display:flex;gap:8px;margin:20px 0 4px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
   .cats::-webkit-scrollbar{display:none}
@@ -1099,6 +1113,26 @@
       <button class="hcar-arr hcar-next" id="hcarNext" aria-label="Next slide">&#8250;</button>
       <div class="hcar-dots" id="hcarDots"></div>
       <div class="hcar-bar" id="hcarBar"></div>
+    </div>
+
+    <!-- promo pair -->
+    <div class="promo-pair">
+      <div class="promo-card">
+        <img src="art/art-slots-eternal-clash.webp" alt="Challenges">
+        <div class="promo-card-body">
+          <h3>Take on the Challenge!</h3>
+          <p>Play, progress, and earn rewards across a range of challenges.</p>
+          <button class="btn-promo">View Challenges &rarr;</button>
+        </div>
+      </div>
+      <div class="promo-card">
+        <img src="art/poster-made-man.webp" alt="Tournaments">
+        <div class="promo-card-body">
+          <h3>Compete &amp; Win</h3>
+          <p>Compete in tournaments and climb the leaderboard for rewards.</p>
+          <button class="btn-promo">View Tournaments &rarr;</button>
+        </div>
+      </div>
     </div>
 
     <!-- categories -->
