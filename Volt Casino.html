@@ -1108,20 +1108,20 @@
 
     <!-- promo pair -->
     <div class="promo-pair">
-      <div class="promo-card">
-        <img src="art/art-slots-eternal-clash.webp" alt="Challenges">
+      <div class="promo-card" id="promoPairA">
+        <img id="promoPairImgA" src="art/art-slots-eternal-clash.webp" alt="Challenges">
         <div class="promo-card-body">
-          <h3>Take on the Challenge!</h3>
-          <p>Play, progress, and earn rewards across a range of challenges.</p>
-          <button class="btn-promo">View Challenges &rarr;</button>
+          <h3 id="promoPairHeadA">Take on the Challenge!</h3>
+          <p id="promoPairSubA">Play, progress, and earn rewards across a range of challenges.</p>
+          <button class="btn-promo" id="promoPairBtnA">View Challenges &rarr;</button>
         </div>
       </div>
-      <div class="promo-card">
-        <img src="art/poster-made-man.webp" alt="Tournaments">
+      <div class="promo-card" id="promoPairB">
+        <img id="promoPairImgB" src="art/poster-made-man.webp" alt="Tournaments">
         <div class="promo-card-body">
-          <h3>Compete &amp; Win</h3>
-          <p>Compete in tournaments and climb the leaderboard for rewards.</p>
-          <button class="btn-promo">View Tournaments &rarr;</button>
+          <h3 id="promoPairHeadB">Compete &amp; Win</h3>
+          <p id="promoPairSubB">Compete in tournaments and climb the leaderboard for rewards.</p>
+          <button class="btn-promo" id="promoPairBtnB">View Tournaments &rarr;</button>
         </div>
       </div>
     </div>
@@ -1932,6 +1932,21 @@ $id('loyaltyBtn').addEventListener('click',()=>{
 <script>
 /* if the page loaded directly on an originals game via #play= hash */
 if(curSlug)mountEngine(curSlug);
+/* ── promo pair — apply admin overrides from localStorage ── */
+(function(){
+  try{
+    const s=JSON.parse(localStorage.getItem('volt-promo-pair')||'{}');
+    ['a','b'].forEach(k=>{
+      const d=s[k];if(!d)return;
+      const K=k.toUpperCase();
+      if(d.img){const el=document.getElementById('promoPairImg'+K);if(el)el.src=d.img;}
+      if(d.head){const el=document.getElementById('promoPairHead'+K);if(el)el.textContent=d.head;}
+      if(d.sub){const el=document.getElementById('promoPairSub'+K);if(el)el.textContent=d.sub;}
+      if(d.btn){const el=document.getElementById('promoPairBtn'+K);if(el)el.textContent=d.btn;}
+    });
+  }catch(e){}
+}());
+
 /* ── hero carousel — removed ── */
 if(false)(function(){
   const INTERVAL=5200;

@@ -497,40 +497,68 @@ tbody tr:last-child td{border-bottom:none}
     <!-- ═══════════════ PROMOTIONS ═══════════════ -->
     <div class="tab-content" id="tab-promos">
 
-      <p style="font-size:12px;color:var(--muted);margin-bottom:20px">Edit the hero banner displayed on the casino lobby. Changes save to localStorage and apply on page reload.</p>
-      <div class="promo-cards" style="grid-template-columns:1fr 1.4fr">
-        <!-- Hero Banner (single slide) -->
+      <p style="font-size:12px;color:var(--muted);margin-bottom:20px">Edit the two promo cards displayed on the casino lobby. Changes save to localStorage and apply on page reload.</p>
+
+      <!-- Card A -->
+      <div style="margin-bottom:14px;font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2)">Card 1 — Left</div>
+      <div class="promo-cards" style="grid-template-columns:1fr 1fr;margin-bottom:28px">
         <div class="promo-card-edit" id="pce-a">
-          <div class="pce-preview" style="background:linear-gradient(110deg,#2a1a8a 0%,#4433cc 55%,#5b40e8 120%)">
-            <span class="pce-preview-label">🏁 Promotion</span>
-            <img id="previewImgA" src="art/poster-wiseguys.webp" alt="" style="object-position:right center">
-            <span class="pce-preview-title" id="previewTitleA">$75,000 Weekly Race</span>
+          <div class="pce-preview" style="background:linear-gradient(110deg,#1a0a40 0%,#3a1f80 55%,#5b40e8 120%)">
+            <img id="previewImgA" src="art/art-slots-eternal-clash.webp" alt="">
+            <span class="pce-preview-title" id="previewTitleA">Take on the Challenge!</span>
           </div>
           <div class="pce-body">
-            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlA" type="text" placeholder="https://… or leave blank for default" value=""/></div>
-            <div class="pce-field"><label>Heading</label><input class="pce-input" id="headA" type="text" value="$75,000 Weekly Race"/></div>
-            <div class="pce-field"><label>Subtext</label><input class="pce-input" id="subA" type="text" value="Climb the leaderboard. Earn your spot."/></div>
+            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlA" type="text" placeholder="https://… or leave blank for default"/></div>
+            <div class="pce-field"><label>Heading</label><input class="pce-input" id="headA" type="text" value="Take on the Challenge!"/></div>
+            <div class="pce-field"><label>Subtext</label><input class="pce-input" id="subA" type="text" value="Play, progress, and earn rewards across a range of challenges."/></div>
+            <div class="pce-field"><label>Button Text</label><input class="pce-input" id="btnA" type="text" value="View Challenges →"/></div>
             <div class="pce-row">
-              <label class="pce-upload" id="uploadBtnA"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Upload file<input type="file" accept="image/*" id="fileA" hidden/></label>
-              <button class="pce-save" onclick="savePromo('a')">Save</button>
+              <label class="pce-upload"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Upload<input type="file" accept="image/*" id="fileA" hidden/></label>
+              <button class="pce-save" onclick="savePromoPair('a')">Save</button>
             </div>
             <div class="pce-toast" id="toastA"></div>
           </div>
         </div>
+        <!-- live preview A -->
+        <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:14px;overflow:hidden;position:relative;min-height:220px">
+          <img id="lpImgA" src="art/art-slots-eternal-clash.webp" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right center;opacity:.85">
+          <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(6,8,18,.88) 0%,rgba(6,8,18,.35) 55%,transparent 100%)"></div>
+          <div style="position:absolute;bottom:20px;left:20px;z-index:2;max-width:55%">
+            <div id="lpHeadA" style="font-size:17px;font-weight:900;text-transform:uppercase;line-height:1.1;color:#fff">Take on the Challenge!</div>
+            <div id="lpSubA" style="font-size:11px;color:rgba(255,255,255,.7);margin:7px 0 12px;line-height:1.4">Play, progress, and earn rewards across a range of challenges.</div>
+            <div id="lpBtnA" style="display:inline-block;background:#f0a020;color:#0a0600;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:8px 16px;border-radius:99px">View Challenges →</div>
+          </div>
+        </div>
+      </div>
 
-        <!-- Live preview -->
-        <div style="background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
-          <div style="padding:14px 18px;border-bottom:1px solid var(--line);font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.1em;text-transform:uppercase">Live Preview</div>
-          <div style="flex:1;padding:20px;display:flex;align-items:center;justify-content:center;background:var(--bg-2)">
-            <div style="width:100%;border-radius:10px;overflow:hidden;position:relative;height:160px;background:linear-gradient(110deg,#2a1a8a,#5b40e8)">
-              <img id="livePreviewImg" src="art/poster-wiseguys.webp" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right center;opacity:.85">
-              <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(6,8,18,.88) 0%,rgba(6,8,18,.35) 55%,transparent 100%)"></div>
-              <div style="position:absolute;bottom:16px;left:16px;z-index:2">
-                <div style="font-size:9px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;background:rgba(0,0,0,.4);padding:3px 9px;border-radius:99px;margin-bottom:6px;display:inline-block">🏁 Promotion</div>
-                <div id="livePreviewHead" style="font-size:18px;font-weight:900;text-transform:uppercase;line-height:1">$75,000 Weekly Race</div>
-                <div id="livePreviewSub" style="font-size:10px;opacity:.55;margin-top:4px;font-weight:700;letter-spacing:.06em;text-transform:uppercase">Climb the leaderboard. Earn your spot.</div>
-              </div>
+      <!-- Card B -->
+      <div style="margin-bottom:14px;font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2)">Card 2 — Right</div>
+      <div class="promo-cards" style="grid-template-columns:1fr 1fr">
+        <div class="promo-card-edit" id="pce-b">
+          <div class="pce-preview" style="background:linear-gradient(110deg,#0b1340 0%,#162060 60%,#1e2d80 100%)">
+            <img id="previewImgB" src="art/poster-made-man.webp" alt="">
+            <span class="pce-preview-title" id="previewTitleB">Compete &amp; Win</span>
+          </div>
+          <div class="pce-body">
+            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlB" type="text" placeholder="https://… or leave blank for default"/></div>
+            <div class="pce-field"><label>Heading</label><input class="pce-input" id="headB" type="text" value="Compete &amp; Win"/></div>
+            <div class="pce-field"><label>Subtext</label><input class="pce-input" id="subB" type="text" value="Compete in tournaments and climb the leaderboard for rewards."/></div>
+            <div class="pce-field"><label>Button Text</label><input class="pce-input" id="btnB" type="text" value="View Tournaments →"/></div>
+            <div class="pce-row">
+              <label class="pce-upload"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Upload<input type="file" accept="image/*" id="fileB" hidden/></label>
+              <button class="pce-save" onclick="savePromoPair('b')">Save</button>
             </div>
+            <div class="pce-toast" id="toastB"></div>
+          </div>
+        </div>
+        <!-- live preview B -->
+        <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:14px;overflow:hidden;position:relative;min-height:220px">
+          <img id="lpImgB" src="art/poster-made-man.webp" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right center;opacity:.85">
+          <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(6,8,18,.88) 0%,rgba(6,8,18,.35) 55%,transparent 100%)"></div>
+          <div style="position:absolute;bottom:20px;left:20px;z-index:2;max-width:55%">
+            <div id="lpHeadB" style="font-size:17px;font-weight:900;text-transform:uppercase;line-height:1.1;color:#fff">Compete &amp; Win</div>
+            <div id="lpSubB" style="font-size:11px;color:rgba(255,255,255,.7);margin:7px 0 12px;line-height:1.4">Compete in tournaments and climb the leaderboard for rewards.</div>
+            <div id="lpBtnB" style="display:inline-block;background:#f0a020;color:#0a0600;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:8px 16px;border-radius:99px">View Tournaments →</div>
           </div>
         </div>
       </div>
@@ -845,64 +873,77 @@ function startPolling(){
   },10000);
 }
 
-/* ══ PROMO EDITOR ═══════════════════════════════════════════ */
-const LS_PROMOS='volt-promos';
-function loadPromoState(){ try{ return JSON.parse(localStorage.getItem(LS_PROMOS))||{}; }catch{ return {}; } }
-function initPromoEditor(){
-  const state=loadPromoState();
-  const imgEl=$('previewImgA');
-  if(state.a){
-    if(state.a.img){
-      imgEl.src=state.a.img;
-      $('livePreviewImg').src=state.a.img;
-      if(state.a.img.startsWith('data:')){$('urlA').value='(uploaded file)';$('urlA').dataset.dataUrl=state.a.img;}
-      else $('urlA').value=state.a.img;
+/* ══ PROMO PAIR EDITOR ══════════════════════════════════════ */
+const LS_PROMO_PAIR='volt-promo-pair';
+const PROMO_DEFAULTS={
+  a:{img:'art/art-slots-eternal-clash.webp',head:'Take on the Challenge!',sub:'Play, progress, and earn rewards across a range of challenges.',btn:'View Challenges →'},
+  b:{img:'art/poster-made-man.webp',        head:'Compete & Win',         sub:'Compete in tournaments and climb the leaderboard for rewards.',  btn:'View Tournaments →'},
+};
+function loadPairState(){try{return JSON.parse(localStorage.getItem(LS_PROMO_PAIR)||'{}');}catch{return{};}}
+
+function initPromoPairEditor(){
+  const saved=loadPairState();
+  ['a','b'].forEach(k=>{
+    const K=k.toUpperCase();
+    const def=PROMO_DEFAULTS[k];
+    const d=saved[k]||{};
+    const previewImg=$('previewImg'+K), lpImg=$('lpImg'+K);
+    const urlEl=$('url'+K), headEl=$('head'+K), subEl=$('sub'+K), btnEl=$('btn'+K);
+
+    /* restore saved values */
+    if(d.img){
+      previewImg.src=lpImg.src=d.img;
+      if(d.img.startsWith('data:')){urlEl.value='(uploaded file)';urlEl.dataset.dataUrl=d.img;}
+      else urlEl.value=d.img;
     }
-    if(state.a.head){$('headA').value=state.a.head;$('previewTitleA').textContent=state.a.head;$('livePreviewHead').textContent=state.a.head;}
-    if(state.a.sub){$('subA').value=state.a.sub;$('livePreviewSub').textContent=state.a.sub;}
-  }
-  $('urlA').addEventListener('input',e=>{
-    const v=e.target.value.trim();
-    imgEl.src=v||'art/poster-wiseguys.webp';
-    $('livePreviewImg').src=v||'art/poster-wiseguys.webp';
-    delete $('urlA').dataset.dataUrl;
-  });
-  $('headA').addEventListener('input',e=>{
-    const v=e.target.value||'$75,000 Weekly Race';
-    $('previewTitleA').textContent=v;
-    $('livePreviewHead').textContent=v;
-  });
-  $('subA').addEventListener('input',e=>{
-    $('livePreviewSub').textContent=e.target.value||'Climb the leaderboard. Earn your spot.';
-  });
-  $('fileA').addEventListener('change',e=>{
-    const f=e.target.files[0];if(!f)return;
-    const reader=new FileReader();
-    reader.onload=ev=>{
-      const url=ev.target.result;
-      imgEl.src=url;$('livePreviewImg').src=url;
-      $('urlA').value='(uploaded file)';$('urlA').dataset.dataUrl=url;
-    };
-    reader.readAsDataURL(f);
+    if(d.head){headEl.value=d.head;$('previewTitle'+K).textContent=d.head;$('lpHead'+K).textContent=d.head;}
+    if(d.sub){subEl.value=d.sub;$('lpSub'+K).textContent=d.sub;}
+    if(d.btn){btnEl.value=d.btn;$('lpBtn'+K).textContent=d.btn;}
+
+    /* live wiring */
+    urlEl.addEventListener('input',e=>{
+      const v=e.target.value.trim();
+      previewImg.src=lpImg.src=v||def.img;
+      delete urlEl.dataset.dataUrl;
+    });
+    headEl.addEventListener('input',e=>{
+      const v=e.target.value||def.head;
+      $('previewTitle'+K).textContent=v;$('lpHead'+K).textContent=v;
+    });
+    subEl.addEventListener('input',e=>{$('lpSub'+K).textContent=e.target.value||def.sub;});
+    btnEl.addEventListener('input',e=>{$('lpBtn'+K).textContent=e.target.value||def.btn;});
+    $('file'+K).addEventListener('change',e=>{
+      const f=e.target.files[0];if(!f)return;
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        const url=ev.target.result;
+        previewImg.src=lpImg.src=url;
+        urlEl.value='(uploaded file)';urlEl.dataset.dataUrl=url;
+      };
+      reader.readAsDataURL(f);
+    });
   });
 }
-window.savePromo=function(k){
-  const urlEl=$('url'+k.toUpperCase());
+
+window.savePromoPair=function(k){
+  const K=k.toUpperCase();
+  const urlEl=$('url'+K);
   const img=urlEl.dataset.dataUrl||urlEl.value.trim();
-  const head=$('head'+k.toUpperCase()).value.trim();
-  const sub=$('sub'+k.toUpperCase()).value.trim();
-  const state=loadPromoState();state[k]={img,head,sub};
-  const toast=$('toast'+k.toUpperCase());
+  const head=$('head'+K).value.trim();
+  const sub=$('sub'+K).value.trim();
+  const btn=$('btn'+K).value.trim();
+  const state=loadPairState();state[k]={img,head,sub,btn};
+  const toast=$('toast'+K);
   try{
-    localStorage.setItem(LS_PROMOS,JSON.stringify(state));
+    localStorage.setItem(LS_PROMO_PAIR,JSON.stringify(state));
     toast.textContent='✓ Saved — reload the casino page to see changes';
   }catch(e){
-    toast.textContent='⚠ Image too large to save — try a URL instead';
+    toast.textContent='⚠ Image too large — use a URL instead';
     toast.style.color='#f87171';
   }
   setTimeout(()=>{toast.textContent='';toast.style.color='';},4000);
 };
-initPromoEditor();
+initPromoPairEditor();
 
 /* ══ GAME ART EDITOR ════════════════════════════════════════ */
 const LS_GAME_ART='volt-game-art';
