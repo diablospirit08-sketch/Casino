@@ -213,6 +213,32 @@ export async function authRoutes(fastify) {
     return { ok: true };
   });
 
+  // ── Set username (post-signup onboarding) ────────────────────────────────
+  fastify.put('/username', {
+    onRequest: [fastify.authenticate],
+    schema: {
+      body: {
+        type: 'object',
+        required: ['username'],
+        properties: { username: { type: 'string', minLength: 3, maxLength: 32, pattern: '^[a-zA-Z0-9_]+$' } },
+        additionalProperties: false,
+      },
+    },
+  }, async (req, reply) => {
+    try {
+      const rows = await query(
+        'UPDATE users SET username = $1 WHERE id = $2 RETURNING id, email, username',
+        [req.body.username, req.user.id]
+      );
+      return rows[0];
+    } catch (err) {
+      if (err.constraint === 'users_username_key') {
+        return reply.code(409).send({ error: 'Username already taken' });
+      }
+      throw err;
+    }
+  });
+
   // ── Me ────────────────────────────────────────────────────────────────────
   fastify.get('/me', {
     onRequest: [fastify.authenticate],

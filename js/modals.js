@@ -296,6 +296,10 @@ authSubmit.addEventListener('click',async()=>{
         showToast({icon:'📧',title:'Check your email',sub:'Click the confirmation link to activate your account.'});
         return;
       }
+      /* signup success — show username picker before finishing */
+      closeAuth();
+      openUnamePicker(authEmail.value);
+      return;
     } else {
       const{error}=await supa.auth.signInWithPassword({email:authEmail.value,password:authPass.value});
       if(error)throw error;
@@ -306,6 +310,67 @@ authSubmit.addEventListener('click',async()=>{
     showToast({icon:'⚠',title:'Auth error',sub:err.message});
   }
 });
+
+/* ===== USERNAME PICKER (post-signup) ===== */
+(function(){
+  const overlay=document.getElementById('unameOverlay'),
+        input=document.getElementById('unameInput'),
+        submit=document.getElementById('unameSubmit'),
+        hint=document.getElementById('unameHint'),
+        skip=document.getElementById('unameSkip');
+
+  function validate(){
+    const v=input.value.trim();
+    const ok=/^[a-zA-Z0-9_]{3,32}$/.test(v);
+    submit.disabled=!ok;
+    if(v.length>0&&!ok){
+      hint.innerHTML='<b style="color:#ff6b6b">3–32 chars · letters, numbers, underscores only</b>';
+    } else {
+      hint.innerHTML='3–32 characters · letters, numbers, underscores only';
+    }
+  }
+
+  window.openUnamePicker=function(email){
+    /* pre-fill with derived name */
+    input.value=(email||'').split('@')[0].replace(/[^a-zA-Z0-9_]/g,'_').slice(0,32)||'';
+    validate();
+    overlay.classList.add('open');
+    setTimeout(()=>{input.select();},60);
+  };
+
+  async function saveUsername(){
+    const username=input.value.trim();
+    if(!/^[a-zA-Z0-9_]{3,32}$/.test(username))return;
+    submit.disabled=true;
+    submit.textContent='Saving…';
+    try{
+      const r=await voltApi._fetch('/api/auth/username',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({username})});
+      const j=await r.json();
+      if(!r.ok){
+        hint.innerHTML='<b style="color:#ff6b6b">'+(j.error||'Error saving username')+'</b>';
+        submit.disabled=false;
+        submit.textContent='Set Username';
+        return;
+      }
+      /* update stored user with new username */
+      const stored=JSON.parse(localStorage.getItem('volt-user')||'{}');
+      stored.username=j.username;
+      localStorage.setItem('volt-user',JSON.stringify(stored));
+      overlay.classList.remove('open');
+      finishAuth();
+      showToast({icon:'✓',col:'#41f0a4',title:'Welcome, '+j.username+'!',sub:'Your username has been set.'});
+    } catch(e){
+      hint.innerHTML='<b style="color:#ff6b6b">Network error — try again</b>';
+      submit.disabled=false;
+      submit.textContent='Set Username';
+    }
+  }
+
+  input.addEventListener('input',validate);
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!submit.disabled)saveUsername();});
+  submit.addEventListener('click',saveUsername);
+  skip.addEventListener('click',()=>{overlay.classList.remove('open');finishAuth();});
+})();
 authEmail.addEventListener('keydown',e=>{if(e.key==='Enter')authPass.focus();});
 authPass.addEventListener('keydown',e=>{if(e.key==='Enter'&&!authSubmit.disabled)authSubmit.click();});
 
