@@ -1343,11 +1343,10 @@
         <div><h4>Platform</h4><a href="#" data-act="top">Casino</a><a href="#" data-act="sports">Sports</a><a href="#" data-act="providers">Providers</a><a href="#" data-act="race">Promotions</a></div>
         <div><h4>Offers</h4><a href="#" data-act="bonus">Rewards</a><a href="#" data-act="race">Weekly Race</a><a href="#" data-act="vip">VIP Club</a><a href="#" data-act="referrals">Referrals</a></div>
         <div><h4>Legal</h4><a href="#" data-act="terms">Terms of Service</a><a href="#" data-act="privacy">Privacy Policy</a><a href="#" data-act="fraud">Anti-Fraud Policy</a><a href="#" data-act="aml">AML Policy</a></div>
-        <div><h4>Support</h4><a href="#" data-act="chat">Live Support</a><a href="#" data-act="help">Help Center</a><a href="#" data-act="responsible">Responsible Gambling</a><a href="#" data-act="complaint">Complaint Form</a></div>
+        <div><h4>Support</h4><a href="#" data-act="chat">Live Support</a><a href="#" data-act="help">Help Center</a><a href="#" data-act="complaint">Complaint Form</a></div>
       </div>
       <div class="pay-strip" id="payStrip"><span class="lbl">Payments</span></div>
       <div class="rg-strip">
-        <span class="rg-lbl">Responsible Gambling</span>
         <a href="#" data-act="responsible" class="cert-logo"><img src="https://eu-images.contentstack.com/v3/assets/blt07f4bf5152f418f6/blt859ebfa5c0760ddb/6254370f1ef2515ab665a9aa/18_plus1.png" alt="18+"></a>
         <a href="https://www.gambleaware.org/" target="_blank" rel="noopener" class="cert-logo"><img src="https://eu-images.contentstack.com/v3/assets/blt07f4bf5152f418f6/bltcb19d68a2037cc61/67517b01354792a2dfe580c7/gambleaware.png" alt="GambleAware"></a>
         <a href="https://www.gamblersanonymous.org.uk/" target="_blank" rel="noopener" class="cert-logo"><img src="https://eu-images.contentstack.com/v3/assets/blt07f4bf5152f418f6/blt82d28914dfbb11da/62543c43b4f5ca2cdc8cb543/ga.png" alt="Gamblers Anonymous"></a>
@@ -1947,14 +1946,11 @@ if(curSlug)mountEngine(curSlug);
 (function(){
   const INTERVAL=5200;
   const DEFAULTS=[
-    {tag:'🎁 New Players',head:'Welcome Bonus',sub:'Get up to $1,000 + 150 Free Spins on your first deposit',grad:'linear-gradient(110deg,#0b3320 0%,#165c3a 55%,#1e8a56 110%)',img:'art/poster-made-man.webp'},
-    {tag:'⭐ Featured',head:'New Releases',sub:'Discover and play the latest games on VOLT.',grad:'linear-gradient(110deg,#0b1340 0%,#162060 60%,#1e2d80 100%)',img:'images/slots-777.png'},
     {tag:'🏁 Promotion',head:'$75,000 Weekly Race',sub:'Climb the leaderboard. Earn your spot.',grad:'linear-gradient(110deg,#2a1a8a 0%,#4433cc 55%,#5b40e8 120%)',img:'art/poster-wiseguys.webp'},
-    {tag:'⚡ Sports',head:'Sports Cashback',sub:'Get 10% back on every sports bet, every week.',grad:'linear-gradient(110deg,#3d1000 0%,#8b2e00 55%,#c84a0a 120%)',img:'art/art-slots-sin-city.webp'},
   ];
   try{
     const saved=JSON.parse(localStorage.getItem('volt-promos')||'{}');
-    ['a','b','c','d'].forEach((k,i)=>{
+    ['a'].forEach((k,i)=>{
       if(!saved[k])return;
       if(saved[k].head)DEFAULTS[i].head=saved[k].head;
       if(saved[k].sub)DEFAULTS[i].sub=saved[k].sub;
@@ -1975,11 +1971,20 @@ if(curSlug)mountEngine(curSlug);
       <div class="hcar-sub">${s.sub}</div>
     </div>`).join('');
 
-  dotsEl.innerHTML=DEFAULTS.map((_,i)=>`<button class="hcar-dot${i===0?' active':''}" data-i="${i}" aria-label="Slide ${i+1}"></button>`).join('');
+  const single=DEFAULTS.length===1;
+  if(single){
+    dotsEl.style.display='none';
+    bar.style.display='none';
+    document.getElementById('hcarPrev').style.display='none';
+    document.getElementById('hcarNext').style.display='none';
+  } else {
+    dotsEl.innerHTML=DEFAULTS.map((_,i)=>`<button class="hcar-dot${i===0?' active':''}" data-i="${i}" aria-label="Slide ${i+1}"></button>`).join('');
+  }
 
   let cur=0,timer=null;
 
   function startBar(){
+    if(single)return;
     bar.style.transition='none';bar.style.width='0';
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
       bar.style.transition='width '+INTERVAL+'ms linear';
@@ -1988,6 +1993,7 @@ if(curSlug)mountEngine(curSlug);
   }
 
   function goTo(idx){
+    if(single)return;
     cur=((idx%DEFAULTS.length)+DEFAULTS.length)%DEFAULTS.length;
     track.style.transform='translateX(-'+cur*100+'%)';
     dotsEl.querySelectorAll('.hcar-dot').forEach((d,i)=>d.classList.toggle('active',i===cur));
@@ -1996,9 +2002,11 @@ if(curSlug)mountEngine(curSlug);
     timer=setTimeout(()=>goTo(cur+1),INTERVAL);
   }
 
-  document.getElementById('hcarPrev').addEventListener('click',e=>{e.stopPropagation();goTo(cur-1);});
-  document.getElementById('hcarNext').addEventListener('click',e=>{e.stopPropagation();goTo(cur+1);});
-  dotsEl.addEventListener('click',e=>{const b=e.target.closest('.hcar-dot');if(b)goTo(+b.dataset.i);});
+  if(!single){
+    document.getElementById('hcarPrev').addEventListener('click',e=>{e.stopPropagation();goTo(cur-1);});
+    document.getElementById('hcarNext').addEventListener('click',e=>{e.stopPropagation();goTo(cur+1);});
+    dotsEl.addEventListener('click',e=>{const b=e.target.closest('.hcar-dot');if(b)goTo(+b.dataset.i);});
+  }
 
   let tx=0;
   track.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;clearTimeout(timer);},{passive:true});
