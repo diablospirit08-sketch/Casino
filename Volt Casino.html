@@ -1950,6 +1950,19 @@ applyPromoPair();
 window.addEventListener('storage',function(e){
   if(e.key==='volt-promo-pair')applyPromoPair();
 });
+try{
+  new BroadcastChannel('volt-promo').onmessage=function(e){
+    var s=e.data;if(!s)return;
+    ['a','b'].forEach(function(k){
+      var d=s[k];if(!d)return;
+      var K=k.toUpperCase();
+      if(d.img){var el=document.getElementById('promoPairImg'+K);if(el)el.src=d.img;}
+      if(d.head){var el2=document.getElementById('promoPairHead'+K);if(el2)el2.textContent=d.head;}
+      if(d.sub){var el3=document.getElementById('promoPairSub'+K);if(el3)el3.textContent=d.sub;}
+      if(d.btn){var el4=document.getElementById('promoPairBtn'+K);if(el4)el4.textContent=d.btn;}
+    });
+  };
+}catch(_){}
 
 /* ── hero carousel — removed ── */
 if(false)(function(){

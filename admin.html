@@ -944,12 +944,14 @@ window.savePromoPair=function(k){
   const toast=$('toast'+K);
   try{
     localStorage.setItem(LS_PROMO_PAIR,JSON.stringify(state));
-    toast.textContent='✓ Saved — reload the casino page to see changes';
+    /* broadcast to casino page if open in another tab */
+    try{new BroadcastChannel('volt-promo').postMessage(state);}catch(_){}
+    toast.textContent='✓ Saved';
   }catch(e){
     toast.textContent='⚠ Image too large — use a URL instead';
     toast.style.color='#f87171';
   }
-  setTimeout(()=>{toast.textContent='';toast.style.color='';},4000);
+  setTimeout(()=>{toast.textContent='';toast.style.color='';},3000);
 };
 initPromoPairEditor();
 
