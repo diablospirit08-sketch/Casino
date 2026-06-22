@@ -1929,16 +1929,22 @@ $id('loyaltyBtn').addEventListener('click',()=>{
 /* if the page loaded directly on an originals game via #play= hash */
 if(curSlug)mountEngine(curSlug);
 /* ── promo pair — apply admin overrides from localStorage ── */
-function applyPromoPair(){
+var PROMO_DEFAULTS_CASINO={
+  a:{img:'art/art-slots-eternal-clash.webp',head:'Take on the Challenge!',sub:'Play, progress, and earn rewards across a range of challenges.',btn:'View Challenges →'},
+  b:{img:'art/poster-made-man.webp',head:'Compete & Win',sub:'Compete in tournaments and climb the leaderboard for rewards.',btn:'View Tournaments →'}
+};
+function applyPromoPair(state){
   try{
-    const s=JSON.parse(localStorage.getItem('volt-promo-pair')||'{}');
-    ['a','b'].forEach(k=>{
-      const d=s[k];if(!d)return;
-      const K=k.toUpperCase();
-      if(d.img){const el=document.getElementById('promoPairImg'+K);if(el)el.src=d.img;}
-      if(d.head){const el=document.getElementById('promoPairHead'+K);if(el)el.textContent=d.head;}
-      if(d.sub){const el=document.getElementById('promoPairSub'+K);if(el)el.textContent=d.sub;}
-      if(d.btn){const el=document.getElementById('promoPairBtn'+K);if(el)el.textContent=d.btn;}
+    var s=state||JSON.parse(localStorage.getItem('volt-promo-pair')||'{}');
+    ['a','b'].forEach(function(k){
+      var d=s[k];
+      var K=k.toUpperCase();
+      var def=PROMO_DEFAULTS_CASINO[k];
+      var el;
+      el=document.getElementById('promoPairImg'+K);  if(el)el.src=d&&d.img?d.img:def.img;
+      el=document.getElementById('promoPairHead'+K); if(el)el.textContent=d&&d.head?d.head:def.head;
+      el=document.getElementById('promoPairSub'+K);  if(el)el.textContent=d&&d.sub?d.sub:def.sub;
+      el=document.getElementById('promoPairBtn'+K);  if(el)el.textContent=d&&d.btn?d.btn:def.btn;
     });
   }catch(e){}
 }
@@ -1947,17 +1953,7 @@ window.addEventListener('storage',function(e){
   if(e.key==='volt-promo-pair')applyPromoPair();
 });
 try{
-  new BroadcastChannel('volt-promo').onmessage=function(e){
-    var s=e.data;if(!s)return;
-    ['a','b'].forEach(function(k){
-      var d=s[k];if(!d)return;
-      var K=k.toUpperCase();
-      if(d.img){var el=document.getElementById('promoPairImg'+K);if(el)el.src=d.img;}
-      if(d.head){var el2=document.getElementById('promoPairHead'+K);if(el2)el2.textContent=d.head;}
-      if(d.sub){var el3=document.getElementById('promoPairSub'+K);if(el3)el3.textContent=d.sub;}
-      if(d.btn){var el4=document.getElementById('promoPairBtn'+K);if(el4)el4.textContent=d.btn;}
-    });
-  };
+  new BroadcastChannel('volt-promo').onmessage=function(e){applyPromoPair(e.data);};
 }catch(_){}
 
 /* ── hero carousel — removed ── */
