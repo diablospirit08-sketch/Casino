@@ -1106,15 +1106,6 @@
   <div class="wrap">
   <div id="lobbyView" data-screen-label="Lobby">
 
-    <!-- hero carousel -->
-    <div class="hero-car" id="sec-top" aria-label="Promotions carousel">
-      <div class="hcar-track" id="hcarTrack"></div>
-      <button class="hcar-arr hcar-prev" id="hcarPrev" aria-label="Previous slide">&#8249;</button>
-      <button class="hcar-arr hcar-next" id="hcarNext" aria-label="Next slide">&#8250;</button>
-      <div class="hcar-dots" id="hcarDots"></div>
-      <div class="hcar-bar" id="hcarBar"></div>
-    </div>
-
     <!-- promo pair -->
     <div class="promo-pair">
       <div class="promo-card">
@@ -1941,8 +1932,8 @@ $id('loyaltyBtn').addEventListener('click',()=>{
 <script>
 /* if the page loaded directly on an originals game via #play= hash */
 if(curSlug)mountEngine(curSlug);
-/* ── hero carousel ── */
-(function(){
+/* ── hero carousel — removed ── */
+if(false)(function(){
   const INTERVAL=5200;
   const DEFAULTS=[
     {tag:'🏁 Promotion',head:'$75,000 Weekly Race',sub:'Climb the leaderboard. Earn your spot.',grad:'linear-gradient(110deg,#2a1a8a 0%,#4433cc 55%,#5b40e8 120%)',img:'art/poster-wiseguys.webp'},
