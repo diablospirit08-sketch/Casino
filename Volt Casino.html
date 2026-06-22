@@ -1957,6 +1957,15 @@ try{
   new BroadcastChannel('volt-promo').onmessage=function(e){applyPromoPair(e.data);};
 }catch(_){}
 
+/* poll every 2s so changes from admin show without reload */
+(function(){
+  var _lastPromo='';
+  setInterval(function(){
+    var v=localStorage.getItem('volt-promo-pair')||'';
+    if(v!==_lastPromo){_lastPromo=v;applyPromoPair();}
+  },2000);
+})();
+
 /* ── hero carousel — removed ── */
 if(false)(function(){
   const INTERVAL=5200;
