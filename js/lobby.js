@@ -434,10 +434,6 @@ document.getElementById('rows').innerHTML = ROWS.map(row=>`
             ${g.boost?`<span class="boost">⚡ ${g.boost}</span>`:''}
             <div class="gc-ov"><div class="gc-ov-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7-11-7Z"/></svg></div><span class="gc-ov-lbl">Play Now</span></div>
           </div>
-          <div class="card-meta nm">
-            <span class="cname">${g.n}</span>
-            <span class="cprov">${g.p}</span>
-          </div>
         </div>`;}).join('')}
     </div>
   </div>
