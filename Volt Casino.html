@@ -1950,6 +1950,13 @@ function applyPromoPair(state){
   }catch(e){}
 }
 applyPromoPair();
+/* also fetch from Railway so deployed site shows admin changes */
+fetch('/api/promo').then(function(r){return r.ok?r.json():null;}).then(function(d){
+  if(d&&Object.keys(d).length){
+    localStorage.setItem('volt-promo-pair',JSON.stringify(d));
+    applyPromoPair(d);
+  }
+}).catch(function(){});
 window.addEventListener('storage',function(e){
   if(e.key==='volt-promo-pair')applyPromoPair();
 });

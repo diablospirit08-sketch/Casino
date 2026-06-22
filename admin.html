@@ -946,7 +946,7 @@ function initPromoPairEditor(){
   });
 }
 
-window.savePromoPair=function(k){
+window.savePromoPair=async function(k){
   const K=k.toUpperCase();
   const urlEl=$('url'+K);
   const img=_pendingImg[k]||(urlEl.value.trim()==='(uploaded file)'?null:urlEl.value.trim())||'';
@@ -957,14 +957,20 @@ window.savePromoPair=function(k){
   const toast=$('toast'+K);
   try{
     localStorage.setItem(LS_PROMO_PAIR,JSON.stringify(state));
-    /* broadcast to casino page if open in another tab */
     try{new BroadcastChannel('volt-promo').postMessage(state);}catch(_){}
-    toast.textContent='✓ Saved';
+    toast.textContent='Saving…';
+    /* also persist to Railway so the deployed site updates */
+    try{
+      await aFetch('/api/admin/promo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)});
+      toast.textContent='✓ Saved (local + Railway)';
+    }catch(_){
+      toast.textContent='✓ Saved locally (Railway offline)';
+    }
   }catch(e){
     toast.textContent='⚠ Image too large — use a URL instead';
     toast.style.color='#f87171';
   }
-  setTimeout(()=>{toast.textContent='';toast.style.color='';},3000);
+  setTimeout(()=>{toast.textContent='';toast.style.color='';},4000);
 };
 initPromoPairEditor();
 
