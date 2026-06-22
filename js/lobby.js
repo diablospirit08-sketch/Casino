@@ -432,7 +432,7 @@ document.getElementById('rows').innerHTML = ROWS.map(row=>`
             <span class="nm">${g.n}</span>
             ${g.corner?`<span class="corner${g.corner==='Hot'?' hot':''}">${g.corner}</span>`:''}
             ${g.boost?`<span class="boost">⚡ ${g.boost}</span>`:''}
-            <div class="gc-ov"><div class="gc-ov-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7-11-7Z"/></svg></div><span class="gc-ov-lbl">Play Now</span></div>
+            <div class="gc-ov"><div class="gc-ov-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7-11-7Z"/></svg>Play Now</div></div>
           </div>
         </div>`;}).join('')}
     </div>
