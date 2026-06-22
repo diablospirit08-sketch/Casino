@@ -306,10 +306,6 @@
   .frow b{font-size:12px;font-weight:800;color:var(--mint);font-variant-numeric:tabular-nums}
   .frow .fg{grid-column:1/-1;font-size:10.5px;color:var(--muted-2)}
   .frow.me .fn{color:var(--mint)}
-  /* play button on tiles */
-  .gcover .playbtn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.8);width:46px;height:46px;border-radius:50%;background:var(--mint);color:var(--mint-ink);display:grid;place-items:center;border:none;cursor:pointer;opacity:0;transition:.18s;z-index:4;box-shadow:0 10px 24px -8px rgba(65,240,164,.7)}
-  .gtile:hover .playbtn{opacity:1;transform:translate(-50%,-50%) scale(1)}
-  .playbtn svg{width:18px;height:18px;margin-left:2px}
   @media(max-width:760px){
     .gv-frame{grid-template-columns:1fr}
     .gv-canvas{order:-1;min-height:340px}
@@ -969,6 +965,34 @@
   #avatarBtn.has-av{padding:0;overflow:hidden}
   .av-rank-num{font-size:15px;font-weight:900;letter-spacing:-.02em;line-height:1;pointer-events:none}
   .um-av .av-rank-num{font-size:22px}
+
+  /* ── 1. Game card hover overlay ── */
+  .gc-ov{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;background:rgba(8,9,12,.62);backdrop-filter:blur(5px);opacity:0;transition:opacity .2s;border-radius:inherit;pointer-events:none}
+  .gc-ov-ic{width:50px;height:50px;border-radius:50%;background:var(--mint);color:#08090c;display:grid;place-items:center;box-shadow:0 8px 26px -8px rgba(65,240,164,.75);transform:scale(.72);transition:transform .22s}
+  .gc-ov-ic svg{width:20px;height:20px;margin-left:2px}
+  .gc-ov-lbl{font-size:10px;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:#fff;opacity:0;transform:translateY(8px);transition:opacity .2s .05s,transform .2s .05s}
+  .gtile:hover .gc-ov{opacity:1}
+  .gtile:hover .gc-ov-ic{transform:scale(1)}
+  .gtile:hover .gc-ov-lbl{opacity:1;transform:none}
+
+  /* ── 2. Balance widget redesign ── */
+  .wallet{border-radius:999px;background:var(--panel);border:1.5px solid rgba(65,240,164,.32);box-shadow:0 0 20px -6px rgba(65,240,164,.28),0 4px 18px rgba(0,0,0,.4)}
+  .wallet-bal{padding:0 12px 0 10px;height:42px}
+  .wallet-bal b{font-size:15px}
+  .wallet-dep{margin:4px;border-radius:999px;padding:0 16px;height:calc(100% - 8px);font-size:11.5px}
+
+  /* ── 3. Hero carousel animated gradient ── */
+  .hcar-slide{min-height:300px}
+  @keyframes hcarFloat{0%,100%{transform:translate(0,0) scale(1);opacity:.55}50%{transform:translate(5%,-6%) scale(1.12);opacity:1}}
+  .hcar-slide::after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;animation:hcarFloat 5.5s ease-in-out infinite}
+  .hcar-slide[data-i="0"]::after{background:radial-gradient(ellipse 65% 75% at 78% 22%,rgba(65,240,164,.35) 0%,transparent 65%)}
+  .hcar-slide[data-i="1"]::after{background:radial-gradient(ellipse 65% 75% at 78% 22%,rgba(61,155,255,.35) 0%,transparent 65%)}
+  .hcar-slide[data-i="2"]::after{background:radial-gradient(ellipse 65% 75% at 78% 22%,rgba(160,100,255,.38) 0%,transparent 65%)}
+  .hcar-slide[data-i="2"] .hcar-before{animation-delay:-2.7s}
+
+  /* ── 4. Skeleton shimmer ── */
+  @keyframes shimmer{to{background-position:200% 0}}
+  .gcover image-slot:not([data-filled]){background:linear-gradient(90deg,rgba(255,255,255,.03) 25%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.03) 75%);background-size:200% 100%;animation:shimmer 1.5s linear infinite}
 </style>
 </head>
 <body>
@@ -1758,7 +1782,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/api.js"></script>
 <script src="js/supabase-client.js"></script>
-<script src="js/lobby.js?v=7"></script>
+<script src="js/lobby.js?v=8"></script>
 <script src="js/gameview.js"></script>
 <script src="js/chips.js"></script>
 <script src="js/engines.js"></script>
