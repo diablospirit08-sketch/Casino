@@ -111,11 +111,11 @@ async function renderDep(){
     if(depNetId){netDdLbl.textContent=nets.find(n=>n.id===depNetId).name;netDdLbl.style.color='';}
     else{netDdLbl.textContent='Select network';netDdLbl.style.color='var(--muted)';}
   }
-  if(netDdBtn)netDdBtn.disabled=nets.length<=1;
-  if(netPanel)netPanel.innerHTML=nets.length>1?nets.map(n=>`
+  if(netDdBtn)netDdBtn.disabled=false;
+  if(netPanel)netPanel.innerHTML=nets.map(n=>`
     <button class="dep-dd-item${n.id===depNetId?' sel':''}" data-dn="${n.id}">
       <span>${n.name}</span>
-    </button>`).join(''):'';
+    </button>`).join('');
 
   /* network warning — shown for multi-network coins; message adapts to selection state */
   const netWarn=document.getElementById('depNetWarn');
