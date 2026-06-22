@@ -85,8 +85,8 @@ function currentNetwork(){
 async function renderDep(){
   if(!DEPOSIT[depCur]){depCur='BTC';}
   const nets=DEPOSIT[depCur].networks;
-  if(!nets.find(n=>n.id===depNetId)) depNetId=nets[0].id;
-  const net=currentNetwork();
+  /* auto-select only when there's exactly one network; otherwise wait for user */
+  if(!nets.find(n=>n.id===depNetId)) depNetId=nets.length===1?nets[0].id:null;
 
   /* currency dropdown */
   const curDdIc=document.getElementById('depCurDdIc'),curDdLbl=document.getElementById('depCurDdLbl');
@@ -104,43 +104,58 @@ async function renderDep(){
   const netDdBtn=document.getElementById('depNetDdBtn');
   const netDdLbl=document.getElementById('depNetDdLbl');
   const netPanel=document.getElementById('depNetPanel');
-  if(netDdLbl){netDdLbl.textContent=net.name;netDdLbl.style.color='';}
+  if(netDdLbl){
+    if(depNetId){netDdLbl.textContent=nets.find(n=>n.id===depNetId).name;netDdLbl.style.color='';}
+    else{netDdLbl.textContent='Select network';netDdLbl.style.color='var(--muted)';}
+  }
   if(netDdBtn)netDdBtn.disabled=nets.length<=1;
   if(netPanel)netPanel.innerHTML=nets.length>1?nets.map(n=>`
     <button class="dep-dd-item${n.id===depNetId?' sel':''}" data-dn="${n.id}">
       <span>${n.name}</span>
     </button>`).join(''):'';
 
-  depNet.textContent=net.name;
-  depMin.textContent=net.min;
-  depConf.textContent=net.conf;
-  depWarnCur.textContent=depCur;
-  /* network warning — only for multi-network coins */
+  /* network warning — shown for multi-network coins; message adapts to selection state */
   const netWarn=document.getElementById('depNetWarn');
   const netWarnMsg=document.getElementById('depNetWarnMsg');
   if(netWarn){
     const multiNet=nets.length>1;
     netWarn.hidden=!multiNet;
     if(multiNet&&netWarnMsg){
-      netWarnMsg.textContent='Your deposit must be sent on the '+net.name+' network to be processed. Sending on the wrong network will result in lost funds.';
+      if(depNetId){
+        const sel=nets.find(n=>n.id===depNetId);
+        netWarnMsg.textContent='Your deposit must be sent on the '+sel.name+' network. Sending on the wrong network will result in lost funds.';
+      } else {
+        netWarnMsg.textContent='This coin runs on multiple networks — please select a network above before depositing.';
+      }
     }
   }
-  clearTimeout(depCopyT);
-  depCopyBtn.textContent='Copy';
-  depCopyBtn.classList.remove('ok');
 
-  if(net.evm){
-    depAddr.textContent='Fetching address…';
-    drawQr('');
-    const addr=await fetchDepositAddress(depCur,net.id);
-    if(addr){depAddr.textContent=addr;drawQr(addr);}
-    else{depAddr.textContent='Sign in to get your deposit address';}
-  } else {
-    depAddr.textContent=net.addr||'Sign in to get your deposit address';
-    drawQr(net.addr);
+  /* address section — visible only after network is chosen */
+  const addrSec=document.getElementById('depAddrSection');
+  if(addrSec) addrSec.hidden=!depNetId;
+
+  if(depNetId){
+    const net=currentNetwork();
+    depNet.textContent=net.name;
+    depMin.textContent=net.min;
+    depConf.textContent=net.conf;
+    depWarnCur.textContent=depCur;
+    clearTimeout(depCopyT);
+    depCopyBtn.textContent='Copy';
+    depCopyBtn.classList.remove('ok');
+    if(net.evm){
+      depAddr.textContent='Fetching address…';
+      drawQr('');
+      const addr=await fetchDepositAddress(depCur,net.id);
+      if(addr){depAddr.textContent=addr;drawQr(addr);}
+      else{depAddr.textContent='Sign in to get your deposit address';}
+    } else {
+      depAddr.textContent=net.addr||'Sign in to get your deposit address';
+      drawQr(net.addr);
+    }
+    if(document.getElementById('depCalcEq'))document.getElementById('depCalcEq').textContent='≈ — '+depCur;
+    if(typeof updateCalc==='function')updateCalc();
   }
-  if(typeof updateCalc==='function')updateCalc();
-  if(document.getElementById('depCalcEq'))document.getElementById('depCalcEq').textContent='≈ — '+depCur;
 }
 
 /* ── deposit dropdown toggles ── */
