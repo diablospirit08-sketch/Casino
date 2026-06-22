@@ -434,7 +434,6 @@ document.getElementById('rows').innerHTML = ROWS.map(row=>`
             ${g.boost?`<span class="boost">⚡ ${g.boost}</span>`:''}
             <div class="gc-ov"><div class="gc-ov-ic"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7-11-7Z"/></svg></div><span class="gc-ov-lbl">Play Now</span></div>
           </div>
-          <div class="under"><b>${g.n}</b>${g.boost?'<span class="rtp">RTP+</span>':''}</div>
         </div>`;}).join('')}
     </div>
   </div>
@@ -511,7 +510,7 @@ document.querySelectorAll('#rows .row').forEach(rowEl=>{
   rowEl.querySelectorAll('.gtile').forEach((tile,i)=>{
     const g=GAME_BY_SLUG[tile.dataset.slug]||{};
     TILE_META.push({tile,rowEl,rowKey,ord:i,
-      name:(tile.querySelector('.under b')||{}).textContent||'',
+      name:(tile.querySelector('.nm')||{}).textContent||'',
       boost:!!tile.querySelector('.boost'),
       prov:g.p||'',isNew:g.corner==='New',live:!!g.live,demo:!!g.demo});
   });
