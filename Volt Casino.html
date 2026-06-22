@@ -1054,6 +1054,32 @@
 </style>
 </head>
 <body>
+<!-- ===== PAGE LOADER ===== -->
+<div id="pageLoader">
+  <div id="pageLoaderInner">
+    <svg width="52" height="52" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="10" fill="#120a1e"/>
+      <defs>
+        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#4287f5"/>
+          <stop offset="100%" stop-color="#f542a4"/>
+        </linearGradient>
+      </defs>
+      <path d="M19 4 9 18h8l-4 10 14-16h-9l1-8z" fill="url(#lg)"/>
+    </svg>
+    <div id="pageLoaderName">VOLT</div>
+    <div id="pageLoaderSpinner"></div>
+  </div>
+</div>
+<style>
+  #pageLoader{position:fixed;inset:0;z-index:9999;background:#120a1e;display:flex;align-items:center;justify-content:center;transition:opacity .5s ease,visibility .5s ease}
+  #pageLoader.done{opacity:0;visibility:hidden}
+  #pageLoaderInner{display:flex;flex-direction:column;align-items:center;gap:16px}
+  #pageLoaderName{font-family:'Inter',sans-serif;font-size:22px;font-weight:900;letter-spacing:.25em;background:linear-gradient(90deg,#4287f5,#f542a4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  #pageLoaderSpinner{width:32px;height:32px;border:3px solid rgba(66,135,245,.2);border-top-color:#4287f5;border-radius:50%;animation:plSpin .8s linear infinite}
+  @keyframes plSpin{to{transform:rotate(360deg)}}
+</style>
+
 
 <!-- ===== TOP BAR ===== -->
 <header>
@@ -2140,6 +2166,19 @@ if(false)(function(){
 
   goTo(0);
 })();
+</script>
+<script>
+/* dismiss page loader once all scripts have run */
+(function(){
+  function dismiss(){
+    var el=document.getElementById('pageLoader');
+    if(el)el.classList.add('done');
+  }
+  if(document.readyState==='complete'){dismiss();}
+  else{window.addEventListener('load',dismiss);}
+  /* safety fallback — never block the UI */
+  setTimeout(dismiss,3000);
+}());
 </script>
 </body>
 </html>
