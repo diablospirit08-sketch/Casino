@@ -24,14 +24,51 @@ import {
   InsufficientFundsError,
 } from '../services/ledger.js';
 
-// Supported currencies and their minimum withdrawal amounts
+// Supported currencies — minWithdraw, maxWithdraw (per tx), dailyCap (per user per day)
 const CURRENCIES = {
-  BTC:  { networks: ['mainnet'],        minWithdraw: 0.0001, fee: 0.00005 },
-  ETH:  { networks: ['mainnet'],        minWithdraw: 0.005,  fee: 0.002   },
-  USDC: { networks: ['mainnet', 'bsc', 'polygon'], minWithdraw: 10, fee: 1 },
-  BNB:  { networks: ['bsc'],            minWithdraw: 0.01,   fee: 0.001   },
-  USDT: { networks: ['mainnet', 'bsc', 'tron'],    minWithdraw: 10, fee: 1 },
+  BTC:  { networks: ['mainnet'],                   minWithdraw: 0.0001, fee: 0.00005, maxWithdraw: 0.5,   dailyCap: 1.0    },
+  ETH:  { networks: ['mainnet'],                   minWithdraw: 0.005,  fee: 0.002,   maxWithdraw: 5,     dailyCap: 10     },
+  USDC: { networks: ['mainnet', 'bsc', 'polygon'], minWithdraw: 10,     fee: 1,       maxWithdraw: 5000,  dailyCap: 10000  },
+  BNB:  { networks: ['bsc'],                       minWithdraw: 0.01,   fee: 0.001,   maxWithdraw: 50,    dailyCap: 100    },
+  USDT: { networks: ['mainnet', 'bsc', 'tron'],    minWithdraw: 10,     fee: 1,       maxWithdraw: 5000,  dailyCap: 10000  },
 };
+
+// USD-equivalent threshold above which admin gets alerted
+const ALERT_THRESHOLD = parseFloat(process.env.WITHDRAWAL_ALERT_THRESHOLD ?? '500');
+
+// Rough USD rates for alert threshold comparison (not used for accounting)
+const USD_RATES = { BTC: 65000, ETH: 3500, BNB: 600, USDT: 1, USDC: 1 };
+
+async function getDailyWithdrawn(userId, currency) {
+  const rows = await query(
+    `SELECT COALESCE(SUM(amount), 0)::NUMERIC AS total
+     FROM withdrawals
+     WHERE user_id = $1 AND currency = $2
+       AND status NOT IN ('failed','cancelled')
+       AND created_at >= date_trunc('day', NOW() AT TIME ZONE 'UTC')`,
+    [userId, currency]
+  );
+  return parseFloat(rows[0].total);
+}
+
+async function alertAdmin(payload) {
+  const url = process.env.ADMIN_WEBHOOK_URL;
+  if (!url) return;
+  const { username, userId, currency, amount, address, withdrawalId } = payload;
+  const usd = (amount * (USD_RATES[currency] ?? 1)).toFixed(0);
+  const msg = `🚨 **Large withdrawal queued**\n` +
+    `User: **${username}** (\`${userId}\`)\n` +
+    `Amount: **${amount} ${currency}** (~$${usd} USD)\n` +
+    `Address: \`${address}\`\n` +
+    `ID: \`${withdrawalId}\``;
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: msg }),
+    });
+  } catch { /* non-critical */ }
+}
 
 export async function walletRoutes(fastify) {
   // All wallet routes require auth
@@ -153,8 +190,18 @@ export async function walletRoutes(fastify) {
       return reply.code(400).send({ error: `${currency} not supported on ${network}` });
     }
     if (amount < def.minWithdraw) {
+      return reply.code(400).send({ error: `Minimum withdrawal for ${currency} is ${def.minWithdraw}` });
+    }
+    if (amount > def.maxWithdraw) {
+      return reply.code(400).send({ error: `Maximum withdrawal per transaction for ${currency} is ${def.maxWithdraw}` });
+    }
+
+    // Daily cap check
+    const dailyTotal = await getDailyWithdrawn(req.user.id, currency);
+    if (dailyTotal + amount > def.dailyCap) {
+      const remaining = Math.max(0, def.dailyCap - dailyTotal);
       return reply.code(400).send({
-        error: `Minimum withdrawal for ${currency} is ${def.minWithdraw}`,
+        error: `Daily withdrawal limit reached for ${currency}. Remaining today: ${remaining.toFixed(8)}`,
       });
     }
 
@@ -178,12 +225,24 @@ export async function walletRoutes(fastify) {
         fee: def.fee,
       });
 
-      // In production: queue the withdrawal for processing by your custody provider.
-      // Mark as processing immediately so the user sees the status.
       await query(
         `UPDATE withdrawals SET status = 'processing', updated_at = NOW() WHERE id = $1`,
         [withdrawalId]
       );
+
+      // Alert admin if withdrawal exceeds threshold
+      const usdValue = amount * (USD_RATES[currency] ?? 1);
+      if (usdValue >= ALERT_THRESHOLD) {
+        const userRows = await query(`SELECT username FROM users WHERE id = $1`, [req.user.id]);
+        alertAdmin({
+          username: userRows[0]?.username ?? req.user.id,
+          userId: req.user.id,
+          currency,
+          amount,
+          address,
+          withdrawalId,
+        });
+      }
 
       return {
         withdrawalId,
