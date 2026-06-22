@@ -246,7 +246,6 @@
   #poda:focus-within>.border::before{transform:translate(-50%,-50%) rotate(430deg);transition:all 4s}
   .glow{overflow:hidden;filter:blur(30px);opacity:.4;max-height:130px}
   .glow::before{content:"";z-index:-2;top:50%;left:50%;transform:translate(-50%,-50%) rotate(60deg);position:absolute;width:999px;height:999px;background-repeat:no-repeat;background-position:0 0;background-image:conic-gradient(#000,#402fb5 5%,#000 38%,#000 50%,#cf30aa 60%,#000 87%);transition:all 2s}
-  .grid{height:400px;width:400px;background-image:linear-gradient(to right,#0f0f10 1px,transparent 1px),linear-gradient(to bottom,#0f0f10 1px,transparent 1px);background-size:1rem 1rem;background-position:center center;position:absolute;z-index:-1;filter:blur(1px)}
   #search-icon{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;display:flex}
   .pill{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:0 18px;height:44px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:.16s}
   .pill:hover{color:var(--txt);border-color:var(--line-2)}
@@ -1141,7 +1140,6 @@
           <div id="search-icon">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           </div>
-          <div class="grid"></div>
         </div>
       </div>
       <div class="pill-wrap" id="sortWrap">
