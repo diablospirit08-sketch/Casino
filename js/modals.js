@@ -36,7 +36,6 @@ const DEPOSIT={
 };
 let depCur=voltCur,depNetId=null;
 const depOverlay=document.getElementById('depOverlay'),
-      depCoins=document.getElementById('depCoins'),
       depNet=document.getElementById('depNet'),
       depMin=document.getElementById('depMin'),
       depConf=document.getElementById('depConf'),
@@ -89,22 +88,28 @@ async function renderDep(){
   if(!nets.find(n=>n.id===depNetId)) depNetId=nets[0].id;
   const net=currentNetwork();
 
-  depCoins.innerHTML=WALLETS.map(x=>`
-    <button class="dep-coin ${x.c===depCur?'sel':''}" data-c="${x.c}">
-      ${coinImg(x.c)}${x.c}</button>`).join('');
+  /* currency dropdown */
+  const curDdIc=document.getElementById('depCurDdIc'),curDdLbl=document.getElementById('depCurDdLbl');
+  if(curDdIc){curDdIc.src=coinIconUrl(depCur);curDdIc.alt=depCur;}
+  if(curDdLbl)curDdLbl.textContent=depCur;
+  const curPanel=document.getElementById('depCurPanel');
+  if(curPanel)curPanel.innerHTML=WALLETS.map(w=>`
+    <button class="dep-dd-item${w.c===depCur?' sel':''}" data-dc="${w.c}">
+      <img src="${coinIconUrl(w.c)}" alt="${w.c}" onerror="this.style.display='none'">
+      <span>${w.c}</span>
+      <span class="bal">${fmtAmt(w)}</span>
+    </button>`).join('');
 
-  const netSel=document.getElementById('depNetSel');
-  const netLbl=document.getElementById('depNetLbl');
-  if(nets.length>1){
-    netSel.hidden=false;
-    if(netLbl)netLbl.hidden=false;
-    netSel.innerHTML=nets.map(n=>`
-      <button class="dep-net-chip ${n.id===depNetId?'sel':''}" data-n="${n.id}">${n.name}</button>`).join('');
-  } else {
-    netSel.hidden=true;
-    netSel.innerHTML='';
-    if(netLbl)netLbl.hidden=true;
-  }
+  /* network dropdown */
+  const netDdBtn=document.getElementById('depNetDdBtn');
+  const netDdLbl=document.getElementById('depNetDdLbl');
+  const netPanel=document.getElementById('depNetPanel');
+  if(netDdLbl){netDdLbl.textContent=net.name;netDdLbl.style.color='';}
+  if(netDdBtn)netDdBtn.disabled=nets.length<=1;
+  if(netPanel)netPanel.innerHTML=nets.length>1?nets.map(n=>`
+    <button class="dep-dd-item${n.id===depNetId?' sel':''}" data-dn="${n.id}">
+      <span>${n.name}</span>
+    </button>`).join(''):'';
 
   depNet.textContent=net.name;
   depMin.textContent=net.min;
@@ -138,10 +143,46 @@ async function renderDep(){
   if(document.getElementById('depCalcEq'))document.getElementById('depCalcEq').textContent='≈ — '+depCur;
 }
 
-document.getElementById('depNetSel').addEventListener('click',e=>{
-  const b=e.target.closest('.dep-net-chip');if(!b)return;
-  depNetId=b.dataset.n;renderDep();
-});
+/* ── deposit dropdown toggles ── */
+(function(){
+  function closeAll(){
+    document.getElementById('depCurPanel').hidden=true;
+    document.getElementById('depCurDdBtn').classList.remove('open');
+    document.getElementById('depNetPanel').hidden=true;
+    document.getElementById('depNetDdBtn').classList.remove('open');
+  }
+  document.getElementById('depCurDdBtn').addEventListener('click',()=>{
+    const p=document.getElementById('depCurPanel'),open=!p.hidden;
+    document.getElementById('depNetPanel').hidden=true;
+    document.getElementById('depNetDdBtn').classList.remove('open');
+    p.hidden=open;document.getElementById('depCurDdBtn').classList.toggle('open',!open);
+  });
+  document.getElementById('depNetDdBtn').addEventListener('click',()=>{
+    const b=document.getElementById('depNetDdBtn');if(b.disabled)return;
+    const p=document.getElementById('depNetPanel'),open=!p.hidden;
+    document.getElementById('depCurPanel').hidden=true;
+    document.getElementById('depCurDdBtn').classList.remove('open');
+    p.hidden=open;b.classList.toggle('open',!open);
+  });
+  document.getElementById('depCurPanel').addEventListener('click',e=>{
+    const b=e.target.closest('[data-dc]');if(!b)return;
+    depCur=b.dataset.dc;depNetId=null;closeAll();renderDep();
+  });
+  document.getElementById('depNetPanel').addEventListener('click',e=>{
+    const b=e.target.closest('[data-dn]');if(!b)return;
+    depNetId=b.dataset.dn;closeAll();renderDep();
+  });
+  document.addEventListener('click',e=>{
+    if(!document.getElementById('depCurDd')?.contains(e.target)){
+      document.getElementById('depCurPanel').hidden=true;
+      document.getElementById('depCurDdBtn').classList.remove('open');
+    }
+    if(!document.getElementById('depNetDd')?.contains(e.target)){
+      document.getElementById('depNetPanel').hidden=true;
+      document.getElementById('depNetDdBtn')?.classList.remove('open');
+    }
+  });
+})();
 /* ── amount calculator ── */
 const depUsdAmt=document.getElementById('depUsdAmt');
 const depCalcEq=document.getElementById('depCalcEq');
@@ -199,10 +240,6 @@ depOverlay.addEventListener('click',e=>{if(e.target===depOverlay)closeDep();});
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&depOverlay.classList.contains('open')){closeDep();e.stopPropagation();}
 },true);
-depCoins.addEventListener('click',e=>{
-  const b=e.target.closest('.dep-coin');if(!b)return;
-  depCur=b.dataset.c;renderDep();
-});
 depCopyBtn.addEventListener('click',()=>{
   const t=depAddr.textContent;
   if(!t||t.length<10)return;
