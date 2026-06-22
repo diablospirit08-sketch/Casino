@@ -1353,7 +1353,7 @@
       <div class="auth-tabs" id="depTabs">
         <button class="auth-tab active" data-mode="dep">Deposit</button>
         <button class="auth-tab" data-mode="wd">Withdraw</button>
-        <button class="auth-tab" data-mode="txn">Manage Wallets</button>
+        <button class="auth-tab" data-mode="buy">Buy Crypto</button>
       </div>
       <button class="icon-btn" id="depClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
     </div>
@@ -1424,6 +1424,13 @@
       </div>
       <div id="iTxnList" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:2px"></div>
       <button class="dep-copy" id="iTxnMore" style="width:100%;background:var(--panel-2);color:var(--txt);margin-top:10px;display:none">Load more</button>
+    </div>
+    <div id="buyView" hidden>
+      <p class="dep-lbl" style="margin-top:0">Select currency to buy</p>
+      <div class="dep-coins" id="buyCoins"></div>
+      <div id="buyFrame" style="margin-top:16px;border-radius:12px;overflow:hidden;min-height:480px;background:var(--bg-2);display:flex;align-items:center;justify-content:center">
+        <p style="color:var(--muted);font-size:12px;text-align:center;padding:24px">Select a currency above to open the purchase flow.</p>
+      </div>
     </div>
   </div>
 </div>
@@ -1735,7 +1742,7 @@
 <script src="js/games/keno.js"></script>
 <script src="js/games/coinflip.js"></script>
 <script src="js/vip.js?v=2"></script>
-<script src="js/modals.js?v=6"></script>
+<script src="js/modals.js?v=7"></script>
 <script src="js/extras.js?v=4"></script>
 <script src="js/balances.js"></script>
 <script src="js/bets.js"></script>

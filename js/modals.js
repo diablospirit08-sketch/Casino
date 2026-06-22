@@ -191,7 +191,8 @@ document.getElementById('depBuyBtn').addEventListener('click',()=>{
 
 function openDep(mode){
   depCur=voltCur;depNetId=null;depMode=mode||'dep';
-  if(depMode!=='txn')renderDep();
+  if(depMode==='dep')renderDep();
+  if(depMode==='wd')renderDep();
   renderDepMode();
   depOverlay.classList.add('open');
   if(depMode==='dep')startDepMonitor();
@@ -227,11 +228,12 @@ depCopyBtn.addEventListener('click',()=>{
   else flash();
 });
 
-/* ---------- deposit / withdraw / transactions tabs ---------- */
+/* ---------- deposit / withdraw / buy crypto tabs ---------- */
 const depTabsEl=document.getElementById('depTabs'),
       depView=document.getElementById('depView'),
       wdView=document.getElementById('wdView'),
       txnViewInline=document.getElementById('txnViewInline'),
+      buyView=document.getElementById('buyView'),
       wdCoins=document.getElementById('wdCoins'),
       wdAvail=document.getElementById('wdAvail'),
       wdAddr=document.getElementById('wdAddr'),
@@ -241,13 +243,37 @@ const depTabsEl=document.getElementById('depTabs'),
       wdSubmit=document.getElementById('wdSubmit');
 let depMode='dep';
 const depW=()=>WALLETS.find(x=>x.c===depCur);
+let buyCur=voltCur||'BNB';
+function renderBuyView(){
+  const buyCoins=document.getElementById('buyCoins');
+  if(buyCoins)buyCoins.innerHTML=WALLETS.map(x=>`
+    <button class="dep-coin ${x.c===buyCur?'sel':''}" data-bc="${x.c}">
+      ${coinImg(x.c)}${x.c}</button>`).join('');
+  openBuyFrame(buyCur);
+}
+function openBuyFrame(coin){
+  const frame=document.getElementById('buyFrame');if(!frame)return;
+  const addr=depAddrCache[coin+':'+((DEPOSIT[coin]?.networks||[])[0]?.id||coin)]||'';
+  const url='https://global.transak.com/?defaultCryptoCurrency='+coin.toLowerCase()
+    +(addr?'&walletAddress='+encodeURIComponent(addr):'')
+    +'&disableWalletAddressForm=true';
+  frame.innerHTML=`<iframe src="${url}" style="width:100%;height:480px;border:none;border-radius:12px" allow="camera;microphone;payment" loading="lazy"></iframe>`;
+}
+document.getElementById('buyView').addEventListener('click',e=>{
+  const b=e.target.closest('[data-bc]');if(!b)return;
+  buyCur=b.dataset.bc;
+  document.querySelectorAll('[data-bc]').forEach(x=>x.classList.toggle('sel',x.dataset.bc===buyCur));
+  openBuyFrame(buyCur);
+});
 function renderDepMode(){
   depTabsEl.querySelectorAll('.auth-tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===depMode));
   depView.hidden=depMode!=='dep';
   wdView.hidden=depMode!=='wd';
   txnViewInline.hidden=depMode!=='txn';
+  buyView.hidden=depMode!=='buy';
   if(depMode==='wd')renderWd();
   if(depMode==='txn')window.loadInlineTxnPage&&window.loadInlineTxnPage(true);
+  if(depMode==='buy')renderBuyView();
 }
 function renderWd(){
   const w=depW();
