@@ -38,6 +38,7 @@ a{color:inherit;text-decoration:none}
 
 /* ── sidebar ── */
 .sidebar{width:var(--sidebar);min-height:100vh;background:var(--bg-2);border-right:1px solid var(--line);display:flex;flex-direction:column;flex:none;position:fixed;top:0;left:0;bottom:0;z-index:10}
+.sidebar::after{content:'';position:absolute;top:0;right:0;width:2px;height:100%;background:linear-gradient(180deg,#3d9bff,#41f0a4 28%,#ffd23d 52%,#ff8a3d 76%,#ff4757);opacity:.35;pointer-events:none}
 .sb-logo{display:flex;align-items:center;gap:10px;padding:22px 20px 18px;border-bottom:1px solid var(--line)}
 .sb-logo .volt-ic{width:30px;height:30px;background:var(--spectrum);border-radius:8px;display:grid;place-items:center;font-size:14px}
 .sb-logo span{font-family:'Inter',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em}
@@ -69,9 +70,9 @@ a{color:inherit;text-decoration:none}
 
 /* ── stat cards ── */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
-.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;border-left:3px solid var(--accent,var(--mint))}
 .stat-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:7px}
-.stat-label svg{width:14px;height:14px}
+.stat-label svg{width:14px;height:14px;color:var(--accent,var(--mint))}
 .stat-val{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1}
 .stat-sub{font-size:11px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:5px}
 .stat-sub .up{color:var(--mint)}
@@ -268,7 +269,7 @@ tbody tr:last-child td{border-bottom:none}
 
       <!-- stat cards -->
       <div class="stats">
-        <div class="stat">
+        <div class="stat" style="--accent:#41f0a4">
           <div class="stat-label">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
             Total Revenue
@@ -276,7 +277,7 @@ tbody tr:last-child td{border-bottom:none}
           <div class="stat-val">$284,920</div>
           <div class="stat-sub"><span class="up">↑ 12.4%</span> vs last week</div>
         </div>
-        <div class="stat">
+        <div class="stat" style="--accent:#3d9bff">
           <div class="stat-label">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
             Active Users
@@ -284,7 +285,7 @@ tbody tr:last-child td{border-bottom:none}
           <div class="stat-val">1,847</div>
           <div class="stat-sub"><span class="up">↑ 8.1%</span> vs yesterday</div>
         </div>
-        <div class="stat">
+        <div class="stat" style="--accent:#ffd23d">
           <div class="stat-label">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
             Bets Today
@@ -292,7 +293,7 @@ tbody tr:last-child td{border-bottom:none}
           <div class="stat-val">24,391</div>
           <div class="stat-sub"><span class="dn">↓ 2.3%</span> vs yesterday</div>
         </div>
-        <div class="stat">
+        <div class="stat" style="--accent:#ff8a3d">
           <div class="stat-label">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             Total Wagered
@@ -496,18 +497,19 @@ tbody tr:last-child td{border-bottom:none}
     <!-- ═══════════════ PROMOTIONS ═══════════════ -->
     <div class="tab-content" id="tab-promos">
 
-      <div class="promo-cards">
-        <!-- Slide A: Welcome Bonus -->
+      <p style="font-size:12px;color:var(--muted);margin-bottom:20px">Edit the hero banner displayed on the casino lobby. Changes save to localStorage and apply on page reload.</p>
+      <div class="promo-cards" style="grid-template-columns:1fr 1.4fr">
+        <!-- Hero Banner (single slide) -->
         <div class="promo-card-edit" id="pce-a">
-          <div class="pce-preview" style="background:linear-gradient(110deg,#0b3320 0%,#165c3a 55%,#1e8a56 110%)">
-            <span class="pce-preview-label">🎁 New Players</span>
-            <img id="previewImgA" src="" alt="" style="display:none">
-            <span class="pce-preview-title" id="previewTitleA">Welcome Bonus</span>
+          <div class="pce-preview" style="background:linear-gradient(110deg,#2a1a8a 0%,#4433cc 55%,#5b40e8 120%)">
+            <span class="pce-preview-label">🏁 Promotion</span>
+            <img id="previewImgA" src="art/poster-wiseguys.webp" alt="" style="object-position:right center">
+            <span class="pce-preview-title" id="previewTitleA">$75,000 Weekly Race</span>
           </div>
           <div class="pce-body">
-            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlA" type="text" placeholder="https://…" value=""/></div>
-            <div class="pce-field"><label>Heading</label><input class="pce-input" id="headA" type="text" value="Welcome Bonus"/></div>
-            <div class="pce-field"><label>Subtext</label><input class="pce-input" id="subA" type="text" value="Get up to $1,000 + 150 Free Spins on your first deposit"/></div>
+            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlA" type="text" placeholder="https://… or leave blank for default" value=""/></div>
+            <div class="pce-field"><label>Heading</label><input class="pce-input" id="headA" type="text" value="$75,000 Weekly Race"/></div>
+            <div class="pce-field"><label>Subtext</label><input class="pce-input" id="subA" type="text" value="Climb the leaderboard. Earn your spot."/></div>
             <div class="pce-row">
               <label class="pce-upload" id="uploadBtnA"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Upload file<input type="file" accept="image/*" id="fileA" hidden/></label>
               <button class="pce-save" onclick="savePromo('a')">Save</button>
@@ -516,60 +518,19 @@ tbody tr:last-child td{border-bottom:none}
           </div>
         </div>
 
-        <!-- Slide B: New Releases -->
-        <div class="promo-card-edit" id="pce-b">
-          <div class="pce-preview" style="background:linear-gradient(110deg,#0b1340 0%,#162060 60%,#1e2d80 100%)">
-            <span class="pce-preview-label">⭐ Featured</span>
-            <img id="previewImgB" src="" alt="" style="display:none">
-            <span class="pce-preview-title" id="previewTitleB">New Releases</span>
-          </div>
-          <div class="pce-body">
-            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlB" type="text" placeholder="https://…" value=""/></div>
-            <div class="pce-field"><label>Heading</label><input class="pce-input" id="headB" type="text" value="New Releases"/></div>
-            <div class="pce-field"><label>Subtext</label><input class="pce-input" id="subB" type="text" value="Discover and play the latest games on VOLT."/></div>
-            <div class="pce-row">
-              <label class="pce-upload" id="uploadBtnB"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Upload file<input type="file" accept="image/*" id="fileB" hidden/></label>
-              <button class="pce-save" onclick="savePromo('b')">Save</button>
+        <!-- Live preview -->
+        <div style="background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="padding:14px 18px;border-bottom:1px solid var(--line);font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.1em;text-transform:uppercase">Live Preview</div>
+          <div style="flex:1;padding:20px;display:flex;align-items:center;justify-content:center;background:var(--bg-2)">
+            <div style="width:100%;border-radius:10px;overflow:hidden;position:relative;height:160px;background:linear-gradient(110deg,#2a1a8a,#5b40e8)">
+              <img id="livePreviewImg" src="art/poster-wiseguys.webp" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right center;opacity:.85">
+              <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(6,8,18,.88) 0%,rgba(6,8,18,.35) 55%,transparent 100%)"></div>
+              <div style="position:absolute;bottom:16px;left:16px;z-index:2">
+                <div style="font-size:9px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;background:rgba(0,0,0,.4);padding:3px 9px;border-radius:99px;margin-bottom:6px;display:inline-block">🏁 Promotion</div>
+                <div id="livePreviewHead" style="font-size:18px;font-weight:900;text-transform:uppercase;line-height:1">$75,000 Weekly Race</div>
+                <div id="livePreviewSub" style="font-size:10px;opacity:.55;margin-top:4px;font-weight:700;letter-spacing:.06em;text-transform:uppercase">Climb the leaderboard. Earn your spot.</div>
+              </div>
             </div>
-            <div class="pce-toast" id="toastB"></div>
-          </div>
-        </div>
-
-        <!-- Slide C: Weekly Race -->
-        <div class="promo-card-edit" id="pce-c">
-          <div class="pce-preview" style="background:linear-gradient(110deg,#2a1a8a 0%,#4433cc 55%,#5b40e8 120%)">
-            <span class="pce-preview-label">🏁 Promotion</span>
-            <img id="previewImgC" src="" alt="" style="display:none">
-            <span class="pce-preview-title" id="previewTitleC">$75,000 Weekly Race</span>
-          </div>
-          <div class="pce-body">
-            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlC" type="text" placeholder="https://…" value=""/></div>
-            <div class="pce-field"><label>Heading</label><input class="pce-input" id="headC" type="text" value="$75,000 Weekly Race"/></div>
-            <div class="pce-field"><label>Subtext</label><input class="pce-input" id="subC" type="text" value="Climb the leaderboard. Earn your spot."/></div>
-            <div class="pce-row">
-              <label class="pce-upload" id="uploadBtnC"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Upload file<input type="file" accept="image/*" id="fileC" hidden/></label>
-              <button class="pce-save" onclick="savePromo('c')">Save</button>
-            </div>
-            <div class="pce-toast" id="toastC"></div>
-          </div>
-        </div>
-
-        <!-- Slide D: Sports Cashback -->
-        <div class="promo-card-edit" id="pce-d">
-          <div class="pce-preview" style="background:linear-gradient(110deg,#3d1000 0%,#8b2e00 55%,#c84a0a 120%)">
-            <span class="pce-preview-label">⚡ Sports</span>
-            <img id="previewImgD" src="" alt="" style="display:none">
-            <span class="pce-preview-title" id="previewTitleD">Sports Cashback</span>
-          </div>
-          <div class="pce-body">
-            <div class="pce-field"><label>Image URL</label><input class="pce-input" id="urlD" type="text" placeholder="https://…" value=""/></div>
-            <div class="pce-field"><label>Heading</label><input class="pce-input" id="headD" type="text" value="Sports Cashback"/></div>
-            <div class="pce-field"><label>Subtext</label><input class="pce-input" id="subD" type="text" value="Get 10% back on every sports bet, every week."/></div>
-            <div class="pce-row">
-              <label class="pce-upload" id="uploadBtnD"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Upload file<input type="file" accept="image/*" id="fileD" hidden/></label>
-              <button class="pce-save" onclick="savePromo('d')">Save</button>
-            </div>
-            <div class="pce-toast" id="toastD"></div>
           </div>
         </div>
       </div>
@@ -889,58 +850,54 @@ const LS_PROMOS='volt-promos';
 function loadPromoState(){ try{ return JSON.parse(localStorage.getItem(LS_PROMOS))||{}; }catch{ return {}; } }
 function initPromoEditor(){
   const state=loadPromoState();
-  ['a','b','c','d'].forEach(k=>{
-    const K=k.toUpperCase();
-    const imgEl=$('previewImg'+K);
-    if(state[k]){
-      if(state[k].img){
-        const urlEl=$('url'+K);
-        imgEl.src=state[k].img;
-        imgEl.style.display='';
-        if(state[k].img.startsWith('data:')){
-          urlEl.value='(uploaded file)';
-          urlEl.dataset.dataUrl=state[k].img;
-        } else {
-          urlEl.value=state[k].img;
-        }
-      }
-      if(state[k].head){ $('head'+K).value=state[k].head; $('previewTitle'+K).textContent=state[k].head; }
-      if(state[k].sub)  $('sub'+K).value=state[k].sub;
+  const imgEl=$('previewImgA');
+  if(state.a){
+    if(state.a.img){
+      imgEl.src=state.a.img;
+      $('livePreviewImg').src=state.a.img;
+      if(state.a.img.startsWith('data:')){$('urlA').value='(uploaded file)';$('urlA').dataset.dataUrl=state.a.img;}
+      else $('urlA').value=state.a.img;
     }
-    $('url'+K).addEventListener('input',e=>{
-      const v=e.target.value.trim();
-      if(v){ imgEl.src=v; imgEl.style.display=''; delete $('url'+K).dataset.dataUrl; }
-      else { imgEl.src=''; imgEl.style.display='none'; }
-    });
-    $('head'+K).addEventListener('input',e=>{
-      $('previewTitle'+K).textContent=e.target.value||' ';
-    });
-    $('file'+K).addEventListener('change',e=>{
-      const f=e.target.files[0]; if(!f) return;
-      const reader=new FileReader();
-      reader.onload=ev=>{
-        const url=ev.target.result;
-        imgEl.src=url; imgEl.style.display='';
-        $('url'+K).value='(uploaded file)';
-        $('url'+K).dataset.dataUrl=url;
-      };
-      reader.readAsDataURL(f);
-    });
+    if(state.a.head){$('headA').value=state.a.head;$('previewTitleA').textContent=state.a.head;$('livePreviewHead').textContent=state.a.head;}
+    if(state.a.sub){$('subA').value=state.a.sub;$('livePreviewSub').textContent=state.a.sub;}
+  }
+  $('urlA').addEventListener('input',e=>{
+    const v=e.target.value.trim();
+    imgEl.src=v||'art/poster-wiseguys.webp';
+    $('livePreviewImg').src=v||'art/poster-wiseguys.webp';
+    delete $('urlA').dataset.dataUrl;
+  });
+  $('headA').addEventListener('input',e=>{
+    const v=e.target.value||'$75,000 Weekly Race';
+    $('previewTitleA').textContent=v;
+    $('livePreviewHead').textContent=v;
+  });
+  $('subA').addEventListener('input',e=>{
+    $('livePreviewSub').textContent=e.target.value||'Climb the leaderboard. Earn your spot.';
+  });
+  $('fileA').addEventListener('change',e=>{
+    const f=e.target.files[0];if(!f)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const url=ev.target.result;
+      imgEl.src=url;$('livePreviewImg').src=url;
+      $('urlA').value='(uploaded file)';$('urlA').dataset.dataUrl=url;
+    };
+    reader.readAsDataURL(f);
   });
 }
 window.savePromo=function(k){
-  const K=k.toUpperCase();
-  const urlEl=$('url'+K);
+  const urlEl=$('url'+k.toUpperCase());
   const img=urlEl.dataset.dataUrl||urlEl.value.trim();
-  const head=$('head'+K).value.trim();
-  const sub=$('sub'+K).value.trim();
-  const state=loadPromoState(); state[k]={img,head,sub};
-  const toast=$('toast'+K);
+  const head=$('head'+k.toUpperCase()).value.trim();
+  const sub=$('sub'+k.toUpperCase()).value.trim();
+  const state=loadPromoState();state[k]={img,head,sub};
+  const toast=$('toast'+k.toUpperCase());
   try{
     localStorage.setItem(LS_PROMOS,JSON.stringify(state));
     toast.textContent='✓ Saved — reload the casino page to see changes';
   }catch(e){
-    toast.textContent='⚠ Image too large to save — try a smaller file or use a URL instead';
+    toast.textContent='⚠ Image too large to save — try a URL instead';
     toast.style.color='#f87171';
   }
   setTimeout(()=>{toast.textContent='';toast.style.color='';},4000);
