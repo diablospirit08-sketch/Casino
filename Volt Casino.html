@@ -549,6 +549,10 @@
   .vault-hist-amt{font-weight:900;font-variant-numeric:tabular-nums}
   .vault-hist-time{font-size:10px;color:var(--muted-2);text-align:right;white-space:nowrap}
   .vault-empty{padding:24px 0;text-align:center;color:var(--muted-2);font-size:12px;font-weight:700}
+  .vault-cur-btn{display:flex;align-items:center;gap:5px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--muted);font-family:inherit;font-size:10.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;cursor:pointer;transition:.14s}
+  .vault-cur-btn:hover{border-color:var(--line-2);color:var(--txt)}
+  .vault-cur-btn.active{border-color:var(--mint);color:var(--txt);background:rgba(155,61,255,.1)}
+  .vault-cur-btn img{width:18px;height:18px;border-radius:50%;object-fit:cover;flex:none}
 
   /* ===== FOOTER ===== */
   footer{margin-top:60px;border-top:1px solid var(--line);padding:50px 0 36px}
@@ -1519,6 +1523,7 @@
       <p class="vault-bal-big" id="vaultBalBig">0.0000 BTC</p>
       <p class="vault-bal-sub" id="vaultBalFiat">≈ $0.00</p>
     </div>
+    <div id="vaultCurPicker" style="display:flex;gap:6px;flex-wrap:wrap;padding:0 22px 10px;justify-content:center"></div>
     <div class="vault-row" style="padding-bottom:4px">
       <span class="dep-lbl" style="margin:0;font-size:11px">Wallet Balance</span>
       <b id="vaultWalletBal" style="font-size:13px;font-variant-numeric:tabular-nums">—</b>
