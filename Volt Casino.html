@@ -2607,7 +2607,7 @@ if(false)(function(){
     updateChip();
     renderBanner();
     renderModal();
-    if(typeof showToast==='function')showToast('⚡ '+p+' VIO claimed!','Your tokens are ready to withdraw.','⚡');
+    if(typeof showToast==='function')showToast({icon:'⚡',title:p+' VIO claimed!',sub:'Your tokens are ready to withdraw.'});
   });
 
   /* connect wallet — placeholder */

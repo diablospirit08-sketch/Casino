@@ -434,7 +434,8 @@ authSubmit.addEventListener('click',async()=>{
   authSubmit.textContent='…';
   try{
     if(authMode==='up'){
-      const{data,error}=await supa.auth.signUp({email:authEmail.value,password:authPass.value});
+      const signupEmail=authEmail.value;
+      const{data,error}=await supa.auth.signUp({email:signupEmail,password:authPass.value});
       if(error)throw error;
       if(!data.session){
         closeAuth();
@@ -443,7 +444,7 @@ authSubmit.addEventListener('click',async()=>{
       }
       /* signup success — show username picker before finishing */
       closeAuth();
-      openUnamePicker(authEmail.value);
+      openUnamePicker(signupEmail);
       return;
     } else {
       const{error}=await supa.auth.signInWithPassword({email:authEmail.value,password:authPass.value});

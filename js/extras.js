@@ -297,10 +297,11 @@ $id('profSaveBtn').addEventListener('click',async()=>{
   if(!name)return;
   btn.textContent='Saving…';btn.disabled=true;
   try{
-    await supa.auth.updateUser({data:{full_name:name}});
+    const r=await voltApi._fetch('/api/auth/username',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:name})});
+    if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.error||'Save failed');}
     $id('profName').textContent=name;
     showToast({icon:'✓',title:'Profile updated',col:'#4287f5'});
-  }catch(_){showToast({icon:'⚠',title:'Could not save',col:'#f87171'});}
+  }catch(e){showToast({icon:'⚠',title:'Could not save',sub:e.message,col:'#f87171'});}
   btn.textContent='Save';btn.disabled=false;
 });
 
