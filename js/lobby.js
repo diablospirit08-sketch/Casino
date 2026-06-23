@@ -238,7 +238,29 @@ document.getElementById('railNav').innerHTML = railItems.map((r,i)=>`
   <div class="rail-foot">
     <span class="sep"></span>
     <button class="auth-in" id="giftBtn" title="Daily Bonus">
-      <span class="it" style="position:relative"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="24" height="24"><defs><linearGradient id="gift-grad" x1="6" x2="58" y1="32" y2="32" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#5932e6"/><stop offset=".343" stop-color="#8632e6"/><stop offset=".646" stop-color="#b332e6"/><stop offset=".903" stop-color="#e032e6"/></linearGradient></defs><path fill="url(#gift-grad)" d="M53 17h-4V6a1 1 0 0 0-1.242-.97L36.67 7.8a6.957 6.957 0 0 0-9.342 0L16.242 5.03A1 1 0 0 0 15 6v11h-4a5.006 5.006 0 0 0-5 5v10a1 1 0 0 0 1 1h1v21a5.006 5.006 0 0 0 5 5h38a5.006 5.006 0 0 0 5-5V33h1a1 1 0 0 0 1-1V22a5.006 5.006 0 0 0-5-5ZM37 57H27V33h10ZM27 31v-4.382l2.553 1.277A1 1 0 0 0 31 27v-7.08a6.298 6.298 0 0 0 2 0V27a1 1 0 0 0 1.447.895L37 26.618V31Zm-4-11.72 4.329-1.081A7.012 7.012 0 0 0 29 19.315v6.067l-2.553-1.276a1.001 1.001 0 0 0-.894 0L23 25.382Zm15.447 4.825a1.001 1.001 0 0 0-.894 0L35 25.382v-6.067a7.012 7.012 0 0 0 1.671-1.116L41 19.28v6.1Zm-.385-7.62A6.942 6.942 0 0 0 38.92 14H42a1 1 0 0 0 0-2h-3.08a6.943 6.943 0 0 0-.858-2.485L47 7.281v11.438ZM32 8a5 5 0 1 1-5 5 5.006 5.006 0 0 1 5-5Zm-15-.72 8.938 2.235A6.942 6.942 0 0 0 25.08 12H22a1 1 0 0 0 0 2h3.08a6.942 6.942 0 0 0 .858 2.485L17 18.719ZM8 22a3.003 3.003 0 0 1 3-3h4v1a1 1 0 0 0 1.242.97L21 19.78V27a1 1 0 0 0 1.447.895L25 26.618V31H8Zm2 32V33h15v24H13a3.003 3.003 0 0 1-3-3Zm44 0a3.003 3.003 0 0 1-3 3H39V33h15Zm2-23H39v-4.382l2.553 1.277A1 1 0 0 0 43 27v-7.22l4.758 1.19A1 1 0 0 0 49 20v-1h4a3.003 3.003 0 0 1 3 3ZM18 54a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V44a1 1 0 0 1 2 0v9h3a1 1 0 0 1 1 1Zm36-32v6a1 1 0 0 1-2 0v-6a1 1 0 0 1 2 0ZM23 54a1 1 0 0 1-1 1h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 1 1Z"/></svg><i class="dot" id="giftDot" hidden></i></span>
+      <span class="it" style="position:relative"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="24" height="24">
+  <!-- box body -->
+  <rect x="8" y="42" width="84" height="52" rx="6" fill="#7c52e0" stroke="#1a1a2e" stroke-width="4"/>
+  <!-- box highlight -->
+  <rect x="14" y="48" width="72" height="18" rx="3" fill="#9b7ae8" opacity=".5"/>
+  <!-- box lid -->
+  <rect x="5" y="33" width="90" height="18" rx="6" fill="#8b5cf6" stroke="#1a1a2e" stroke-width="4"/>
+  <!-- lid highlight -->
+  <rect x="11" y="38" width="78" height="8" rx="3" fill="#b48af7" opacity=".45"/>
+  <!-- vertical ribbon on body -->
+  <rect x="43" y="42" width="14" height="52" rx="2" fill="#f5c842" stroke="#c9920a" stroke-width="1.5"/>
+  <!-- vertical ribbon on lid -->
+  <rect x="43" y="33" width="14" height="18" rx="2" fill="#f5c842" stroke="#c9920a" stroke-width="1.5"/>
+  <!-- bow left loop -->
+  <ellipse cx="32" cy="26" rx="16" ry="11" fill="#f5c842" stroke="#1a1a2e" stroke-width="3.5" transform="rotate(-20 32 26)"/>
+  <ellipse cx="33" cy="27" rx="9" ry="6" fill="#fad55c" transform="rotate(-20 33 27)"/>
+  <!-- bow right loop -->
+  <ellipse cx="68" cy="26" rx="16" ry="11" fill="#f5c842" stroke="#1a1a2e" stroke-width="3.5" transform="rotate(20 68 26)"/>
+  <ellipse cx="67" cy="27" rx="9" ry="6" fill="#fad55c" transform="rotate(20 67 27)"/>
+  <!-- bow knot -->
+  <circle cx="50" cy="30" r="9" fill="#f5c842" stroke="#1a1a2e" stroke-width="3.5"/>
+  <circle cx="50" cy="30" r="5" fill="#fad55c"/>
+</svg><i class="dot" id="giftDot" hidden></i></span>
       <span class="lbl">Daily Bonus</span>
     </button>
     <a href="#" id="railChat" title="Live support">
