@@ -10,7 +10,9 @@
       "Bash(git fetch *)",
       "Bash(git pull *)",
       "Bash(git stash *)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Skill(run)",
+      "Skill(run:*)"
     ]
   }
 }
