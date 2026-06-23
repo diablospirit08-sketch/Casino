@@ -6,7 +6,8 @@
       "PowerShell(Get-ChildItem \"e:\\\\Projects\\\\casino\\\\backend\" | Where-Object { $_.PSIsContainer -eq $false } | Select-Object Name)",
       "PowerShell(Get-ChildItem \"e:\\\\Projects\\\\casino\\\\backend\" | Where-Object { $_.PSIsContainer -eq $true } | Select-Object Name)",
       "Bash(grep -v \"//\\\\|node_modules\\\\|localStorage\\\\|volt-xp\\\\|volt-streak\\\\|volt-claim\\\\|volt-notif\\\\|volt-game\\\\|voltApi\\\\|VoltApi\\\\|volt-lang\\\\|CSS\\\\|spectrum\\\\|css\\\\|#\")",
-      "Bash(grep -v \"node_modules\\\\|//\\\\|comment\")"
+      "Bash(grep -v \"node_modules\\\\|//\\\\|comment\")",
+      "Bash(npx vercel *)"
     ]
   }
 }

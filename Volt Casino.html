@@ -549,6 +549,10 @@
   .vault-hist-amt{font-weight:900;font-variant-numeric:tabular-nums}
   .vault-hist-time{font-size:10px;color:var(--muted-2);text-align:right;white-space:nowrap}
   .vault-empty{padding:24px 0;text-align:center;color:var(--muted-2);font-size:12px;font-weight:700}
+  .vault-cur-btn{display:flex;align-items:center;gap:5px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--muted);font-family:inherit;font-size:10.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;cursor:pointer;transition:.14s}
+  .vault-cur-btn:hover{border-color:var(--line-2);color:var(--txt)}
+  .vault-cur-btn.active{border-color:var(--mint);color:var(--txt);background:rgba(155,61,255,.1)}
+  .vault-cur-btn img{width:18px;height:18px;border-radius:50%;object-fit:cover;flex:none}
 
   /* ===== FOOTER ===== */
   footer{margin-top:60px;border-top:1px solid var(--line);padding:50px 0 36px}
@@ -1154,13 +1158,13 @@
           <button class="umi" id="prefBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>User Preferences</button>
           <button class="umi" id="inboxBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>Inbox</button>
           <button class="umi" id="txnMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>Transactions</button>
+          <button class="umi" id="vaultBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M12 9v-2M12 17v-2M9 12H7M17 12h-2"/><circle cx="18.5" cy="8.5" r="1"/></svg>Vault</button>
           <button class="umi" id="profileBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>History</button>
           <button class="umi" id="supportMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>Live Support</button>
           <div class="um-divider"></div>
           <button class="umi out" id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 4h4v16h-4"/><path d="M11 8l-4 4 4 4M7 12h10"/></svg>Log Out</button>
           <!-- hidden stubs for JS compat -->
           <button id="walletMenuBtn" hidden></button>
-          <button id="vaultBtn" hidden></button>
           <button id="rbBtn" hidden><span class="umi-dot" id="rbDot" hidden></span></button>
           <button id="loyaltyBtn" hidden></button>
         </div>
@@ -1519,6 +1523,7 @@
       <p class="vault-bal-big" id="vaultBalBig">0.0000 BTC</p>
       <p class="vault-bal-sub" id="vaultBalFiat">≈ $0.00</p>
     </div>
+    <div id="vaultCurPicker" style="display:flex;gap:6px;flex-wrap:wrap;padding:0 22px 10px;justify-content:center"></div>
     <div class="vault-row" style="padding-bottom:4px">
       <span class="dep-lbl" style="margin:0;font-size:11px">Wallet Balance</span>
       <b id="vaultWalletBal" style="font-size:13px;font-variant-numeric:tabular-nums">—</b>

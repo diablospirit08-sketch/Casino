@@ -309,6 +309,7 @@ const vaultOverlay=$id('vaultOverlay');
 const VAULT={};
 WALLETS.forEach(w=>VAULT[w.c]=0);
 let vaultMode='lock';
+let vaultCurSel=voltCur;
 const _vpPfx='volt-vault-';let _vpUid=null;
 function _vpKey(){return _vpPfx+(_vpUid||'guest');}
 function _vpSave(){try{localStorage.setItem(_vpKey(),JSON.stringify(VAULT));}catch(_){}}
@@ -321,18 +322,35 @@ function _vpLoad(uid){
 }
 (async()=>{const{data:{session}}=await supa.auth.getSession();_vpLoad(session?.user?.id);})();
 supa.auth.onAuthStateChange((_,s)=>{_vpLoad(s?.user?.id);});
+function _vaultW(){return WALLETS.find(x=>x.c===vaultCurSel)||WALLETS[0];}
 function _vaultTimeAgo(iso){
   const s=Math.floor((Date.now()-new Date(iso))/1000);
   if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';
   if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
 }
+function _buildVaultPicker(){
+  const el=$id('vaultCurPicker');if(!el)return;
+  el.innerHTML=WALLETS.map(w=>`
+    <button class="vault-cur-btn${w.c===vaultCurSel?' active':''}" data-vc="${w.c}">
+      <img src="${coinIconUrl(w.c)}" alt="${w.c}" onerror="this.style.display='none'">
+      ${w.c}
+    </button>`).join('');
+  el.querySelectorAll('.vault-cur-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      vaultCurSel=btn.dataset.vc;
+      _buildVaultPicker();
+      if($id('vaultAmt'))$id('vaultAmt').value='';
+      renderVault();
+    });
+  });
+}
 function renderVault(){
-  const w=curW();
+  const w=_vaultW();
   const vBal=VAULT[w.c]||0;
   const door=$id('vaultDoor');
   if(door)door.classList.toggle('unlocked',vBal>0);
   const bb=$id('vaultBalBig');if(bb)bb.textContent=fmtW(w,vBal)+' '+w.c;
-  const bf=$id('vaultBalFiat');if(bf)bf.textContent='≈ $'+(vBal*w.rate).toFixed(2);
+  const bf=$id('vaultBalFiat');if(bf)bf.textContent='≈ $'+(vBal*(w.rate||0)).toFixed(2);
   const wb=$id('vaultWalletBal');if(wb)wb.textContent=fmtW(w,w.amt)+' '+w.c;
   const ic=$id('vaultCoinIc');if(ic){ic.style.background=w.col;ic.textContent=w.s;}
   const histKey='hist_'+w.c;
@@ -352,7 +370,7 @@ function renderVault(){
 }
 function _validateVault(){
   const btn=$id('vaultAction');if(!btn)return;
-  const w=curW(),a=parseFloat(($id('vaultAmt')||{}).value)||0;
+  const w=_vaultW(),a=parseFloat(($id('vaultAmt')||{}).value)||0;
   const max=vaultMode==='lock'?w.amt:(VAULT[w.c]||0);
   btn.disabled=!(a>0&&a<=max);
 }
@@ -370,6 +388,8 @@ function _setVaultMode(m){
 }
 window.openVault=function(){
   _vpLoad(_vpUid);
+  vaultCurSel=voltCur;
+  _buildVaultPicker();
   renderVault();
   _setVaultMode('lock');
   vaultOverlay.classList.add('open');
@@ -379,21 +399,21 @@ $id('vaultTabLock').addEventListener('click',()=>_setVaultMode('lock'));
 $id('vaultTabUnlock').addEventListener('click',()=>_setVaultMode('unlock'));
 $id('vaultAmt').addEventListener('input',_validateVault);
 $id('vaultMax').addEventListener('click',()=>{
-  const w=curW();
+  const w=_vaultW();
   $id('vaultAmt').value=fmtW(w,floorW(w,vaultMode==='lock'?w.amt:(VAULT[w.c]||0)));
   _validateVault();
 });
 document.querySelectorAll('.vault-pct').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const pct=parseInt(btn.dataset.pct)/100;
-    const w=curW();
+    const w=_vaultW();
     const src=vaultMode==='lock'?w.amt:(VAULT[w.c]||0);
     $id('vaultAmt').value=fmtW(w,floorW(w,src*pct));
     _validateVault();
   });
 });
 $id('vaultAction').addEventListener('click',()=>{
-  const w=curW();
+  const w=_vaultW();
   const amtIn=$id('vaultAmt');
   const max=vaultMode==='lock'?w.amt:(VAULT[w.c]||0);
   const a=Math.min(parseFloat(amtIn.value)||0,max);
