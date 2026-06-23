@@ -305,12 +305,10 @@ $id('profSaveBtn').addEventListener('click',async()=>{
 });
 
 /* ---------- vault ---------- */
-const vaultOverlay=$id('vaultOverlay'),vaultAmtIn=$id('vaultAmt'),
-      vaultGo=$id('vaultGo'),vaultIcEl=$id('vaultIc');
+const vaultOverlay=$id('vaultOverlay');
 const VAULT={};
 WALLETS.forEach(w=>VAULT[w.c]=0);
-let vaultMode='in';
-/* persistence — scoped to user ID so different accounts don't share a vault */
+let vaultMode='lock';
 const _vpPfx='volt-vault-';let _vpUid=null;
 function _vpKey(){return _vpPfx+(_vpUid||'guest');}
 function _vpSave(){try{localStorage.setItem(_vpKey(),JSON.stringify(VAULT));}catch(_){}}
@@ -321,49 +319,103 @@ function _vpLoad(uid){
     Object.keys(VAULT).forEach(c=>{VAULT[c]=Math.max(0,parseFloat(s[c])||0);});
   }catch(_){}
 }
-(async()=>{const{data:{session}}=await supa.auth.getSession();_vpLoad(session?.user?.id);renderVault();})();
-supa.auth.onAuthStateChange((_,s)=>{_vpLoad(s?.user?.id);renderVault();});
+(async()=>{const{data:{session}}=await supa.auth.getSession();_vpLoad(session?.user?.id);})();
+supa.auth.onAuthStateChange((_,s)=>{_vpLoad(s?.user?.id);});
+function _vaultTimeAgo(iso){
+  const s=Math.floor((Date.now()-new Date(iso))/1000);
+  if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
+}
 function renderVault(){
   const w=curW();
-  $id('vaultTabs').querySelectorAll('.auth-tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===vaultMode));
-  $id('vaultWal').textContent=fmtW(w,w.amt)+' '+w.c;
-  $id('vaultBal').textContent=fmtW(w,VAULT[w.c])+' '+w.c;
-  vaultIcEl.style.background=w.col;vaultIcEl.textContent=w.s;
-  vaultGo.textContent=vaultMode==='in'?'Move to Vault':'Move to Wallet';
-  validateVault();
+  const vBal=VAULT[w.c]||0;
+  const door=$id('vaultDoor');
+  if(door)door.classList.toggle('unlocked',vBal>0);
+  const bb=$id('vaultBalBig');if(bb)bb.textContent=fmtW(w,vBal)+' '+w.c;
+  const bf=$id('vaultBalFiat');if(bf)bf.textContent='≈ $'+(vBal*w.rate).toFixed(2);
+  const wb=$id('vaultWalletBal');if(wb)wb.textContent=fmtW(w,w.amt)+' '+w.c;
+  const ic=$id('vaultCoinIc');if(ic){ic.style.background=w.col;ic.textContent=w.s;}
+  const histKey='hist_'+w.c;
+  const hist=(JSON.parse(localStorage.getItem(_vpKey())||'{}')||{})[histKey]||[];
+  const hEl=$id('vaultHistory');
+  if(hEl){
+    if(!hist.length){hEl.innerHTML='<p class="vault-empty">No vault activity yet.</p>';}
+    else{hEl.innerHTML=hist.slice().reverse().map(h=>`
+      <div class="vault-hist-row">
+        <div class="vault-hist-ic ${h.type==='lock'?'lock':'unlock'}">${h.type==='lock'?'🔒':'🔓'}</div>
+        <span class="vault-hist-label">${h.type==='lock'?'Locked':'Unlocked'}</span>
+        <b class="vault-hist-amt">${h.amt} ${w.c}</b>
+        <span class="vault-hist-time">${_vaultTimeAgo(h.ts)}</span>
+      </div>`).join('');}
+  }
+  _validateVault();
 }
-function validateVault(){
-  const w=curW(),a=parseFloat(vaultAmtIn.value);
-  const max=vaultMode==='in'?w.amt:VAULT[w.c];
-  vaultGo.disabled=!(a>0&&a<=max);
+function _validateVault(){
+  const btn=$id('vaultAction');if(!btn)return;
+  const w=curW(),a=parseFloat(($id('vaultAmt')||{}).value)||0;
+  const max=vaultMode==='lock'?w.amt:(VAULT[w.c]||0);
+  btn.disabled=!(a>0&&a<=max);
 }
-$id('vaultBtn').addEventListener('click',()=>{
-  avatarWrap.classList.remove('open');
-  vaultMode='in';vaultAmtIn.value='';
+function _setVaultMode(m){
+  vaultMode=m;
+  const tl=$id('vaultTabLock'),tu=$id('vaultTabUnlock'),btn=$id('vaultAction');
+  if(tl)tl.classList.toggle('active',m==='lock');
+  if(tu)tu.classList.toggle('active',m==='unlock');
+  if(btn){
+    btn.textContent=m==='lock'?'Lock Funds':'Unlock Funds';
+    btn.style.background=m==='lock'?'var(--accent-grad)':'linear-gradient(90deg,#0e6b4a,#41f0a4)';
+  }
+  const amtIn=$id('vaultAmt');if(amtIn)amtIn.value='';
+  _validateVault();
+}
+window.openVault=function(){
+  _vpLoad(_vpUid);
   renderVault();
+  _setVaultMode('lock');
   vaultOverlay.classList.add('open');
-});
-$id('vaultTabs').addEventListener('click',e=>{
-  const t=e.target.closest('.auth-tab');
-  if(t){vaultMode=t.dataset.mode;renderVault();}
-});
+};
+$id('vaultBtn').addEventListener('click',()=>{avatarWrap.classList.remove('open');openVault();});
+$id('vaultTabLock').addEventListener('click',()=>_setVaultMode('lock'));
+$id('vaultTabUnlock').addEventListener('click',()=>_setVaultMode('unlock'));
+$id('vaultAmt').addEventListener('input',_validateVault);
 $id('vaultMax').addEventListener('click',()=>{
   const w=curW();
-  vaultAmtIn.value=fmtW(w,floorW(w,vaultMode==='in'?w.amt:VAULT[w.c]));
-  validateVault();
+  $id('vaultAmt').value=fmtW(w,floorW(w,vaultMode==='lock'?w.amt:(VAULT[w.c]||0)));
+  _validateVault();
 });
-vaultAmtIn.addEventListener('input',validateVault);
-vaultGo.addEventListener('click',()=>{
-  if(vaultGo.disabled)return;
+document.querySelectorAll('.vault-pct').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const pct=parseInt(btn.dataset.pct)/100;
+    const w=curW();
+    const src=vaultMode==='lock'?w.amt:(VAULT[w.c]||0);
+    $id('vaultAmt').value=fmtW(w,floorW(w,src*pct));
+    _validateVault();
+  });
+});
+$id('vaultAction').addEventListener('click',()=>{
   const w=curW();
-  const max=vaultMode==='in'?w.amt:VAULT[w.c];
-  const a=Math.min(parseFloat(vaultAmtIn.value)||0,max);
+  const amtIn=$id('vaultAmt');
+  const max=vaultMode==='lock'?w.amt:(VAULT[w.c]||0);
+  const a=Math.min(parseFloat(amtIn.value)||0,max);
   if(a<=0)return;
-  if(vaultMode==='in'){creditTo(w,-a);VAULT[w.c]+=a;}
-  else{VAULT[w.c]-=a;creditTo(w,a);}
-  _vpSave();
-  showToast({icon:'🔒',title:vaultMode==='in'?'Moved to vault':'Moved to wallet',sub:fmtW(w,a)+' '+w.c});
-  vaultAmtIn.value='';
+  /* save history */
+  const stateRaw=JSON.parse(localStorage.getItem(_vpKey())||'{}');
+  const histKey='hist_'+w.c;
+  const hist=stateRaw[histKey]||[];
+  hist.push({type:vaultMode==='lock'?'lock':'unlock',amt:fmtW(w,a),ts:new Date().toISOString()});
+  if(vaultMode==='lock'){
+    creditTo(w,-a);
+    VAULT[w.c]=(VAULT[w.c]||0)+a;
+    showToast({icon:'🔒',title:'Funds locked',sub:fmtW(w,a)+' '+w.c+' moved to your Vault.'});
+  }else{
+    VAULT[w.c]=Math.max(0,(VAULT[w.c]||0)-a);
+    creditTo(w,a);
+    showToast({icon:'🔓',title:'Funds unlocked',sub:fmtW(w,a)+' '+w.c+' returned to your wallet.'});
+  }
+  stateRaw[histKey]=hist;
+  WALLETS.forEach(x=>{stateRaw[x.c]=VAULT[x.c];});
+  try{localStorage.setItem(_vpKey(),JSON.stringify(stateRaw));}catch(_){}
+  amtIn.value='';
   renderVault();
 });
 $id('vaultClose').addEventListener('click',()=>vaultOverlay.classList.remove('open'));
