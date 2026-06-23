@@ -39,9 +39,9 @@
     --fs-xl:24px;
     --font-ui:'Inter',system-ui,sans-serif;
     --font-display:'Cinzel',serif;
-    --volt:#e8a020;
-    --volt-dim:rgba(232,160,32,.12);
-    --volt-border:rgba(232,160,32,.28);
+    --vio:#e8a020;
+    --vio-dim:rgba(232,160,32,.12);
+    --vio-border:rgba(232,160,32,.28);
   }
   body.rail-min{--rail:56px}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -1096,81 +1096,81 @@
   @keyframes shimmer{to{background-position:200% 0}}
   .gcover image-slot:not([data-filled]){background:linear-gradient(90deg,rgba(255,255,255,.03) 25%,rgba(255,255,255,.11) 50%,rgba(255,255,255,.03) 75%);background-size:200% 100%;animation:shimmer 1.5s linear infinite}
 
-  /* ===== VOLT TOKEN ===== */
+  /* ===== VIO TOKEN ===== */
   /* header chip — lives inside .wallet pill */
-  .volt-hdr-chip{display:none;align-items:center;gap:5px;padding:0 14px;height:100%;border:none;border-left:1px solid var(--line-2);background:transparent;color:var(--volt);font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;transition:.15s;white-space:nowrap;letter-spacing:.02em}
-  body.authed .volt-hdr-chip{display:flex}
-  .volt-hdr-chip:hover{background:var(--volt-dim)}
-  .volt-hdr-chip svg{width:13px;height:13px;flex:none}
+  .vio-hdr-chip{display:none;align-items:center;gap:5px;padding:0 14px;height:100%;border:none;border-left:1px solid var(--line-2);background:transparent;color:var(--vio);font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;transition:.15s;white-space:nowrap;letter-spacing:.02em}
+  body.authed .vio-hdr-chip{display:flex}
+  .vio-hdr-chip:hover{background:var(--vio-dim)}
+  .vio-hdr-chip svg{width:13px;height:13px;flex:none}
 
   /* modal hero */
-  .volt-hero{display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 22px 18px;text-align:center}
-  .volt-ic{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#2a1a00,#120d00);border:3px solid var(--volt);box-shadow:0 0 0 6px var(--volt-dim),0 8px 28px -8px rgba(0,0,0,.8);display:grid;place-items:center}
-  .volt-ic svg{width:38px;height:38px;color:var(--volt)}
-  .volt-bal-big{font-size:30px;font-weight:900;letter-spacing:.02em;font-variant-numeric:tabular-nums;color:var(--volt)}
-  .volt-bal-sub{font-size:12px;color:var(--muted);font-weight:600}
+  .vio-hero{display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 22px 18px;text-align:center}
+  .vio-ic{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#2a1a00,#120d00);border:3px solid var(--vio);box-shadow:0 0 0 6px var(--vio-dim),0 8px 28px -8px rgba(0,0,0,.8);display:grid;place-items:center}
+  .vio-ic svg{width:38px;height:38px;color:var(--vio)}
+  .vio-bal-big{font-size:30px;font-weight:900;letter-spacing:.02em;font-variant-numeric:tabular-nums;color:var(--vio)}
+  .vio-bal-sub{font-size:12px;color:var(--muted);font-weight:600}
 
   /* earn-rate pills */
-  .volt-rates{display:flex;justify-content:center;gap:8px;padding:0 22px 4px;flex-wrap:wrap}
-  .volt-rate-pill{display:inline-flex;align-items:center;gap:6px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:99px;padding:6px 12px;font-size:10.5px;font-weight:700;color:var(--muted)}
-  .volt-rate-pill b{color:var(--txt);font-weight:800}
+  .vio-rates{display:flex;justify-content:center;gap:8px;padding:0 22px 4px;flex-wrap:wrap}
+  .vio-rate-pill{display:inline-flex;align-items:center;gap:6px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:99px;padding:6px 12px;font-size:10.5px;font-weight:700;color:var(--muted)}
+  .vio-rate-pill b{color:var(--txt);font-weight:800}
 
   /* progress */
-  .volt-prog-wrap{padding:4px 22px 0}
-  .volt-prog-head{display:flex;justify-content:space-between;font-size:10.5px;font-weight:800;color:var(--muted-2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
-  .volt-prog-head span:last-child{color:var(--txt)}
-  .volt-prog-bar{height:8px;background:var(--panel-2);border-radius:99px;overflow:hidden}
-  .volt-prog-fill{height:100%;background:linear-gradient(90deg,#8a4e00,var(--volt));border-radius:99px;transition:width .5s ease;min-width:4px}
-  .volt-prog-note{margin-top:7px;font-size:11px;color:var(--muted);font-weight:600}
-  .volt-prog-note b{color:var(--volt)}
+  .vio-prog-wrap{padding:4px 22px 0}
+  .vio-prog-head{display:flex;justify-content:space-between;font-size:10.5px;font-weight:800;color:var(--muted-2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+  .vio-prog-head span:last-child{color:var(--txt)}
+  .vio-prog-bar{height:8px;background:var(--panel-2);border-radius:99px;overflow:hidden}
+  .vio-prog-fill{height:100%;background:linear-gradient(90deg,#8a4e00,var(--vio));border-radius:99px;transition:width .5s ease;min-width:4px}
+  .vio-prog-note{margin-top:7px;font-size:11px;color:var(--muted);font-weight:600}
+  .vio-prog-note b{color:var(--vio)}
 
   /* claimable box */
-  .volt-claim-box{margin:14px 22px 0;background:var(--volt-dim);border:1px solid var(--volt-border);border-radius:13px;padding:13px 16px;display:flex;align-items:center;gap:12px}
-  .volt-claim-ic{width:40px;height:40px;border-radius:50%;background:rgba(232,160,32,.2);display:grid;place-items:center;flex:none}
-  .volt-claim-ic svg{width:20px;height:20px;color:var(--volt)}
-  .volt-claim-meta{flex:1;min-width:0}
-  .volt-claim-meta b{display:block;font-size:16px;font-weight:900;color:var(--volt);font-variant-numeric:tabular-nums}
-  .volt-claim-meta span{display:block;font-size:10.5px;color:var(--muted);font-weight:600;margin-top:2px}
+  .vio-claim-box{margin:14px 22px 0;background:var(--vio-dim);border:1px solid var(--vio-border);border-radius:13px;padding:13px 16px;display:flex;align-items:center;gap:12px}
+  .vio-claim-ic{width:40px;height:40px;border-radius:50%;background:rgba(232,160,32,.2);display:grid;place-items:center;flex:none}
+  .vio-claim-ic svg{width:20px;height:20px;color:var(--vio)}
+  .vio-claim-meta{flex:1;min-width:0}
+  .vio-claim-meta b{display:block;font-size:16px;font-weight:900;color:var(--vio);font-variant-numeric:tabular-nums}
+  .vio-claim-meta span{display:block;font-size:10.5px;color:var(--muted);font-weight:600;margin-top:2px}
 
   /* action button */
-  .volt-action{display:block;margin:12px 22px 0;width:calc(100% - 44px);height:46px;border:none;border-radius:12px;background:linear-gradient(90deg,#8a4e00,var(--volt));color:#0a0800;font-family:inherit;font-size:12px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.18s;box-shadow:0 6px 20px -8px rgba(232,160,32,.5)}
-  .volt-action:hover{filter:brightness(1.1);transform:translateY(-1px)}
-  .volt-action:disabled{opacity:.42;pointer-events:none;box-shadow:none}
+  .vio-action{display:block;margin:12px 22px 0;width:calc(100% - 44px);height:46px;border:none;border-radius:12px;background:linear-gradient(90deg,#8a4e00,var(--vio));color:#0a0800;font-family:inherit;font-size:12px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.18s;box-shadow:0 6px 20px -8px rgba(232,160,32,.5)}
+  .vio-action:hover{filter:brightness(1.1);transform:translateY(-1px)}
+  .vio-action:disabled{opacity:.42;pointer-events:none;box-shadow:none}
 
   /* withdraw section */
-  .volt-withdraw{margin:16px 22px 0}
-  .volt-wallet-btn{width:100%;display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:11px;color:var(--txt);font-family:inherit;font-size:12px;font-weight:800;letter-spacing:.04em;cursor:pointer;transition:.15s;text-align:left}
-  .volt-wallet-btn:hover{border-color:var(--volt)}
-  .volt-wallet-btn svg{width:16px;height:16px;flex:none;opacity:.6}
-  .volt-withdraw-note{margin-top:8px;font-size:10.5px;color:var(--muted-2);line-height:1.6}
-  .volt-withdraw-note b{color:var(--muted)}
+  .vio-withdraw{margin:16px 22px 0}
+  .vio-wallet-btn{width:100%;display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:11px;color:var(--txt);font-family:inherit;font-size:12px;font-weight:800;letter-spacing:.04em;cursor:pointer;transition:.15s;text-align:left}
+  .vio-wallet-btn:hover{border-color:var(--vio)}
+  .vio-wallet-btn svg{width:16px;height:16px;flex:none;opacity:.6}
+  .vio-withdraw-note{margin-top:8px;font-size:10.5px;color:var(--muted-2);line-height:1.6}
+  .vio-withdraw-note b{color:var(--muted)}
 
   /* history */
-  .volt-history{padding:0 22px 22px;display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto}
-  .volt-hist-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--panel-2);border-radius:9px;font-size:12px}
-  .volt-hist-ic{width:28px;height:28px;border-radius:50%;background:var(--volt-dim);display:grid;place-items:center;flex:none}
-  .volt-hist-ic svg{width:13px;height:13px;color:var(--volt)}
-  .volt-hist-label{flex:1;font-weight:700;color:var(--muted)}
-  .volt-hist-amt{font-weight:900;color:var(--volt);font-variant-numeric:tabular-nums}
-  .volt-hist-time{font-size:10px;color:var(--muted-2);white-space:nowrap}
-  .volt-empty{padding:20px 0;text-align:center;color:var(--muted-2);font-size:12px;font-weight:700}
+  .vio-history{padding:0 22px 22px;display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto}
+  .vio-hist-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--panel-2);border-radius:9px;font-size:12px}
+  .vio-hist-ic{width:28px;height:28px;border-radius:50%;background:var(--vio-dim);display:grid;place-items:center;flex:none}
+  .vio-hist-ic svg{width:13px;height:13px;color:var(--vio)}
+  .vio-hist-label{flex:1;font-weight:700;color:var(--muted)}
+  .vio-hist-amt{font-weight:900;color:var(--vio);font-variant-numeric:tabular-nums}
+  .vio-hist-time{font-size:10px;color:var(--muted-2);white-space:nowrap}
+  .vio-empty{padding:20px 0;text-align:center;color:var(--muted-2);font-size:12px;font-weight:700}
 
   /* lobby earn banner */
-  .volt-banner{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--volt-border);background:linear-gradient(135deg,#1a1000 0%,var(--panel) 65%);padding:20px 22px;display:flex;align-items:center;gap:18px;margin:20px 0;cursor:pointer;transition:border-color .2s,box-shadow .2s}
-  .volt-banner:hover{border-color:var(--volt);box-shadow:0 8px 32px -12px rgba(232,160,32,.25)}
-  .volt-banner::before{content:'';position:absolute;top:-50px;right:-30px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(232,160,32,.12) 0%,transparent 70%);pointer-events:none}
-  .volt-banner-ic{width:50px;height:50px;border-radius:50%;background:var(--volt-dim);border:2px solid var(--volt-border);display:grid;place-items:center;flex:none}
-  .volt-banner-ic svg{width:24px;height:24px;color:var(--volt)}
-  .volt-banner-body{flex:1;min-width:0}
-  .volt-banner-body h3{font-size:14px;font-weight:800;color:var(--txt);margin-bottom:3px;letter-spacing:.01em}
-  .volt-banner-body p{font-size:12px;color:var(--muted);line-height:1.5}
-  .volt-banner-body p b{color:var(--volt)}
-  .volt-banner-prog-bar{height:4px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;margin-top:10px}
-  .volt-banner-prog-fill{height:100%;background:linear-gradient(90deg,#8a4e00,var(--volt));border-radius:99px;transition:width .5s ease}
-  .volt-banner-prog-note{display:flex;justify-content:space-between;font-size:10px;color:var(--muted-2);margin-top:5px;font-weight:600}
-  .volt-banner-cta{flex:none;background:linear-gradient(90deg,#8a4e00,var(--volt));color:#0a0800;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:10px 18px;border-radius:99px;white-space:nowrap;border:none;cursor:pointer;font-family:inherit;transition:.15s}
-  .volt-banner-cta:hover{filter:brightness(1.08)}
-  @media(max-width:600px){.volt-banner-cta{display:none}}
+  .vio-banner{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--vio-border);background:linear-gradient(135deg,#1a1000 0%,var(--panel) 65%);padding:20px 22px;display:flex;align-items:center;gap:18px;margin:20px 0;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+  .vio-banner:hover{border-color:var(--vio);box-shadow:0 8px 32px -12px rgba(232,160,32,.25)}
+  .vio-banner::before{content:'';position:absolute;top:-50px;right:-30px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(232,160,32,.12) 0%,transparent 70%);pointer-events:none}
+  .vio-banner-ic{width:50px;height:50px;border-radius:50%;background:var(--vio-dim);border:2px solid var(--vio-border);display:grid;place-items:center;flex:none}
+  .vio-banner-ic svg{width:24px;height:24px;color:var(--vio)}
+  .vio-banner-body{flex:1;min-width:0}
+  .vio-banner-body h3{font-size:14px;font-weight:800;color:var(--txt);margin-bottom:3px;letter-spacing:.01em}
+  .vio-banner-body p{font-size:12px;color:var(--muted);line-height:1.5}
+  .vio-banner-body p b{color:var(--vio)}
+  .vio-banner-prog-bar{height:4px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;margin-top:10px}
+  .vio-banner-prog-fill{height:100%;background:linear-gradient(90deg,#8a4e00,var(--vio));border-radius:99px;transition:width .5s ease}
+  .vio-banner-prog-note{display:flex;justify-content:space-between;font-size:10px;color:var(--muted-2);margin-top:5px;font-weight:600}
+  .vio-banner-cta{flex:none;background:linear-gradient(90deg,#8a4e00,var(--vio));color:#0a0800;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:10px 18px;border-radius:99px;white-space:nowrap;border:none;cursor:pointer;font-family:inherit;transition:.15s}
+  .vio-banner-cta:hover{filter:brightness(1.08)}
+  @media(max-width:600px){.vio-banner-cta{display:none}}
 </style>
 </head>
 <body>
@@ -1206,9 +1206,9 @@
         <span class="cur" id="walletCur">BTC</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
       </button>
-      <button class="volt-hdr-chip" id="voltHdrChip" aria-label="VOLT token balance">
+      <button class="vio-hdr-chip" id="vioHdrChip" aria-label="Vio token balance">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11l-2 8.5L19.5 10H13L14.5 2z"/></svg>
-        <span id="voltHdrAmt">0</span>
+        <span id="vioHdrAmt">0</span>
       </button>
       <button class="wallet-dep" id="walletDep">Deposit</button>
       <div class="hdr-menu" id="walletMenu"></div>
@@ -1245,7 +1245,7 @@
           <button class="umi" id="inboxBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>Inbox</button>
           <button class="umi" id="txnMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>Transactions</button>
           <button class="umi" id="vaultBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M12 9v-2M12 17v-2M9 12H7M17 12h-2"/><circle cx="18.5" cy="8.5" r="1"/></svg>Vault</button>
-          <button class="umi" id="tokenBtn" style="color:var(--volt)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--volt)"><path d="M13 2 4.5 13.5H11l-2 8.5L19.5 10H13L14.5 2z"/></svg>VOLT Token</button>
+          <button class="umi" id="vioTokenBtn" style="color:var(--vio)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--vio)"><path d="M13 2 4.5 13.5H11l-2 8.5L19.5 10H13L14.5 2z"/></svg>Vio Token</button>
           <button class="umi" id="supportMenuBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>Live Support</button>
           <div class="um-divider"></div>
           <button class="umi out" id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 4h4v16h-4"/><path d="M11 8l-4 4 4 4M7 12h10"/></svg>Log Out</button>
@@ -1280,13 +1280,13 @@
           <button class="btn btn-mint" id="hcarSignupBtn" style="margin-top:16px;position:relative;z-index:2">Claim Bonus</button>
         </div>
 
-        <!-- Slide 1: VOLT Token -->
+        <!-- Slide 1: Vio Token -->
         <div class="hcar-slide" data-i="1" style="background:linear-gradient(135deg,#120d00 0%,#0e0e16 100%)">
           <img class="hcar-deco" src="art/ember-mascot.webp" alt="">
-          <span class="hcar-tag" style="color:var(--volt);border:1px solid var(--volt-border)">⚡ VOLT Token</span>
+          <span class="hcar-tag" style="color:var(--vio);border:1px solid var(--vio-border)">⚡ Vio Token</span>
           <h2 class="hcar-head">Earn while<br>you play</h2>
-          <p class="hcar-sub">1 VOLT per $10 wagered. Withdraw to Base network.</p>
-          <button class="btn" id="hcarVoltBtn" style="margin-top:16px;position:relative;z-index:2;background:linear-gradient(90deg,#8a4e00,var(--volt));color:#0a0800;padding:11px 22px">Learn More</button>
+          <p class="hcar-sub">1 VIO per $10 wagered. Withdraw to Base network.</p>
+          <button class="btn" id="hcarVioBtn" style="margin-top:16px;position:relative;z-index:2;background:linear-gradient(90deg,#8a4e00,var(--vio));color:#0a0800;padding:11px 22px">Learn More</button>
         </div>
 
         <!-- Slide 2: Weekly Race -->
@@ -1328,21 +1328,21 @@
       </div>
     </div>
 
-    <!-- VOLT earn banner -->
-    <div class="volt-banner" id="voltBanner" role="button" tabindex="0" aria-label="Open VOLT Token">
-      <div class="volt-banner-ic">
+    <!-- Vio earn banner -->
+    <div class="vio-banner" id="vioBanner" role="button" tabindex="0" aria-label="Open Vio Token">
+      <div class="vio-banner-ic">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11l-2 8.5L19.5 10H13L14.5 2z"/></svg>
       </div>
-      <div class="volt-banner-body">
-        <h3>Earn VOLT by Playing</h3>
-        <p>Earn <b>1 VOLT</b> for every <b>$10</b> wagered. Claim and withdraw to your wallet on Base.</p>
-        <div class="volt-banner-prog-bar"><div class="volt-banner-prog-fill" id="voltBannerFill" style="width:0%"></div></div>
-        <div class="volt-banner-prog-note">
-          <span id="voltBannerLeft">Sign in to track your progress</span>
-          <span id="voltBannerRight"></span>
+      <div class="vio-banner-body">
+        <h3>Earn Vio by Playing</h3>
+        <p>Earn <b>1 VIO</b> for every <b>$10</b> wagered. Claim and withdraw to your wallet on Base.</p>
+        <div class="vio-banner-prog-bar"><div class="vio-banner-prog-fill" id="vioBannerFill" style="width:0%"></div></div>
+        <div class="vio-banner-prog-note">
+          <span id="vioBannerLeft">Sign in to track your progress</span>
+          <span id="vioBannerRight"></span>
         </div>
       </div>
-      <button class="volt-banner-cta">View Token</button>
+      <button class="vio-banner-cta">View Vio</button>
     </div>
 
     <!-- categories -->
@@ -2072,75 +2072,75 @@
 </div>
 
 
-<!-- ===== VOLT TOKEN MODAL ===== -->
-<div class="dep-overlay" id="voltOverlay" data-screen-label="VOLT Token">
-  <div class="dep-modal" role="dialog" aria-modal="true" aria-label="VOLT Token" style="max-width:420px;padding:0;overflow:hidden">
+<!-- ===== VIO TOKEN MODAL ===== -->
+<div class="dep-overlay" id="vioOverlay" data-screen-label="Vio Token">
+  <div class="dep-modal" role="dialog" aria-modal="true" aria-label="Vio Token" style="max-width:420px;padding:0;overflow:hidden">
     <div class="dep-head" style="padding:18px 22px 14px">
-      <span style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--volt)">
+      <span style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--vio)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11l-2 8.5L19.5 10H13L14.5 2z"/></svg>
-        VOLT Token
+        Vio Token
       </span>
-      <button class="dep-close" id="voltClose" aria-label="Close">✕</button>
+      <button class="dep-close" id="vioClose" aria-label="Close">✕</button>
     </div>
 
     <!-- hero balance -->
-    <div class="volt-hero">
-      <div class="volt-ic">
+    <div class="vio-hero">
+      <div class="vio-ic">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11l-2 8.5L19.5 10H13L14.5 2z"/></svg>
       </div>
-      <p id="voltBalBig" class="volt-bal-big">0 VOLT</p>
-      <p id="voltBalSub" class="volt-bal-sub">≈ $0.00</p>
+      <p id="vioBalBig" class="vio-bal-big">0 VIO</p>
+      <p id="vioBalSub" class="vio-bal-sub">≈ $0.00</p>
     </div>
 
     <!-- earn rate pills -->
-    <div class="volt-rates">
-      <span class="volt-rate-pill"><b>1 VOLT</b>&nbsp;per $10 wagered</span>
-      <span class="volt-rate-pill">1 VOLT ≈ <b>$0.10</b></span>
-      <span class="volt-rate-pill">Chain: <b>Base</b></span>
+    <div class="vio-rates">
+      <span class="vio-rate-pill"><b>1 VIO</b>&nbsp;per $10 wagered</span>
+      <span class="vio-rate-pill">1 VIO ≈ <b>$0.10</b></span>
+      <span class="vio-rate-pill">Chain: <b>Base</b></span>
     </div>
 
     <div class="vault-sep" style="margin:16px 0 0"></div>
 
     <!-- wager progress -->
-    <div class="volt-prog-wrap" style="padding-top:14px">
-      <div class="volt-prog-head">
+    <div class="vio-prog-wrap" style="padding-top:14px">
+      <div class="vio-prog-head">
         <span>Wager Progress</span>
-        <span><span id="voltProgWagered">$0</span> / <span id="voltProgGoal">$1,000</span></span>
+        <span><span id="vioProgWagered">$0</span> / <span id="vioProgGoal">$1,000</span></span>
       </div>
-      <div class="volt-prog-bar"><div class="volt-prog-fill" id="voltProgFill" style="width:0%"></div></div>
-      <p class="volt-prog-note" id="voltProgNote">Every <b>$100</b> wagered unlocks <b>10 VOLT</b></p>
+      <div class="vio-prog-bar"><div class="vio-prog-fill" id="vioProgFill" style="width:0%"></div></div>
+      <p class="vio-prog-note" id="vioProgNote">Every <b>$100</b> wagered unlocks <b>10 VIO</b></p>
     </div>
 
     <!-- claimable box -->
-    <div class="volt-claim-box">
-      <div class="volt-claim-ic">
+    <div class="vio-claim-box">
+      <div class="vio-claim-ic">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11l-2 8.5L19.5 10H13L14.5 2z"/></svg>
       </div>
-      <div class="volt-claim-meta">
-        <b id="voltClaimAmt">0 VOLT pending</b>
-        <span id="voltClaimNote">Wager more to unlock your next batch</span>
+      <div class="vio-claim-meta">
+        <b id="vioClaimAmt">0 VIO pending</b>
+        <span id="vioClaimNote">Wager more to unlock your next batch</span>
       </div>
     </div>
-    <button class="volt-action" id="voltClaimBtn" disabled>Nothing to claim yet</button>
+    <button class="vio-action" id="vioClaimBtn" disabled>Nothing to claim yet</button>
 
     <div class="vault-sep" style="margin:16px 0 0"></div>
 
     <!-- withdraw to wallet -->
-    <div class="volt-withdraw" style="padding-bottom:4px">
+    <div class="vio-withdraw" style="padding-bottom:4px">
       <p class="dep-lbl" style="padding:0;margin-bottom:10px">Withdraw to Wallet</p>
-      <button class="volt-wallet-btn" id="voltWalletBtn">
+      <button class="vio-wallet-btn" id="vioWalletBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5"/><circle cx="16" cy="12" r="1.5" fill="currentColor"/></svg>
         Connect Wallet
       </button>
-      <p class="volt-withdraw-note" id="voltWithdrawNote">Connect a Web3 wallet to withdraw VOLT to the <b>Base network</b>. Contract deployment coming soon.</p>
+      <p class="vio-withdraw-note" id="vioWithdrawNote">Connect a Web3 wallet to withdraw VIO to the <b>Base network</b>. Contract deployment coming soon.</p>
     </div>
 
     <div class="vault-sep" style="margin:16px 0 0"></div>
 
     <!-- history -->
     <p class="dep-lbl" style="padding:0 22px;margin-bottom:8px">Claim History</p>
-    <div class="volt-history" id="voltHistory">
-      <p class="volt-empty">No claims yet. Start wagering to earn VOLT.</p>
+    <div class="vio-history" id="vioHistory">
+      <p class="vio-empty">No claims yet. Start wagering to earn VIO.</p>
     </div>
   </div>
 </div>
@@ -2473,9 +2473,9 @@ if(false)(function(){
     var o=document.getElementById('authOverlay');
     if(o)o.classList.add('open');
   });
-  var voltBtn=document.getElementById('hcarVoltBtn');
+  var voltBtn=document.getElementById('hcarVioBtn');
   if(voltBtn)voltBtn.addEventListener('click',function(){
-    var o=document.getElementById('voltOverlay');
+    var o=document.getElementById('vioOverlay');
     if(o)o.classList.add('open');
   });
   var raceBtn=document.getElementById('hcarRaceBtn');
@@ -2496,7 +2496,7 @@ if(false)(function(){
 }());
 </script>
 <script>
-/* ===== VOLT TOKEN ENGINE ===== */
+/* ===== VIO TOKEN ENGINE ===== */
 (function(){
   var BOLT_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11l-2 8.5L19.5 10H13L14.5 2z"/></svg>';
 
@@ -2505,7 +2505,7 @@ if(false)(function(){
     balance:1240,
     wagered:680,
     goal:1000,
-    earnPer:10,      /* VOLT per $100 wagered */
+    earnPer:10,      /* VIO per $100 wagered */
     wagerPer:100,    /* $ per batch */
     usdRate:0.10,
     history:[
@@ -2524,51 +2524,51 @@ if(false)(function(){
 
   function renderModal(){
     var p=pending();
-    $i('voltBalBig').textContent=fmtNum(S.balance)+' VOLT';
-    $i('voltBalSub').textContent='≈ '+fmtUsd(S.balance);
-    $i('voltProgFill').style.width=pct()+'%';
-    $i('voltProgWagered').textContent='$'+S.wagered.toLocaleString();
-    $i('voltProgGoal').textContent='$'+S.goal.toLocaleString();
+    $i('vioBalBig').textContent=fmtNum(S.balance)+'' VIO'';
+    $i('vioBalSub').textContent='≈ '+fmtUsd(S.balance);
+    $i('vioProgFill').style.width=pct()+'%';
+    $i('vioProgWagered').textContent='$'+S.wagered.toLocaleString();
+    $i('vioProgGoal').textContent='$'+S.goal.toLocaleString();
     var nextAt=S.wagerPer-(S.wagered%S.wagerPer);
-    $i('voltProgNote').innerHTML='Every <b>$'+S.wagerPer+'</b> wagered unlocks <b>'+S.earnPer+' VOLT</b>';
+    $i('vioProgNote').innerHTML='Every <b>$'+S.wagerPer+'</b> wagered unlocks <b>'+S.earnPer+' VIO</b>';
     /* claim box */
     if(p>0){
-      $i('voltClaimAmt').textContent='+'+p+' VOLT ready';
-      $i('voltClaimNote').textContent='Wager $'+nextAt+' more to earn the next '+S.earnPer+' VOLT';
+      $i('vioClaimAmt').textContent='+'+p+' VIO ready';
+      $i('vioClaimNote').textContent='Wager $'+nextAt+' more to earn the next '+S.earnPer+'' VIO'';
     }else{
-      $i('voltClaimAmt').textContent='0 VOLT pending';
-      $i('voltClaimNote').textContent='Wager $'+nextAt+' more to unlock '+S.earnPer+' VOLT';
+      $i('vioClaimAmt').textContent='0 VIO pending';
+      $i('vioClaimNote').textContent='Wager $'+nextAt+' more to unlock '+S.earnPer+'' VIO'';
     }
-    var btn=$i('voltClaimBtn');
+    var btn=$i('vioClaimBtn');
     btn.disabled=p===0;
-    btn.textContent=p>0?'Claim '+p+' VOLT':'Nothing to claim yet';
+    btn.textContent=p>0?'Claim '+p+'' VIO'':'Nothing to claim yet';
     renderHistory();
   }
 
   function renderHistory(){
-    var el=$i('voltHistory');
+    var el=$i('vioHistory');
     if(!el)return;
-    if(!S.history.length){el.innerHTML='<p class="volt-empty">No claims yet. Start wagering to earn VOLT.</p>';return;}
+    if(!S.history.length){el.innerHTML='<p class="vio-empty">No claims yet. Start wagering to earn VIO.</p>';return;}
     el.innerHTML=S.history.map(function(h){
-      return '<div class="volt-hist-row">'+
-        '<div class="volt-hist-ic">'+BOLT_SVG+'</div>'+
-        '<span class="volt-hist-label">Claimed</span>'+
-        '<span class="volt-hist-amt">+'+h.amt+' VOLT</span>'+
-        '<span class="volt-hist-time">'+h.time+'</span>'+
+      return '<div class="vio-hist-row">'+
+        '<div class="vio-hist-ic">'+BOLT_SVG+'</div>'+
+        '<span class="vio-hist-label">Claimed</span>'+
+        '<span class="vio-hist-amt">+'+h.amt+' VIO</span>'+
+        '<span class="vio-hist-time">'+h.time+'</span>'+
         '</div>';
     }).join('');
   }
 
   function renderBanner(){
-    var fill=$i('voltBannerFill');
-    var left=$i('voltBannerLeft');
-    var right=$i('voltBannerRight');
+    var fill=$i('vioBannerFill');
+    var left=$i('vioBannerLeft');
+    var right=$i('vioBannerRight');
     if(!fill)return;
     var isAuthed=document.body.classList.contains('authed');
     if(isAuthed){
       fill.style.width=pct()+'%';
       if(left)left.textContent='$'+S.wagered+' / $'+S.goal+' wagered this period';
-      if(right)right.textContent=fmtNum(S.balance)+' VOLT earned';
+      if(right)right.textContent=fmtNum(S.balance)+' VIO earned';
     }else{
       fill.style.width='0%';
       if(left)left.textContent='Sign in to track your progress';
@@ -2577,28 +2577,28 @@ if(false)(function(){
   }
 
   function updateChip(){
-    var chip=$i('voltHdrAmt');
+    var chip=$i('vioHdrAmt');
     if(chip)chip.textContent=fmtNum(S.balance);
   }
 
   /* open / close */
   function openVolt(){
     renderModal();
-    $i('voltOverlay').classList.add('open');
+    $i('vioOverlay').classList.add('open');
     var aw=$i('avatarWrap');
     if(aw)aw.classList.remove('open');
   }
-  function closeVolt(){$i('voltOverlay').classList.remove('open');}
+  function closeVolt(){$i('vioOverlay').classList.remove('open');}
 
-  $i('tokenBtn').addEventListener('click',openVolt);
-  $i('voltHdrChip').addEventListener('click',openVolt);
-  $i('voltClose').addEventListener('click',closeVolt);
-  $i('voltOverlay').addEventListener('click',function(e){if(e.target===this)closeVolt();});
-  $i('voltBanner').addEventListener('click',openVolt);
-  $i('voltBanner').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openVolt();}});
+  $i('vioTokenBtn').addEventListener('click',openVolt);
+  $i('vioHdrChip').addEventListener('click',openVolt);
+  $i('vioClose').addEventListener('click',closeVolt);
+  $i('vioOverlay').addEventListener('click',function(e){if(e.target===this)closeVolt();});
+  $i('vioBanner').addEventListener('click',openVolt);
+  $i('vioBanner').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openVolt();}});
 
   /* claim */
-  $i('voltClaimBtn').addEventListener('click',function(){
+  $i('vioClaimBtn').addEventListener('click',function(){
     var p=pending();
     if(!p)return;
     S.balance+=p;
@@ -2607,13 +2607,13 @@ if(false)(function(){
     updateChip();
     renderBanner();
     renderModal();
-    if(typeof showToast==='function')showToast('⚡ '+p+' VOLT claimed!','Your tokens are ready to withdraw.','⚡');
+    if(typeof showToast==='function')showToast('⚡ '+p+' VIO claimed!','Your tokens are ready to withdraw.','⚡');
   });
 
   /* connect wallet — placeholder */
-  $i('voltWalletBtn').addEventListener('click',function(){
-    var note=$i('voltWithdrawNote');
-    if(note)note.innerHTML='<b>Coming soon.</b> On-chain withdrawals will be enabled once the VOLT contract is deployed on Base.';
+  $i('vioWalletBtn').addEventListener('click',function(){
+    var note=$i('vioWithdrawNote');
+    if(note)note.innerHTML='<b>Coming soon.</b> On-chain withdrawals will be enabled once the VIO contract is deployed on Base.';
     this.disabled=true;
     this.textContent='Not yet available';
   });
