@@ -235,9 +235,9 @@ async function openProfile(){
       $id('profVerifiedBadge').hidden=false;
       $id('profFine').textContent='Signed in as '+email;
     } else {
-      $id('profName').textContent='volt_player';
+      $id('profName').textContent='viofyre_player';
       $id('profEmail').value='';
-      $id('profUsername').value='volt_player';
+      $id('profUsername').value='viofyre_player';
       $id('profJoined').textContent='—';
       $id('profVerifiedBadge').hidden=true;
       $id('profFine').textContent='Demo profile — progress is stored in this browser only.';
@@ -413,15 +413,15 @@ raceOverlay.addEventListener('click',e=>{if(e.target===raceOverlay)closeRace();}
 /* ---------- info pages + footer links ---------- */
 const infoOverlay=$id('infoOverlay');
 const PAGES={
-  terms:['Terms of Service','<p><b>VOLT is a fictional product</b> built for design demonstration purposes. It is not a gambling operator, holds no licence, accepts no wagers and pays out no winnings.</p><p>By using this demo you acknowledge that all balances, games, odds and rewards shown are simulated and carry no monetary value of any kind.</p><p>All game names, providers and brands shown are illustrative placeholders.</p>'],
+  terms:['Terms of Service','<p><b>VIOFYRE is a fictional product</b> built for design demonstration purposes. It is not a gambling operator, holds no licence, accepts no wagers and pays out no winnings.</p><p>By using this demo you acknowledge that all balances, games, odds and rewards shown are simulated and carry no monetary value of any kind.</p><p>All game names, providers and brands shown are illustrative placeholders.</p>'],
   privacy:['Privacy Policy','<p>Your account, balances, bets and transactions are stored securely in our database. Your email and password are managed by <b>Supabase Auth</b> and never stored in plain text.</p><p>Preferences such as your avatar and selected currency are saved locally in your browser via <b>localStorage</b>. No analytics or third-party tracking scripts are used.</p>'],
-  fraud:['Anti-Fraud Policy','<p>A real operator would document chargeback handling, bonus-abuse detection and multi-accounting rules here.</p><p>Since VOLT is a demo with no real money involved, this page is a placeholder for that policy.</p>'],
-  aml:['AML Policy','<p>A real operator would document KYC tiers, source-of-funds checks and transaction monitoring here.</p><p>Since VOLT is a demo with no real money involved, this page is a placeholder for that policy.</p>'],
+  fraud:['Anti-Fraud Policy','<p>A real operator would document chargeback handling, bonus-abuse detection and multi-accounting rules here.</p><p>Since VIOFYRE is a demo with no real money involved, this page is a placeholder for that policy.</p>'],
+  aml:['AML Policy','<p>A real operator would document KYC tiers, source-of-funds checks and transaction monitoring here.</p><p>Since VIOFYRE is a demo with no real money involved, this page is a placeholder for that policy.</p>'],
   sports:['Sports','<p>The sportsbook is not part of this demo — only the casino lobby is implemented.</p>'],
   referrals:['Referrals','<p>Invite friends, earn a cut of their wagers — that\'s how this page would work on a real platform.</p><p>In this demo there are no accounts, so there\'s no one to refer. Sorry to you and your imaginary friends.</p>'],
-  help:['Help Center','<p><b>Stuck?</b> Everything in this demo runs locally: sign in with any email and a 6+ character password, claim the daily bonus from the gift icon, and play the Volt Originals with the demo balance.</p><p>For anything else, open Live Support — the chat is happy to listen, even if nobody is on the other end.</p>'],
+  help:['Help Center','<p><b>Stuck?</b> Everything in this demo runs locally: sign in with any email and a 6+ character password, claim the daily bonus from the gift icon, and play the Originals with the demo balance.</p><p>For anything else, open Live Support — the chat is happy to listen, even if nobody is on the other end.</p>'],
   responsible:['Responsible Gambling',`
-    <p style="color:var(--muted);line-height:1.8">At VOLT we are committed to keeping gambling fun, safe and within your control. The following tools and resources are available to every player.</p>
+    <p style="color:var(--muted);line-height:1.8">At VIOFYRE we are committed to keeping gambling fun, safe and within your control. The following tools and resources are available to every player.</p>
 
     <h3 style="font-size:13px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;margin:22px 0 10px;color:var(--txt)">⚠️ Warning Signs</h3>
     <ul style="color:var(--muted);line-height:2;padding-left:18px">
@@ -537,7 +537,7 @@ async function _rgLoadFromServer(){
     const w=typeof curW==='function'?curW():null;
     const cur=w?w.c:'BNB';
     const res=await voltApi._fetch('/api/rg/limits?currency='+cur);
-    _rgCache=res;
+    _rgCache=res.ok?await res.json():{};
   }catch(e){_rgCache={};}
 }
 
@@ -561,7 +561,7 @@ function _rgCheckWager(wager){
     const w=typeof curW==='function'?curW():null;
     const b=w?Math.min(parseFloat((document.getElementById('gvBet')||{}).value||0),w.amt):0;
     if(!_rgCheckWager(b))return null;
-    return _orig.apply(this,arguments);
+    if(_orig)return _orig.apply(this,arguments);
   };
 })();
 

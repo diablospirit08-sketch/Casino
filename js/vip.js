@@ -176,7 +176,7 @@ function syncRakebackDot(){
 }
 
 window.refreshRakeback = function refreshRakeback() {
-  if (!window.voltApi || !window.voltApi.auth.getSession()) return;
+  if (!window.voltApi) return;
   window.voltApi._fetch('/api/rakeback')
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(j){

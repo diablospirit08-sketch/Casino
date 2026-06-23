@@ -217,7 +217,7 @@ export async function betsRoutes(fastify) {
           [
             req.user.id, game, currency, wager, multiplier, payout,
             serverSeedHash, serverSeed, clientSeed, nonce,
-            result, multiplier > 0 ? 'won' : 'lost',
+            result, multiplier > 1 ? 'won' : multiplier === 1 ? 'push' : 'lost',
           ]
         );
         const betId = betRows.rows[0].id;
@@ -370,11 +370,14 @@ function kenoMultiplier(picks, hits) {
 function plinkoMultiplier(rows, risk, bucket) {
   const tables = {
     low:    { 8:  [5.6, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 5.6],
-               16: [16, 9, 2, 1.4, 1.4, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.4, 1.4, 2, 9, 16] },
+              12: [10, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 10],
+              16: [16, 9, 2, 1.4, 1.4, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.4, 1.4, 2, 9, 16] },
     medium: { 8:  [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
-               16: [170, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 170] },
+              12: [33, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 33],
+              16: [170, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 170] },
     high:   { 8:  [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29],
-               16: [1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000] },
+              12: [170, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 170],
+              16: [1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000] },
   };
   const table = tables[risk]?.[rows] ?? tables.medium[16];
   return table[Math.min(bucket, table.length - 1)] ?? 0;

@@ -79,7 +79,6 @@ function serverSettleBet(st, mult, newBalance) {
   gsession.wag += st.b * w.rate;
   addXp(st.b * w.rate);
   if (window.addRakeback) addRakeback(st.b * w.rate);
-  if (window.pfRecord) pfRecord();
   gsession.prof += st.b * (mult - 1) * w.rate;
   if (mult !== 1) win ? gsession.w++ : gsession.l++;
   renderSession();

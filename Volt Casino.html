@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>VOLT — Crypto Casino Lobby</title>
+<title>VIOFYRE Casino</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e1118'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%233d9bff'/%3E%3Cstop offset='50%25' stop-color='%2341f0a4'/%3E%3Cstop offset='100%25' stop-color='%23ffd23d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M19 4 9 18h8l-4 10 14-16h-9l1-8z' fill='url(%23g)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-straight/css/uicons-regular-straight.css" />
 <script src="image-slot.js"></script>
 <style>
@@ -18,16 +18,16 @@
     --panel-2:#251540;
     --line:rgba(180,160,255,.11);
     --line-2:rgba(180,160,255,.18);
-    --spectrum:linear-gradient(90deg,#3d9bff,#41f0a4 28%,#ffd23d 52%,#ff8a3d 76%,#ff4757);
-    --spectrum-v:linear-gradient(180deg,#3d9bff,#41f0a4 28%,#ffd23d 52%,#ff8a3d 76%,#ff4757);
-    --accent-grad:linear-gradient(90deg,#4287f5,#f542a4);
+    --spectrum:linear-gradient(90deg,#6621ba,#9b3dff,#d461ff,#ff31e7);
+    --spectrum-v:linear-gradient(180deg,#6621ba,#9b3dff,#d461ff,#ff31e7);
+    --accent-grad:linear-gradient(90deg,#6621ba,#c43dff);
     --hdr-bg:#0a0614;
     --txt:#eef2fa;
     --muted:#9a96b8;
     --muted-2:#6e6a88;
-    --mint:#4287f5;
-    --mint-2:#74aff7;
-    --mint-ink:#020818;
+    --mint:#9b3dff;
+    --mint-2:#c17fff;
+    --mint-ink:#0d0015;
     --violet:#7b6cf6;
     --rail:216px;
     --maxw:1400px;
@@ -41,7 +41,7 @@
   body.rail-min{--rail:56px}
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
-  body{background:var(--bg);color:var(--txt);font-family:'Inter',system-ui,sans-serif;font-size:var(--fs-base);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body{background:var(--bg);color:var(--txt);font-family:'Cinzel',serif;font-size:var(--fs-base);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
   a{color:inherit;text-decoration:none}
   ::selection{background:var(--mint);color:var(--mint-ink)}
   ::-webkit-scrollbar{width:10px;height:8px}
@@ -67,7 +67,7 @@
   .logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:23px;letter-spacing:.06em;text-transform:lowercase;text-decoration:none;flex:none;margin-left:calc(var(--rail) - 56px);transition:margin-left .23s}
   body.rail-min .logo{margin-left:0}
   .logo .wordmark{background:var(--spectrum);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .logo .bolt{width:40px;height:40px;border-radius:11px;background:var(--spectrum);display:grid;place-items:center;flex:none}
+  .logo .bolt{width:40px;height:40px;border-radius:11px;background:none;display:grid;place-items:center;flex:none;overflow:hidden}
   .logo .bolt svg{width:23px;height:23px}
   .hdr-right{margin-left:auto;display:flex;align-items:center;gap:10px}
   .icon-btn{width:42px;height:42px;border-radius:10px;background:var(--panel);border:none;display:grid;place-items:center;color:#6b82a0;cursor:pointer;transition:.15s}
@@ -178,7 +178,7 @@
   .hcar-deco{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right center;pointer-events:none;opacity:.85;transition:.4s}
   .hcar-slide:hover .hcar-deco{opacity:1}
   .hcar-tag{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;background:rgba(0,0,0,.38);backdrop-filter:blur(6px);padding:5px 11px;border-radius:99px;width:max-content;position:relative;z-index:2;margin-bottom:10px}
-  .hcar-head{font-size:28px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;line-height:1;position:relative;z-index:2;font-family:'Inter',sans-serif}
+  .hcar-head{font-size:28px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;line-height:1;position:relative;z-index:2;font-family:'Cinzel',serif}
   .hcar-sub{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.55;margin-top:7px;position:relative;z-index:2;max-width:54%}
   .hcar-arr{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.42);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.12);border-radius:50%;width:36px;height:36px;font-size:17px;color:#fff;cursor:pointer;z-index:10;transition:.18s;display:flex;align-items:center;justify-content:center;line-height:1;padding:0}
   .hcar-arr:hover{background:rgba(0,0,0,.72)}
@@ -406,8 +406,8 @@
   .auth-modal:hover{box-shadow:0 0 38px 2px rgba(66,135,245,.22),0 30px 80px -20px rgba(0,0,0,.9)!important}
   /* auth brand header */
   .auth-brand{text-align:center;padding:10px 0 18px;display:flex;flex-direction:column;align-items:center;gap:6px}
-  .auth-brand-ic{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#41f0a4,#3d9bff);display:grid;place-items:center;box-shadow:0 6px 20px -6px rgba(66,135,245,.55)}
-  .auth-brand-ic svg{width:24px;height:24px;fill:#08090c}
+  .auth-brand-ic{width:44px;height:44px;border-radius:13px;background:none;display:grid;place-items:center;box-shadow:none}
+  .auth-brand-ic svg{width:24px;height:24px}
   .auth-brand-name{font-size:13px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;background:linear-gradient(90deg,#41f0a4,#3d9bff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   /* icon input fields */
   .auth-input-wrap{display:flex;align-items:center;gap:10px;border-radius:14px;padding:13px 16px;background:#171c2d;box-shadow:inset 2px 4px 12px rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.06);transition:border-color .2s}
@@ -953,7 +953,7 @@
   .info-body b{color:var(--txt)}
 
   /* ===== DISPLAY FONT — two-tier system: Archivo for UI, display face for wordmark + section headers ===== */
-  .logo,.row-head h2,.vip-sec-head h2,.hcar-head,.gv-result,.dice-roll{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+  .logo,.row-head h2,.vip-sec-head h2,.hcar-head,.gv-result,.dice-roll{font-family:'Cinzel',serif;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
   .row-head h2,.vip-sec-head h2{font-size:17px}
   .logo{font-size:27px}
 
@@ -1057,17 +1057,8 @@
 <!-- ===== PAGE LOADER ===== -->
 <div id="pageLoader">
   <div id="pageLoaderInner">
-    <svg width="52" height="52" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="32" height="32" rx="10" fill="#120a1e"/>
-      <defs>
-        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#4287f5"/>
-          <stop offset="100%" stop-color="#f542a4"/>
-        </linearGradient>
-      </defs>
-      <path d="M19 4 9 18h8l-4 10 14-16h-9l1-8z" fill="url(#lg)"/>
-    </svg>
-    <div id="pageLoaderName">VOLT</div>
+    <img src="images/icon.jpg (5).png" width="72" height="72" style="object-fit:contain">
+    <div id="pageLoaderName">VIOFYRE</div>
     <div id="pageLoaderSpinner"></div>
   </div>
 </div>
@@ -1075,8 +1066,8 @@
   #pageLoader{position:fixed;inset:0;z-index:9999;background:#120a1e;display:flex;align-items:center;justify-content:center;transition:opacity .5s ease,visibility .5s ease}
   #pageLoader.done{opacity:0;visibility:hidden}
   #pageLoaderInner{display:flex;flex-direction:column;align-items:center;gap:16px}
-  #pageLoaderName{font-family:'Inter',sans-serif;font-size:22px;font-weight:900;letter-spacing:.25em;background:linear-gradient(90deg,#4287f5,#f542a4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-  #pageLoaderSpinner{width:32px;height:32px;border:3px solid rgba(66,135,245,.2);border-top-color:#4287f5;border-radius:50%;animation:plSpin .8s linear infinite}
+  #pageLoaderName{font-family:'Cinzel',serif;font-size:22px;font-weight:900;letter-spacing:.25em;background:linear-gradient(90deg,#6621ba,#d461ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  #pageLoaderSpinner{width:32px;height:32px;border:3px solid rgba(155,61,255,.2);border-top-color:#9b3dff;border-radius:50%;animation:plSpin .8s linear infinite}
   @keyframes plSpin{to{transform:rotate(360deg)}}
 </style>
 
@@ -1085,7 +1076,7 @@
 <header>
   <div class="hdr-inner">
     <button class="rail-toggle" id="railToggle" aria-label="Toggle sidebar" aria-expanded="true"><span class="bars" id="bar1"></span><span class="bars" id="bar2"></span><span class="bars" id="bar3"></span></button>
-    <a class="logo" href="#"><span class="bolt"><svg viewBox="0 0 24 24" fill="#08090c"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></span><span class="wordmark">volt</span></a>
+    <a class="logo" href="#"><img src="images/icon.jpg (5).png" style="width:52px;height:52px;object-fit:contain;display:block;flex:none"><span class="wordmark">viofyre</span></a>
 
     <!-- wallet module (logged-in) -->
     <div class="wallet" id="wallet">
@@ -1105,7 +1096,7 @@
         <button class="rainbow-border" id="signupBtn">Sign Up</button>
       </span>
       <span class="notif-wrap" id="notifWrap">
-        <button class="icon-btn" id="notifBtn" aria-label="Notifications" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 9a6 6 0 1 0-12 0c0 6-2 7-2 7h16s-2-1-2-7Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><i class="dot" id="notifDot" hidden></i></button>
+        <button class="icon-btn" id="notifBtn" aria-label="Notifications" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 32 32" width="24" height="24"><path fill="#f98a17" d="M16,30.9c-2.829,0-5.154-2.069-5.407-4.813c-0.045-0.495,0.319-0.042,0.813-0.088c0.506-0.036,0.935-0.573,0.979-0.078C12.55,27.704,14.138,29.1,16,29.1s3.45-1.396,3.614-3.178c0.046-0.494,0.48,0.044,0.979,0.078c0.494,0.046,0.858-0.407,0.813,0.088C21.154,28.831,18.829,30.9,16,30.9z"/><path fill="#6621ba" d="M27.868,23.753l-0.66-1.428c-0.277-0.602-0.418-1.243-0.418-1.906v-3.854c0-4.766-3.11-8.813-7.404-10.238V4.485c0-1.866-1.52-3.386-3.386-3.386s-3.386,1.52-3.386,3.386v1.842C8.32,7.752,5.21,11.8,5.21,16.565v3.854c0,0.663-0.141,1.305-0.418,1.905l-0.66,1.43c-0.319,0.691-0.265,1.487,0.146,2.129c0.41,0.642,1.11,1.025,1.872,1.025H25.85c0.762,0,1.462-0.384,1.872-1.025C28.133,25.241,28.187,24.445,27.868,23.753z M14.415,4.485C14.415,3.611,15.126,2.9,16,2.9s1.585,0.711,1.585,1.585v1.42C17.066,5.828,16.54,5.775,16,5.775s-1.066,0.053-1.585,0.13V4.485z M26.206,24.913c-0.047,0.072-0.155,0.194-0.356,0.194H6.15c-0.201,0-0.31-0.122-0.356-0.194c-0.046-0.073-0.112-0.223-0.027-0.404l0.66-1.43c0.388-0.84,0.584-1.735,0.584-2.66v-3.854c0-4.957,4.032-8.989,8.989-8.989s8.989,4.032,8.989,8.989v3.854c0,0.925,0.196,1.82,0.584,2.661l0.66,1.428C26.318,24.69,26.252,24.84,26.206,24.913z"/></svg><i class="dot" id="notifDot" hidden></i></button>
         <div class="hdr-menu" id="notifMenu"></div>
       </span>
       <button class="icon-btn" id="hdrSearchBtn" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
@@ -1411,8 +1402,8 @@
         <h3>How can we help?</h3>
         <button class="btn btn-mint" id="contactBtn">Contact Us</button>
       </div>
-      <p class="fineprint">VOLT is a fictional brand created for design demonstration purposes only. It is not a real gambling operator, accepts no wagers, and offers no real-money play. All game names and providers shown are illustrative placeholders. Gambling can be addictive — please play responsibly. 18+</p>
-      <p class="copyright">© 2026 VOLT. All rights reserved.</p>
+      <p class="fineprint">VIOFYRE is a fictional brand created for design demonstration purposes only. It is not a real gambling operator, accepts no wagers, and offers no real-money play. All game names and providers shown are illustrative placeholders. Gambling can be addictive — please play responsibly. 18+</p>
+      <p class="copyright">© 2026 VIOFYRE. All rights reserved.</p>
     </div>
   </footer>
 </main>
@@ -1427,7 +1418,7 @@
       </div>
       <button class="icon-btn" id="walletPickerClose" onclick="document.getElementById('walletPickerOverlay').classList.remove('open')" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     </div>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Choose your wallet to connect to VOLT.</p>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Choose your wallet to connect to VIOFYRE.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="walletPickerGrid">
       <button class="bsc-w-btn" id="wpMetaMask" style="display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:10px;color:var(--txt);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.15s">
         <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" style="width:24px;height:24px;border-radius:4px" onerror="this.style.display='none'">MetaMask</button>
@@ -1592,8 +1583,8 @@
     </div>
     <!-- brand -->
     <div class="auth-brand">
-      <div class="auth-brand-ic"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></div>
-      <span class="auth-brand-name">VOLT Casino</span>
+      <div class="auth-brand-ic"><img src="images/icon.jpg (5).png" style="width:44px;height:44px;border-radius:13px;object-fit:cover;display:block"></div>
+      <span class="auth-brand-name">VIOFYRE Casino</span>
     </div>
     <button class="auth-sso" id="ssoGoogle">
       <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.27c0-.85-.08-1.66-.22-2.45H12v4.64h6.46a5.53 5.53 0 0 1-2.4 3.63v3h3.87c2.27-2.09 3.57-5.17 3.57-8.82Z"></path><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.94-2.91l-3.87-3c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.29v3.1A12 12 0 0 0 12 24Z"></path><path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.37-2.28v-3.1H1.29a12 12 0 0 0 0 10.76l3.98-3.1Z"></path><path fill="#EA4335" d="M12 4.77c1.76 0 3.34.6 4.58 1.79l3.44-3.44A11.97 11.97 0 0 0 12 0 12 12 0 0 0 1.29 6.62l3.98 3.1C6.22 6.88 8.87 4.77 12 4.77Z"></path></svg>
