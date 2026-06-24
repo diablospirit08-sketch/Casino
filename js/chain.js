@@ -358,9 +358,6 @@ var BSC_DEP_ID='bscDepSection', BSC_WD_ID='bscWdSection';
   if(depView&&!document.getElementById(BSC_DEP_ID)){
     var d=document.createElement('div');d.id=BSC_DEP_ID;depView.appendChild(d);
   }
-  if(wdView&&!document.getElementById(BSC_WD_ID)){
-    var w=document.createElement('div');w.id=BSC_WD_ID;wdView.appendChild(w);
-  }
 })();
 
 function renderBscDeposit(){renderSection(document.getElementById(BSC_DEP_ID),'dep');}
