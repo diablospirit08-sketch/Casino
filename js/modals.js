@@ -308,9 +308,11 @@ function renderBuyView(){
 function openBuyFrame(coin){
   const frame=document.getElementById('buyFrame');if(!frame)return;
   const addr=depAddrCache[coin+':'+((DEPOSIT[coin]?.networks||[])[0]?.id||coin)]||'';
-  const url='https://global.transak.com/?defaultCryptoCurrency='+coin.toLowerCase()
-    +(addr?'&walletAddress='+encodeURIComponent(addr):'')
-    +'&disableWalletAddressForm=true';
+  const supportedCoins=WALLETS.map(x=>x.c).join(',');
+  const url='https://buy.onramper.com/?apiKey=pk_test_01KVX5EX6NMKGSF6VX1FH71FH3'
+    +'&defaultCrypto='+coin
+    +'&onlyCryptos='+supportedCoins
+    +(addr?'&walletAddress='+encodeURIComponent(addr)+'&isAddressEditable=false':'');
   frame.innerHTML=`<iframe src="${url}" style="width:100%;height:480px;border:none;border-radius:12px" allow="camera;microphone;payment" loading="lazy"></iframe>`;
 }
 document.getElementById('buyView').addEventListener('click',e=>{
