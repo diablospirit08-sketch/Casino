@@ -911,24 +911,32 @@ function initPromoPairEditor(){
     });
     subEl.addEventListener('input',e=>{$('lpSub'+K).textContent=e.target.value||def.sub;});
     btnEl.addEventListener('input',e=>{$('lpBtn'+K).textContent=e.target.value||def.btn;});
-    $('file'+K).addEventListener('change',e=>{
+    $('file'+K).addEventListener('change',async e=>{
       const f=e.target.files[0];if(!f)return;
       const toast=$('toast'+K);
-      if(f.size>1.5*1024*1024){
-        toast.textContent='⚠ File too large (max ~1.5 MB) — compress it or paste an image URL instead';
+      if(f.size>2*1024*1024){
+        toast.textContent='⚠ File too large (max 2 MB)';
+        toast.style.color='#f87171';
+        setTimeout(()=>{toast.textContent='';toast.style.color='';},5000);
+        e.target.value='';return;
+      }
+      toast.textContent='Uploading…';toast.style.color='var(--muted)';
+      try{
+        const fd=new FormData();
+        fd.append('promo-'+k,f,f.name);
+        const res=await aFetch('/api/admin/upload',{method:'POST',body:fd});
+        const fullUrl=API+res.url;
+        previewImg.src=lpImg.src=fullUrl;
+        _pendingImg[k]=fullUrl;
+        urlEl.value=fullUrl;
+        toast.textContent='✓ Uploaded';toast.style.color='#4ade80';
+        setTimeout(()=>{toast.textContent='';toast.style.color='';},3000);
+      }catch(err){
+        toast.textContent='⚠ Upload failed — try pasting an image URL instead';
         toast.style.color='#f87171';
         setTimeout(()=>{toast.textContent='';toast.style.color='';},6000);
-        e.target.value='';
-        return;
       }
-      const reader=new FileReader();
-      reader.onload=ev=>{
-        const url=ev.target.result;
-        previewImg.src=lpImg.src=url;
-        _pendingImg[k]=url;
-        urlEl.value='(uploaded file)';
-      };
-      reader.readAsDataURL(f);
+      e.target.value='';
     });
   });
 }

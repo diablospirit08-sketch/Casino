@@ -5,6 +5,7 @@ import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import rateLimit from '@fastify/rate-limit';
 import staticFiles from '@fastify/static';
+import multipart from '@fastify/multipart';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -18,6 +19,7 @@ import { adminRoutes }    from './routes/admin.js';
 import { promoPublicRoutes, promoAdminRoutes } from './routes/promo.js';
 import { rakebackRoutes } from './routes/rakeback.js';
 import { rgRoutes }       from './routes/rg.js';
+import { imageUploadRoutes, imageServeRoutes } from './routes/images.js';
 
 const PORT = parseInt(process.env.PORT ?? '4000', 10);
 const HOST = process.env.HOST ?? '0.0.0.0';
@@ -32,6 +34,8 @@ const fastify = Fastify({
 });
 
 // ─── Plugins ──────────────────────────────────────────────────────────────────
+
+await fastify.register(multipart, { limits: { fileSize: 2 * 1024 * 1024 } });
 
 await fastify.register(cors, {
   origin: process.env.CORS_ORIGIN ?? '*',
@@ -68,7 +72,9 @@ await fastify.register(adminRoutes,    { prefix: '/api/admin' });
 await fastify.register(promoPublicRoutes, { prefix: '/api' });
 await fastify.register(promoAdminRoutes,  { prefix: '/api/admin' });
 await fastify.register(rakebackRoutes, { prefix: '/api/rakeback' });
-await fastify.register(rgRoutes,       { prefix: '/api/rg' });
+await fastify.register(rgRoutes,          { prefix: '/api/rg' });
+await fastify.register(imageUploadRoutes, { prefix: '/api/admin' });
+await fastify.register(imageServeRoutes,  { prefix: '/api/image' });
 
 // Health check
 fastify.get('/health', async () => ({ status: 'ok', ts: new Date().toISOString() }));
