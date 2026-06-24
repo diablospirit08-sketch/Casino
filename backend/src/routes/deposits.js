@@ -37,6 +37,7 @@ import { JsonRpcProvider } from 'ethers';
 import { query, transaction } from '../db.js';
 import { creditDeposit } from '../services/ledger.js';
 import { parseDepositedLog, weiBnb, DEPOSITED_TOPIC } from '../services/vault.js';
+import { checkDepositLimits, RGLimitError } from '../services/rg.js';
 
 const BSC_RPC = {
   bsc:         'https://bsc-dataseed.binance.org/',
@@ -266,6 +267,17 @@ async function creditOnchainDeposit({ txHash, logIndex, playerAddress, amountBnb
   if (existing.length) {
     logger.info({ txHash, logIndex }, 'Deposit already processed — skipping');
     return;
+  }
+
+  // Enforce RG deposit limits — reject the deposit if a limit is exceeded
+  try {
+    await checkDepositLimits(userId, 'BNB', amountBnb);
+  } catch (err) {
+    if (err instanceof RGLimitError) {
+      logger.warn({ userId, amountBnb, code: err.code }, 'Deposit blocked by RG limit');
+      return; // silently skip — funds remain on-chain, player must contact support
+    }
+    throw err;
   }
 
   await transaction(async (tx) => {

@@ -20,6 +20,8 @@ import { promoPublicRoutes, promoAdminRoutes } from './routes/promo.js';
 import { rakebackRoutes } from './routes/rakeback.js';
 import { rgRoutes }       from './routes/rg.js';
 import { imageUploadRoutes, imageServeRoutes } from './routes/images.js';
+import { complaintRoutes, complaintAdminRoutes } from './routes/complaints.js';
+import { vaultRoutes } from './routes/vault.js';
 
 const PORT = parseInt(process.env.PORT ?? '4000', 10);
 const HOST = process.env.HOST ?? '0.0.0.0';
@@ -73,8 +75,11 @@ await fastify.register(promoPublicRoutes, { prefix: '/api' });
 await fastify.register(promoAdminRoutes,  { prefix: '/api/admin' });
 await fastify.register(rakebackRoutes, { prefix: '/api/rakeback' });
 await fastify.register(rgRoutes,          { prefix: '/api/rg' });
-await fastify.register(imageUploadRoutes, { prefix: '/api/admin' });
-await fastify.register(imageServeRoutes,  { prefix: '/api/image' });
+await fastify.register(imageUploadRoutes,    { prefix: '/api/admin' });
+await fastify.register(imageServeRoutes,     { prefix: '/api/image' });
+await fastify.register(complaintRoutes,      { prefix: '/api' });
+await fastify.register(complaintAdminRoutes, { prefix: '/api/admin' });
+await fastify.register(vaultRoutes,          { prefix: '/api/vault' });
 
 // Health check
 fastify.get('/health', async () => ({ status: 'ok', ts: new Date().toISOString() }));

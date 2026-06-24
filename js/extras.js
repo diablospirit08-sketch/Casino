@@ -311,23 +311,22 @@ const VAULT={};
 WALLETS.forEach(w=>VAULT[w.c]=0);
 let vaultMode='lock';
 let vaultCurSel=voltCur;
-const _vpPfx='volt-vault-';let _vpUid=null;
-function _vpKey(){return _vpPfx+(_vpUid||'guest');}
-function _vpSave(){try{localStorage.setItem(_vpKey(),JSON.stringify(VAULT));}catch(_){}}
-function _vpLoad(uid){
-  _vpUid=uid||null;
-  try{
-    const s=JSON.parse(localStorage.getItem(_vpKey())||'{}');
-    Object.keys(VAULT).forEach(c=>{VAULT[c]=Math.max(0,parseFloat(s[c])||0);});
-  }catch(_){}
-}
-(async()=>{const{data:{session}}=await supa.auth.getSession();_vpLoad(session?.user?.id);})();
-supa.auth.onAuthStateChange((_,s)=>{_vpLoad(s?.user?.id);});
+let _vaultHistory=[];
+
 function _vaultW(){return WALLETS.find(x=>x.c===vaultCurSel)||WALLETS[0];}
 function _vaultTimeAgo(iso){
   const s=Math.floor((Date.now()-new Date(iso))/1000);
   if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';
   if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
+}
+async function _vaultFetch(){
+  try{
+    const res=await voltApi._fetch('/api/vault');
+    if(!res.ok)return;
+    const{balances,history}=await res.json();
+    Object.assign(VAULT,balances);
+    _vaultHistory=history||[];
+  }catch(_){}
 }
 function _buildVaultPicker(){
   const el=$id('vaultCurPicker');if(!el)return;
@@ -354,17 +353,16 @@ function renderVault(){
   const bf=$id('vaultBalFiat');if(bf)bf.textContent='≈ $'+(vBal*(w.rate||0)).toFixed(2);
   const wb=$id('vaultWalletBal');if(wb)wb.textContent=fmtW(w,w.amt)+' '+w.c;
   const ic=$id('vaultCoinIc');if(ic){ic.style.background=w.col;ic.textContent=w.s;}
-  const histKey='hist_'+w.c;
-  const hist=(JSON.parse(localStorage.getItem(_vpKey())||'{}')||{})[histKey]||[];
+  const hist=_vaultHistory.filter(h=>h.currency===w.c);
   const hEl=$id('vaultHistory');
   if(hEl){
     if(!hist.length){hEl.innerHTML='<p class="vault-empty">No vault activity yet.</p>';}
-    else{hEl.innerHTML=hist.slice().reverse().map(h=>`
+    else{hEl.innerHTML=hist.map(h=>`
       <div class="vault-hist-row">
         <div class="vault-hist-ic ${h.type==='lock'?'lock':'unlock'}">${h.type==='lock'?'🔒':'🔓'}</div>
         <span class="vault-hist-label">${h.type==='lock'?'Locked':'Unlocked'}</span>
-        <b class="vault-hist-amt">${h.amt} ${w.c}</b>
-        <span class="vault-hist-time">${_vaultTimeAgo(h.ts)}</span>
+        <b class="vault-hist-amt">${parseFloat(h.amount).toFixed(6)} ${w.c}</b>
+        <span class="vault-hist-time">${_vaultTimeAgo(h.created_at)}</span>
       </div>`).join('');}
   }
   _validateVault();
@@ -387,13 +385,13 @@ function _setVaultMode(m){
   const amtIn=$id('vaultAmt');if(amtIn)amtIn.value='';
   _validateVault();
 }
-window.openVault=function(){
-  _vpLoad(_vpUid);
+window.openVault=async function(){
   vaultCurSel=voltCur;
   _buildVaultPicker();
-  renderVault();
   _setVaultMode('lock');
   vaultOverlay.classList.add('open');
+  await _vaultFetch();
+  renderVault();
 };
 $id('vaultBtn').addEventListener('click',()=>{avatarWrap.classList.remove('open');openVault();});
 $id('vaultTabLock').addEventListener('click',()=>_setVaultMode('lock'));
@@ -413,31 +411,27 @@ document.querySelectorAll('.vault-pct').forEach(btn=>{
     _validateVault();
   });
 });
-$id('vaultAction').addEventListener('click',()=>{
+$id('vaultAction').addEventListener('click',async()=>{
   const w=_vaultW();
   const amtIn=$id('vaultAmt');
   const max=vaultMode==='lock'?w.amt:(VAULT[w.c]||0);
   const a=Math.min(parseFloat(amtIn.value)||0,max);
   if(a<=0)return;
-  /* save history */
-  const stateRaw=JSON.parse(localStorage.getItem(_vpKey())||'{}');
-  const histKey='hist_'+w.c;
-  const hist=stateRaw[histKey]||[];
-  hist.push({type:vaultMode==='lock'?'lock':'unlock',amt:fmtW(w,a),ts:new Date().toISOString()});
-  if(vaultMode==='lock'){
-    creditTo(w,-a);
-    VAULT[w.c]=(VAULT[w.c]||0)+a;
-    showToast({icon:'🔒',title:'Funds locked',sub:fmtW(w,a)+' '+w.c+' moved to your Vault.'});
-  }else{
-    VAULT[w.c]=Math.max(0,(VAULT[w.c]||0)-a);
-    creditTo(w,a);
-    showToast({icon:'🔓',title:'Funds unlocked',sub:fmtW(w,a)+' '+w.c+' returned to your wallet.'});
-  }
-  stateRaw[histKey]=hist;
-  WALLETS.forEach(x=>{stateRaw[x.c]=VAULT[x.c];});
-  try{localStorage.setItem(_vpKey(),JSON.stringify(stateRaw));}catch(_){}
-  amtIn.value='';
-  renderVault();
+  const btn=$id('vaultAction');
+  btn.disabled=true;btn.textContent='Processing…';
+  try{
+    const endpoint=vaultMode==='lock'?'/api/vault/lock':'/api/vault/unlock';
+    const res=await voltApi._fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({currency:w.c,amount:a})});
+    const j=await res.json();
+    if(!res.ok)throw new Error(j.error||'Request failed');
+    if(vaultMode==='lock'){creditTo(w,-a);VAULT[w.c]=(VAULT[w.c]||0)+a;}
+    else{VAULT[w.c]=Math.max(0,(VAULT[w.c]||0)-a);creditTo(w,a);}
+    showToast({icon:vaultMode==='lock'?'🔒':'🔓',title:vaultMode==='lock'?'Funds locked':'Funds unlocked',sub:fmtW(w,a)+' '+w.c+(vaultMode==='lock'?' moved to your Vault.':" returned to your wallet.")});
+    amtIn.value='';
+    await _vaultFetch();
+    renderVault();
+  }catch(e){showToast({icon:'⚠',title:'Vault error',sub:e.message,col:'#f87171'});}
+  _setVaultMode(vaultMode);
 });
 $id('vaultClose').addEventListener('click',()=>vaultOverlay.classList.remove('open'));
 vaultOverlay.addEventListener('click',e=>{if(e.target===vaultOverlay)vaultOverlay.classList.remove('open');});
@@ -492,7 +486,25 @@ const PAGES={
   aml:['AML Policy','<p>A real operator would document KYC tiers, source-of-funds checks and transaction monitoring here.</p><p>Since VIOFYRE is a demo with no real money involved, this page is a placeholder for that policy.</p>'],
   sports:['Sports','<p>The sportsbook is not part of this demo — only the casino lobby is implemented.</p>'],
   referrals:['Referrals','<p>Invite friends, earn a cut of their wagers — that\'s how this page would work on a real platform.</p><p>In this demo there are no accounts, so there\'s no one to refer. Sorry to you and your imaginary friends.</p>'],
-  help:['Help Center','<p><b>Stuck?</b> Everything in this demo runs locally: sign in with any email and a 6+ character password, claim the daily bonus from the gift icon, and play the Originals with the demo balance.</p><p>For anything else, open Live Support — the chat is happy to listen, even if nobody is on the other end.</p>'],
+  help:['Help Center',`
+    <style>.faq-item{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:8px}.faq-q{width:100%;background:var(--panel-2);border:none;color:var(--txt);font-family:inherit;font-size:13px;font-weight:700;text-align:left;padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px}.faq-q:hover{background:var(--panel)}.faq-q .arr{font-size:16px;transition:transform .2s;flex:none}.faq-item.open .arr{transform:rotate(180deg)}.faq-a{display:none;padding:14px 16px;font-size:12.5px;color:var(--muted);line-height:1.7;background:var(--panel)}.faq-item.open .faq-a{display:block}.faq-cat{font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2);margin:18px 0 8px}</style>
+    <p class="faq-cat">Account</p>
+    <div class="faq-item"><button class="faq-q">How do I create an account?<span class="arr">&#8964;</span></button><div class="faq-a">Click <b>Sign Up</b> in the top-right corner. Enter your email, choose a username and a password of at least 8 characters. You'll be logged in immediately.</div></div>
+    <div class="faq-item"><button class="faq-q">How do I change my username or password?<span class="arr">&#8964;</span></button><div class="faq-a">Go to your <b>Avatar → User Preferences</b>. You can update your username anytime. To change your password, click <b>Change Password</b> in the same screen.</div></div>
+    <div class="faq-item"><button class="faq-q">I forgot my password. What do I do?<span class="arr">&#8964;</span></button><div class="faq-a">On the login screen click <b>Forgot password?</b> and enter your email. You'll receive a reset link within a few minutes. Check your spam folder if it doesn't arrive.</div></div>
+    <p class="faq-cat">Deposits & Withdrawals</p>
+    <div class="faq-item"><button class="faq-q">Which cryptocurrencies do you accept?<span class="arr">&#8964;</span></button><div class="faq-a">We currently support <b>BTC, ETH, BNB, USDT, and USDC</b>. More currencies are added regularly. Each currency has its own deposit address — always double-check you're sending to the correct network.</div></div>
+    <div class="faq-item"><button class="faq-q">How long do deposits take?<span class="arr">&#8964;</span></button><div class="faq-a">Deposits are credited after the required number of network confirmations: BTC (3), ETH/BNB/USDT/USDC (12). This typically takes 5–30 minutes depending on network congestion.</div></div>
+    <div class="faq-item"><button class="faq-q">What is the minimum withdrawal?<span class="arr">&#8964;</span></button><div class="faq-a">Minimum withdrawals vary by currency. Network fees are deducted from the withdrawal amount. You can see exact minimums on the <b>Withdraw</b> screen after selecting your currency.</div></div>
+    <p class="faq-cat">Games & Fairness</p>
+    <div class="faq-item"><button class="faq-q">Are the games provably fair?<span class="arr">&#8964;</span></button><div class="faq-a">Yes. All VioFyre Originals (Dice, Mines, Plinko, Crash, etc.) use a <b>provably fair</b> system. Each bet generates a server seed hash before the bet is placed — you can verify any result using the Verify tool on the game screen.</div></div>
+    <div class="faq-item"><button class="faq-q">What is RTP and where can I find it?<span class="arr">&#8964;</span></button><div class="faq-a"><b>Return to Player (RTP)</b> is the percentage of wagered money a game pays back over time. It's displayed on every game tile and inside the game header. VioFyre Originals are set at 97–99% RTP.</div></div>
+    <div class="faq-item"><button class="faq-q">What is the Vio Token?<span class="arr">&#8964;</span></button><div class="faq-a">VIO is our loyalty token. You earn <b>1 VIO for every $10 wagered</b>. Accumulated VIO can be withdrawn to your BNB wallet once the contract is live. Track your balance via the ⚡ icon in the header.</div></div>
+    <p class="faq-cat">Bonuses & VIP</p>
+    <div class="faq-item"><button class="faq-q">How does the Welcome Bonus work?<span class="arr">&#8964;</span></button><div class="faq-a">New players receive a <b>200% match up to $1,000</b> on their first deposit. The bonus has a 30× wagering requirement before withdrawal. Full terms are available on the Promotions page.</div></div>
+    <div class="faq-item"><button class="faq-q">How do I climb the VIP ranks?<span class="arr">&#8964;</span></button><div class="faq-a">VIP rank is determined by your total lifetime wager. Each rank unlocks higher cashback rates, faster withdrawals, and dedicated account managers. You can see your progress under <b>Loyalty Program</b> on the lobby page.</div></div>
+    <script>(function(){document.querySelectorAll('.faq-q').forEach(function(btn){btn.addEventListener('click',function(){var item=btn.closest('.faq-item');item.classList.toggle('open');});});})();</script>
+  `],
   responsible:['Responsible Gambling',`
     <p style="color:var(--muted);line-height:1.8">At VIOFYRE we are committed to keeping gambling fun, safe and within your control. The following tools and resources are available to every player.</p>
 
@@ -546,7 +558,52 @@ const PAGES={
       <p style="color:#e74c3c;font-size:12px;line-height:1.7"><b>Remember:</b> Gambling should always be entertainment, not a way to make money. Never gamble with money you cannot afford to lose. If you feel you have a problem, please reach out — help is free, confidential and available 24/7.</p>
     </div>
   `],
-  complaint:['Complaint Form','<p>On a real platform this form would route to a support team with a ticket number and an SLA.</p><p>In this demo, your complaint has been pre-emptively resolved by virtue of nothing being real.</p>'],
+  complaint:['Complaint Form',`
+    <style>.cf-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}.cf-field label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.cf-field input,.cf-field select,.cf-field textarea{background:var(--panel-2);border:1px solid var(--line-2);border-radius:8px;color:var(--txt);font-family:inherit;font-size:13px;padding:10px 13px;outline:none;transition:border-color .15s}.cf-field input:focus,.cf-field select:focus,.cf-field textarea:focus{border-color:var(--mint)}.cf-field textarea{resize:vertical;min-height:110px}.cf-field select option{background:var(--panel-2)}#cfErr{font-size:12px;color:#e2596a;min-height:16px;margin-bottom:6px}#cfOk{font-size:12px;color:#4ade80;min-height:16px;margin-bottom:6px}</style>
+    <p style="font-size:12.5px;color:var(--muted);margin-bottom:18px;line-height:1.6">We aim to respond to all complaints within <b>48 hours</b>. For urgent issues, use <b>Live Support</b>.</p>
+    <form id="cfForm" onsubmit="return false">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="cf-field"><label>Your Name</label><input id="cfName" type="text" placeholder="Optional" maxlength="80"/></div>
+        <div class="cf-field"><label>Email *</label><input id="cfEmail" type="email" placeholder="your@email.com" required maxlength="254"/></div>
+      </div>
+      <div class="cf-field"><label>Category</label>
+        <select id="cfCat">
+          <option value="general">General</option>
+          <option value="account">Account</option>
+          <option value="payment">Payment / Withdrawal</option>
+          <option value="game">Game Issue</option>
+          <option value="bonus">Bonus / Promotion</option>
+          <option value="technical">Technical Problem</option>
+        </select>
+      </div>
+      <div class="cf-field"><label>Subject *</label><input id="cfSubject" type="text" placeholder="Brief description of your issue" required maxlength="120"/></div>
+      <div class="cf-field"><label>Message *</label><textarea id="cfMsg" placeholder="Please describe the issue in as much detail as possible..." required maxlength="4000"></textarea></div>
+      <div id="cfErr"></div><div id="cfOk"></div>
+      <button type="submit" class="auth-submit" id="cfBtn" style="width:100%">Submit Complaint</button>
+    </form>
+    <script>(function(){
+      var form=document.getElementById('cfForm');
+      if(!form||form._cfBound)return;form._cfBound=true;
+      form.addEventListener('submit',async function(){
+        var btn=document.getElementById('cfBtn');
+        var err=document.getElementById('cfErr');var ok=document.getElementById('cfOk');
+        err.textContent='';ok.textContent='';
+        var email=document.getElementById('cfEmail').value.trim();
+        var subject=document.getElementById('cfSubject').value.trim();
+        var msg=document.getElementById('cfMsg').value.trim();
+        if(!email||!subject||msg.length<10){err.textContent='Please fill in all required fields (message min 10 chars).';return;}
+        btn.disabled=true;btn.textContent='Submitting…';
+        try{
+          var res=await fetch('/api/complaints',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('cfName').value.trim()||undefined,email:email,category:document.getElementById('cfCat').value,subject:subject,message:msg})});
+          var j=await res.json();
+          if(!res.ok)throw new Error(j.error||'Submission failed');
+          ok.textContent='✓ '+j.message;
+          form.reset();
+        }catch(e){err.textContent='⚠ '+e.message;}
+        btn.disabled=false;btn.textContent='Submit Complaint';
+      });
+    })();</script>
+  `],
 };
 function openInfo(key){
   const p=PAGES[key];if(!p)return;
