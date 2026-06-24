@@ -692,7 +692,7 @@ function rnd(a,b){return Math.random()*(b-a)+a}
 const _COINS=[{bg:'#F3BA2F',fg:'#000',s:'BNB'},{bg:'#627EEA',fg:'#fff',s:'ETH'},{bg:'#9945FF',fg:'#fff',s:'SOL'},{bg:'#00AAE4',fg:'#fff',s:'XRP'},{bg:'#2775CA',fg:'#fff',s:'USDC'},{bg:'#E84142',fg:'#fff',s:'AVAX'},{bg:'#16C784',fg:'#fff',s:'BNB'},{bg:'#FF6B35',fg:'#fff',s:'DOGE'}];
 function _maskName(n){if(n==='Hidden')return'Hidden';return n[0]+'*'.repeat(Math.min(5,n.length-2))+n[n.length-1];}
 function _coinIdx(r){return(r.game.charCodeAt(0)+r.player.charCodeAt(0))%_COINS.length;}
-function _ic(c){return`<div class="bt-ic" style="background:${c.bg};color:${c.fg}">${c.s}</div>`;}
+function _coinIc(c){return`<div class="bt-ic" style="background:${c.bg};color:${c.fg}">${c.s}</div>`;}
 function makeBetRow(){
   const bet=rnd(0.05,2.4),mult=Math.random()<0.5?0:rnd(1.5,50);
   return{game:ballgames[Math.floor(rnd(0,ballgames.length))],
@@ -701,7 +701,7 @@ function makeBetRow(){
 }
 function betRowHtml(r){
   const c=_COINS[_coinIdx(r)];
-  const ic=_ic(c);
+  const ic=_coinIc(c);
   const payout=r.win?(r.bet*(r.mult-1)).toFixed(2):'0.00';
   const multLbl='x'+(r.mult>0?r.mult.toFixed(2):'0.00');
   const uic=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6"/></svg>`;

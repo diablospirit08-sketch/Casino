@@ -42,11 +42,7 @@ document.addEventListener('click',()=>notifWrap.classList.remove('open'));
 $id('hdrSearchBtn').addEventListener('click',()=>{
   const wasInGame=document.body.classList.contains('ingame');
   if(wasInGame&&window.closeGame)closeGame();
-  setTimeout(()=>{
-    const s=$id('gameSearch');
-    window.scrollTo({top:s.getBoundingClientRect().top+window.scrollY-150,behavior:'smooth'});
-    s.focus({preventScroll:true});
-  },wasInGame?500:0);
+  setTimeout(()=>{if(window.openSearch)openSearch();},wasInGame?500:0);
 });
 
 /* ---------- chat drawer ---------- */

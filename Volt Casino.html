@@ -2296,7 +2296,7 @@
 <script src="js/games/coinflip.js"></script>
 <script src="js/vip.js?v=3"></script>
 <script src="js/modals.js?v=17"></script>
-<script src="js/extras.js?v=8"></script>
+<script src="js/extras.js?v=9"></script>
 <script src="js/balances.js"></script>
 <script src="js/bets.js"></script>
 <script src="js/place-bet.js"></script>
@@ -2579,11 +2579,11 @@ if(false)(function(){
       $i('vioClaimNote').textContent='Wager $'+nextAt+' more to earn the next '+S.earnPer+' VIO';
     }else{
       $i('vioClaimAmt').textContent='0 VIO pending';
-      $i('vioClaimNote').textContent='Wager $'+nextAt+' more to unlock '+S.earnPer+'' VIO'';
+      $i('vioClaimNote').textContent='Wager $'+nextAt+' more to unlock '+S.earnPer+' VIO';
     }
     var btn=$i('vioClaimBtn');
     btn.disabled=p===0;
-    btn.textContent=p>0?'Claim '+p+'' VIO'':'Nothing to claim yet';
+    btn.textContent=p>0?'Claim '+p+' VIO':'Nothing to claim yet';
     renderHistory();
   }
 
