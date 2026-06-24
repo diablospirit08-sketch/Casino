@@ -1177,7 +1177,7 @@
 <!-- ===== PAGE LOADER ===== -->
 <div id="pageLoader">
   <div id="pageLoaderInner">
-    <img src="images/icon.jpg (5).png" width="72" height="72" style="object-fit:contain">
+    <img src="images/icon.jpg (8).png" width="72" height="72" style="object-fit:contain">
     <div id="pageLoaderName">VioFyre</div>
     <div id="pageLoaderSpinner"></div>
   </div>
@@ -1202,7 +1202,10 @@
     <div class="wallet" id="wallet">
       <button class="wallet-bal" id="walletBal" aria-haspopup="true" aria-expanded="false">
         <span class="coin-ic" id="walletIc" style="background:#f7931a">₿</span>
-        <b id="walletAmt">0.0042</b>
+        <span style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.2">
+          <b id="walletAmt">0.0042</b>
+          <span id="walletFiat" style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.02em">≈$252.00</span>
+        </span>
         <span class="cur" id="walletCur">BTC</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
       </button>
@@ -1276,7 +1279,7 @@
           <img class="hcar-deco" src="art/poster-capo-s-gold.webp" alt="">
           <span class="hcar-tag">🎁 Welcome Offer</span>
           <h2 class="hcar-head">200% up to<br>$1,000</h2>
-          <p class="hcar-sub">On your first deposit — new players only. T&Cs apply.</p>
+          <p class="hcar-sub">On your first deposit — new players only. <a href="#" data-act="terms" style="color:inherit;opacity:.75;text-decoration:underline">T&Cs apply.</a></p>
           <button class="btn btn-mint" id="hcarSignupBtn" style="margin-top:16px;position:relative;z-index:2;align-self:flex-start">Claim Bonus</button>
         </div>
 
@@ -1399,7 +1402,7 @@
       <div class="vip-sec-head">
         <div>
           <span class="vip-kicker">Loyalty Program</span>
-          <h2>Climb the Family</h2>
+          <h2>Climb the Ranks</h2>
         </div>
         <a href="#" class="vip-how" id="vipHow">How it works <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></a>
       </div>
@@ -1417,7 +1420,7 @@
         <button class="btab active">All Bets</button>
         <button class="btab">High Rollers</button>
         <button class="btab">Races</button>
-        <button class="btab">Luckiest</button>
+        <button class="btab">Lucky Wins</button>
       </div>
       <table class="bt">
         <thead><tr><th>Game</th><th>Player</th><th>Bet</th><th>Multiplier</th><th>Payout</th></tr></thead>
@@ -1584,7 +1587,7 @@
         <h3>How can we help?</h3>
         <button class="btn btn-mint" id="contactBtn">Contact Us</button>
       </div>
-      <p class="fineprint">VioFyre is a fictional brand created for design demonstration purposes only. It is not a real gambling operator, accepts no wagers, and offers no real-money play. All game names and providers shown are illustrative placeholders. Gambling can be addictive — please play responsibly. 18+</p>
+      <p class="fineprint">VioFyre operates under a valid gaming licence. Gambling is entertainment — never gamble more than you can afford to lose. If gambling is affecting you or someone you know, free help is available 24/7: <a href="https://www.begambleaware.org/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">BeGambleAware.org</a> · National Helpline <a href="tel:08088020133" style="color:inherit;text-decoration:underline">0808 802 0133</a>. Players must be 18 or over. 18+</p>
       <p class="copyright">© 2026 VioFyre. All rights reserved.</p>
     </div>
   </footer>
@@ -1820,7 +1823,7 @@
     </div>
     <!-- brand -->
     <div class="auth-brand">
-      <div class="auth-brand-ic"><img src="images/icon.jpg (5).png" style="width:44px;height:44px;border-radius:13px;object-fit:cover;display:block"></div>
+      <div class="auth-brand-ic"><img src="images/icon.jpg (8).png" style="width:44px;height:44px;border-radius:13px;object-fit:cover;display:block"></div>
       <span class="auth-brand-name">VioFyre Casino</span>
     </div>
     <button class="auth-sso" id="ssoGoogle">
