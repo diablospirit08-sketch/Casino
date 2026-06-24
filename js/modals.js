@@ -300,12 +300,10 @@ const depW=()=>WALLETS.find(x=>x.c===depCur);
 function renderBuyView(){
   const frame=document.getElementById('buyFrame');if(!frame)return;
   if(frame.querySelector('iframe'))return;
-  const url='https://buy.onramper.com/?apiKey=pk_test_01KVX5EX6NMKGSF6VX1FH71FH3'
-    +'&onlyCryptos=BTC,ETH,BNB,LTC,USDT,USDC,SOL'
-    +'&defaultCrypto=BTC'
-    +'&themeName=dark'
-    +'&containerColor=13151f'
-    +'&primaryColor=4287f5';
+  const url='https://buy-sandbox.moonpay.com/?apiKey=pk_test_01KVX5EX6NMKGSF6VX1FH71FH3'
+    +'&currencyCode=btc'
+    +'&colorCode=%234287f5'
+    +'&theme=dark';
   frame.innerHTML=`<iframe src="${url}" style="width:100%;height:560px;border:none;border-radius:12px" allow="camera;microphone;payment" loading="lazy"></iframe>`;
 }
 function renderDepMode(){
