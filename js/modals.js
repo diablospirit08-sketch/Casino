@@ -297,30 +297,17 @@ const depTabsEl=document.getElementById('depTabs'),
       wdSubmit=document.getElementById('wdSubmit');
 let depMode='dep';
 const depW=()=>WALLETS.find(x=>x.c===depCur);
-let buyCur=voltCur||'BNB';
 function renderBuyView(){
-  const buyCoins=document.getElementById('buyCoins');
-  if(buyCoins)buyCoins.innerHTML=WALLETS.map(x=>`
-    <button class="dep-coin ${x.c===buyCur?'sel':''}" data-bc="${x.c}">
-      ${coinImg(x.c)}${x.c}</button>`).join('');
-  openBuyFrame(buyCur);
-}
-function openBuyFrame(coin){
   const frame=document.getElementById('buyFrame');if(!frame)return;
-  const addr=depAddrCache[coin+':'+((DEPOSIT[coin]?.networks||[])[0]?.id||coin)]||'';
-  const supportedCoins=WALLETS.map(x=>x.c).join(',');
+  if(frame.querySelector('iframe'))return;
   const url='https://buy.onramper.com/?apiKey=pk_test_01KVX5EX6NMKGSF6VX1FH71FH3'
-    +'&defaultCrypto='+coin
-    +'&onlyCryptos='+supportedCoins
-    +(addr?'&walletAddress='+encodeURIComponent(addr)+'&isAddressEditable=false':'');
-  frame.innerHTML=`<iframe src="${url}" style="width:100%;height:480px;border:none;border-radius:12px" allow="camera;microphone;payment" loading="lazy"></iframe>`;
+    +'&onlyCryptos=BTC,ETH,BNB,LTC,USDT,USDC,SOL'
+    +'&defaultCrypto=BTC'
+    +'&themeName=dark'
+    +'&containerColor=13151f'
+    +'&primaryColor=4287f5';
+  frame.innerHTML=`<iframe src="${url}" style="width:100%;height:560px;border:none;border-radius:12px" allow="camera;microphone;payment" loading="lazy"></iframe>`;
 }
-document.getElementById('buyView').addEventListener('click',e=>{
-  const b=e.target.closest('[data-bc]');if(!b)return;
-  buyCur=b.dataset.bc;
-  document.querySelectorAll('[data-bc]').forEach(x=>x.classList.toggle('sel',x.dataset.bc===buyCur));
-  openBuyFrame(buyCur);
-});
 function renderDepMode(){
   depTabsEl.querySelectorAll('.auth-tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===depMode));
   depView.hidden=depMode!=='dep';
