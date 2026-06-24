@@ -143,7 +143,7 @@
   /* ===== NAV RAIL (expanded 216px / collapsed 56px) ===== */
   .rail{position:fixed;left:0;top:62px;bottom:0;width:var(--rail);background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px 10px;gap:2px;z-index:60;overflow-y:auto;overflow-x:hidden;transition:width .2s ease}
   .rail::-webkit-scrollbar{display:none}
-  .rail a,.rail button{position:relative;z-index:1;display:flex;align-items:center;gap:11px;height:48px;flex:none;padding:0 4px;border-radius:10px;color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;transition:color .16s;background:none;border:none;cursor:pointer;width:100%;text-align:left}
+  .rail a,.rail button{position:relative;z-index:1;display:flex;align-items:center;gap:11px;height:48px;flex:none;padding:0 4px;border-radius:10px;color:var(--muted);font-family:inherit;font-size:13px;font-weight:800;letter-spacing:.01em;text-transform:none;white-space:nowrap;transition:color .16s;background:none;border:none;cursor:pointer;width:100%;text-align:left}
   .rail-pill{display:none}
   .rail a .it,.rail button .it{width:32px;height:32px;flex:none;border-radius:8px;display:grid;place-items:center;
     background:transparent;border:none;transition:.15s;user-select:none}
@@ -1555,9 +1555,9 @@
         <div><h4>Platform</h4><a href="#" data-act="top">Casino</a><a href="#" data-act="sports">Sports</a><a href="#" data-act="providers">Providers</a><a href="#" data-act="race">Promotions</a></div>
         <div><h4>Offers</h4><a href="#" data-act="bonus">Rewards</a><a href="#" data-act="race">Weekly Race</a><a href="#" data-act="vip">VIP Club</a><a href="#" data-act="referrals">Referrals</a></div>
         <div><h4>Legal</h4><a href="#" data-act="terms">Terms of Service</a><a href="#" data-act="privacy">Privacy Policy</a><a href="#" data-act="fraud">Anti-Fraud Policy</a><a href="#" data-act="aml">AML Policy</a></div>
-        <div><h4>Support</h4><a href="#" data-act="chat">Live Support</a><a href="#" data-act="help">Help Center</a><a href="#" data-act="complaint">Complaint Form</a></div>
+        <div><h4>Support</h4><a href="#" data-act="support">Live Support</a><a href="#" data-act="help">Help Center</a><a href="#" data-act="complaint">Complaint Form</a></div>
       </div>
-      <div class="pay-strip" id="payStrip"><span class="lbl">Payments</span></div>
+      <div class="pay-strip" id="payStrip"></div>
       <div class="rg-strip">
         <a href="#" data-act="responsible" class="cert-logo"><img src="https://eu-images.contentstack.com/v3/assets/blt07f4bf5152f418f6/blt859ebfa5c0760ddb/6254370f1ef2515ab665a9aa/18_plus1.png" alt="18+"></a>
         <a href="https://www.gamblersanonymous.org.uk/" target="_blank" rel="noopener" class="cert-logo"><img src="https://eu-images.contentstack.com/v3/assets/blt07f4bf5152f418f6/blt82d28914dfbb11da/62543c43b4f5ca2cdc8cb543/ga.png" alt="Gamblers Anonymous"></a>
@@ -2127,18 +2127,6 @@
 
     <div class="vault-sep" style="margin:16px 0 0"></div>
 
-    <!-- withdraw to wallet -->
-    <div class="vio-withdraw" style="padding-bottom:4px">
-      <p class="dep-lbl" style="padding:0;margin-bottom:10px">Withdraw to Wallet</p>
-      <button class="vio-wallet-btn" id="vioWalletBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5"/><circle cx="16" cy="12" r="1.5" fill="currentColor"/></svg>
-        Connect Wallet
-      </button>
-      <p class="vio-withdraw-note" id="vioWithdrawNote">Connect a Web3 wallet to withdraw VIO to the <b>BNB network</b>. Contract deployment coming soon.</p>
-    </div>
-
-    <div class="vault-sep" style="margin:16px 0 0"></div>
-
     <!-- history -->
     <p class="dep-lbl" style="padding:0 22px;margin-bottom:8px">Claim History</p>
     <div class="vio-history" id="vioHistory">
@@ -2225,6 +2213,30 @@
   </div>
   <p class="chat-fine">Demo chat — messages are simulated and not sent anywhere.</p>
 </aside>
+
+<!-- ===== LIVE SUPPORT MODAL ===== -->
+<div class="dep-overlay" id="supportOverlay" role="dialog" aria-modal="true" aria-label="Live Support" style="align-items:flex-end;justify-content:flex-end;padding:0">
+  <div id="supportBox" style="width:360px;height:520px;background:var(--bg-2);border:1px solid var(--line);border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:-8px -8px 40px rgba(0,0,0,.5)">
+    <!-- header -->
+    <div style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:linear-gradient(90deg,#4a1e8a,#7c3aed);flex:none">
+      <div style="width:40px;height:40px;border-radius:50%;background:#fff1;border:2px solid rgba(255,255,255,.3);display:grid;place-items:center;flex:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" width="20" height="20"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:800;color:#fff">VioFyre Support</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.65);display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block"></span>Online — typical reply in &lt;2 min</div>
+      </div>
+      <button class="icon-btn" id="supportClose" aria-label="Close" style="color:#fff;opacity:.7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <!-- messages -->
+    <div id="supportMsgs" style="flex:1;overflow-y:auto;padding:16px 16px 8px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth"></div>
+    <!-- input -->
+    <div style="padding:10px 14px 14px;border-top:1px solid var(--line);display:flex;gap:8px;flex:none">
+      <input id="supportInput" type="text" placeholder="Type your message…" maxlength="500" style="flex:1;background:var(--panel);border:1px solid var(--line-2);border-radius:99px;padding:0 15px;height:38px;color:var(--txt);font-family:inherit;font-size:13px;outline:none;transition:border-color .15s" onfocus="this.style.borderColor='var(--mint)'" onblur="this.style.borderColor='var(--line-2)'"/>
+      <button class="btn btn-mint" id="supportSend" style="height:38px;padding:0 18px;font-size:12px">Send</button>
+    </div>
+  </div>
+</div>
 
 <!-- toasts -->
 <div class="toasts" id="toasts" aria-live="polite"></div>
@@ -2640,6 +2652,105 @@ if(false)(function(){
   else{window.addEventListener('load',dismiss);}
   /* safety fallback — never block the UI */
   setTimeout(dismiss,3000);
+}());
+</script>
+
+<script>
+/* ===== LIVE SUPPORT CHAT ===== */
+(function(){
+  var overlay=document.getElementById('supportOverlay');
+  var msgs=document.getElementById('supportMsgs');
+  var input=document.getElementById('supportInput');
+  var sendBtn=document.getElementById('supportSend');
+  var closeBtn=document.getElementById('supportClose');
+  var opened=false;
+
+  var AGENT_REPLIES=[
+    "Thanks for reaching out! How can I help you today?",
+    "I understand. Let me look into that for you.",
+    "Could you provide more details so I can assist you better?",
+    "Absolutely, that's something our team can help with.",
+    "I've noted your concern. Our team will follow up within 24 hours.",
+    "Is there anything else I can help you with?",
+    "For account-related issues, please make sure you're logged in so we can verify your identity.",
+    "Withdrawals typically process within 1–3 business days depending on your payment method.",
+    "Your security is our top priority. We'll never ask for your password.",
+    "I've escalated this to a senior agent. You'll hear back via email shortly.",
+  ];
+  var replyIdx=0;
+
+  function scrollBottom(){msgs.scrollTop=msgs.scrollHeight;}
+
+  function addMsg(text,isUser){
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;gap:8px;align-items:flex-end;'+(isUser?'flex-direction:row-reverse':'');
+    var avatar=document.createElement('div');
+    avatar.style.cssText='width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:12px;font-weight:800;';
+    if(isUser){
+      avatar.style.background='var(--accent-grad)';
+      avatar.textContent='U';
+    } else {
+      avatar.style.background='linear-gradient(135deg,#4a1e8a,#7c3aed)';
+      avatar.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="14" height="14"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>';
+    }
+    var bubble=document.createElement('div');
+    bubble.style.cssText='max-width:75%;padding:10px 14px;border-radius:'+(isUser?'16px 4px 16px 16px':'4px 16px 16px 16px')+';font-size:13px;line-height:1.5;'+(isUser?'background:var(--accent-grad);color:#fff':'background:var(--panel);color:var(--txt);border:1px solid var(--line)');
+    bubble.textContent=text;
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    msgs.appendChild(row);
+    scrollBottom();
+  }
+
+  function agentTyping(){
+    var row=document.createElement('div');
+    row.id='supportTyping';
+    row.style.cssText='display:flex;gap:8px;align-items:flex-end';
+    row.innerHTML='<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#4a1e8a,#7c3aed);flex:none;display:grid;place-items:center"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="14" height="14"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></div>'
+      +'<div style="background:var(--panel);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:10px 16px;display:flex;gap:5px;align-items:center">'
+      +'<span style="width:6px;height:6px;border-radius:50%;background:var(--muted);animation:pulse 1s infinite"></span>'
+      +'<span style="width:6px;height:6px;border-radius:50%;background:var(--muted);animation:pulse 1s .2s infinite"></span>'
+      +'<span style="width:6px;height:6px;border-radius:50%;background:var(--muted);animation:pulse 1s .4s infinite"></span>'
+      +'</div>';
+    msgs.appendChild(row);
+    scrollBottom();
+  }
+
+  function agentReply(){
+    agentTyping();
+    setTimeout(function(){
+      var t=document.getElementById('supportTyping');
+      if(t)t.remove();
+      addMsg(AGENT_REPLIES[replyIdx%AGENT_REPLIES.length],false);
+      replyIdx++;
+    },1200+Math.random()*800);
+  }
+
+  function openSupport(){
+    overlay.classList.add('open');
+    setTimeout(function(){input.focus();},200);
+    if(!opened){
+      opened=true;
+      setTimeout(function(){addMsg("Hi! Welcome to VioFyre Support 👋 How can I help you today?",false);},600);
+    }
+  }
+
+  function closeSupport(){overlay.classList.remove('open');}
+
+  function sendMsg(){
+    var txt=input.value.trim();
+    if(!txt)return;
+    addMsg(txt,true);
+    input.value='';
+    setTimeout(agentReply,400);
+  }
+
+  closeBtn.addEventListener('click',closeSupport);
+  overlay.addEventListener('click',function(e){if(e.target===overlay)closeSupport();});
+  sendBtn.addEventListener('click',sendMsg);
+  input.addEventListener('keydown',function(e){if(e.key==='Enter')sendMsg();});
+
+  window.openLiveSupport=openSupport;
 }());
 </script>
 </body>

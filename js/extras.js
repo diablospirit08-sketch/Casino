@@ -199,8 +199,7 @@ $id('inboxBtn').addEventListener('click',e=>{
 /* live support → scrolls rail support link */
 $id('supportMenuBtn').addEventListener('click',()=>{
   avatarWrap.classList.remove('open');
-  const s=document.getElementById('railChat');
-  if(s)s.click();
+  if(typeof openLiveSupport==='function')openLiveSupport();
 });
 
 /* ---------- profile modal ---------- */
@@ -620,6 +619,7 @@ const ACTS={
   bonus:()=>openBonus(),
   vip:()=>vipOverlay.classList.add('open'),
   chat:openChat,
+  support:()=>{if(typeof openLiveSupport==='function')openLiveSupport();},
   responsible:()=>openRg(),
 };
 document.addEventListener('click',e=>{
