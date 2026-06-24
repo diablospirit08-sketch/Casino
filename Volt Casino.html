@@ -512,20 +512,26 @@
   .btab{padding:8px 16px;border-radius:99px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);cursor:pointer;border:1px solid transparent;transition:.16s;background:none;font-family:inherit}
   .btab:hover{color:var(--txt)}
   .btab.active{background:rgba(66,135,245,.1);color:var(--mint);border-color:rgba(66,135,245,.35)}
-  .bet-feed{padding:8px 10px 10px;display:flex;flex-direction:column;gap:4px;overflow:hidden}
-  .bet-card{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:11px;background:var(--panel-2);border:1px solid var(--line);transition:background .15s;cursor:default}
-  .bet-card:hover{background:rgba(255,255,255,.04)}
-  .bet-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)}
-  .bet-info{flex:1;min-width:0}
-  .bet-game{font-size:13px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .bet-player{font-size:11px;color:var(--mint);font-weight:700;margin-top:1px}
-  .bet-amt{font-size:12px;color:var(--muted);min-width:58px;text-align:right;flex-shrink:0}
-  .bet-mult{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:99px;background:rgba(255,255,255,.07);color:var(--txt);min-width:40px;text-align:center;flex-shrink:0}
-  .bet-payout{font-size:13px;font-weight:800;min-width:76px;text-align:right;flex-shrink:0}
-  .bet-payout.win{color:#4cca8a}
-  .bet-payout.lose{color:#e2596a}
-  @keyframes betSlide{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
-  .bet-card:first-child{animation:betSlide .28s ease}
+  table.bt{width:100%;border-collapse:collapse}
+  .bt th{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);text-align:left;padding:11px 20px;border-bottom:1px solid var(--line)}
+  .bt td{padding:12px 20px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--txt);vertical-align:middle}
+  .bt tr:last-child td{border-bottom:none}
+  .bt tr:hover td{background:rgba(255,255,255,.025)}
+  .bt .bt-game{font-weight:700}
+  .bt .bt-user{display:flex;align-items:center;gap:7px;color:var(--muted)}
+  .bt .bt-user svg{color:var(--muted-2);flex-shrink:0}
+  .bt .bt-coin{display:flex;align-items:center;gap:7px}
+  .bt .bt-ic{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;flex-shrink:0;letter-spacing:0}
+  .bt .bt-usd{font-size:11px;color:var(--muted-2);margin-left:1px}
+  .bt .bt-mult{display:inline-flex;align-items:center;justify-content:center;padding:4px 11px;border-radius:6px;font-size:12px;font-weight:700;min-width:58px}
+  .bt .bt-mult.win{background:linear-gradient(90deg,#2f5fd4,#5b8af5);color:#fff}
+  .bt .bt-mult.lose{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid rgba(255,255,255,.07)}
+  .bt .bt-pay{display:flex;align-items:center;gap:7px}
+  .bt .bt-pay-amt{font-weight:600}
+  .bt .bt-pay-amt.win{color:#4cca8a}
+  .bt .bt-pay-amt.lose{color:var(--muted-2)}
+  @keyframes betSlide{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+  .bt tbody tr:first-child td{animation:betSlide .25s ease}
 
   /* ===== VAULT ===== */
   .vault-hero{display:flex;flex-direction:column;align-items:center;padding:28px 22px 20px;text-align:center;gap:10px}
@@ -1432,7 +1438,10 @@
         <button class="btab">Races</button>
         <button class="btab">Lucky Wins</button>
       </div>
-      <div class="bet-feed" id="betBody"></div>
+      <table class="bt">
+        <thead><tr><th>Game</th><th>User</th><th>Bet Amount</th><th>Multiplier</th><th>Payout</th></tr></thead>
+        <tbody id="betBody"></tbody>
+      </table>
     </div>
 
   </div><!-- /lobbyView -->
@@ -2252,7 +2261,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="js/api.js"></script>
 <script src="js/supabase-client.js"></script>
-<script src="js/lobby.js?v=14"></script>
+<script src="js/lobby.js?v=15"></script>
 <script src="js/gameview.js"></script>
 <script src="js/chips.js"></script>
 <script src="js/engines.js"></script>
