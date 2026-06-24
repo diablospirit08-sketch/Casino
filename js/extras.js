@@ -275,7 +275,7 @@ $id('profPwSave').addEventListener('click',async()=>{
   $id('profChPwBtn').disabled=false;
   showToast({icon:'🔒',title:'Password updated',sub:'Your new password is active.'});
 });
-$id('profileBtn').addEventListener('click',openProfile);
+const _profileBtn=$id('profileBtn');if(_profileBtn)_profileBtn.addEventListener('click',openProfile);
 function _profClose(){profOverlay.classList.remove('open');_profChPwReset();}
 $id('profClose').addEventListener('click',_profClose);
 profOverlay.addEventListener('click',e=>{if(e.target===profOverlay)_profClose();});
