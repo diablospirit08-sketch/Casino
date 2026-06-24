@@ -404,6 +404,23 @@
   .dep-buy-btn svg{width:14px;height:14px;flex:none;opacity:.7}
   .dep-net-warn{display:flex;align-items:flex-start;gap:10px;background:rgba(255,180,0,.08);border:1px solid rgba(255,180,0,.35);border-radius:10px;padding:11px 13px;margin-top:12px;font-size:11.5px;font-weight:700;color:#f5c842;line-height:1.5}
   .dep-net-warn svg{width:16px;height:16px;flex:none;margin-top:1px;color:#f5c842}
+  /* ===== BUY CRYPTO VIEW ===== */
+  .buy-banner{display:flex;gap:10px;background:rgba(66,135,245,.08);border:1px solid rgba(66,135,245,.22);border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:11.5px;line-height:1.55;color:var(--muted)}
+  .buy-banner svg{width:16px;height:16px;flex:none;margin-top:1px;color:var(--mint)}
+  .buy-steps{display:flex;flex-direction:column}
+  .buy-step{display:flex;gap:14px;align-items:flex-start;padding-bottom:18px;position:relative}
+  .buy-step:not(:last-child)::before{content:'';position:absolute;left:13px;top:30px;bottom:0;width:2px;background:var(--line-2)}
+  .buy-step-num{width:28px;height:28px;border-radius:50%;border:2px solid var(--mint);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--mint);flex:none;background:var(--bg)}
+  .buy-step-body{flex:1;padding-top:2px}
+  .buy-provider-card{display:flex;align-items:center;gap:12px;background:var(--panel-2);border:2px solid var(--mint);border-radius:12px;padding:13px 16px;margin-top:8px}
+  .buy-provider-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--mint);display:flex;align-items:center;justify-content:center;flex:none}
+  .buy-provider-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--mint);display:block}
+  .buy-provider-name{font-size:13px;font-weight:900;color:var(--txt);flex:1;letter-spacing:.02em}
+  .buy-pay-icons{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+  .buy-pay-ic{background:#fff;color:#111;font-size:7.5px;font-weight:900;padding:3px 6px;border-radius:4px;letter-spacing:.03em;white-space:nowrap}
+  .buy-continue{width:100%;background:#22c55e;color:#fff;border:none;border-radius:12px;padding:14px;font-family:inherit;font-size:13px;font-weight:900;letter-spacing:.04em;cursor:pointer;margin-top:14px;transition:opacity .15s}
+  .buy-continue:hover{opacity:.88}
+  .buy-continue:disabled{opacity:.4;cursor:not-allowed}
 
   /* ===== AUTH MODAL ===== */
   .auth-modal{
@@ -1841,9 +1858,52 @@
       <button class="dep-copy" id="iTxnMore" style="width:100%;background:var(--panel-2);color:var(--txt);margin-top:10px;display:none">Load more</button>
     </div>
     <div id="buyView" hidden>
-      <div id="buyFrame" style="border-radius:12px;overflow:hidden;min-height:560px;background:var(--bg-2);display:flex;align-items:center;justify-content:center">
-        <p style="color:var(--muted);font-size:12px;text-align:center;padding:24px">Loading…</p>
+      <div class="buy-banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>You are using a credit card to purchase crypto that will be used to fund your account. It will automatically be sent to your deposit address once purchased.</span>
       </div>
+      <div class="buy-steps">
+        <div class="buy-step">
+          <div class="buy-step-num">1</div>
+          <div class="buy-step-body">
+            <p class="dep-lbl" style="margin:0 0 8px">Select Currency</p>
+            <div class="dep-dd" id="buyCurDd">
+              <button class="dep-dd-btn" id="buyCurDdBtn">
+                <img id="buyCurDdIc" src="data:," alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;flex:none">
+                <span id="buyCurDdLbl">BTC</span>
+                <svg class="dep-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <div class="dep-dd-panel" id="buyCurPanel" hidden></div>
+            </div>
+          </div>
+        </div>
+        <div class="buy-step">
+          <div class="buy-step-num">2</div>
+          <div class="buy-step-body">
+            <p class="dep-lbl" style="margin:0 0 8px">Select Network</p>
+            <div class="dep-dd" id="buyNetDd">
+              <button class="dep-dd-btn" id="buyNetDdBtn">
+                <span id="buyNetDdLbl">Bitcoin</span>
+                <svg class="dep-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <div class="dep-dd-panel" id="buyNetPanel" hidden></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="dep-lbl">Provider</p>
+      <div class="buy-provider-card">
+        <div class="buy-provider-radio"></div>
+        <span class="buy-provider-name">MoonPay</span>
+        <div class="buy-pay-icons">
+          <span class="buy-pay-ic">VISA</span>
+          <span class="buy-pay-ic">MC</span>
+          <span class="buy-pay-ic">G Pay</span>
+          <span class="buy-pay-ic">Apple Pay</span>
+        </div>
+      </div>
+      <button class="buy-continue" id="buyContinueBtn">Continue to MoonPay &rarr;</button>
+      <p class="dep-fine" style="margin-top:14px">You are purchasing cryptocurrency from a third-party provider. By continuing, you acknowledge that you have read and agree to our <a href="#" style="color:var(--mint)">Terms of Service</a>.</p>
     </div>
   </div>
 </div>

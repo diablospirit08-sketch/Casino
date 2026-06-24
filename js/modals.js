@@ -297,15 +297,81 @@ const depTabsEl=document.getElementById('depTabs'),
       wdSubmit=document.getElementById('wdSubmit');
 let depMode='dep';
 const depW=()=>WALLETS.find(x=>x.c===depCur);
-function renderBuyView(){
-  const frame=document.getElementById('buyFrame');if(!frame)return;
-  if(frame.querySelector('iframe'))return;
-  const url='https://buy-sandbox.moonpay.com/?apiKey=pk_test_01KVX5EX6NMKGSF6VX1FH71FH3'
-    +'&currencyCode=btc'
-    +'&colorCode=%234287f5'
-    +'&theme=dark';
-  frame.innerHTML=`<iframe src="${url}" style="width:100%;height:560px;border:none;border-radius:12px" allow="camera;microphone;payment" loading="lazy"></iframe>`;
+
+/* ── Buy Crypto view ── */
+const MOONPAY_CUR={
+  BTC:{BTC:'btc'},
+  ETH:{ERC20:'eth'},
+  BNB:{BEP20:'bnb_bsc'},
+  LTC:{LTC:'ltc'},
+  USDT:{ERC20:'usdt',TRC20:'usdt_tron',BEP20:'usdt_bsc',SPL:'usdt_sol'},
+  USDC:{ERC20:'usdc',BEP20:'usdc_bsc',SPL:'usdc_sol'},
+  SOL:{SOL:'sol'},
+  XRP:{XRP:'xrp'},
+};
+let buyCur='BTC',buyNetId=null;
+
+function renderBuyNetDd(){
+  const nets=(DEPOSIT[buyCur]||DEPOSIT.BTC).networks;
+  if(!buyNetId||!nets.find(n=>n.id===buyNetId))buyNetId=nets[0].id;
+  const net=nets.find(n=>n.id===buyNetId)||nets[0];
+  const lbl=document.getElementById('buyNetDdLbl');
+  if(lbl)lbl.textContent=net.name;
+  const panel=document.getElementById('buyNetPanel');
+  if(panel)panel.innerHTML=nets.map(n=>`
+    <button class="dep-dd-item${n.id===buyNetId?' sel':''}" data-buyn="${n.id}">
+      <span>${n.name}</span>
+    </button>`).join('');
 }
+
+function renderBuyView(){
+  const ic=document.getElementById('buyCurDdIc'),lbl=document.getElementById('buyCurDdLbl');
+  if(ic){ic.src=coinIconUrl(buyCur);ic.alt=buyCur;}
+  if(lbl)lbl.textContent=buyCur;
+  const panel=document.getElementById('buyCurPanel');
+  if(panel)panel.innerHTML=Object.keys(DEPOSIT).map(c=>`
+    <button class="dep-dd-item${c===buyCur?' sel':''}" data-buyc="${c}">
+      <img src="${coinIconUrl(c)}" alt="${c}" onerror="this.style.display='none'">
+      <span>${c}</span>
+    </button>`).join('');
+  renderBuyNetDd();
+}
+
+document.getElementById('buyCurDdBtn').addEventListener('click',()=>{
+  const p=document.getElementById('buyCurPanel'),b=document.getElementById('buyCurDdBtn');
+  const open=!p.hidden;p.hidden=open;b.classList.toggle('open',!open);
+});
+document.getElementById('buyCurPanel').addEventListener('click',e=>{
+  const b=e.target.closest('[data-buyc]');if(!b)return;
+  buyCur=b.dataset.buyc;buyNetId=null;
+  document.getElementById('buyCurPanel').hidden=true;
+  document.getElementById('buyCurDdBtn').classList.remove('open');
+  renderBuyView();
+});
+document.getElementById('buyNetDdBtn').addEventListener('click',()=>{
+  const p=document.getElementById('buyNetPanel'),b=document.getElementById('buyNetDdBtn');
+  const open=!p.hidden;p.hidden=open;b.classList.toggle('open',!open);
+});
+document.getElementById('buyNetPanel').addEventListener('click',e=>{
+  const b=e.target.closest('[data-buyn]');if(!b)return;
+  buyNetId=b.dataset.buyn;
+  document.getElementById('buyNetPanel').hidden=true;
+  document.getElementById('buyNetDdBtn').classList.remove('open');
+  renderBuyNetDd();
+});
+document.getElementById('buyContinueBtn').addEventListener('click',async()=>{
+  const btn=document.getElementById('buyContinueBtn');
+  btn.disabled=true;btn.textContent='Opening MoonPay…';
+  const net=(DEPOSIT[buyCur]?.networks||[]).find(n=>n.id===buyNetId)||(DEPOSIT[buyCur]?.networks||[])[0];
+  const addr=depAddrCache[buyCur+':'+(net?.id||buyCur)]||await fetchDepositAddress(buyCur,net?.id||buyCur)||'';
+  const mpCur=(MOONPAY_CUR[buyCur]||{})[buyNetId]||buyCur.toLowerCase();
+  const url='https://buy-sandbox.moonpay.com/?apiKey=pk_test_01KVX5EX6NMKGSF6VX1FH71FH3'
+    +'&currencyCode='+mpCur
+    +(addr?'&walletAddress='+encodeURIComponent(addr):'')
+    +'&theme=dark&colorCode='+encodeURIComponent('#4287f5');
+  window.open(url,'_blank');
+  btn.disabled=false;btn.innerHTML='Continue to MoonPay &rarr;';
+});
 function renderDepMode(){
   depTabsEl.querySelectorAll('.auth-tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===depMode));
   depView.hidden=depMode!=='dep';
