@@ -9,12 +9,19 @@ serve(async (req) => {
   try {
     const rawBody = await req.text()
 
-    // Verify Alchemy HMAC signature when signing key is configured
-    const signingKey = Deno.env.get('ALCHEMY_SIGNING_KEY')
-    if (signingKey) {
+    // Verify Alchemy HMAC signature — check ETH and BNB signing keys
+    const signingKeys = [
+      Deno.env.get('ALCHEMY_SIGNING_KEY_ETH'),
+      Deno.env.get('ALCHEMY_SIGNING_KEY_BNB'),
+      Deno.env.get('ALCHEMY_SIGNING_KEY'), // legacy fallback
+    ].filter(Boolean) as string[]
+
+    if (signingKeys.length > 0) {
       const alchemySig = req.headers.get('x-alchemy-signature') ?? ''
-      const expected   = createHmac('sha256', signingKey).update(rawBody).digest('hex')
-      if (alchemySig !== expected) {
+      const valid = signingKeys.some(key =>
+        createHmac('sha256', key).update(rawBody).digest('hex') === alchemySig
+      )
+      if (!valid) {
         console.error('[alchemy-webhook] bad signature')
         return new Response('Forbidden', { status: 403 })
       }

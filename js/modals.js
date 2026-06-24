@@ -7,7 +7,7 @@ document.getElementById('payStrip').insertAdjacentHTML('beforeend',
 /* ---------- deposit modal ---------- */
 const DEPOSIT={
   BTC:{networks:[
-    {id:'BTC', name:'Bitcoin',              addr:'bc1qj9w4ux0e3a8yq2v5tslh7nf06xm3r9c4kzd2e', min:'0.0001 BTC', conf:'1 confirmation',   fee:'0.00005 BTC', evm:false},
+    {id:'BTC', name:'Bitcoin',              addr:'bc1qh9hlwc6vhzskuzkjtznj4zuy88e03f0pzzthdf', min:'0.0001 BTC', conf:'1 confirmation',   fee:'0.00005 BTC', evm:false},
   ]},
   ETH:{networks:[
     {id:'ERC20',name:'Ethereum · ERC-20',   addr:'',                                            min:'0.005 ETH',  conf:'12 confirmations', fee:'0.0008 ETH',  evm:true},
@@ -16,22 +16,22 @@ const DEPOSIT={
     {id:'BEP20',name:'BNB Chain · BEP-20',  addr:'',                                            min:'0.01 BNB',   conf:'15 confirmations', fee:'0.001 BNB',   evm:true},
   ]},
   LTC:{networks:[
-    {id:'LTC', name:'Litecoin',             addr:'ltc1q8v2m4xw9c7t3p5dyh0kn6azfu1rqsje5lg8b3',min:'0.01 LTC',   conf:'3 confirmations',  fee:'0.001 LTC',   evm:false},
+    {id:'LTC', name:'Litecoin',             addr:'ltc1qnt2qj2ku76wgg5ajjx7av4ws7xntlh2t852u7v',min:'0.01 LTC',   conf:'3 confirmations',  fee:'0.001 LTC',   evm:false},
   ]},
   USDT:{networks:[
     {id:'ERC20',name:'Ethereum · ERC-20',   addr:'',                                            min:'10 USDT',    conf:'12 confirmations', fee:'2 USDT',      evm:true},
-    {id:'TRC20',name:'Tron · TRC-20',       addr:'TUsdt7vR3mQk9xZ2bP4wN6cF8gH0jL5eA',         min:'1 USDT',     conf:'~1 min',           fee:'0.5 USDT',    evm:false},
+    {id:'TRC20',name:'Tron · TRC-20',       addr:'TMR9Jny3DXe8xgrPNGREJhmmMvnvd7Nbaf',         min:'1 USDT',     conf:'~1 min',           fee:'0.5 USDT',    evm:false},
     {id:'BEP20',name:'BNB Chain · BEP-20',  addr:'',                                            min:'1 USDT',     conf:'15 confirmations', fee:'0.5 USDT',    evm:true},
-    {id:'SPL',  name:'Solana · SPL',        addr:'9wK3rT7pNxV2mQ8cZ5bL4dF6gH1jY0aEuSnB8XoD2RkM',min:'1 USDT',  conf:'~1 min',           fee:'0.01 USDT',   evm:false},
+    {id:'SPL',  name:'Solana · SPL',        addr:'5UX3z2nACjhAPAQHDRDRCtdq5no38bqRXfpMMixeShTg',min:'1 USDT',  conf:'~1 min',           fee:'0.01 USDT',   evm:false},
   ]},
   USDC:{networks:[
     {id:'ERC20',name:'Ethereum · ERC-20',   addr:'',                                            min:'10 USDC',    conf:'12 confirmations', fee:'1.5 USDC',    evm:true},
-    {id:'SOL',  name:'Solana · SPL',        addr:'9wK3rT7pNxV2mQ8cZ5bL4dF6gH1jY0aEuSnB8XoD2RkM',min:'1 USDC',  conf:'~1 min',           fee:'0.01 USDC',   evm:false},
+    {id:'SOL',  name:'Solana · SPL',        addr:'5UX3z2nACjhAPAQHDRDRCtdq5no38bqRXfpMMixeShTg',min:'1 USDC',  conf:'~1 min',           fee:'0.01 USDC',   evm:false},
     {id:'BEP20',name:'BNB Chain · BEP-20',  addr:'',                                            min:'1 USDC',     conf:'15 confirmations', fee:'0.5 USDC',    evm:true},
-    {id:'TRC20',name:'Tron · TRC-20',       addr:'TUsdc8wR4mQk9xZ2bP4wN6cF8gH0jL5eB',         min:'1 USDC',     conf:'~1 min',           fee:'0.5 USDC',    evm:false},
+    {id:'TRC20',name:'Tron · TRC-20',       addr:'TYaYhdMcmfqsSesmmYT4C1AaATSzR5XR8p',         min:'1 USDC',     conf:'~1 min',           fee:'0.5 USDC',    evm:false},
   ]},
   SOL:{networks:[
-    {id:'SOL', name:'Solana',               addr:'9wK3rT7pNxV2mQ8cZ5bL4dF6gH1jY0aEuSnB8XoD2RkM',min:'0.05 SOL', conf:'~1 min finality',  fee:'0.001 SOL',   evm:false},
+    {id:'SOL', name:'Solana',               addr:'5UX3z2nACjhAPAQHDRDRCtdq5no38bqRXfpMMixeShTg',min:'0.05 SOL', conf:'~1 min finality',  fee:'0.001 SOL',   evm:false},
   ]},
 };
 let depCur=voltCur,depNetId=null;
