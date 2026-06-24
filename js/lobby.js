@@ -737,51 +737,82 @@ setInterval(()=>{
   renderBets();
 },2600);
 
-/* ---------- header search overlay ---------- */
+/* ---------- search overlay ---------- */
 const searchOverlay=document.getElementById('searchOverlay');
 const srchInput=document.getElementById('srchInput');
 const srchGrid=document.getElementById('srchGrid');
 const srchCount=document.getElementById('srchCount');
+const srchPub=document.getElementById('srchPub');
+const srchCats=document.getElementById('srchCats');
+let srchCat='all';
+
+/* populate publisher dropdown after TILE_META is ready */
+function initSrchPub(){
+  const provs=[...new Set(TILE_META.map(m=>m.prov))].sort();
+  provs.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;srchPub.appendChild(o);});
+}
 
 function openSearch(){
+  if(!srchPub.options.length||srchPub.options.length===1)initSrchPub();
   searchOverlay.classList.add('open');
   srchInput.value='';
   renderSearch('');
   setTimeout(()=>srchInput.focus(),40);
 }
-function closeSearch(){
-  searchOverlay.classList.remove('open');
-}
+function closeSearch(){searchOverlay.classList.remove('open');}
 document.getElementById('srchClose').addEventListener('click',closeSearch);
 searchOverlay.addEventListener('click',e=>{if(e.target===searchOverlay)closeSearch();});
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&searchOverlay.classList.contains('open')){closeSearch();e.stopPropagation();}
 },true);
 srchInput.addEventListener('input',()=>renderSearch(srchInput.value.trim().toLowerCase()));
+srchPub.addEventListener('change',()=>renderSearch(srchInput.value.trim().toLowerCase()));
+srchCats.addEventListener('click',e=>{
+  const btn=e.target.closest('.srch-cat');if(!btn)return;
+  srchCat=btn.dataset.cat;
+  srchCats.querySelectorAll('.srch-cat').forEach(b=>b.classList.toggle('active',b===btn));
+  renderSearch(srchInput.value.trim().toLowerCase());
+});
+
+const _CAT_ROWS={slots:['slots','hot'],live:['live'],shows:['shows'],hot:['hot'],new:['new']};
 
 function srchCardHTML(slug,name,prov,gradColors){
   const g=gradColors||(GAME_BY_SLUG[slug]&&GAME_BY_SLUG[slug].g)||['#1a2236','#2a3447'];
-  const playing=Math.floor(Math.random()*380)+2;
   return`<div class="srch-card" data-slug="${slug}" style="background:linear-gradient(160deg,${g[0]},${g[1]})" role="button" tabindex="0">
-    <div class="srch-card-body"><b>${name}</b><span>${prov}</span><em>${playing} playing</em></div>
+    <div class="srch-card-body"><b>${name}</b><span>${prov}</span></div>
   </div>`;
 }
 
+function _srchFilter(list){
+  const pub=srchPub.value;
+  return pub?list.filter(m=>m.prov===pub):list;
+}
+
 function renderSearch(q){
-  const MAX=48;
-  if(q){
-    const results=TILE_META.filter(m=>m.name.toLowerCase().includes(q)||m.prov.toLowerCase().includes(q)).slice(0,MAX);
-    srchCount.textContent=results.length?results.length+' result'+(results.length===1?'':'s'):'';
-    if(!results.length){srchGrid.innerHTML=`<p class="srch-empty">No games found for "<b>${q}</b>"</p>`;return;}
+  const MAX=60;
+  if(q||srchCat!=='all'){
+    let results=TILE_META.slice();
+    if(q)results=results.filter(m=>m.name.toLowerCase().includes(q)||m.prov.toLowerCase().includes(q));
+    if(srchCat!=='all'){const keys=_CAT_ROWS[srchCat]||[];results=results.filter(m=>keys.includes(m.rowKey));}
+    results=_srchFilter(results).slice(0,MAX);
+    srchCount.textContent=results.length?results.length+' game'+(results.length===1?'':'s'):'';
+    if(!results.length){srchGrid.innerHTML=`<p class="srch-empty">No games found${q?' for "<b>'+q+'</b>"':''}</p>`;_bindCards();return;}
     srchGrid.innerHTML=`<div class="srch-flat">${results.map(m=>srchCardHTML(m.tile.dataset.slug,m.name,m.prov)).join('')}</div>`;
   }else{
+    const visRows=_srchFilter(TILE_META).map(m=>m.rowKey);
+    const rows=ROWS.filter(r=>!_srchFilter(TILE_META).length||visRows.includes(r.key));
     srchCount.textContent='';
-    srchGrid.innerHTML=ROWS.map(row=>`
-      <div class="srch-section">
-        <div class="srch-sec-head">${row.img?`<img src="${row.img}" style="width:18px;height:18px;object-fit:contain">`:(row.iconSvg||`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="${row.icon}"/></svg>`)}<span>${row.title}</span></div>
-        <div class="srch-row">${row.games.map(g=>srchCardHTML(row.key+'-'+slugify(g.n),g.n,g.p,g.g)).join('')}</div>
-      </div>`).join('');
+    srchGrid.innerHTML=rows.map(row=>{
+      const games=srchPub.value?row.games.filter(g=>g.p===srchPub.value):row.games;
+      if(!games.length)return'';
+      return`<div class="srch-section">
+        <div class="srch-sec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="${row.icon}"/></svg><span>${row.title}</span></div>
+        <div class="srch-row">${games.map(g=>srchCardHTML(row.key+'-'+slugify(g.n),g.n,g.p,g.g)).join('')}</div>
+      </div>`;}).join('');
   }
+  _bindCards();
+}
+function _bindCards(){
   srchGrid.querySelectorAll('[data-slug]').forEach(t=>{
     t.addEventListener('click',()=>{closeSearch();openGame(t.dataset.slug);});
     t.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();closeSearch();openGame(t.dataset.slug);}});
