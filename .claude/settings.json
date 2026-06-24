@@ -12,7 +12,9 @@
       "Bash(git stash *)",
       "Bash(git checkout *)",
       "Skill(run)",
-      "Skill(run:*)"
+      "Skill(run:*)",
+      "Bash(grep -n 'function $i' 'e:/Projects/casino/Volt Casino.html')",
+      "Bash(npm install *)"
     ]
   }
 }
