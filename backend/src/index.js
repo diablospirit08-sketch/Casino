@@ -22,6 +22,7 @@ import { rgRoutes }       from './routes/rg.js';
 import { imageUploadRoutes, imageServeRoutes } from './routes/images.js';
 import { complaintRoutes, complaintAdminRoutes } from './routes/complaints.js';
 import { vaultRoutes } from './routes/vault.js';
+import { forgotPasswordRoutes } from './routes/forgot-password.js';
 
 const PORT = parseInt(process.env.PORT ?? '4000', 10);
 const HOST = process.env.HOST ?? '0.0.0.0';
@@ -80,6 +81,7 @@ await fastify.register(imageServeRoutes,     { prefix: '/api/image' });
 await fastify.register(complaintRoutes,      { prefix: '/api' });
 await fastify.register(complaintAdminRoutes, { prefix: '/api/admin' });
 await fastify.register(vaultRoutes,          { prefix: '/api/vault' });
+await fastify.register(forgotPasswordRoutes, { prefix: '/api/auth' });
 
 // Health check
 fastify.get('/health', async () => ({ status: 'ok', ts: new Date().toISOString() }));

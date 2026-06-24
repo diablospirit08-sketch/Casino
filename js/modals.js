@@ -418,7 +418,7 @@ function finishAuth(){
 }
 authTabs.addEventListener('click',e=>{
   const t=e.target.closest('.auth-tab');
-  if(t){authMode=t.dataset.mode;renderAuth();}
+  if(t){authMode=t.dataset.mode;showAuthErr('');renderAuth();}
 });
 document.getElementById('authClose').addEventListener('click',closeAuth);
 authOverlay.addEventListener('click',e=>{if(e.target===authOverlay)closeAuth();});
@@ -427,8 +427,11 @@ document.addEventListener('keydown',e=>{
 },true);
 [authEmail,authPass].forEach(i=>i.addEventListener('input',validateAuth));
 authTermsCb.addEventListener('change',validateAuth);
+const authErr=document.getElementById('authErr');
+function showAuthErr(msg){if(authErr){authErr.textContent=msg;authErr.style.display=msg?'':'none';}}
 authSubmit.addEventListener('click',async()=>{
   if(authSubmit.disabled)return;
+  showAuthErr('');
   const label=authSubmit.textContent;
   authSubmit.disabled=true;
   authSubmit.textContent='…';
@@ -442,7 +445,6 @@ authSubmit.addEventListener('click',async()=>{
         showToast({icon:'📧',title:'Check your email',sub:'Click the confirmation link to activate your account.'});
         return;
       }
-      /* signup success — show username picker before finishing */
       closeAuth();
       openUnamePicker(signupEmail);
       return;
@@ -453,7 +455,7 @@ authSubmit.addEventListener('click',async()=>{
   } catch(err){
     authSubmit.disabled=false;
     authSubmit.textContent=label;
-    showToast({icon:'⚠',title:'Auth error',sub:err.message});
+    showAuthErr(err.message);
   }
 });
 
@@ -564,9 +566,7 @@ forgotBtn.addEventListener('click',async()=>{
 
 async function sendReset(email){
   try{
-    const{error}=await supa.auth.resetPasswordForEmail(email,{
-      redirectTo:location.origin+location.pathname+'?reset=1',
-    });
+    const{error}=await supa.auth.resetPasswordForEmail(email);
     if(error)throw error;
     closeAuth();
     showToast({icon:'📧',title:'Reset link sent',sub:'Check your inbox — the link expires in 1 hour.'});

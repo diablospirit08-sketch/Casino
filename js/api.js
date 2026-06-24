@@ -72,7 +72,15 @@
         const at   = localStorage.getItem(LS_AT);
         const user = _getUser();
         if (!at || !user) return { data: { session: null } };
-        return { data: { session: { access_token: at, user } } };
+        // Auto-refresh if token looks expired (JWT exp claim check)
+        try {
+          const payload = JSON.parse(atob(at.split('.')[1]));
+          if (payload.exp && payload.exp * 1000 < Date.now() + 60_000) {
+            const fresh = await _refresh();
+            if (!fresh) return { data: { session: null } };
+          }
+        } catch { /* malformed token — proceed, let API reject it */ }
+        return { data: { session: { access_token: localStorage.getItem(LS_AT), user } } };
       },
 
       async getUser() {
@@ -142,8 +150,34 @@
         return { data: {}, error: null };
       },
 
-      async resetPasswordForEmail() {
-        return { error: { message: 'Password reset is not yet available. Contact support.' } };
+      async resetPasswordForEmail(email) {
+        try {
+          const res = await fetch(`${API}/api/auth/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+          });
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok) return { error: { message: json.error || 'Request failed' } };
+          return { error: null };
+        } catch {
+          return { error: { message: 'Network error — check your connection.' } };
+        }
+      },
+
+      async resetPassword(token, password) {
+        try {
+          const res = await fetch(`${API}/api/auth/reset-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, password }),
+          });
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok) return { error: { message: json.error || 'Reset failed' } };
+          return { error: null };
+        } catch {
+          return { error: { message: 'Network error — check your connection.' } };
+        }
       },
 
       async signInWithOAuth({ provider, options = {} } = {}) {
