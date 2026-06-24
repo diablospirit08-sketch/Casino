@@ -685,10 +685,12 @@ _pBtns.forEach(btn=>{
 provRowEl.addEventListener('scroll',syncProvArrows,{passive:true});
 syncProvArrows();
 
-/* ---------- bets table ---------- */
+/* ---------- bets feed ---------- */
 const bplayers=['Hidden','Volty_88','Nina_X','Hidden','Krakn','Joules','Hidden','Mx_Turbo','Hidden','Ohmies'];
 const ballgames=['Berry Rush','Limbo','Plinko','Crazy Hour','Blackjack','Dice','Jelly Express','Storm Roulette','Keno','Coinflip'];
 function rnd(a,b){return Math.random()*(b-a)+a}
+const _GCOLS=[['#523CBD','#9B6EFF'],['#0f6b4a','#1fc97c'],['#7c2a00','#f7653a'],['#1a3a6b','#4287f5'],['#5c1a7c','#c86bff'],['#7c4a00','#f5b942'],['#0d4a5c','#33c8e8'],['#4a0d2a','#e84897']];
+function _gameColor(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))&0xffff;return _GCOLS[h%_GCOLS.length];}
 function makeBetRow(){
   const bet=rnd(0.5,800),mult=Math.random()<0.55?0:rnd(1.01,80);
   return{game:ballgames[Math.floor(rnd(0,ballgames.length))],
@@ -696,13 +698,16 @@ function makeBetRow(){
          bet,mult,win:mult>0};
 }
 function betRowHtml(r){
-  return`<tr>
-    <td class="g">${r.game}</td>
-    <td class="u">${r.player}</td>
-    <td>$${r.bet.toFixed(2)}</td>
-    <td class="mult">${r.mult>0?r.mult.toFixed(2)+'×':'—'}</td>
-    <td class="${r.win?'win':'lose'}">${r.win?'+$'+(r.bet*(r.mult-1)).toFixed(2):'-$'+r.bet.toFixed(2)}</td>
-  </tr>`;
+  const [c1,c2]=_gameColor(r.game);
+  const payout=r.win?'+$'+(r.bet*(r.mult-1)).toFixed(2):'-$'+r.bet.toFixed(2);
+  const mult=r.mult>0?r.mult.toFixed(2)+'×':'—';
+  return`<div class="bet-card">
+    <div class="bet-icon" style="background:linear-gradient(135deg,${c1},${c2})">${r.game[0]}</div>
+    <div class="bet-info"><div class="bet-game">${r.game}</div><div class="bet-player">${r.player}</div></div>
+    <div class="bet-amt">$${r.bet.toFixed(2)}</div>
+    <div class="bet-mult">${mult}</div>
+    <div class="bet-payout ${r.win?'win':'lose'}">${payout}</div>
+  </div>`;
 }
 const BET_POOL=[];
 const MAX_POOL=60;

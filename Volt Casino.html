@@ -511,15 +511,20 @@
   .btab{padding:8px 16px;border-radius:99px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);cursor:pointer;border:1px solid transparent;transition:.16s;background:none;font-family:inherit}
   .btab:hover{color:var(--txt)}
   .btab.active{background:rgba(66,135,245,.1);color:var(--mint);border-color:rgba(66,135,245,.35)}
-  table.bt{width:100%;border-collapse:collapse}
-  .bt th{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2);text-align:left;padding:12px 18px;border-bottom:1px solid var(--line)}
-  .bt td{padding:12px 18px;font-size:13px;border-bottom:1px solid var(--line);color:var(--muted)}
-  .bt tr:last-child td{border-bottom:none}
-  .bt td.g{color:var(--txt);font-weight:700}
-  .bt td.u{color:var(--mint);font-weight:700}
-  .bt td.win{color:var(--mint);font-weight:800}
-  .bt td.lose{color:#e2596a;font-weight:800}
-  .bt .mult{font-weight:800;color:var(--txt)}
+  .bet-feed{padding:8px 10px 10px;display:flex;flex-direction:column;gap:4px;overflow:hidden}
+  .bet-card{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:11px;background:var(--panel-2);border:1px solid var(--line);transition:background .15s;cursor:default}
+  .bet-card:hover{background:rgba(255,255,255,.04)}
+  .bet-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+  .bet-info{flex:1;min-width:0}
+  .bet-game{font-size:13px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bet-player{font-size:11px;color:var(--mint);font-weight:700;margin-top:1px}
+  .bet-amt{font-size:12px;color:var(--muted);min-width:58px;text-align:right;flex-shrink:0}
+  .bet-mult{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:99px;background:rgba(255,255,255,.07);color:var(--txt);min-width:40px;text-align:center;flex-shrink:0}
+  .bet-payout{font-size:13px;font-weight:800;min-width:76px;text-align:right;flex-shrink:0}
+  .bet-payout.win{color:#4cca8a}
+  .bet-payout.lose{color:#e2596a}
+  @keyframes betSlide{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
+  .bet-card:first-child{animation:betSlide .28s ease}
 
   /* ===== VAULT ===== */
   .vault-hero{display:flex;flex-direction:column;align-items:center;padding:28px 22px 20px;text-align:center;gap:10px}
@@ -1422,10 +1427,7 @@
         <button class="btab">Races</button>
         <button class="btab">Lucky Wins</button>
       </div>
-      <table class="bt">
-        <thead><tr><th>Game</th><th>Player</th><th>Bet</th><th>Multiplier</th><th>Payout</th></tr></thead>
-        <tbody id="betBody"></tbody>
-      </table>
+      <div class="bet-feed" id="betBody"></div>
     </div>
 
   </div><!-- /lobbyView -->
