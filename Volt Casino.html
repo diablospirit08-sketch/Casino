@@ -2677,8 +2677,11 @@ if(false)(function(){
   $i('vioHdrChip').addEventListener('click',openVolt);
   $i('vioClose').addEventListener('click',closeVolt);
   $i('vioOverlay').addEventListener('click',function(e){if(e.target===this)closeVolt();});
-  $i('vioBanner').addEventListener('click',openVolt);
-  $i('vioBanner').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openVolt();}});
+  var _vioBanner=$i('vioBanner');
+  if(_vioBanner){
+    _vioBanner.addEventListener('click',openVolt);
+    _vioBanner.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openVolt();}});
+  }
 
   /* claim */
   $i('vioClaimBtn').addEventListener('click',function(){

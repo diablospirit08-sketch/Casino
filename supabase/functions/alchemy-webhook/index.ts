@@ -2,29 +2,29 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { createHmac } from 'node:crypto'
 
-// keccak256("Deposited(address,uint256)") — VoltVault event topic (verified from BSCScan)
-const DEPOSITED_TOPIC = '0x2da466a7b24304f47e87fa2e1e5a81b9831ce54fec19055ce277ca2f39ba42c4'
-
 serve(async (req) => {
   try {
     const rawBody = await req.text()
 
-    // Verify Alchemy HMAC signature — check ETH and BNB signing keys
+    // Verify Alchemy HMAC signature — require at least one signing key to be configured
     const signingKeys = [
       Deno.env.get('ALCHEMY_SIGNING_KEY_ETH'),
       Deno.env.get('ALCHEMY_SIGNING_KEY_BNB'),
       Deno.env.get('ALCHEMY_SIGNING_KEY'), // legacy fallback
     ].filter(Boolean) as string[]
 
-    if (signingKeys.length > 0) {
-      const alchemySig = req.headers.get('x-alchemy-signature') ?? ''
-      const valid = signingKeys.some(key =>
-        createHmac('sha256', key).update(rawBody).digest('hex') === alchemySig
-      )
-      if (!valid) {
-        console.error('[alchemy-webhook] bad signature')
-        return new Response('Forbidden', { status: 403 })
-      }
+    if (signingKeys.length === 0) {
+      console.error('[alchemy-webhook] no signing keys configured — rejecting request')
+      return new Response('Forbidden', { status: 403 })
+    }
+
+    const alchemySig = req.headers.get('x-alchemy-signature') ?? ''
+    const valid = signingKeys.some(key =>
+      createHmac('sha256', key).update(rawBody).digest('hex') === alchemySig
+    )
+    if (!valid) {
+      console.error('[alchemy-webhook] bad signature')
+      return new Response('Forbidden', { status: 403 })
     }
 
     return await handlePayload(JSON.parse(rawBody))
@@ -51,12 +51,11 @@ async function handlePayload(payload: any) {
   const activity: any[] = payload?.event?.activity ?? []
 
   for (const act of activity) {
-    // Native BNB transfer to the vault (Address Activity webhook format)
-    const toAddr     = act.toAddress?.toLowerCase()
-    const fromAddr   = act.fromAddress?.toLowerCase()
-    const amountBnb  = parseFloat(act.value) || 0
-    const txHash     = act.hash ?? null
-    const category   = act.category  // 'external' for native transfers
+    const toAddr    = act.toAddress?.toLowerCase()
+    const fromAddr  = act.fromAddress?.toLowerCase()
+    const amountBnb = parseFloat(act.value) || 0
+    const txHash    = act.hash ?? null
+    const category  = act.category
 
     console.log('[alchemy-webhook] activity:', category, fromAddr, '->', toAddr, amountBnb, 'BNB')
 
@@ -64,11 +63,16 @@ async function handlePayload(payload: any) {
     if (amountBnb <= 0) continue
     if (category !== 'external' && category !== 'internal') continue
 
+    // Drop activity with no tx hash — can't deduplicate safely
+    if (!txHash) {
+      console.warn('[alchemy-webhook] skipping activity with no txHash')
+      continue
+    }
+
     const playerAddr = fromAddr
 
     console.log('[alchemy-webhook] Deposited:', playerAddr, amountBnb, 'BNB tx:', txHash)
 
-    // Find Supabase user by wallet address (case-insensitive)
     const { data: profile } = await supabase
       .from('profiles')
       .select('id')
@@ -101,7 +105,8 @@ async function handlePayload(payload: any) {
     })
     if (balErr) {
       console.error('[alchemy-webhook] add_balance error:', balErr.message)
-      continue
+      // Return 500 so Alchemy retries this webhook delivery
+      return new Response('Internal error', { status: 500 })
     }
 
     // Record completed deposit
