@@ -1634,30 +1634,6 @@
   </footer>
 </main>
 
-<!-- ===== WALLET CONNECT MODAL ===== -->
-<div class="dep-overlay" id="walletPickerOverlay" role="dialog" aria-modal="true" aria-label="Connect Wallet">
-  <div class="dep-modal" style="max-width:400px">
-    <div class="dep-head">
-      <div style="display:flex;align-items:center;gap:10px">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8L2 7h20l-6-4Z"/><circle cx="16" cy="14" r="2"/></svg>
-        <span style="font-weight:800;font-size:15px">Connect Wallet</span>
-      </div>
-      <button class="icon-btn" id="walletPickerClose" onclick="document.getElementById('walletPickerOverlay').classList.remove('open')" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-    </div>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Choose your wallet to connect to VioFyre.</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="walletPickerGrid">
-      <button class="bsc-w-btn" id="wpMetaMask" style="display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:10px;color:var(--txt);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.15s">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" style="width:24px;height:24px;border-radius:4px" onerror="this.style.display='none'">MetaMask</button>
-      <button class="bsc-w-btn" id="wpWalletConnect" style="display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:10px;color:var(--txt);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.15s">
-        <img src="https://avatars.githubusercontent.com/u/37784886?s=48" style="width:24px;height:24px;border-radius:4px" onerror="this.style.display='none'">WalletConnect</button>
-      <button class="bsc-w-btn" id="wpCoinbase" style="display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:10px;color:var(--txt);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.15s">
-        <img src="https://avatars.githubusercontent.com/u/18060234?s=48" style="width:24px;height:24px;border-radius:4px" onerror="this.style.display='none'">Coinbase Wallet</button>
-      <button class="bsc-w-btn" id="wpTrust" style="display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:10px;color:var(--txt);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.15s">
-        <img src="https://trustwallet.com/assets/images/media/assets/TWT.png" style="width:24px;height:24px;border-radius:4px" onerror="this.style.display='none'">Trust Wallet</button>
-    </div>
-    <p id="walletPickerMsg" style="font-size:11px;color:var(--muted);margin-top:10px;min-height:14px"></p>
-  </div>
-</div>
 
 <!-- ===== SEARCH OVERLAY ===== -->
 <div id="searchOverlay" role="dialog" aria-modal="true" aria-label="Search games">
@@ -2366,7 +2342,6 @@
 <script src="js/balances.js"></script>
 <script src="js/bets.js"></script>
 <script src="js/place-bet.js"></script>
-<script src="js/chain.js?v=7"></script>
 <script>
 $id('loyaltyBtn').addEventListener('click',()=>{
   if(typeof avatarWrap!=='undefined')avatarWrap.classList.remove('open');

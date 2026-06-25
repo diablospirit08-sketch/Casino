@@ -73,23 +73,6 @@ function setAuth(on){
 setAuth(false); /* initial state; Supabase session restore runs in modals.js after load */
 document.getElementById('loginBtn').addEventListener('click',()=>openAuth('in'));
 document.getElementById('signupBtn').addEventListener('click',()=>openAuth('up'));
-const walletPickerOverlay=document.getElementById('walletPickerOverlay');
-const walletPickerMsg=document.getElementById('walletPickerMsg');
-function openWalletPicker(){walletPickerOverlay.classList.add('open');}
-function closeWalletPicker(){walletPickerOverlay.classList.remove('open');walletPickerMsg.textContent='';}
-function wpConnect(fn,btn){
-  const orig=btn.innerHTML;
-  btn.disabled=true;btn.textContent='Connecting…';
-  walletPickerMsg.textContent='';
-  fn().then(()=>{closeWalletPicker();showToast({icon:'🔗',title:'Wallet connected',sub:'BNB balance is live'});})
-     .catch(e=>{btn.disabled=false;btn.innerHTML=orig;walletPickerMsg.textContent=e.message;});
-}
-document.getElementById('walletPickerClose').addEventListener('click',closeWalletPicker);
-walletPickerOverlay.addEventListener('click',e=>{if(e.target===walletPickerOverlay)closeWalletPicker();});
-document.getElementById('wpMetaMask').addEventListener('click',function(){wpConnect(()=>window.bscCashier.connectMetaMask(),this);});
-document.getElementById('wpWalletConnect').addEventListener('click',function(){wpConnect(()=>window.bscCashier.connectWalletConnect(),this);});
-document.getElementById('wpCoinbase').addEventListener('click',function(){wpConnect(()=>window.bscCashier.connectCoinbase(),this);});
-document.getElementById('wpTrust').addEventListener('click',function(){wpConnect(()=>window.bscCashier.connectTrust(),this);});
 document.getElementById('logoutBtn').addEventListener('click',()=>{supa.auth.signOut();setAuth(false);});
 walletBal.addEventListener('click',e=>{
   e.stopPropagation();
