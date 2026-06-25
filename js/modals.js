@@ -44,23 +44,17 @@ const depOverlay=document.getElementById('depOverlay'),
       depCopyBtn=document.getElementById('depCopy');
 let depCopyT=null;
 function drawQr(text){
-  const c=document.getElementById('depQr'),ctx=c.getContext('2d'),N=33;
-  ctx.fillStyle='#fff';ctx.fillRect(0,0,N,N);
-  let seed=0;
-  for(const ch of text)seed=(seed*131+ch.charCodeAt(0))>>>0;
-  if(!seed)seed=7;
-  const rand=()=>{seed^=seed<<13;seed>>>=0;seed^=seed>>17;seed^=seed<<5;seed>>>=0;return seed/4294967296;};
-  ctx.fillStyle='#10141d';
-  for(let y=1;y<N-1;y++)for(let x=1;x<N-1;x++){
-    const inFinder=(x<10&&y<10)||(x>=N-10&&y<10)||(x<10&&y>=N-10);
-    if(!inFinder&&rand()<0.46)ctx.fillRect(x,y,1,1);
+  const c=document.getElementById('depQr');
+  if(!c)return;
+  if(!text){
+    const ctx=c.getContext('2d');
+    c.width=180;c.height=180;
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,180,180);
+    return;
   }
-  const fin=(ox,oy)=>{
-    ctx.fillStyle='#10141d';ctx.fillRect(ox,oy,7,7);
-    ctx.fillStyle='#fff';ctx.fillRect(ox+1,oy+1,5,5);
-    ctx.fillStyle='#10141d';ctx.fillRect(ox+2,oy+2,3,3);
-  };
-  fin(1,1);fin(N-8,1);fin(1,N-8);
+  if(typeof QRCode!=='undefined'){
+    QRCode.toCanvas(c,text,{width:180,margin:1,color:{dark:'#000',light:'#fff'}},function(){});
+  }
 }
 const depAddrCache={};
 
