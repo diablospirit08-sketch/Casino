@@ -19,8 +19,8 @@
     --line:rgba(160,150,200,.09);
     --line-2:rgba(160,150,200,.15);
     --blue:#4287f5;
-    --spectrum:linear-gradient(90deg,#2563eb,#7c3aed,#a855c8,#c93dbf);
-    --spectrum-v:linear-gradient(180deg,#2563eb,#7c3aed,#a855c8,#c93dbf);
+    --spectrum:linear-gradient(90deg,#5b21b6,#9333ea,#ec4899,#f97316,#fbbf24);
+    --spectrum-v:linear-gradient(180deg,#5b21b6,#9333ea,#ec4899,#f97316,#fbbf24);
     --accent-grad:linear-gradient(90deg,#2563eb,#7c3aed);
     --hdr-bg:#08080e;
     --txt:#ffffff;
@@ -106,7 +106,7 @@
   .wallet-bal .cur{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--muted)}
   .wallet-bal>svg{width:13px;height:13px;color:var(--muted);transition:transform .18s}
   .wallet.open .wallet-bal>svg{transform:rotate(180deg)}
-  .wallet-dep{border:none;background:var(--spectrum);color:#08090c;font-family:inherit;font-weight:900;letter-spacing:.1em;text-transform:uppercase;font-size:12px;padding:0 18px;margin:-1px -1px -1px 0;border-radius:0 999px 999px 0;cursor:pointer;transition:.18s;box-shadow:0 6px 20px -8px rgba(255,150,70,.55)}
+  .wallet-dep{border:none;background:var(--spectrum);color:#fff;font-family:inherit;font-weight:900;letter-spacing:.1em;text-transform:uppercase;font-size:12px;padding:0 18px;margin:-1px -1px -1px 0;border-radius:0 999px 999px 0;cursor:pointer;transition:.18s;box-shadow:0 6px 20px -8px rgba(249,115,22,.7),0 2px 12px -4px rgba(236,72,153,.55);text-shadow:0 1px 4px rgba(0,0,0,.4)}
   .wallet-dep:hover{filter:brightness(1.07)}
   .wallet-dep:active{transform:scale(.97)}
   /* dropdown menus */
@@ -1122,10 +1122,10 @@
   .gc-ov-ic,.gc-ov-lbl{display:none}
 
   /* ── 2. Balance widget redesign ── */
-  .wallet{border-radius:999px;background:var(--panel);border:1.5px solid rgba(66,135,245,.32);box-shadow:0 0 20px -6px rgba(66,135,245,.28),0 4px 18px rgba(0,0,0,.4)}
+  .wallet{border-radius:999px;background:var(--panel);border:1.5px solid rgba(236,72,153,.35);box-shadow:0 0 22px -6px rgba(236,72,153,.4),0 0 8px -2px rgba(249,115,22,.25),0 4px 18px rgba(0,0,0,.4)}
   .wallet-bal{padding:0 14px 0 12px;height:50px}
   .wallet-bal b{font-size:17px}
-  .wallet-dep{margin:5px;border-radius:999px;padding:0 20px;height:calc(100% - 10px);font-size:12px}
+  .wallet-dep{margin:5px;border-radius:999px;padding:0 20px;height:calc(100% - 10px);font-size:12px;box-shadow:0 4px 18px -6px rgba(249,115,22,.6),0 2px 10px -4px rgba(236,72,153,.5)}
 
   /* ── 3. Hero carousel animated gradient ── */
   .hcar-slide{min-height:300px}
