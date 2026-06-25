@@ -398,17 +398,21 @@ wdSubmit.addEventListener('click',async()=>{
   const w=depW(),a=Math.min(parseFloat(wdAmt.value)||0,w.amt);
   if(a<=0)return;
   const addr=wdAddr.value.trim();
-  const net=currentNetwork();
+  const amountWei=BigInt(Math.round(a*1e18)).toString();
   wdSubmit.disabled=true;wdSubmit.textContent='Submitting…';
   try{
-    const res=await window.voltApi._fetch('/api/wallet/withdraw',{
-      method:'POST',
-      body:JSON.stringify({currency:w.c,network:net.id,amount:a,address:addr}),
-    });
+    const{data:{session}}=await supa.auth.getSession();
+    if(!session)throw new Error('Please sign in first');
+    const res=await fetch(
+      'https://czqqdwmifcqoiyphjqjk.supabase.co/functions/v1/create-withdrawal',
+      {method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+       body:JSON.stringify({walletAddress:addr,amountWei,currency:w.c})}
+    );
     const json=await res.json();
     if(!res.ok)throw new Error(json.error||'Withdrawal failed');
     if(window.loadBalances)loadBalances().catch(()=>{});
-    showToast({icon:'↗',title:'Withdrawal submitted',sub:'-'+fmtW(w,a)+' '+w.c+' · processing'});
+    const sub=json.txHash?'-'+fmtW(w,a)+' '+w.c+' · tx: '+json.txHash.slice(0,10)+'…':json.message||'Processing within 24h';
+    showToast({icon:'↗',title:'Withdrawal submitted',sub});
     wdAmt.value='';wdAddr.value='';renderWd();
   }catch(err){
     showToast({icon:'⚠',title:'Withdrawal failed',sub:err.message});
