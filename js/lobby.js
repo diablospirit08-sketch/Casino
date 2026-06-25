@@ -353,11 +353,11 @@ movePill(document.querySelector('#railNav a.active'),true);
 const cats = [
   {l:'Lobby', key:'lobby', cnt:3214, active:true, ic:'<path class="fl" d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9.5Z"/><path d="M9.5 21v-5.5h5V21"/>'},
   {l:'Originals', key:'originals', cnt:24, rows:['originals'], ic:'<path class="fl" d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/>'},
-  {l:'Slots', key:'slots', cnt:2418, rows:['slots','hot'], ic:'<path d="M7.2 12.5C7.6 8.5 9.8 5.2 13.5 3.5"/><path d="M16.6 12.8c-1.2-3.3-1.7-6.4-3.1-9.3"/><path d="M13.5 3.5c1.6-.6 3.3-.7 4.9-.2-1 1.3-2.6 2-4.4 2.1"/><circle class="fl" cx="7" cy="15.8" r="3.4"/><circle class="fl" cx="16.2" cy="16.4" r="3.4"/>'},
-  {l:'Live Casino', key:'live', cnt:312, rows:['live'], ic:'<circle cx="12" cy="12" r="8.5"/><circle class="fl" cx="12" cy="12" r="2.6"/><path d="M12 3.5v6M12 14.6v5.9M3.5 12h6M14.6 12h5.9M6.2 6.2l4 4M13.8 13.8l4 4"/>'},
-  {l:'Game Shows', key:'shows', cnt:38, rows:['shows'], ic:'<circle cx="12" cy="13.5" r="7.3"/><path d="M12 6.2v7.3M5.9 10.1l6.1 3.4M18.1 10.1 12 13.5M8.6 19.9 12 13.5M15.4 19.9 12 13.5"/><path class="fl" d="M9.8 2h4.4L12 5.4 9.8 2Z"/>'},
-  {l:'Table Games', key:'table', cnt:146, match:'baccarat|blackjack|roulette|board bonanza', ic:'<path class="fl" d="M12 2.5 18.5 12 12 21.5 5.5 12 12 2.5Z"/>'},
-  {l:'New Arrivals', key:'new', cnt:89, rows:['new'], ic:'<path class="fl" d="M11 4l1.6 5.4L18 11l-5.4 1.6L11 18l-1.6-5.4L4 11l5.4-1.6L11 4Z"/><path d="M18.5 16.5v4M16.5 18.5h4"/>'},
+  {l:'Slots', key:'slots', cnt:2418, rows:['slots','hot'], ic:'<rect class="fl" x="3" y="6" width="18" height="13" rx="2"/><path d="M9 6V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V6"/><line x1="9" y1="6" x2="9" y2="19"/><line x1="15" y1="6" x2="15" y2="19"/><circle cx="6.5" cy="12.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="17.5" cy="12.5" r="1.2" fill="currentColor" stroke="none"/>'},
+  {l:'Live Casino', key:'live', cnt:312, rows:['live'], ic:'<path class="fl" d="M15 10l4.5-2.5v9L15 14v-4z"/><rect class="fl" x="2" y="8" width="13" height="9" rx="2"/><circle cx="5.5" cy="5.5" r="1.5" fill="currentColor" stroke="none"/><line x1="5.5" y1="7" x2="5.5" y2="8"/>'},
+  {l:'Game Shows', key:'shows', cnt:38, rows:['shows'], ic:'<rect class="fl" x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><circle cx="12" cy="10.5" r="2.5" fill="currentColor" stroke="none"/>'},
+  {l:'Table Games', key:'table', cnt:146, match:'baccarat|blackjack|roulette|board bonanza', ic:'<rect class="fl" x="2" y="4" width="13" height="17" rx="2"/><rect x="9" y="3" width="13" height="17" rx="2"/><path d="M15 7h4M15 10h4M15 13h4"/>'},
+  {l:'New Arrivals', key:'new', cnt:89, rows:['new'], ic:'<path class="fl" d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z"/>'},
 ];
 document.getElementById('cats').innerHTML = cats.map(c=>`
   <div class="cat ${c.active?'active':''}" data-cat="${c.key}" role="button" tabindex="0">
