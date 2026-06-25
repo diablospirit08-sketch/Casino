@@ -1213,6 +1213,22 @@
   .vio-banner-cta{flex:none;background:linear-gradient(90deg,#8a4e00,var(--vio));color:#0a0800;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:10px 18px;border-radius:99px;white-space:nowrap;border:none;cursor:pointer;font-family:inherit;transition:.15s}
   .vio-banner-cta:hover{filter:brightness(1.08)}
   @media(max-width:600px){.vio-banner-cta{display:none}}
+
+  /* rail VIO teaser card */
+  .rail-vio{margin:4px 4px 0;border-radius:10px;border:1px solid var(--vio-border);background:linear-gradient(135deg,#1a1000 0%,rgba(26,19,0,.6) 100%);padding:10px 10px 9px;cursor:pointer;transition:border-color .2s,box-shadow .2s;flex:none;overflow:hidden;position:relative}
+  .rail-vio:hover{border-color:var(--vio);box-shadow:0 4px 20px -8px rgba(232,160,32,.3)}
+  .rail-vio-head{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .rail-vio-head svg{width:16px;height:16px;color:var(--vio);flex:none}
+  .rail-vio-title{font-size:11px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.02em}
+  .rail-vio-bar{height:3px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;margin-bottom:5px}
+  .rail-vio-bar-fill{height:100%;background:linear-gradient(90deg,#8a4e00,var(--vio));border-radius:99px;width:0%;transition:width .5s ease}
+  .rail-vio-note{font-size:10px;color:var(--muted-2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* collapsed: icon-only pill */
+  body.rail-min .rail-vio{margin:4px 0 0;padding:0;border:none;background:none;display:flex;justify-content:center;align-items:center;height:48px;border-radius:10px}
+  body.rail-min .rail-vio:hover{background:rgba(255,255,255,.04);box-shadow:none;border:none}
+  body.rail-min .rail-vio-head{margin:0;justify-content:center}
+  body.rail-min .rail-vio-head svg{width:22px;height:22px}
+  body.rail-min .rail-vio-title,body.rail-min .rail-vio-bar,body.rail-min .rail-vio-note{display:none}
 </style>
 </head>
 <body>
@@ -1371,23 +1387,6 @@
           <button class="btn-promo" id="promoPairBtnB">View Tournaments &rarr;</button>
         </div>
       </div>
-    </div>
-
-    <!-- Vio earn banner -->
-    <div class="vio-banner" id="vioBanner" role="button" tabindex="0" aria-label="Open Vio Token">
-      <div class="vio-banner-ic">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11l-2 8.5L19.5 10H13L14.5 2z"/></svg>
-      </div>
-      <div class="vio-banner-body">
-        <h3>Earn Vio by Playing</h3>
-        <p>Earn <b>1 VIO</b> for every <b>$10</b> wagered. Claim and withdraw to your wallet on BNB.</p>
-        <div class="vio-banner-prog-bar"><div class="vio-banner-prog-fill" id="vioBannerFill" style="width:0%"></div></div>
-        <div class="vio-banner-prog-note">
-          <span id="vioBannerLeft">Sign in to track your progress</span>
-          <span id="vioBannerRight"></span>
-        </div>
-      </div>
-      <button class="vio-banner-cta">View Vio</button>
     </div>
 
     <!-- categories -->

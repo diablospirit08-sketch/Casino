@@ -234,6 +234,15 @@ document.getElementById('railNav').innerHTML = railItems.map((r,i)=>`
     ${_ic(r.ic)}<span class="lbl">${r.l}</span></a>
   ${i===2||i===5?'<span class="sep"></span>':''}
 `).join('')+`
+  <div class="rail-vio" id="vioBanner" role="button" tabindex="0" aria-label="Open Vio Token">
+    <div class="rail-vio-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11l-2 8.5L19.5 10H13L14.5 2z"/></svg>
+      <span class="rail-vio-title">Earn VIO</span>
+    </div>
+    <div class="rail-vio-bar"><div class="rail-vio-bar-fill" id="vioBannerFill"></div></div>
+    <div class="rail-vio-note" id="vioBannerLeft">Sign in to track</div>
+    <span id="vioBannerRight" hidden></span>
+  </div>
   <div class="rail-foot">
     <span class="sep"></span>
     <button class="auth-in" id="giftBtn" title="Daily Bonus">
