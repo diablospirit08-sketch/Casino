@@ -90,6 +90,8 @@ async function renderDep(){
   const nets=DEPOSIT[depCur].networks;
   /* keep depNetId as-is; caller is responsible for setting it */
   if(depNetId&&!nets.find(n=>n.id===depNetId)) depNetId=null;
+  /* auto-select when only one network exists */
+  if(!depNetId&&nets.length===1) depNetId=nets[0].id;
 
   /* currency dropdown */
   const curDdIc=document.getElementById('depCurDdIc'),curDdLbl=document.getElementById('depCurDdLbl');
