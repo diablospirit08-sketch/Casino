@@ -437,7 +437,7 @@
   .auth-brand{text-align:center;padding:10px 0 18px;display:flex;flex-direction:column;align-items:center;gap:6px}
   .auth-brand-ic{width:44px;height:44px;border-radius:13px;background:none;display:grid;place-items:center;box-shadow:none}
   .auth-brand-ic svg{width:24px;height:24px}
-  .auth-brand-name{font-size:13px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;background:linear-gradient(90deg,#41f0a4,#3d9bff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .auth-brand-name{font-size:13px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;background:var(--spectrum);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   /* icon input fields */
   .auth-input-wrap{display:flex;align-items:center;gap:10px;border-radius:14px;padding:13px 16px;background:#171c2d;box-shadow:inset 2px 4px 12px rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.06);transition:border-color .2s}
   .auth-input-wrap:focus-within{border-color:rgba(66,135,245,.35)}
@@ -472,7 +472,7 @@
   .auth-terms .box svg{width:11px;height:11px;color:var(--mint-ink);opacity:0}
   .auth-terms input:checked+.box{background:var(--mint);border-color:var(--mint)}
   .auth-terms input:checked+.box svg{opacity:1}
-  .auth-submit{width:100%;height:48px;border:none;border-radius:11px;background:var(--mint);color:var(--mint-ink);font-family:inherit;font-size:12px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.18s;box-shadow:0 8px 24px -8px rgba(66,135,245,.6)}
+  .auth-submit{width:100%;height:48px;border:none;border-radius:11px;background:var(--accent-grad);color:#fff;font-family:inherit;font-size:12px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.18s;box-shadow:0 8px 24px -8px rgba(66,135,245,.6)}
   .auth-submit:hover{filter:brightness(1.07)}
   .auth-submit:disabled{opacity:.4;cursor:default;box-shadow:none}
   .auth-fine{margin-top:12px;font-size:10.5px;color:var(--muted-2);text-align:center}
@@ -1898,7 +1898,7 @@
     </div>
     <!-- brand -->
     <div class="auth-brand">
-      <div class="auth-brand-ic"><img src="images/viofyre-logo.png.png" style="width:120px;height:44px;border-radius:0;object-fit:contain;display:block"></div>
+      <div class="auth-brand-ic"><img src="images/viofyre-logo.png.png" style="width:200px;height:80px;border-radius:0;object-fit:contain;display:block"></div>
       <span class="auth-brand-name">VioFyre Casino</span>
     </div>
     <button class="auth-sso" id="ssoGoogle">
