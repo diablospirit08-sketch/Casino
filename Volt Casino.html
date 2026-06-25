@@ -97,7 +97,7 @@
   @media(max-width:900px){.hdr-search-pill span{display:none}.hdr-search-pill{min-width:36px;padding:0;width:36px;justify-content:center;border-radius:10px}}
 
   /* ===== WALLET MODULE ===== */
-  .wallet{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;align-items:stretch;height:50px;border-radius:999px;background:var(--bg-2);border:1px solid var(--line-2)}
+  .wallet{position:absolute;left:calc(50% + var(--rail) / 2);top:50%;transform:translate(-50%,-50%);display:none;align-items:stretch;height:50px;border-radius:999px;background:var(--bg-2);border:1px solid var(--line-2)}
   body.authed .wallet{display:flex}
   .wallet-bal{display:flex;align-items:center;gap:8px;padding:0 12px 0 9px;background:transparent;border:none;border-radius:999px 0 0 999px;color:var(--txt);font-family:inherit;cursor:pointer;transition:.16s}
   .wallet-bal:hover{background:var(--panel-2)}
