@@ -398,16 +398,15 @@ wdSubmit.addEventListener('click',async()=>{
   const w=depW(),a=Math.min(parseFloat(wdAmt.value)||0,w.amt);
   if(a<=0)return;
   const addr=wdAddr.value.trim();
-  const amountWei=BigInt(Math.round(a*1e18)).toString();
   wdSubmit.disabled=true;wdSubmit.textContent='Submitting…';
   try{
-    const{data:{session}}=await supa.auth.getSession();
-    if(!session)throw new Error('Please sign in first');
-    const res=await fetch(
-      'https://czqqdwmifcqoiyphjqjk.supabase.co/functions/v1/create-withdrawal',
-      {method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-       body:JSON.stringify({walletAddress:addr,amountWei,currency:w.c})}
-    );
+    const net=currentNetwork();
+    const NET_MAP={BEP20:'bsc',ERC20:'mainnet',TRC20:'tron',BTC:'mainnet',LTC:'mainnet',SOL:'sol',TRC20:'tron',SPL:'sol'};
+    const railwayNet=NET_MAP[net.id]||net.id.toLowerCase();
+    const res=await window.voltApi._fetch('/api/wallet/withdraw',{
+      method:'POST',
+      body:JSON.stringify({currency:w.c,network:railwayNet,amount:a,address:addr})
+    });
     const json=await res.json();
     if(!res.ok)throw new Error(json.error||'Withdrawal failed');
     if(window.loadBalances)loadBalances().catch(()=>{});

@@ -35,33 +35,26 @@ serve(async (req) => {
 })
 
 async function handlePayload(payload: any) {
-  console.log('[alchemy-webhook] payload keys:', Object.keys(payload ?? {}))
-  console.log('[alchemy-webhook] event keys:', Object.keys(payload?.event ?? {}))
-  console.log('[alchemy-webhook] activity length:', payload?.event?.activity?.length ?? 'undefined')
-  console.log('[alchemy-webhook] raw sample:', JSON.stringify(payload).slice(0, 500))
+  console.log('[alchemy-webhook] activity count:', payload?.event?.activity?.length ?? 0)
 
+  // Use service role key — bypasses RLS so we can write to Railway tables
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     { auth: { persistSession: false } }
   )
 
-  const vaultAddr = (Deno.env.get('VAULT_ADDRESS') ?? '').toLowerCase()
-
   const activity: any[] = payload?.event?.activity ?? []
 
   for (const act of activity) {
     const toAddr    = act.toAddress?.toLowerCase()
     const fromAddr  = act.fromAddress?.toLowerCase()
-    const amountBnb = parseFloat(act.value) || 0
+    const amountRaw = parseFloat(act.value) || 0
     const txHash    = act.hash ?? null
     const category  = act.category
+    const asset     = (act.asset || '').toUpperCase()
 
-    console.log('[alchemy-webhook] activity:', category, fromAddr, '->', toAddr, amountBnb, 'BNB')
-
-    if (toAddr !== vaultAddr) continue
-    if (amountBnb <= 0) continue
-    if (category !== 'external' && category !== 'internal') continue
+    console.log('[alchemy-webhook] activity:', category, asset, fromAddr, '->', toAddr, amountRaw)
 
     // Drop activity with no tx hash — can't deduplicate safely
     if (!txHash) {
@@ -69,27 +62,36 @@ async function handlePayload(payload: any) {
       continue
     }
 
-    const playerAddr = fromAddr
+    if (amountRaw <= 0) continue
 
-    console.log('[alchemy-webhook] Deposited:', playerAddr, amountBnb, 'BNB tx:', txHash)
+    // Determine the currency: use asset field for ERC-20, otherwise infer from context
+    const currency = (category === 'erc20' || category === 'token') && asset
+      ? asset
+      : null  // will be filled from deposit_addresses lookup
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .ilike('wallet_address', playerAddr)
-      .single()
+    // Look up the deposit address in the Railway deposit_addresses table
+    const { data: depositAddr } = await supabase
+      .from('deposit_addresses')
+      .select('user_id, currency, network')
+      .ilike('address', toAddr)
+      .maybeSingle()
 
-    if (!profile) {
-      console.warn('[alchemy-webhook] no user for wallet:', playerAddr)
+    if (!depositAddr) {
+      console.log('[alchemy-webhook] no deposit address record for:', toAddr, '— skipping')
       continue
     }
 
-    // Skip duplicate transactions
+    const resolvedCurrency = currency || depositAddr.currency
+    const { user_id, network } = depositAddr
+
+    console.log('[alchemy-webhook] deposit:', resolvedCurrency, amountRaw, 'user:', user_id, 'tx:', txHash)
+
+    // Idempotency: skip if already credited
     const { data: existing } = await supabase
-      .from('transactions')
+      .from('deposits')
       .select('id')
       .eq('tx_hash', txHash)
-      .eq('type', 'deposit')
+      .eq('status', 'credited')
       .maybeSingle()
 
     if (existing) {
@@ -97,30 +99,39 @@ async function handlePayload(payload: any) {
       continue
     }
 
-    // Credit balance atomically
-    const { error: balErr } = await supabase.rpc('add_balance', {
-      p_user_id:  profile.id,
-      p_currency: 'BNB',
-      p_amount:   amountBnb,
-    })
-    if (balErr) {
-      console.error('[alchemy-webhook] add_balance error:', balErr.message)
-      // Return 500 so Alchemy retries this webhook delivery
+    // Credit the Railway ledger table directly (same Supabase PostgreSQL)
+    const { data: ledgerRow, error: ledgerErr } = await supabase
+      .from('ledger')
+      .insert({
+        user_id,
+        type: 'deposit',
+        currency: resolvedCurrency,
+        amount: amountRaw,
+        ref_id: txHash,
+        meta: { network, tx_hash: txHash, from: fromAddr },
+      })
+      .select('id')
+      .single()
+
+    if (ledgerErr) {
+      console.error('[alchemy-webhook] ledger insert error:', ledgerErr.message)
       return new Response('Internal error', { status: 500 })
     }
 
-    // Record completed deposit
-    await supabase.from('transactions').insert({
-      user_id:  profile.id,
-      type:     'deposit',
-      currency: 'BNB',
-      amount:   amountBnb,
-      status:   'completed',
-      tx_hash:  txHash,
-      address:  playerAddr,
+    // Record in deposits table for history and idempotency
+    await supabase.from('deposits').insert({
+      user_id,
+      currency: resolvedCurrency,
+      network,
+      amount: amountRaw,
+      tx_hash: txHash,
+      confirmations: 1,
+      required_confs: 1,
+      status: 'credited',
+      credit_ledger_id: ledgerRow.id,
     })
 
-    console.log('[alchemy-webhook] credited', amountBnb, 'BNB to user', profile.id)
+    console.log('[alchemy-webhook] credited', amountRaw, resolvedCurrency, 'to user', user_id)
   }
 
   return new Response('ok', { status: 200 })

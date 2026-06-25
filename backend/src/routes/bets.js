@@ -217,7 +217,7 @@ export async function betsRoutes(fastify) {
           [
             req.user.id, game, currency, wager, multiplier, payout,
             serverSeedHash, serverSeed, clientSeed, nonce,
-            result, multiplier > 1 ? 'won' : multiplier === 1 ? 'push' : 'lost',
+            result, multiplier >= 1 ? 'won' : 'lost',
           ]
         );
         const betId = betRows.rows[0].id;
