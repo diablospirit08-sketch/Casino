@@ -58,14 +58,17 @@ function drawQr(text){
 }
 const depAddrCache={};
 
+const DEP_NET_MAP={ERC20:'mainnet',BEP20:'bsc',TRC20:'tron',BTC:'mainnet',LTC:'mainnet',SOL:'sol',SPL:'sol'};
+
 async function fetchDepositAddress(currency,networkId){
   const key=currency+':'+networkId;
   if(depAddrCache[key])return depAddrCache[key];
   const{data:{session}}=await supa.auth.getSession();
   if(!session) return null;
+  const railNet=DEP_NET_MAP[networkId]||networkId.toLowerCase();
   try{
     const res=await window.voltApi._fetch(
-      '/api/wallet/deposit-address/'+currency+'/'+networkId
+      '/api/wallet/deposit-address/'+currency+'/'+railNet
     );
     if(!res.ok)return null;
     const json=await res.json();
@@ -401,8 +404,7 @@ wdSubmit.addEventListener('click',async()=>{
   wdSubmit.disabled=true;wdSubmit.textContent='Submitting…';
   try{
     const net=currentNetwork();
-    const NET_MAP={BEP20:'bsc',ERC20:'mainnet',TRC20:'tron',BTC:'mainnet',LTC:'mainnet',SOL:'sol',TRC20:'tron',SPL:'sol'};
-    const railwayNet=NET_MAP[net.id]||net.id.toLowerCase();
+    const railwayNet=DEP_NET_MAP[net.id]||net.id.toLowerCase();
     const res=await window.voltApi._fetch('/api/wallet/withdraw',{
       method:'POST',
       body:JSON.stringify({currency:w.c,network:railwayNet,amount:a,address:addr})
