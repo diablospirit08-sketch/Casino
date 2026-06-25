@@ -201,19 +201,6 @@ async function renderDep(){
     }
   });
 })();
-/* ── amount calculator ── */
-const depUsdAmt=document.getElementById('depUsdAmt');
-const depCalcEq=document.getElementById('depCalcEq');
-function updateCalc(){
-  const usd=parseFloat(depUsdAmt.value);
-  const w=WALLETS.find(x=>x.c===depCur);
-  const rate=w?.rate||0;
-  if(!usd||!rate){depCalcEq.textContent='≈ — '+depCur;return;}
-  const amt=usd/rate;
-  const fmt=amt<0.0001?amt.toFixed(8):amt<0.01?amt.toFixed(6):amt<1?amt.toFixed(4):amt.toFixed(2);
-  depCalcEq.textContent='≈ '+fmt+' '+depCur;
-}
-depUsdAmt.addEventListener('input',updateCalc);
 
 /* ── deposit monitor (polls balance while modal open) ── */
 const depMonitor=document.getElementById('depMonitor');
