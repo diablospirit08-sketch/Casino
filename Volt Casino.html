@@ -372,8 +372,8 @@
   .dep-coin.sel{background:rgba(66,135,245,.08);border-color:var(--mint);color:var(--mint)}
   .dep-coins{display:flex;flex-wrap:wrap;gap:6px}
   .dep-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin:16px 0 14px}
-  .dep-qr{width:180px;height:180px;background:#fff;border-radius:14px;padding:12px;box-shadow:0 4px 24px -8px rgba(0,0,0,.5)}
-  .dep-qr canvas{display:block;width:100%;height:100%}
+  .dep-qr{width:180px;height:180px;background:#fff;border-radius:14px;padding:12px;box-shadow:0 4px 24px -8px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center}
+  .dep-qr img{display:block;width:100%;height:100%}
   .dep-qr-hint{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--muted-2);text-transform:uppercase}
   .dep-info-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-2);border:1px solid var(--line-2);border-radius:11px;overflow:hidden;margin-top:10px}
   .dep-info-cell{display:flex;flex-direction:column;gap:3px;padding:9px 10px;background:var(--bg-2);font-size:11px}
@@ -1780,7 +1780,7 @@
       <div id="depAddrSection" hidden>
         <!-- QR code centered -->
         <div class="dep-qr-wrap">
-          <div class="dep-qr"><canvas id="depQr"></canvas></div>
+          <div class="dep-qr" id="depQr"></div>
           <p class="dep-qr-hint">Scan with your wallet app</p>
         </div>
         <!-- address bar -->

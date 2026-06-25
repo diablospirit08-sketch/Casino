@@ -44,17 +44,17 @@ const depOverlay=document.getElementById('depOverlay'),
       depCopyBtn=document.getElementById('depCopy');
 let depCopyT=null;
 function drawQr(text){
-  const c=document.getElementById('depQr');
-  if(!c)return;
-  if(!text){
-    const ctx=c.getContext('2d');
-    c.width=180;c.height=180;
-    ctx.fillStyle='#fff';ctx.fillRect(0,0,180,180);
-    return;
-  }
-  if(typeof QRCode!=='undefined'){
-    QRCode.toCanvas(c,text,{width:180,margin:1,color:{dark:'#000',light:'#fff'}},function(){});
-  }
+  const wrap=document.getElementById('depQr');
+  if(!wrap)return;
+  wrap.innerHTML='';
+  if(!text)return;
+  if(typeof QRCode==='undefined')return;
+  QRCode.toDataURL(text,{width:156,margin:1,color:{dark:'#000000',light:'#ffffff'}},function(err,url){
+    if(err){console.warn('[depQr] QR error:',err);return;}
+    const img=document.createElement('img');
+    img.src=url;img.alt='Deposit QR';
+    wrap.appendChild(img);
+  });
 }
 const depAddrCache={};
 
