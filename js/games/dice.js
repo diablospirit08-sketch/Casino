@@ -1,8 +1,59 @@
 /* --- dice --- */
+(function(){
+
+/* cube face rotations — rotate the cube so each face faces the camera */
+const FACE_TARGETS=[
+  [0,0],    // 1 front
+  [-90,0],  // 2 top
+  [0,-90],  // 3 right
+  [0,90],   // 4 left
+  [90,0],   // 5 bottom
+  [0,180],  // 6 back
+];
+
+/* dot layouts — 9-cell 3×3 grid, active positions for each face value */
+const DOT_POS=[[4],[2,6],[2,4,6],[0,2,6,8],[0,2,4,6,8],[0,2,3,5,6,8]];
+function makeFace(n){
+  const cells=Array(9).fill(0);DOT_POS[n].forEach(i=>cells[i]=1);
+  return'<div class="dice-dots">'+cells.map(v=>`<span class="dice-dot${v?'':' hide'}"></span>`).join('')+'</div>';
+}
+
 ORIGINALS['originals-dice']={
-  rtp:'99%',auto:true,chance:50,over:true,busy:false,_raf:0,_pend:null,
-  hist:[],
+  rtp:'99%',auto:true,chance:50,over:true,busy:false,_raf:0,
+  hist:[],_spinX:0,_spinY:0,_spinTimer:null,
+
   mult(){return 99/this.chance},
+
+  _startSpin(){
+    const cube=$id('diCube');if(!cube)return;
+    cube.style.transition='none';
+    cube.classList.remove('win','lose');
+    this._spinX=0;this._spinY=0;
+    this._spinTimer=setInterval(()=>{
+      this._spinX+=40+Math.random()*65;
+      this._spinY+=40+Math.random()*65;
+      cube.style.transform=`rotateX(${this._spinX}deg) rotateY(${this._spinY}deg)`;
+    },80);
+  },
+
+  _stopSpin(win){
+    clearInterval(this._spinTimer);this._spinTimer=null;
+    const cube=$id('diCube');if(!cube)return;
+    const[tx,ty]=FACE_TARGETS[Math.floor(Math.random()*6)];
+    /* add 2 full extra rotations so it decelerates dramatically */
+    const finalX=Math.round(this._spinX/360)*360+720+tx;
+    const finalY=Math.round(this._spinY/360)*360+720+ty;
+    requestAnimationFrame(()=>{
+      cube.style.transition='transform .75s cubic-bezier(.16,1,.3,1)';
+      cube.style.transform=`rotateX(${finalX}deg) rotateY(${finalY}deg)`;
+      setTimeout(()=>{
+        cube.classList.add(win?'win':'lose');
+        if(win) setTimeout(()=>cube.classList.remove('win'),1800);
+        else    setTimeout(()=>cube.classList.remove('lose'),500);
+      },680);
+    });
+  },
+
   mount(){
     this.hist=[];
     engFields.innerHTML=`
@@ -17,6 +68,14 @@ ORIGINALS['originals-dice']={
       <div class="eng-readout"><span>Profit on Win</span><b id="diProf"></b></div>`;
     gvStage.innerHTML=`
       <div class="dice-wrap">
+        <div class="dice-3d-wrap"><div class="dice-cube" id="diCube">
+          <div class="dice-face f">${makeFace(0)}</div>
+          <div class="dice-face b">${makeFace(5)}</div>
+          <div class="dice-face r">${makeFace(2)}</div>
+          <div class="dice-face l">${makeFace(3)}</div>
+          <div class="dice-face t">${makeFace(1)}</div>
+          <div class="dice-face d">${makeFace(4)}</div>
+        </div></div>
         <div class="dice-roll idle" id="diRoll">—</div>
         <div class="dice-arena">
           <div class="dice-pin" id="diPin"><span class="dpv"></span></div>
@@ -34,6 +93,7 @@ ORIGINALS['originals-dice']={
     });
     this.sync();
   },
+
   sync(){
     if(!$id('diLbl'))return;
     const t=this.over?100-this.chance:this.chance,w=curW(),b=parseFloat(gvBetIn.value)||0;
@@ -44,15 +104,18 @@ ORIGINALS['originals-dice']={
     if(this.over){f.style.left=t+'%';f.style.right='0';}
     else{f.style.left='0';f.style.right=(100-t)+'%';}
   },
+
   renderHist(){
     const el=$id('diHist');if(!el)return;
     el.innerHTML=this.hist.slice(-15).reverse().map(h=>
       `<div class="dice-chip ${h.win?'win':'lose'}">${h.r.toFixed(0)}</div>`
     ).join('');
   },
+
   onCur(){this.sync();},
   onBet(){this.roll(null);},
   autoBet(done){this.roll(done);},
+
   async roll(done){
     if(this.busy){if(done)stopAuto();return;}
     window._sbActive=true;
@@ -63,7 +126,7 @@ ORIGINALS['originals-dice']={
     const rollEl=$id('diRoll'),pin=$id('diPin');
     rollEl.className='dice-roll';
     pin.classList.remove('show');
-    /* spinner while waiting for server */
+    this._startSpin();
     let spinning=true;
     const spinFn=()=>{if(spinning){rollEl.textContent=rnd(0,100).toFixed(2);this._raf=requestAnimationFrame(spinFn);}};
     this._raf=requestAnimationFrame(spinFn);
@@ -73,6 +136,7 @@ ORIGINALS['originals-dice']={
       res=await placeBet({game:'dice',currency:st.w.c,wager:st.b,params:{chance:this.chance,over:this.over}});
     }catch(err){
       spinning=false;cancelAnimationFrame(this._raf);
+      clearInterval(this._spinTimer);this._spinTimer=null;
       window._sbActive=false;this.busy=false;gvBetBtn.disabled=false;
       showToast({icon:'⚠',title:'Bet failed',sub:err.message});
       if(done)stopAuto();
@@ -80,12 +144,13 @@ ORIGINALS['originals-dice']={
     }
     spinning=false;cancelAnimationFrame(this._raf);
     window._sbActive=false;
-    const{roll:r,target:t}=res.gameData,win=res.gameData?.win===true,m=res.multiplier;
+    const{roll:r}=res.gameData,win=res.gameData?.win===true,m=res.multiplier;
     rollEl.textContent=r.toFixed(2);
     rollEl.classList.add(win?'win':'lose');
     pin.classList.add('show');
     pin.style.left=r+'%';
     pin.querySelector('.dpv').textContent=r.toFixed(0);
+    this._stopSpin(win);
     this.hist.push({r,win});
     this.renderHist();
     serverSettleBet(st,win?m:0,res.new_balance);
@@ -93,8 +158,12 @@ ORIGINALS['originals-dice']={
     this.sync();
     if(done)done(win,st.b*(win?m-1:-1));
   },
+
   unmount(){
     cancelAnimationFrame(this._raf);
+    clearInterval(this._spinTimer);this._spinTimer=null;
     this.busy=false;
   }
 };
+
+})();
