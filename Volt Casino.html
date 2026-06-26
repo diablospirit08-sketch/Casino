@@ -2919,16 +2919,25 @@ if(false)(function(){
     });
 
     var expandBtn=el.querySelector('.mg-expand-btn');
-    var isLarge=false,dragging=false,x0,y0,ex,ey;
+    var isFloating=false,isExpanded=false,dragging=false,x0,y0,ex,ey;
+
+    function popOut(){
+      if(isFloating)return;
+      var rect=el.getBoundingClientRect();
+      isFloating=true;
+      document.body.appendChild(el);
+      el.style.position='fixed';
+      el.style.left=rect.left+'px';
+      el.style.top=rect.top+'px';
+      el.style.zIndex=99999;
+    }
+
     expandBtn.addEventListener('click',function(){
-      isLarge=!isLarge;
-      if(isLarge){
-        // pop out of stack into free-floating window
-        var rect=el.getBoundingClientRect();
+      isExpanded=!isExpanded;
+      if(isExpanded){
+        popOut();
         el.classList.add('mg-large');
         expandBtn.classList.add('mg-expanded');
-        document.body.appendChild(el);
-        // responsive center — never exceed viewport
         var w=Math.min(680,window.innerWidth-32);
         var h=Math.min(520,window.innerHeight-80);
         el.style.width=w+'px';
@@ -2937,29 +2946,21 @@ if(false)(function(){
         el.style.top=Math.max(16,(window.innerHeight-h)/2)+'px';
         el.style.zIndex=99999;
       }else{
-        // snap back into stack
         el.classList.remove('mg-large');
-        el.style.left='';el.style.top='';el.style.zIndex='';
+        el.style.width='';el.style.height='';
+        el.style.left='';el.style.top='';
+        el.style.position='';el.style.zIndex='';
         expandBtn.classList.remove('mg-expanded');
+        isFloating=false;
         stack.appendChild(el);
         el.scrollIntoView({behavior:'smooth',block:'nearest'});
       }
     });
 
-    // draggable in both normal and large mode
     var bar=el.querySelector('.mg-win-bar');
     bar.addEventListener('mousedown',function(e){
       if(e.target.tagName==='BUTTON')return;
-      // pop out of stack on first drag if not already floating
-      if(!isLarge){
-        var rect=el.getBoundingClientRect();
-        document.body.appendChild(el);
-        el.style.position='fixed';
-        el.style.left=rect.left+'px';
-        el.style.top=rect.top+'px';
-        isLarge=true;
-        expandBtn.classList.add('mg-expanded');
-      }
+      popOut();
       x0=el.offsetLeft;y0=el.offsetTop;ex=e.clientX;ey=e.clientY;
       dragging=true;el.style.zIndex=99999;
       document.body.style.userSelect='none';
