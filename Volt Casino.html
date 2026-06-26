@@ -2941,10 +2941,20 @@ if(false)(function(){
       }
     });
 
-    // drag only when large
+    // draggable in both normal and large mode
     var bar=el.querySelector('.mg-win-bar');
     bar.addEventListener('mousedown',function(e){
-      if(!isLarge||e.target.tagName==='BUTTON')return;
+      if(e.target.tagName==='BUTTON')return;
+      // pop out of stack on first drag if not already floating
+      if(!isLarge){
+        var rect=el.getBoundingClientRect();
+        document.body.appendChild(el);
+        el.style.position='fixed';
+        el.style.left=rect.left+'px';
+        el.style.top=rect.top+'px';
+        isLarge=true;
+        expandBtn.classList.add('mg-expanded');
+      }
       x0=el.offsetLeft;y0=el.offsetTop;ex=e.clientX;ey=e.clientY;
       dragging=true;el.style.zIndex=99999;
       document.body.style.userSelect='none';
