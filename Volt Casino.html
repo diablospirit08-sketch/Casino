@@ -310,7 +310,7 @@
   .gv-bet:hover{filter:brightness(1.07)}
   .gv-bet:active{transform:scale(.98)}
   .gv-bet:disabled{opacity:.6;cursor:default}
-  .gv-canvas{position:relative;min-height:540px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:var(--panel)}
+  .gv-canvas{position:relative;min-height:calc(100vh - 178px);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:var(--panel)}
   .gv-canvas .glow{position:absolute;inset:0;opacity:.16}
   .gv-canvas::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 25%,rgba(10,13,19,.6));pointer-events:none}
   .gv-history{position:absolute;top:14px;right:14px;display:flex;gap:6px;z-index:2}
@@ -341,7 +341,7 @@
   .frow.me .fn{color:var(--mint)}
   @media(max-width:760px){
     .gv-frame{grid-template-columns:1fr}
-    .gv-canvas{order:-1;min-height:340px}
+    .gv-canvas{order:-1;min-height:0;aspect-ratio:4/3}
     .gv-panel{border-right:none;border-top:1px solid var(--line)}
     .gv-title h1{font-size:16px}
     .gv-stats{flex-direction:column;gap:14px}
