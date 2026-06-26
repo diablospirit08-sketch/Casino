@@ -2893,6 +2893,7 @@ if(false)(function(){
     el.innerHTML='<div class="mg-win-bar">'
       +'<span class="mg-win-title">'+g.n+'</span>'
       +'<div class="mg-win-btns">'
+      +'<button class="mg-fs-btn" title="Full screen">⛶</button>'
       +'<button class="mg-min-btn" title="Minimize">—</button>'
       +'<button class="mg-cls-btn" title="Close">✕</button>'
       +'</div></div>'
@@ -2928,6 +2929,11 @@ if(false)(function(){
       dragging=false;document.body.style.userSelect='';
     });
 
+    el.querySelector('.mg-fs-btn').addEventListener('click',function(){
+      el.remove();taskBtn.remove();delete mgWindows[slug];
+      if(g.demo){window.open(g.demo,'_blank');}
+      else if(typeof openGame==='function'){openGame(slug);}
+    });
     el.querySelector('.mg-min-btn').addEventListener('click',function(){
       el.classList.toggle('mg-minimized');
     });
