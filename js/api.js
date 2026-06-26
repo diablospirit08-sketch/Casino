@@ -48,7 +48,10 @@
   // Token-aware fetch — auto-refreshes on 401
   async function _fetch(path, opts = {}) {
     const at = localStorage.getItem(LS_AT);
-    const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+    // Don't set Content-Type for FormData — browser must set it with the multipart boundary
+    const headers = opts.body instanceof FormData
+      ? { ...(opts.headers || {}) }
+      : { 'Content-Type': 'application/json', ...(opts.headers || {}) };
     if (at) headers['Authorization'] = 'Bearer ' + at;
 
     let res = await fetch(`${API}${path}`, { ...opts, headers });

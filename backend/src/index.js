@@ -39,7 +39,7 @@ const fastify = Fastify({
 
 // ─── Plugins ──────────────────────────────────────────────────────────────────
 
-await fastify.register(multipart, { limits: { fileSize: 2 * 1024 * 1024 } });
+await fastify.register(multipart, { limits: { fileSize: 10 * 1024 * 1024 } });
 
 await fastify.register(cors, {
   origin: process.env.CORS_ORIGIN ?? '*',
