@@ -894,6 +894,11 @@ renderGvCur();
 walletMenu.addEventListener('click',()=>setTimeout(renderGvCur,0));
 // Fun / Real play toolbar toggle
 (function(){
+  function revertToFun(pill,funLbl,realLbl){
+    pill.classList.remove('real');
+    funLbl.classList.add('active');
+    realLbl.classList.remove('active');
+  }
   function setMode(fun){
     const pill=$id('gvTogPill');
     const funLbl=$id('gvFunLbl');
@@ -902,10 +907,19 @@ walletMenu.addEventListener('click',()=>setTimeout(renderGvCur,0));
     pill.classList.toggle('real',!fun);
     funLbl.classList.toggle('active',fun);
     realLbl.classList.toggle('active',!fun);
-    if(!fun&&!document.body.classList.contains('authed')){
-      openAuth('up');
-      // revert to fun since not authed
-      pill.classList.remove('real');funLbl.classList.add('active');realLbl.classList.remove('active');
+    if(!fun){
+      if(!document.body.classList.contains('authed')){
+        openAuth('up');
+        revertToFun(pill,funLbl,realLbl);
+        return;
+      }
+      const bal=(WALLETS.find(w=>w.c===voltCur)||{}).amt||0;
+      if(bal<=0){
+        showToast({icon:'💳',title:'No balance',sub:'Add funds to play with real money'});
+        openDep();
+        revertToFun(pill,funLbl,realLbl);
+        return;
+      }
     }
   }
   $id('gvFunLbl').addEventListener('click',()=>setMode(true));
