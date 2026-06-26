@@ -2930,7 +2930,7 @@ if(false)(function(){
         document.body.appendChild(el);
         el.style.left=Math.max(20,rect.left-150)+'px';
         el.style.top=Math.max(20,rect.top)+'px';
-        el.style.zIndex=++mgZ;
+        el.style.zIndex=99999;
       }else{
         // snap back into stack
         el.classList.remove('mg-large');
@@ -2946,7 +2946,7 @@ if(false)(function(){
     bar.addEventListener('mousedown',function(e){
       if(!isLarge||e.target.tagName==='BUTTON')return;
       x0=el.offsetLeft;y0=el.offsetTop;ex=e.clientX;ey=e.clientY;
-      dragging=true;el.style.zIndex=++mgZ;
+      dragging=true;el.style.zIndex=99999;
       document.body.style.userSelect='none';
     });
     document.addEventListener('mousemove',function(e){
