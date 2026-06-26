@@ -1124,14 +1124,23 @@ function initGameArtEditor(){
       if(v){imgEl.src=v;imgEl.style.display='';delete urlEl.dataset.dataUrl;}
       else{imgEl.src='';imgEl.style.display='none';}
     });
-    document.getElementById('gaeFile-'+g.slug).addEventListener('change',e=>{
+    document.getElementById('gaeFile-'+g.slug).addEventListener('change',async e=>{
       const f=e.target.files[0];if(!f)return;
-      const reader=new FileReader();
-      reader.onload=ev=>{
-        imgEl.src=ev.target.result;imgEl.style.display='';
-        urlEl.value='(uploaded file)';urlEl.dataset.dataUrl=ev.target.result;
-      };
-      reader.readAsDataURL(f);
+      const toast=document.getElementById('gaeTost-'+g.slug);
+      toast.textContent='Uploading…';toast.style.color='var(--muted)';
+      try{
+        const fd=new FormData();
+        fd.append(g.slug,f,f.name);
+        const res=await aFetch('/api/admin/upload',{method:'POST',body:fd});
+        const finalUrl=res.url.startsWith('http')?res.url:API+res.url;
+        imgEl.src=finalUrl;imgEl.style.display='';
+        urlEl.value=finalUrl;delete urlEl.dataset.dataUrl;
+        toast.textContent='✓ Uploaded — click Save to apply';toast.style.color='var(--mint)';
+      }catch(err){
+        toast.textContent='⚠ Upload failed: '+err.message;toast.style.color='#f87171';
+      }
+      setTimeout(()=>{toast.textContent='';toast.style.color='';},4000);
+      e.target.value='';
     });
   });
 }
