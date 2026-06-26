@@ -235,6 +235,14 @@ function doBet(onDone){
   });
 }
 document.getElementById('rows').addEventListener('click',e=>{
+  // Play Now button → open in floating mini window
+  const btn=e.target.closest('.gc-ov-btn');
+  if(btn){
+    const t=btn.closest('.gtile');
+    if(t&&window.openMiniGame)openMiniGame(t.dataset.slug);
+    return;
+  }
+  // Card click → full-screen game view
   const t=e.target.closest('.gtile');
   if(t&&t.dataset.slug)openGame(t.dataset.slug);
 });
