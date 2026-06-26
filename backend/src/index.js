@@ -120,9 +120,11 @@ await fastify.register(staticFiles, {
   index: 'Volt Casino.html',
   decorateReply: false,
   setHeaders(res, filePath) {
-    if (/\.(js|css|png|jpg|jpeg|gif|svg|ico|mp3|wav|ogg|woff2?)$/.test(filePath)) {
+    if (/\.(png|jpg|jpeg|gif|svg|ico|mp3|wav|ogg|woff2?)$/.test(filePath)) {
+      // Images, fonts, audio — rarely change, long cache is fine
       res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
     } else {
+      // JS, CSS, HTML — always revalidate so deploys show immediately
       res.setHeader('Cache-Control', 'no-cache');
     }
   },
