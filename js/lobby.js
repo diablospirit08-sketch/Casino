@@ -424,6 +424,21 @@ const EXT_ART={
   'originals-blackjack':'art/art-originals-blackjack.svg',
 };
 const GAME_ART_LS=(()=>{try{return JSON.parse(localStorage.getItem('volt-game-art')||'{}');}catch{return{};}})();
+
+function applyGameArt(arts){
+  Object.entries(arts).forEach(([slug,url])=>{
+    const el=document.getElementById('art-'+slug);
+    if(!el)return;
+    if(url){el.setAttribute('src',url);}
+    else{el.removeAttribute('src');}
+  });
+}
+window.addEventListener('storage',e=>{
+  if(e.key!=='volt-game-art')return;
+  let arts={};try{arts=JSON.parse(e.newValue||'{}');}catch{}
+  applyGameArt(arts);
+});
+try{new BroadcastChannel('volt-game-art').addEventListener('message',e=>applyGameArt(e.data||{}));}catch(_){}
 document.getElementById('rows').innerHTML = ROWS.map(row=>`
   <div class="row" id="sec-${row.key}">
     <div class="row-head">

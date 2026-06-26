@@ -1142,9 +1142,11 @@ window.saveGameArt=function(slug){
   const toast=document.getElementById('gaeTost-'+slug);
   try{
     localStorage.setItem(LS_GAME_ART,JSON.stringify(state));
-    toast.textContent='✓ Saved — reload the casino page';
+    try{new BroadcastChannel('volt-game-art').postMessage(state);}catch(_){}
+    toast.textContent='✓ Saved — updates live in open casino tabs';
+    toast.style.color='';
   }catch(e){
-    toast.textContent='⚠ Image too large — use a URL instead';
+    toast.textContent='⚠ Image too large — paste a URL instead of uploading';
     toast.style.color='#f87171';
   }
   setTimeout(()=>{toast.textContent='';toast.style.color='';},4000);
