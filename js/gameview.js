@@ -61,7 +61,7 @@ function _abortTransition(){
   if(gameEl)gameEl.classList.remove('view-out','view-in');
   if(lobbyEl)lobbyEl.classList.remove('view-out','view-in');
 }
-function openGame(slug){
+function openGame(slug,mode){
   const g=GAMES[slug];if(!g||_viewBusy)return;
   if(autoRunning)stopAuto();
   // Prepare game data immediately so it's ready when the view appears
@@ -70,6 +70,21 @@ function openGame(slug){
   gvProv.textContent=g.p;
   gvRtp.textContent='RTP '+rtpFor(slug,g);
   gvLiveChip.hidden=!g.live;
+  // Show Fun/Real toggle only for non-original slot games
+  const playToggle=document.getElementById('gvPlayToggle');
+  const togPill=document.getElementById('gvTogPill');
+  const funLbl=document.getElementById('gvFunLbl');
+  const realLbl=document.getElementById('gvRealLbl');
+  if(playToggle){
+    const showTog=!!g.demo&&!slug.startsWith('originals-');
+    playToggle.hidden=!showTog;
+    if(showTog){
+      const isFun=mode==='fun';
+      togPill.classList.toggle('real',!isFun);
+      funLbl.classList.toggle('active',isFun);
+      realLbl.classList.toggle('active',!isFun);
+    }
+  }
   gvGlow.style.background=`linear-gradient(160deg,${g.g[0]},${g.g[1]})`;
   gvIdle.hidden=false;gvResult.hidden=true;gvHistory.innerHTML='';
   if(location.hash!=='#play='+slug)location.hash='play='+slug;

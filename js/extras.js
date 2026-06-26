@@ -892,6 +892,28 @@ renderGvCur();
 })();
 
 walletMenu.addEventListener('click',()=>setTimeout(renderGvCur,0));
+// Fun / Real play toolbar toggle
+(function(){
+  function setMode(fun){
+    const pill=$id('gvTogPill');
+    const funLbl=$id('gvFunLbl');
+    const realLbl=$id('gvRealLbl');
+    if(!pill)return;
+    pill.classList.toggle('real',!fun);
+    funLbl.classList.toggle('active',fun);
+    realLbl.classList.toggle('active',!fun);
+    if(!fun&&!document.body.classList.contains('authed')){
+      openAuth('up');
+      // revert to fun since not authed
+      pill.classList.remove('real');funLbl.classList.add('active');realLbl.classList.remove('active');
+    }
+  }
+  $id('gvFunLbl').addEventListener('click',()=>setMode(true));
+  $id('gvRealLbl').addEventListener('click',()=>setMode(false));
+  $id('gvTogPill').addEventListener('click',function(){
+    setMode(this.classList.contains('real'));
+  });
+})();
 $id('gvFavBtn').addEventListener('click',function(){
   const on=this.classList.toggle('active');
   showToast({icon:on?'💚':'🤍',title:on?'Added to favourites':'Removed from favourites',sub:gvName.textContent});
