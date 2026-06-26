@@ -699,16 +699,29 @@
   .eng-range:disabled{opacity:.45;cursor:default}
 
   /* dice */
-  .dice-wrap{width:100%;display:flex;flex-direction:column;gap:46px;align-items:center}
+  .dice-wrap{width:100%;display:flex;flex-direction:column;gap:32px;align-items:center}
   .dice-roll{font-size:64px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1;text-shadow:0 6px 30px rgba(0,0,0,.55);min-height:64px}
   .dice-roll.win{background:var(--spectrum);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 22px rgba(255,180,80,.35))}
   .dice-roll.lose{color:#e2596a}
   .dice-roll.idle{color:var(--muted-2)}
-  .dice-track{position:relative;width:100%;height:12px;border-radius:99px;background:#3a2530}
-  .dice-fill{position:absolute;top:0;bottom:0;background:rgba(66,135,245,.85);border-radius:99px;box-shadow:0 0 14px rgba(66,135,245,.35)}
-  .dice-pin{position:absolute;top:50%;left:0;width:44px;height:34px;margin-left:-22px;border-radius:9px;background:var(--txt);color:#10141d;display:grid;place-items:center;font-size:13px;font-weight:900;font-variant-numeric:tabular-nums;transform:translateY(-72%) rotate(0deg);box-shadow:0 8px 20px rgba(0,0,0,.5);opacity:0;transition:left .42s cubic-bezier(.3,1.4,.4,1),opacity .2s}
+  /* track arena — padding-top reserves space for the floating pin */
+  .dice-arena{position:relative;width:100%;padding-top:42px}
+  .dice-track{position:relative;width:100%;height:20px;border-radius:99px;background:#3d1a20;box-shadow:inset 0 2px 6px rgba(0,0,0,.4)}
+  .dice-fill{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,#1d4ed8,#4287f5,#60a5fa);border-radius:99px;box-shadow:0 0 22px rgba(66,135,245,.5);overflow:hidden}
+  .dice-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);background-size:200% 100%;animation:diceShimmer 2s linear infinite}
+  @keyframes diceShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  /* pin — triangle arrow floating above the track */
+  .dice-pin{position:absolute;top:4px;left:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;opacity:0;transition:left .42s cubic-bezier(.3,1.4,.4,1),opacity .2s;pointer-events:none;z-index:2}
   .dice-pin.show{opacity:1}
-  .dice-scale{display:flex;justify-content:space-between;width:100%;margin-top:-34px;font-size:10px;font-weight:800;color:var(--muted-2);font-variant-numeric:tabular-nums}
+  .dice-pin .dpv{background:#fff;color:#10141d;font-size:12px;font-weight:900;font-variant-numeric:tabular-nums;padding:4px 10px;border-radius:7px;box-shadow:0 4px 14px rgba(0,0,0,.5);white-space:nowrap}
+  .dice-pin::after{content:'';width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #fff}
+  .dice-scale{display:flex;justify-content:space-between;width:100%;margin-top:6px;font-size:10px;font-weight:800;color:var(--muted-2);font-variant-numeric:tabular-nums}
+  /* roll history ticker */
+  .dice-hist{display:flex;gap:5px;overflow:hidden;justify-content:flex-end;width:100%;min-height:28px;align-items:center}
+  .dice-chip{flex:none;min-width:34px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:900;font-variant-numeric:tabular-nums;padding:0 7px;animation:chipIn .22s ease}
+  .dice-chip.win{background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.2)}
+  .dice-chip.lose{background:rgba(226,89,106,.1);color:#e2596a;border:1px solid rgba(226,89,106,.18)}
+  @keyframes chipIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
 
   /* mines */
   .mines-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;height:100%}

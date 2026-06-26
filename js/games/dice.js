@@ -1,8 +1,10 @@
 /* --- dice --- */
 ORIGINALS['originals-dice']={
   rtp:'99%',auto:true,chance:50,over:true,busy:false,_raf:0,_pend:null,
+  hist:[],
   mult(){return 99/this.chance},
   mount(){
+    this.hist=[];
     engFields.innerHTML=`
       <div class="gv-field"><label>Win Chance <span id="diLbl"></span></label>
         <input type="range" class="eng-range" id="diChance" min="2" max="98" step="1" value="${this.chance}" aria-label="Win chance"/></div>
@@ -16,8 +18,12 @@ ORIGINALS['originals-dice']={
     gvStage.innerHTML=`
       <div class="dice-wrap">
         <div class="dice-roll idle" id="diRoll">—</div>
-        <div class="dice-track"><div class="dice-fill" id="diFill"></div><div class="dice-pin" id="diPin">0</div></div>
-        <div class="dice-scale"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+        <div class="dice-arena">
+          <div class="dice-pin" id="diPin"><span class="dpv"></span></div>
+          <div class="dice-track"><div class="dice-fill" id="diFill"></div></div>
+          <div class="dice-scale"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+        </div>
+        <div class="dice-hist" id="diHist"></div>
       </div>`;
     $id('diChance').addEventListener('input',()=>{this.chance=+$id('diChance').value;this.sync();});
     $id('diMode').addEventListener('click',e=>{
@@ -38,6 +44,12 @@ ORIGINALS['originals-dice']={
     if(this.over){f.style.left=t+'%';f.style.right='0';}
     else{f.style.left='0';f.style.right=(100-t)+'%';}
   },
+  renderHist(){
+    const el=$id('diHist');if(!el)return;
+    el.innerHTML=this.hist.slice(-15).reverse().map(h=>
+      `<div class="dice-chip ${h.win?'win':'lose'}">${h.r.toFixed(0)}</div>`
+    ).join('');
+  },
   onCur(){this.sync();},
   onBet(){this.roll(null);},
   autoBet(done){this.roll(done);},
@@ -50,7 +62,8 @@ ORIGINALS['originals-dice']={
     if(!autoRunning)gvBetBtn.disabled=true;
     const rollEl=$id('diRoll'),pin=$id('diPin');
     rollEl.className='dice-roll';
-    /* start spinner while waiting for server */
+    pin.classList.remove('show');
+    /* spinner while waiting for server */
     let spinning=true;
     const spinFn=()=>{if(spinning){rollEl.textContent=rnd(0,100).toFixed(2);this._raf=requestAnimationFrame(spinFn);}};
     this._raf=requestAnimationFrame(spinFn);
@@ -70,7 +83,11 @@ ORIGINALS['originals-dice']={
     const{roll:r,target:t}=res.gameData,win=res.gameData?.win===true,m=res.multiplier;
     rollEl.textContent=r.toFixed(2);
     rollEl.classList.add(win?'win':'lose');
-    pin.classList.add('show');pin.style.left=r+'%';pin.textContent=r.toFixed(0);
+    pin.classList.add('show');
+    pin.style.left=r+'%';
+    pin.querySelector('.dpv').textContent=r.toFixed(0);
+    this.hist.push({r,win});
+    this.renderHist();
     serverSettleBet(st,win?m:0,res.new_balance);
     this.busy=false;gvBetBtn.disabled=false;
     this.sync();
