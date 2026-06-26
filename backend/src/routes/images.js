@@ -1,35 +1,40 @@
 /**
  * Image storage routes
  *
- * POST /api/admin/upload  — admin only, uploads to R2 (or DB fallback), returns { url }
- * GET  /api/image/:key    — public fallback server (used when R2 not configured)
+ * POST /api/admin/upload  — admin only, uploads to Cloudinary (or DB fallback)
+ * GET  /api/image/:key    — public fallback server (used when Cloudinary not configured)
  *
- * Cloudflare R2 env vars (all required to enable R2):
- *   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL
+ * Cloudinary env vars (all required to enable Cloudinary):
+ *   CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
  */
 
 import { query } from '../db.js';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { v2 as cloudinary } from 'cloudinary';
 import { randomUUID } from 'crypto';
 
-/* ── R2 client (lazy init) ─────────────────────────────────────── */
-let s3 = null;
-function getS3() {
-  if (s3) return s3;
-  const { R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY } = process.env;
-  if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) return null;
-  s3 = new S3Client({
-    region: 'auto',
-    endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    credentials: { accessKeyId: R2_ACCESS_KEY_ID, secretAccessKey: R2_SECRET_ACCESS_KEY },
-  });
-  return s3;
+/* ── Cloudinary ────────────────────────────────────────────────── */
+function cloudinaryEnabled() {
+  return !!(process.env.CLOUDINARY_CLOUD_NAME &&
+            process.env.CLOUDINARY_API_KEY &&
+            process.env.CLOUDINARY_API_SECRET);
 }
 
-function r2Enabled() {
-  return !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID &&
-            process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME &&
-            process.env.R2_PUBLIC_URL);
+function initCloudinary() {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key:    process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure:     true,
+  });
+}
+
+function uploadToCloudinary(buffer, options) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (err, result) => {
+      if (err) reject(err); else resolve(result);
+    });
+    stream.end(buffer);
+  });
 }
 
 /* ── DB fallback ───────────────────────────────────────────────── */
@@ -58,6 +63,8 @@ export async function imageUploadRoutes(fastify) {
   fastify.addHook('onRequest', fastify.authenticate);
   fastify.addHook('preHandler', requireAdmin);
 
+  if (cloudinaryEnabled()) initCloudinary();
+
   fastify.post('/upload', async (req, reply) => {
     const data = await req.file();
     if (!data) return reply.code(400).send({ error: 'No file provided' });
@@ -71,31 +78,31 @@ export async function imageUploadRoutes(fastify) {
     for await (const chunk of data.file) chunks.push(chunk);
     const buffer = Buffer.concat(chunks);
 
-    if (buffer.length > 5 * 1024 * 1024) {
-      return reply.code(413).send({ error: 'Image too large (max 5 MB)' });
+    if (buffer.length > 10 * 1024 * 1024) {
+      return reply.code(413).send({ error: 'Image too large (max 10 MB)' });
     }
 
-    const ext = mime.split('/')[1]?.replace('jpeg', 'jpg') || 'webp';
-    const key = `${data.fieldname || 'img'}-${randomUUID().slice(0, 8)}.${ext}`;
+    const publicId = `viofyre/${data.fieldname || 'img'}-${randomUUID().slice(0, 8)}`;
 
-    /* ── Try R2 first ── */
-    if (r2Enabled()) {
+    /* ── Try Cloudinary first ── */
+    if (cloudinaryEnabled()) {
       try {
-        await getS3().send(new PutObjectCommand({
-          Bucket: process.env.R2_BUCKET_NAME,
-          Key: key,
-          Body: buffer,
-          ContentType: mime,
-          CacheControl: 'public, max-age=31536000',
-        }));
-        const url = `${process.env.R2_PUBLIC_URL.replace(/\/$/, '')}/${key}`;
-        return { url };
+        const result = await uploadToCloudinary(buffer, {
+          public_id:    publicId,
+          resource_type:'image',
+          overwrite:    true,
+          folder:       'viofyre',
+          transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+        });
+        return { url: result.secure_url };
       } catch (err) {
-        fastify.log.error({ err }, 'R2 upload failed, falling back to DB');
+        fastify.log.error({ err }, 'Cloudinary upload failed, falling back to DB');
       }
     }
 
     /* ── DB fallback ── */
+    const ext = mime.split('/')[1]?.replace('jpeg', 'jpg') || 'webp';
+    const key = `${data.fieldname || 'img'}-${randomUUID().slice(0, 8)}.${ext}`;
     await ensureTable();
     await query(
       `INSERT INTO images (key, data, mime_type, updated_at)
