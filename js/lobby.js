@@ -427,10 +427,22 @@ const GAME_ART_LS=(()=>{try{return JSON.parse(localStorage.getItem('volt-game-ar
 
 function applyGameArt(arts){
   Object.entries(arts).forEach(([slug,url])=>{
-    const el=document.getElementById('art-'+slug);
-    if(!el)return;
-    if(url){el.setAttribute('src',url);}
-    else{el.removeAttribute('src');}
+    const tile=document.querySelector('[data-slug="'+slug+'"]');
+    if(!tile)return;
+    const cover=tile.querySelector('.gcover');
+    if(!cover)return;
+    let over=cover.querySelector('img.ga-url');
+    if(url){
+      if(!over){
+        over=document.createElement('img');
+        over.className='ga-url';
+        over.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:4;pointer-events:none;border-radius:inherit';
+        cover.appendChild(over);
+      }
+      over.src=url;
+    }else{
+      if(over)over.remove();
+    }
   });
 }
 window.addEventListener('storage',e=>{
@@ -438,7 +450,7 @@ window.addEventListener('storage',e=>{
   let arts={};try{arts=JSON.parse(e.newValue||'{}');}catch{}
   applyGameArt(arts);
 });
-try{new BroadcastChannel('volt-game-art').addEventListener('message',e=>applyGameArt(e.data||{}));}catch(_){}
+let _artCh;try{_artCh=new BroadcastChannel('volt-game-art');_artCh.addEventListener('message',e=>applyGameArt(e.data||{}));}catch(_){}
 document.getElementById('rows').innerHTML = ROWS.map(row=>`
   <div class="row" id="sec-${row.key}">
     <div class="row-head">
@@ -465,6 +477,9 @@ document.getElementById('rows').innerHTML = ROWS.map(row=>`
     </div>
   </div>
 `).join('');
+
+/* apply any admin-saved art URLs as overlay imgs (bypasses image-slot internals) */
+applyGameArt(GAME_ART_LS);
 
 /* row scrolling — arrows page by one full set of tiles, disabled at limits */
 function syncRowArrows(track){
