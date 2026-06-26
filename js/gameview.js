@@ -235,11 +235,16 @@ function doBet(onDone){
   });
 }
 document.getElementById('rows').addEventListener('click',e=>{
-  const t=e.target.closest('.gtile');
-  if(t&&t.dataset.slug){
-    // Always open in floating mini window so the lobby stays visible
-    if(window.openMiniGame)openMiniGame(t.dataset.slug);
+  // Mini-window button on slot cards
+  const mini=e.target.closest('.gc-mini-btn');
+  if(mini){
+    const t=mini.closest('.gtile');
+    if(t&&window.openMiniGame)openMiniGame(t.dataset.slug);
+    return;
   }
+  // Any other card click → full-screen game view
+  const t=e.target.closest('.gtile');
+  if(t&&t.dataset.slug)openGame(t.dataset.slug);
 });
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&document.body.classList.contains('ingame'))closeGame();

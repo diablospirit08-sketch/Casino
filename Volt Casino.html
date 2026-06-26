@@ -1115,30 +1115,35 @@
 
   /* ── 1. Game card hover quick-play button ── */
   .gc-ov{position:absolute;bottom:10px;left:50%;transform:translateX(-50%) translateY(14px);width:calc(100% - 16px);z-index:4;opacity:0;transition:opacity .18s,transform .18s;pointer-events:none}
-  .gc-ov-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(90deg,#4287f5,#f542a4);color:#fff;font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;padding:9px 0;border-radius:99px;width:100%;box-shadow:0 6px 20px -6px rgba(66,135,245,.6);cursor:pointer}
+  .gc-ov{display:flex;gap:6px;align-items:center}
+  .gc-ov-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(90deg,#4287f5,#f542a4);color:#fff;font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;padding:9px 0;border-radius:99px;flex:1;box-shadow:0 6px 20px -6px rgba(66,135,245,.6);cursor:pointer;border:none;font-family:inherit}
   .gc-ov-btn svg{width:13px;height:13px;flex:none}
+  .gc-mini-btn{width:34px;height:34px;border-radius:99px;border:none;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;display:grid;place-items:center;flex-shrink:0;backdrop-filter:blur(4px);transition:.15s;padding:0}
+  .gc-mini-btn:hover{background:rgba(255,255,255,.22)}
+  .gc-mini-btn svg{width:14px;height:14px}
   .gtile:hover .gc-ov{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
   /* keep legacy class refs working */
   .gc-ov-ic,.gc-ov-lbl{display:none}
 
-  /* ── Multi-game floating windows ── */
-  .mg-win{position:fixed;width:500px;height:580px;background:var(--panel);border:1.5px solid var(--line-2);border-radius:14px;box-shadow:0 28px 70px -10px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.04);display:flex;flex-direction:column;overflow:hidden;min-width:320px;min-height:200px;resize:both}
-  .mg-win-bar{display:flex;align-items:center;gap:8px;padding:0 10px;height:40px;background:var(--bg-2);border-bottom:1px solid var(--line);cursor:move;user-select:none;flex-shrink:0}
-  .mg-win-icon{font-size:14px;line-height:1}
-  .mg-win-title{flex:1;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mg-win-btns{display:flex;gap:4px;flex-shrink:0}
-  .mg-win-btns button{width:22px;height:22px;border:none;border-radius:6px;background:var(--panel-2);color:var(--muted);font-size:11px;cursor:pointer;display:grid;place-items:center;transition:.12s;flex-shrink:0;padding:0}
-  .mg-win-btns button:hover{background:var(--line-2);color:var(--txt)}
-  .mg-cls-btn:hover{background:rgba(226,89,106,.25)!important;color:#e2596a!important}
-  .mg-win-body{flex:1;min-height:0;position:relative;background:var(--bg-2)}
+  /* ── Multi-game floating windows (right-side stacked) ── */
+  #mgStack{position:fixed;top:70px;right:16px;display:flex;flex-direction:column;gap:10px;z-index:9000;pointer-events:none;max-height:calc(100vh - 86px);overflow-y:auto;overflow-x:visible;padding-right:2px}
+  #mgStack::-webkit-scrollbar{display:none}
+  .mg-win{pointer-events:auto;width:380px;background:var(--bg-2);border-radius:12px;box-shadow:0 16px 48px -8px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+  .mg-win-bar{display:flex;align-items:center;gap:8px;padding:0 10px;height:38px;background:var(--panel);border-bottom:1px solid var(--line);cursor:move;user-select:none;flex-shrink:0}
+  .mg-win-title{flex:1;font-size:11px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mg-win-btns{display:flex;gap:2px;flex-shrink:0}
+  .mg-win-btns button{width:24px;height:24px;border:none;border-radius:5px;background:transparent;color:var(--muted);font-size:13px;cursor:pointer;display:grid;place-items:center;transition:.12s;flex-shrink:0;padding:0;line-height:1}
+  .mg-win-btns button:hover{background:var(--panel-2);color:var(--txt)}
+  .mg-cls-btn:hover{background:rgba(226,89,106,.2)!important;color:#e2596a!important}
+  .mg-win-body{position:relative;height:300px;background:#0a0c14}
   .mg-win-body iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
-  .mg-win.mg-minimized{height:40px!important;resize:none}
-  .mg-win.mg-minimized .mg-win-body{display:none}
-  #mgTaskbar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:8999;pointer-events:none;max-width:90vw;flex-wrap:wrap;justify-content:center}
-  .mg-task-btn{pointer-events:auto;display:flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(18,22,34,.92);border:1.5px solid var(--line-2);border-radius:99px;color:var(--txt);font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 4px 24px rgba(0,0,0,.6);transition:.14s;font-family:inherit}
-  .mg-task-btn:hover{background:var(--panel-2)}
-  .mg-task-dot{width:6px;height:6px;border-radius:50%;background:var(--mint);flex-shrink:0}
-  .mg-toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line-2);border-radius:99px;padding:10px 20px;font-size:11px;font-weight:800;color:var(--muted);z-index:99999;pointer-events:none;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+  .mg-win-foot{display:flex;align-items:center;justify-content:space-between;padding:0 12px;height:34px;background:var(--panel);border-top:1px solid var(--line);flex-shrink:0}
+  .mg-win-brand{font-size:13px;font-weight:900;letter-spacing:.04em;background:var(--spectrum);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .mg-win-foot-btns{display:flex;gap:4px}
+  .mg-win-foot-btns button{width:24px;height:24px;border:none;border-radius:5px;background:transparent;color:var(--muted);font-size:13px;cursor:pointer;display:grid;place-items:center;transition:.12s;padding:0}
+  .mg-win-foot-btns button:hover{background:var(--panel-2);color:var(--txt)}
+  .mg-win.mg-minimized .mg-win-body,.mg-win.mg-minimized .mg-win-foot{display:none}
+  .mg-toast{position:fixed;bottom:24px;right:24px;background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:10px 18px;font-size:11px;font-weight:800;color:var(--muted);z-index:99999;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.5)}
 
   /* ── 2. Balance widget redesign ── */
   .wallet{border-radius:999px;background:var(--panel);border:1.5px solid rgba(236,72,153,.35);box-shadow:0 0 22px -6px rgba(236,72,153,.4),0 0 8px -2px rgba(249,115,22,.25),0 4px 18px rgba(0,0,0,.4)}
@@ -2851,13 +2856,12 @@ if(false)(function(){
 }());
 </script>
 <script>
-/* ── Multi-game floating window manager ── */
+/* ── Multi-game floating window manager (right-side stack, slots only) ── */
 (function(){
-  var mgWindows={};  // slug -> {el, taskBtn}
-  var mgZ=9000;
-  var taskbar=document.createElement('div');
-  taskbar.id='mgTaskbar';
-  document.body.appendChild(taskbar);
+  var mgWindows={};  // slug -> el
+  var stack=document.createElement('div');
+  stack.id='mgStack';
+  document.body.appendChild(stack);
 
   function showToast(msg){
     var t=document.createElement('div');
@@ -2869,12 +2873,11 @@ if(false)(function(){
 
   function openMiniGame(slug){
     var g=typeof GAMES!=='undefined'?GAMES[slug]:null;
-    if(!g){showToast('Game not found');return;}
+    if(!g||!g.demo){return;}  // only for external slots
 
     if(mgWindows[slug]){
-      var w=mgWindows[slug];
-      w.el.classList.remove('mg-minimized');
-      w.el.style.zIndex=++mgZ;
+      mgWindows[slug].classList.remove('mg-minimized');
+      mgWindows[slug].scrollIntoView({behavior:'smooth',block:'nearest'});
       return;
     }
     if(Object.keys(mgWindows).length>=4){
@@ -2882,65 +2885,37 @@ if(false)(function(){
       return;
     }
 
-    var url=g.demo||(location.origin+location.pathname+'?mini=1#play='+slug);
-    var offset=Object.keys(mgWindows).length;
-    var left=Math.min(60+offset*36,window.innerWidth-520);
-    var top=Math.min(50+offset*36,window.innerHeight-600);
-
     var el=document.createElement('div');
     el.className='mg-win';
-    el.style.cssText='left:'+left+'px;top:'+top+'px;z-index:'+(++mgZ);
-    el.innerHTML='<div class="mg-win-bar">'
-      +'<span class="mg-win-title">'+g.n+'</span>'
-      +'<div class="mg-win-btns">'
-      +'<button class="mg-fs-btn" title="Full screen">⛶</button>'
-      +'<button class="mg-min-btn" title="Minimize">—</button>'
-      +'<button class="mg-cls-btn" title="Close">✕</button>'
-      +'</div></div>'
-      +'<div class="mg-win-body"><iframe src="'+url+'" allowfullscreen allow="autoplay;encrypted-media"></iframe></div>';
-    document.body.appendChild(el);
+    el.innerHTML=
+      '<div class="mg-win-bar">'
+        +'<span class="mg-win-title">'+g.n+'</span>'
+        +'<div class="mg-win-btns">'
+          +'<button class="mg-min-btn" title="Minimize">&#8212;</button>'
+          +'<button class="mg-cls-btn" title="Close">&#x2715;</button>'
+        +'</div>'
+      +'</div>'
+      +'<div class="mg-win-body"><iframe src="'+g.demo+'" allowfullscreen allow="autoplay;encrypted-media"></iframe></div>'
+      +'<div class="mg-win-foot">'
+        +'<span class="mg-win-brand">VioFyre</span>'
+        +'<div class="mg-win-foot-btns">'
+          +'<button class="mg-expand-btn" title="Open full screen">&#x26F6;</button>'
+        +'</div>'
+      +'</div>';
+    stack.appendChild(el);
+    mgWindows[slug]=el;
+    el.scrollIntoView({behavior:'smooth',block:'nearest'});
 
-    var taskBtn=document.createElement('button');
-    taskBtn.className='mg-task-btn';
-    taskBtn.innerHTML='<span class="mg-task-dot"></span>'+g.n;
-    taskBtn.addEventListener('click',function(){
-      el.classList.remove('mg-minimized');
-      el.style.zIndex=++mgZ;
-    });
-    taskbar.appendChild(taskBtn);
-
-    mgWindows[slug]={el:el,taskBtn:taskBtn};
-
-    /* drag */
-    var bar=el.querySelector('.mg-win-bar');
-    var dragging=false,x0,y0,ex,ey;
-    bar.addEventListener('mousedown',function(e){
-      if(e.target.tagName==='BUTTON')return;
-      x0=el.offsetLeft;y0=el.offsetTop;ex=e.clientX;ey=e.clientY;
-      dragging=true;el.style.zIndex=++mgZ;
-      document.body.style.userSelect='none';
-    });
-    document.addEventListener('mousemove',function(e){
-      if(!dragging)return;
-      el.style.left=Math.max(0,Math.min(window.innerWidth-60,x0+e.clientX-ex))+'px';
-      el.style.top=Math.max(0,Math.min(window.innerHeight-40,y0+e.clientY-ey))+'px';
-    });
-    document.addEventListener('mouseup',function(){
-      dragging=false;document.body.style.userSelect='';
-    });
-
-    el.querySelector('.mg-fs-btn').addEventListener('click',function(){
-      el.remove();taskBtn.remove();delete mgWindows[slug];
-      if(g.demo){window.open(g.demo,'_blank');}
-      else if(typeof openGame==='function'){openGame(slug);}
-    });
     el.querySelector('.mg-min-btn').addEventListener('click',function(){
       el.classList.toggle('mg-minimized');
     });
     el.querySelector('.mg-cls-btn').addEventListener('click',function(){
-      el.remove();taskBtn.remove();delete mgWindows[slug];
+      el.remove();
+      delete mgWindows[slug];
     });
-    el.addEventListener('mousedown',function(){el.style.zIndex=++mgZ;});
+    el.querySelector('.mg-expand-btn').addEventListener('click',function(){
+      window.open(g.demo,'_blank');
+    });
   }
 
   window.openMiniGame=openMiniGame;
