@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>VOLT — Admin</title>
+<title>VioFyre — Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
@@ -196,8 +196,7 @@ tbody tr:last-child td{border-bottom:none}
 <!-- sidebar -->
 <aside class="sidebar">
   <div class="sb-logo">
-    <div class="volt-ic">⚡</div>
-    <span>VOLT</span>
+    <img src="images/viofyre-logo.png.png" alt="VioFyre" style="height:28px;width:auto;object-fit:contain;flex:none">
     <small>Admin</small>
   </div>
   <nav class="sb-nav">
@@ -228,6 +227,15 @@ tbody tr:last-child td{border-bottom:none}
     <button class="sb-item" data-tab="promos">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
       Promotions
+    </button>
+    <button class="sb-item" data-tab="vip">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7l2-7z"/></svg>
+      VIP / Loyalty
+    </button>
+    <div class="sb-sec">System</div>
+    <button class="sb-item" data-tab="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
     </button>
   </nav>
   <div class="sb-bottom">
@@ -566,6 +574,108 @@ tbody tr:last-child td{border-bottom:none}
 
     </div><!-- /promos -->
 
+    <!-- ═══════════════ VIP / LOYALTY ═══════════════ -->
+    <div class="tab-content" id="tab-vip">
+      <!-- VIP tier overview -->
+      <div class="stats" style="grid-template-columns:repeat(5,1fr);margin-bottom:28px" id="vipTierStats">
+        <div class="stat" style="--accent:#c98b4a"><div class="stat-label">Associate</div><div class="stat-val" id="vipCount0">—</div><div class="stat-sub">0 XP min</div></div>
+        <div class="stat" style="--accent:#aeb6c2"><div class="stat-label">Soldier</div><div class="stat-val" id="vipCount1">—</div><div class="stat-sub">500 XP min</div></div>
+        <div class="stat" style="--accent:#f0c05a"><div class="stat-label">Capo</div><div class="stat-val" id="vipCount2">—</div><div class="stat-sub">2,500 XP min</div></div>
+        <div class="stat" style="--accent:#8fd0d8"><div class="stat-label">Underboss</div><div class="stat-val" id="vipCount3">—</div><div class="stat-sub">10,000 XP min</div></div>
+        <div class="stat" style="--accent:#41cdf0"><div class="stat-label">Don</div><div class="stat-val" id="vipCount4">—</div><div class="stat-sub">50,000 XP min</div></div>
+      </div>
+
+      <!-- VIP tier table -->
+      <div class="tbl-wrap" style="margin-bottom:28px">
+        <div class="tbl-toolbar">
+          <h3 style="font-size:13px;font-weight:800;flex:1">VIP Tier Definitions</h3>
+        </div>
+        <table>
+          <thead><tr><th>Tier</th><th>XP Required</th><th>Daily Bonus Mult</th><th>Perk</th><th>Rakeback</th></tr></thead>
+          <tbody>
+            <tr><td><span style="color:#c98b4a;font-weight:800">I — Associate</span></td><td>0</td><td>1×</td><td>5% weekly cashback</td><td class="amt-pos">1%</td></tr>
+            <tr><td><span style="color:#aeb6c2;font-weight:800">II — Soldier</span></td><td>500</td><td>1.5×</td><td>Free spins drops</td><td class="amt-pos">2%</td></tr>
+            <tr><td><span style="color:#f0c05a;font-weight:800">III — Capo</span></td><td>2,500</td><td>2×</td><td>A personal host</td><td class="amt-pos">3.5%</td></tr>
+            <tr><td><span style="color:#8fd0d8;font-weight:800">IV — Underboss</span></td><td>10,000</td><td>3×</td><td>Higher limits &amp; odds</td><td class="amt-pos">5%</td></tr>
+            <tr><td><span style="color:#41cdf0;font-weight:800">V — Don</span></td><td>50,000</td><td>5×</td><td>Bespoke rewards</td><td class="amt-pos">8%</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Top XP users -->
+      <div class="tbl-wrap">
+        <div class="tbl-toolbar">
+          <h3 style="font-size:13px;font-weight:800;flex:1">Top Players by XP (Total Wagered)</h3>
+        </div>
+        <table>
+          <thead><tr><th>#</th><th>Player</th><th>Total Wagered</th><th>Est. XP</th><th>Tier</th></tr></thead>
+          <tbody id="vipLeaderTbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div><!-- /vip -->
+
+    <!-- ═══════════════ SETTINGS ═══════════════ -->
+    <div class="tab-content" id="tab-settings">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+        <!-- Site Info -->
+        <div class="tbl-wrap">
+          <div class="tbl-toolbar"><h3 style="font-size:13px;font-weight:800;flex:1">Site Info</h3></div>
+          <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+            <div class="pce-field"><label class="pce-field" style="display:flex;flex-direction:column;gap:6px"><span style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Casino Name</span><input class="pce-input" type="text" value="VioFyre Casino"/></label></div>
+            <div class="pce-field"><label class="pce-field" style="display:flex;flex-direction:column;gap:6px"><span style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Support Email</span><input class="pce-input" type="email" value="support@viofyre.com"/></label></div>
+            <div class="pce-field"><label class="pce-field" style="display:flex;flex-direction:column;gap:6px"><span style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Default Currency</span><input class="pce-input" type="text" value="BNB"/></label></div>
+            <button class="pce-save" style="align-self:flex-start" onclick="this.textContent='Saved ✓';setTimeout(()=>this.textContent='Save',2000)">Save</button>
+          </div>
+        </div>
+
+        <!-- Game Toggles -->
+        <div class="tbl-wrap">
+          <div class="tbl-toolbar"><h3 style="font-size:13px;font-weight:800;flex:1">Feature Flags</h3></div>
+          <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+            ${[
+              ['Maintenance Mode','Redirect all visitors to a maintenance page',false],
+              ['Demo Mode','Allow games to be played without signing in',true],
+              ['Registrations Open','Allow new accounts to be created',true],
+              ['Deposits Enabled','Accept new crypto deposits',true],
+              ['Withdrawals Enabled','Process withdrawal requests',true],
+            ].map(([label,desc,on])=>`
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="flex:1"><div style="font-size:13px;font-weight:700">${label}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${desc}</div></div>
+                <label style="position:relative;display:inline-block;width:38px;height:22px;cursor:pointer;flex:none">
+                  <input type="checkbox" ${on?'checked':''} style="opacity:0;width:0;height:0" onchange="this.previousElementSibling&&(this.previousElementSibling.style.background=this.checked?'var(--mint)':'var(--panel-2)')">
+                  <span style="position:absolute;inset:0;background:${on?'var(--mint)':'var(--panel-2)'};border-radius:99px;transition:.2s;border:1px solid var(--line-2)"></span>
+                  <span style="position:absolute;top:3px;left:${on?'18':'3'}px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s"></span>
+                </label>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <!-- House Edge Overrides -->
+        <div class="tbl-wrap">
+          <div class="tbl-toolbar"><h3 style="font-size:13px;font-weight:800;flex:1">House Edge Overrides</h3></div>
+          <div style="padding:20px;display:flex;flex-direction:column;gap:10px">
+            ${[['Crash','3'],['Mines','2.5'],['Dice','1'],['Plinko','2'],['Coinflip','2'],['Keno','4'],['Limbo','1'],['Blackjack','0.5'],['Roulette','2.7'],['Baccarat','1.06']].map(([g,e])=>`
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="flex:1;font-size:13px;font-weight:700">${g}</span>
+                <input class="pce-input" type="number" value="${e}" step="0.1" min="0" max="20" style="width:80px;text-align:right"/>
+                <span style="font-size:12px;color:var(--muted)">%</span>
+              </div>`).join('')}
+            <button class="pce-save" style="align-self:flex-start;margin-top:4px" onclick="this.textContent='Saved ✓';setTimeout(()=>this.textContent='Save',2000)">Save</button>
+          </div>
+        </div>
+
+        <!-- API / Backend -->
+        <div class="tbl-wrap">
+          <div class="tbl-toolbar"><h3 style="font-size:13px;font-weight:800;flex:1">Backend Status</h3></div>
+          <div style="padding:20px;display:flex;flex-direction:column;gap:12px" id="settingsBackendStatus">
+            <div style="font-size:12px;color:var(--muted)">Checking Railway connection…</div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /settings -->
+
   </div><!-- /content -->
 </main>
 
@@ -590,7 +700,7 @@ async function aFetch(path,opts){
 }
 
 /* ── tab switching ── */
-const TITLES={dashboard:'Dashboard',users:'Users',transactions:'Transactions',games:'Games',bets:'Live Bets',promos:'Promotions'};
+const TITLES={dashboard:'Dashboard',users:'Users',transactions:'Transactions',games:'Games',bets:'Live Bets',promos:'Promotions',vip:'VIP / Loyalty',settings:'Settings'};
 document.querySelectorAll('.sb-item[data-tab]').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
@@ -653,7 +763,7 @@ function showAuthError(msg){
 }
 
 /* ══ DASHBOARD ══════════════════════════════════════════════ */
-const GICONS={crash:'💥',mines:'💎',dice:'🎲',plinko:'🔮',coinflip:'🪙',keno:'🎯',blackjack:'🃏'};
+const GICONS={crash:'💥',mines:'💎',dice:'🎲',plinko:'🔮',coinflip:'🪙',keno:'🎯',blackjack:'🃏',roulette:'🎡',limbo:'🌀',baccarat:'🎴',livecasino:'🎬',slots:'🎰'};
 const gicon=n=>GICONS[n.toLowerCase()]||'🎮';
 
 async function loadDashboard(){
@@ -773,9 +883,9 @@ function renderTx(){
       <td style="font-family:monospace;font-size:11px;color:var(--muted)">${esc(t.id.slice(0,8))}…</td>
       <td style="font-weight:700">${esc(t.username||'—')}</td>
       <td><span class="badge-type ${esc(t.type)}">${esc(t.type.replace(/_/g,' '))}</span></td>
-      <td class="${pos?'amt-pos':'amt-neg'}">${pos?'+':''}${fmtN(Math.abs(t.amount))} ${esc(t.currency)}</td>
-      <td style="color:var(--muted)">${esc(t.ref_id||'—')}</td>
-      <td><span class="badge-status active">recorded</span></td>
+      <td class="${pos?'amt-pos':'amt-neg'}">${pos?'+':''}${fmtN(Math.abs(t.amount))} ${esc(t.currency||'BNB')}</td>
+      <td style="color:var(--muted)">${esc(t.currency||'BNB')}</td>
+      <td><span class="badge-status ${t.status==='completed'?'completed':t.status==='pending'?'pending':'active'}">${esc(t.status||'recorded')}</span></td>
       <td style="color:var(--muted);font-size:12px">${fmtDate(t.created_at)}</td>
       <td></td>
     </tr>`;
@@ -798,7 +908,10 @@ const GDEFS=[
   {name:'Plinko',   icon:'🔮',cat:'Originals',edge:'2%'},
   {name:'Coinflip', icon:'🪙',cat:'Originals',edge:'2%'},
   {name:'Keno',     icon:'🎯',cat:'Originals',edge:'4%'},
+  {name:'Limbo',    icon:'🌀',cat:'Originals',edge:'1%'},
   {name:'Blackjack',icon:'🃏',cat:'Table',    edge:'0.5%'},
+  {name:'Roulette', icon:'🎡',cat:'Table',    edge:'2.7%'},
+  {name:'Baccarat', icon:'🎴',cat:'Table',    edge:'1.06%'},
 ];
 
 async function loadGames(){
@@ -981,6 +1094,7 @@ const GAME_ART_GAMES=[
   {slug:'originals-limbo',     name:'Limbo',     grad:'linear-gradient(160deg,#a63aba,#e052b8)'},
   {slug:'originals-baccarat',  name:'Baccarat',  grad:'linear-gradient(160deg,#d4452e,#f0763d)'},
   {slug:'originals-coinflip',  name:'Coinflip',  grad:'linear-gradient(160deg,#8a6d1c,#d4af37)'},
+  {slug:'originals-roulette',  name:'Roulette',  grad:'linear-gradient(160deg,#1a6a2e,#2dbd54)'},
 ];
 function loadGameArt(){try{return JSON.parse(localStorage.getItem(LS_GAME_ART)||'{}');}catch{return{};}}
 function initGameArtEditor(){
@@ -1037,6 +1151,61 @@ window.saveGameArt=function(slug){
 };
 initGameArtEditor();
 
+/* ══ VIP ════════════════════════════════════════════════════ */
+const VIP_LEVELS=[
+  {n:'Associate',xp:0,    col:'#c98b4a'},
+  {n:'Soldier',  xp:500,  col:'#aeb6c2'},
+  {n:'Capo',     xp:2500, col:'#f0c05a'},
+  {n:'Underboss',xp:10000,col:'#8fd0d8'},
+  {n:'Don',      xp:50000,col:'#41cdf0'},
+];
+const xpForWager=w=>Math.floor((w||0)*10);
+const tierOf=xp=>{let l=0;VIP_LEVELS.forEach((v,i)=>{if(xp>=v.xp)l=i;});return l;};
+
+async function loadVip(){
+  const {users}=await aFetch('/api/admin/users?limit=200');
+  const all=users||[];
+  /* count users per tier */
+  const counts=[0,0,0,0,0];
+  all.forEach(u=>{counts[tierOf(xpForWager(u.total_wagered))]++;});
+  counts.forEach((c,i)=>{const el=$('vipCount'+i);if(el)el.textContent=c.toLocaleString();});
+  /* top 10 by wagered */
+  const top=[...all].sort((a,b)=>(b.total_wagered||0)-(a.total_wagered||0)).slice(0,10);
+  $('vipLeaderTbody').innerHTML=top.length
+    ? top.map((u,i)=>{
+        const xp=xpForWager(u.total_wagered);
+        const ti=tierOf(xp);
+        const t=VIP_LEVELS[ti];
+        return `<tr>
+          <td style="color:var(--muted-2);font-weight:800">${i+1}</td>
+          <td><div class="td-user"><div class="u-avatar" style="background:${acol(u.username||'?')}">${esc((u.username||'?')[0].toUpperCase())}</div><div><div class="u-name">${esc(u.username||'—')}</div><div class="u-email">${esc(u.email||'—')}</div></div></div></td>
+          <td style="font-weight:700">${fmtN(u.total_wagered)} BNB</td>
+          <td style="color:var(--yellow);font-variant-numeric:tabular-nums">${xp.toLocaleString()} XP</td>
+          <td><span style="font-weight:800;color:${t.col}">${t.n}</span></td>
+        </tr>`;
+      }).join('')
+    : `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No users yet</td></tr>`;
+}
+
+/* ══ SETTINGS STATUS ════════════════════════════════════════ */
+async function loadSettingsStatus(){
+  const el=$('settingsBackendStatus');
+  if(!el)return;
+  try{
+    const stats=await aFetch('/api/admin/stats');
+    el.innerHTML=`
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px"><span class="badge-status active">Connected</span><span style="font-size:12px;color:var(--muted)">Railway API</span></div>
+        <div style="font-size:12px;color:var(--muted)">Total users: <b style="color:var(--txt)">${fmtN(stats.total_users)}</b></div>
+        <div style="font-size:12px;color:var(--muted)">Bets today: <b style="color:var(--txt)">${fmtN(stats.bets_today)}</b></div>
+        <div style="font-size:12px;color:var(--muted)">House profit: <b style="color:var(--mint)">${fmtN(stats.house_profit)} BNB</b></div>
+        <div style="font-size:12px;color:var(--muted)">Pending withdrawals: <b style="color:var(--yellow)">${fmtN(stats.pending_withdrawals)}</b></div>
+      </div>`;
+  }catch(e){
+    el.innerHTML=`<span class="badge-status suspended">Offline</span><div style="font-size:12px;color:var(--muted);margin-top:8px">${esc(e.message)}</div>`;
+  }
+}
+
 /* ══ INIT ═══════════════════════════════════════════════════ */
 async function initAdmin(){
   let me;
@@ -1052,7 +1221,7 @@ async function initAdmin(){
   document.querySelector('.sb-user-info span').textContent=me.email||'admin';
   document.querySelector('.sb-avatar').textContent=(me.username||'A')[0].toUpperCase();
 
-  await Promise.all([loadDashboard(),loadUsers(),loadTransactions(),loadGames(),loadLiveBets()]);
+  await Promise.all([loadDashboard(),loadUsers(),loadTransactions(),loadGames(),loadLiveBets(),loadVip(),loadSettingsStatus()]);
   startPolling();
 }
 
