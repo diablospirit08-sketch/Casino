@@ -2928,8 +2928,9 @@ if(false)(function(){
         el.classList.add('mg-large');
         expandBtn.classList.add('mg-expanded');
         document.body.appendChild(el);
-        el.style.left=Math.max(20,rect.left-150)+'px';
-        el.style.top=Math.max(20,rect.top)+'px';
+        // center on screen
+        el.style.left=Math.max(20,(window.innerWidth-680)/2)+'px';
+        el.style.top=Math.max(20,(window.innerHeight-520)/2)+'px';
         el.style.zIndex=99999;
       }else{
         // snap back into stack
