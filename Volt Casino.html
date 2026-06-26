@@ -1128,7 +1128,7 @@
   /* ── Multi-game floating windows (right-side stacked) ── */
   #mgStack{position:fixed;top:70px;right:16px;display:flex;flex-direction:column;gap:10px;z-index:9000;pointer-events:none;max-height:calc(100vh - 86px);overflow-y:auto;overflow-x:visible;padding-right:2px}
   #mgStack::-webkit-scrollbar{display:none}
-  .mg-win{pointer-events:auto;width:380px;background:var(--bg-2);border-radius:12px;box-shadow:0 16px 48px -8px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+  .mg-win{pointer-events:auto;width:min(380px,calc(100vw - 32px));background:var(--bg-2);border-radius:12px;box-shadow:0 16px 48px -8px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.06);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
   .mg-win-bar{display:flex;align-items:center;gap:8px;padding:0 10px;height:38px;background:var(--panel);border-bottom:1px solid var(--line);cursor:move;user-select:none;flex-shrink:0}
   .mg-win-title{flex:1;font-size:11px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .mg-win-btns{display:flex;gap:2px;flex-shrink:0}
@@ -2928,9 +2928,13 @@ if(false)(function(){
         el.classList.add('mg-large');
         expandBtn.classList.add('mg-expanded');
         document.body.appendChild(el);
-        // center on screen
-        el.style.left=Math.max(20,(window.innerWidth-680)/2)+'px';
-        el.style.top=Math.max(20,(window.innerHeight-520)/2)+'px';
+        // responsive center — never exceed viewport
+        var w=Math.min(680,window.innerWidth-32);
+        var h=Math.min(520,window.innerHeight-80);
+        el.style.width=w+'px';
+        el.style.height=h+'px';
+        el.style.left=Math.max(16,(window.innerWidth-w)/2)+'px';
+        el.style.top=Math.max(16,(window.innerHeight-h)/2)+'px';
         el.style.zIndex=99999;
       }else{
         // snap back into stack
