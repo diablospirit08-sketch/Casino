@@ -2432,6 +2432,14 @@ fetch('/api/promo').then(function(r){return r.ok?r.json():null;}).then(function(
     applyPromoPair(d);
   }
 }).catch(function(){});
+
+/* fetch server-saved game art and apply over localStorage fallback */
+fetch('/api/game-art').then(function(r){return r.ok?r.json():null;}).then(function(d){
+  if(d&&Object.keys(d).length){
+    localStorage.setItem('volt-game-art',JSON.stringify(d));
+    if(typeof applyGameArt==='function') applyGameArt(d);
+  }
+}).catch(function(){});
 window.addEventListener('storage',function(e){
   if(e.key==='volt-promo-pair')applyPromoPair();
 });
