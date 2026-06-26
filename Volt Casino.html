@@ -1143,6 +1143,10 @@
   .mg-win-foot-btns button{width:24px;height:24px;border:none;border-radius:5px;background:transparent;color:var(--muted);font-size:13px;cursor:pointer;display:grid;place-items:center;transition:.12s;padding:0}
   .mg-win-foot-btns button:hover{background:var(--panel-2);color:var(--txt)}
   .mg-win.mg-minimized .mg-win-body,.mg-win.mg-minimized .mg-win-foot{display:none}
+  .mg-win.mg-large{position:fixed;width:680px;height:520px;border-radius:14px;box-shadow:0 32px 80px -12px rgba(0,0,0,.95),0 0 0 1px rgba(255,255,255,.07);resize:both;overflow:hidden;flex-shrink:0}
+  .mg-win.mg-large .mg-win-body{height:auto;flex:1}
+  .mg-win.mg-large .mg-win-bar{cursor:move}
+  .mg-expand-btn.mg-expanded{color:var(--mint)!important}
   .mg-toast{position:fixed;bottom:24px;right:24px;background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:10px 18px;font-size:11px;font-weight:800;color:var(--muted);z-index:99999;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.5)}
 
   /* ── 2. Balance widget redesign ── */
@@ -2913,8 +2917,45 @@ if(false)(function(){
       el.remove();
       delete mgWindows[slug];
     });
-    el.querySelector('.mg-expand-btn').addEventListener('click',function(){
-      window.open(g.demo,'_blank');
+
+    var expandBtn=el.querySelector('.mg-expand-btn');
+    var isLarge=false,dragging=false,x0,y0,ex,ey;
+    expandBtn.addEventListener('click',function(){
+      isLarge=!isLarge;
+      if(isLarge){
+        // pop out of stack into free-floating window
+        var rect=el.getBoundingClientRect();
+        el.classList.add('mg-large');
+        expandBtn.classList.add('mg-expanded');
+        document.body.appendChild(el);
+        el.style.left=Math.max(20,rect.left-150)+'px';
+        el.style.top=Math.max(20,rect.top)+'px';
+        el.style.zIndex=++mgZ;
+      }else{
+        // snap back into stack
+        el.classList.remove('mg-large');
+        el.style.left='';el.style.top='';el.style.zIndex='';
+        expandBtn.classList.remove('mg-expanded');
+        stack.appendChild(el);
+        el.scrollIntoView({behavior:'smooth',block:'nearest'});
+      }
+    });
+
+    // drag only when large
+    var bar=el.querySelector('.mg-win-bar');
+    bar.addEventListener('mousedown',function(e){
+      if(!isLarge||e.target.tagName==='BUTTON')return;
+      x0=el.offsetLeft;y0=el.offsetTop;ex=e.clientX;ey=e.clientY;
+      dragging=true;el.style.zIndex=++mgZ;
+      document.body.style.userSelect='none';
+    });
+    document.addEventListener('mousemove',function(e){
+      if(!dragging)return;
+      el.style.left=Math.max(0,Math.min(window.innerWidth-100,x0+e.clientX-ex))+'px';
+      el.style.top=Math.max(0,Math.min(window.innerHeight-40,y0+e.clientY-ey))+'px';
+    });
+    document.addEventListener('mouseup',function(){
+      dragging=false;document.body.style.userSelect='';
     });
   }
 
