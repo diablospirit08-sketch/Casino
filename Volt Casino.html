@@ -108,7 +108,7 @@
   .wallet-bal .cur{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--muted)}
   .wallet-bal>svg{width:13px;height:13px;color:var(--muted);transition:transform .18s}
   .wallet.open .wallet-bal>svg{transform:rotate(180deg)}
-  .wallet-dep{border:none;background:var(--spectrum);color:#fff;font-family:inherit;font-weight:900;letter-spacing:.1em;text-transform:uppercase;font-size:12px;padding:0 18px;margin:-1px -1px -1px 0;border-radius:0 999px 999px 0;cursor:pointer;transition:.18s;box-shadow:0 6px 20px -8px rgba(249,115,22,.7),0 2px 12px -4px rgba(236,72,153,.55);text-shadow:0 1px 4px rgba(0,0,0,.4)}
+  .wallet-dep{border:none;background:var(--spectrum);color:#fff;font-family:inherit;font-weight:900;letter-spacing:.1em;text-transform:uppercase;font-size:12px;padding:0 18px;margin:-1px -1px -1px 0;border-radius:0 999px 999px 0;cursor:pointer;transition:.18s;box-shadow:0 4px 14px -6px rgba(249,115,22,.5);text-shadow:0 1px 4px rgba(0,0,0,.4)}
   .wallet-dep:hover{filter:brightness(1.07)}
   .wallet-dep:active{transform:scale(.97)}
   /* dropdown menus */
@@ -502,8 +502,8 @@
   .auth-fine{margin-top:12px;font-size:10.5px;color:var(--muted-2);text-align:center}
 
   /* ===== ROWS ===== */
-  .row{margin-top:34px}
-  .row-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .row{margin-top:52px}
+  .row-head{display:flex;align-items:center;gap:12px;margin-bottom:22px}
   .row-head .ic{width:26px;height:26px;border-radius:8px;background:var(--panel-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--mint)}
   .row-head .ic svg{width:14px;height:14px}
   .row-head h2{font-size:15px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
@@ -536,7 +536,7 @@
   .gcover .boost{position:absolute;bottom:0;left:0;right:0;background:rgba(6,42,27,.85);color:var(--mint);font-size:9.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:6px 4px;z-index:3}
   .gcover .corner{position:absolute;top:9px;right:9px;font-size:9.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);padding:4px 7px;border-radius:5px;z-index:3}
   .gcover .corner.hot{background:var(--spectrum);color:#08090c;backdrop-filter:none}
-  .gtile:hover .gcover{transform:translateY(-4px);box-shadow:0 14px 30px -14px rgba(0,0,0,.8)}
+  .gtile:hover .gcover{transform:translateY(-3px);box-shadow:0 8px 20px -10px rgba(0,0,0,.6)}
   .gtile .rtp{color:var(--mint);font-weight:800}
 
   /* dealer tiles */
@@ -738,8 +738,8 @@
   .dice-roll.punch{animation:rollPunch .38s cubic-bezier(.22,1,.36,1) both}
   /* track arena — padding-top reserves space for the floating pin */
   .dice-arena{position:relative;width:100%;padding-top:42px}
-  .dice-track{position:relative;width:100%;height:20px;border-radius:99px;background:linear-gradient(90deg,#420d16,#5a1020);box-shadow:inset 0 2px 6px rgba(0,0,0,.5),0 0 12px rgba(180,20,50,.18)}
-  .dice-fill{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,#1d4ed8,#4287f5,#60a5fa);border-radius:99px;box-shadow:0 0 22px rgba(66,135,245,.5);overflow:hidden}
+  .dice-track{position:relative;width:100%;height:20px;border-radius:99px;background:linear-gradient(90deg,#420d16,#5a1020);box-shadow:inset 0 2px 6px rgba(0,0,0,.5)}
+  .dice-fill{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,#1d4ed8,#4287f5,#60a5fa);border-radius:99px;overflow:hidden}
   .dice-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);background-size:200% 100%;animation:diceShimmer 2s linear infinite}
   @keyframes diceShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
   @keyframes flashWin{0%{box-shadow:0 0 0 rgba(52,211,153,0)}35%{box-shadow:0 0 32px rgba(52,211,153,.95)}100%{box-shadow:0 0 10px rgba(52,211,153,.2)}}
@@ -759,8 +759,8 @@
   .dice-pin{position:absolute;top:4px;left:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;opacity:0;transition:left .42s cubic-bezier(.3,1.4,.4,1);pointer-events:none;z-index:2}
   .dice-pin.show{animation:pinDrop .38s cubic-bezier(.3,1.5,.4,1) forwards}
   .dice-pin .dpv{background:#fff;color:#10141d;font-size:12px;font-weight:900;font-variant-numeric:tabular-nums;padding:4px 10px;border-radius:7px;box-shadow:0 4px 14px rgba(0,0,0,.5);white-space:nowrap;transition:box-shadow .2s}
-  .dice-pin.win .dpv{box-shadow:0 4px 14px rgba(0,0,0,.5),0 0 18px rgba(52,211,153,.85);animation:pinGlow .5s ease 3}
-  .dice-pin.lose .dpv{box-shadow:0 4px 14px rgba(0,0,0,.5),0 0 18px rgba(226,89,106,.85);animation:pinGlow .5s ease 3}
+  .dice-pin.win .dpv{box-shadow:0 4px 14px rgba(0,0,0,.5),0 0 14px rgba(52,211,153,.7);animation:pinGlow .5s ease 1}
+  .dice-pin.lose .dpv{box-shadow:0 4px 14px rgba(0,0,0,.5),0 0 14px rgba(226,89,106,.7);animation:pinGlow .5s ease 1}
   .dice-pin::after{content:'';width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #fff}
   .dice-scale{display:flex;justify-content:space-between;width:100%;margin-top:6px;font-size:10px;font-weight:800;color:var(--muted-2);font-variant-numeric:tabular-nums}
   /* roll history ticker */
