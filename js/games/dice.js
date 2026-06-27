@@ -1,13 +1,12 @@
 /* --- dice --- */
 (function(){
 
-/* ── audio files (sounds/dice-roll.mp3, sounds/win.mp3, sounds/lose.mp3) ── */
+/* ── audio files (sounds/dice.game.mp3, sounds/win.mp3, sounds/lose.mp3) ── */
 var _snd={
   roll:new Audio('sounds/dice.game.mp3'),
   win: new Audio('sounds/win.mp3'),
   lose:new Audio('sounds/lose.mp3')
 };
-_snd.roll.loop=true;
 function _sndRollStart(){try{_snd.roll.currentTime=0;_snd.roll.play().catch(function(){});}catch(e){}}
 function _sndRollStop(){try{_snd.roll.pause();_snd.roll.currentTime=0;}catch(e){}}
 function _sndWin(){try{_snd.win.currentTime=0;_snd.win.play().catch(function(){});}catch(e){}}
