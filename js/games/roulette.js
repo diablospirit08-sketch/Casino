@@ -636,7 +636,7 @@ ORIGINALS['originals-roulette']={
       pockets+=`<path d="${d}" fill="${fill}" stroke="#0E0E12" stroke-width="0.5" data-n="${n}" style="cursor:pointer"/>`;
       const at=rad(-90+theta);
       const tx=cx+rT*Math.cos(at),ty=cy+rT*Math.sin(at);
-      numbers+=`<text x="${f(tx)}" y="${f(ty)}" transform="rotate(${f(theta)} ${f(tx)} ${f(ty)})" fill="#fff" font-size="12" font-weight="700" font-family="Sora,Inter,system-ui,sans-serif" text-anchor="middle" dominant-baseline="central" data-n="${n}" style="cursor:pointer;pointer-events:all">${n}</text>`;
+      numbers+=`<text x="${f(tx)}" y="${f(ty)}" transform="rotate(${f(theta)} ${f(tx)} ${f(ty)})" fill="#fff" font-size="14" font-weight="700" font-family="Sora,Inter,system-ui,sans-serif" text-anchor="middle" dominant-baseline="central" data-n="${n}" style="cursor:pointer;pointer-events:all">${n}</text>`;
       frets+=`<line x1="${f(cx+130*Math.cos(a1))}" y1="${f(cy+130*Math.sin(a1))}" x2="${f(cx+R2*Math.cos(a1))}" y2="${f(cy+R2*Math.sin(a1))}" stroke="#E8C765" stroke-width="2.2" stroke-linecap="round"/>`;
     }
     let deflectors='';
@@ -1146,7 +1146,7 @@ ${brushes}
 .rl-cell:hover{border-color:#E6BE55;box-shadow:0 0 0 1px rgba(230,190,85,.4),0 6px 18px rgba(0,0,0,.5);
   transform:translateY(-1px);z-index:4;color:#fff}
 .rl-cell:active{transform:scale(.96)}
-.rl-num{min-height:32px;border:none;color:#fff;font-size:11px;font-weight:700}
+.rl-num{min-height:32px;border:none;color:#fff;font-size:14px;font-weight:700}
 .rl-num.r{background:#C81E29;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 2px 4px rgba(0,0,0,.32)}
 .rl-num.b{background:#14181F;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 2px 4px rgba(0,0,0,.32)}
 .rl-num:hover{filter:brightness(1.28);border:none}
