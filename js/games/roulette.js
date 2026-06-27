@@ -64,10 +64,6 @@ ORIGINALS['originals-roulette']={
     <button class="rl-act" id="rlClear">✕<span>CLEAR</span></button>
   </div>
   <div class="rl-toggle-row">
-    <span>RACETRACK</span>
-    <label class="rl-tog"><input type="checkbox" id="rlRtToggle" checked><span class="rl-tog-slider"></span></label>
-  </div>
-  <div class="rl-toggle-row">
     <span>FAST SPIN</span>
     <label class="rl-tog"><input type="checkbox" id="rlFastToggle"${this._fast?' checked':''}><span class="rl-tog-slider"></span></label>
   </div>
@@ -115,8 +111,13 @@ ORIGINALS['originals-roulette']={
     <div class="rl-streak" id="rlStreak"></div>
   </div>
   <div class="rl-bottom">
-    <div class="rl-rt-wrap" id="rlRtWrap">
-      ${this._buildRacetrack()}
+    <div class="rl-rt-drawer">
+      <button class="rl-rt-drawer-btn${this._racetrkVisible?' open':''}" id="rlRtDrawerBtn">
+        <span>RACETRACK</span><span class="rl-rt-chev">${this._racetrkVisible?'▴':'▾'}</span>
+      </button>
+      <div class="rl-rt-wrap${this._racetrkVisible?' open':''}" id="rlRtWrap">
+        ${this._buildRacetrack()}
+      </div>
     </div>
     <div class="rl-limits">
       <span>MIN <b>$1</b></span>
@@ -215,10 +216,15 @@ ORIGINALS['originals-roulette']={
       this._renderBets();this._syncInfo();this._syncBtn();
     });
 
-    /* racetrack toggle */
-    document.getElementById('rlRtToggle').addEventListener('change',e=>{
-      this._racetrkVisible=e.target.checked;
-      document.getElementById('rlRtWrap').style.display=e.target.checked?'':'none';
+    /* racetrack drawer toggle */
+    document.getElementById('rlRtDrawerBtn').addEventListener('click',()=>{
+      this._racetrkVisible=!this._racetrkVisible;
+      const wrap=document.getElementById('rlRtWrap');
+      const btn=document.getElementById('rlRtDrawerBtn');
+      const chev=btn.querySelector('.rl-rt-chev');
+      wrap.classList.toggle('open',this._racetrkVisible);
+      btn.classList.toggle('open',this._racetrkVisible);
+      if(chev)chev.textContent=this._racetrkVisible?'▴':'▾';
     });
     /* fast spin toggle */
     document.getElementById('rlFastToggle').addEventListener('change',e=>{
@@ -1178,8 +1184,21 @@ ${brushes}
 .rl-cell[data-tip]:hover::after{
   content:'';position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);
   border:3px solid transparent;border-top-color:#E6BE55;pointer-events:none;z-index:200}
+/* racetrack drawer */
+.rl-rt-drawer{display:flex;flex-direction:column;width:100%}
+.rl-rt-drawer-btn{display:flex;align-items:center;justify-content:space-between;
+  width:100%;padding:7px 14px;background:rgba(255,255,255,.04);border:1px solid #2E3649;
+  border-radius:8px;color:rgba(255,255,255,.35);font-size:10px;font-weight:700;letter-spacing:.1em;
+  cursor:pointer;font-family:inherit;transition:all .15s;box-sizing:border-box}
+.rl-rt-drawer-btn:hover{border-color:rgba(230,190,85,.5);color:rgba(230,190,85,.7)}
+.rl-rt-drawer-btn.open{border-radius:8px 8px 0 0;border-bottom-color:transparent;
+  border-color:#2E3649;color:rgba(255,255,255,.55)}
+.rl-rt-chev{font-size:11px;transition:transform .22s}
+.rl-rt-wrap{overflow:hidden;max-height:0;opacity:0;pointer-events:none;
+  transition:max-height .28s ease,opacity .2s;
+  border:1px solid #2E3649;border-top:none;border-radius:0 0 8px 8px}
+.rl-rt-wrap.open{max-height:200px;opacity:1;pointer-events:auto}
 /* racetrack — horizontal under table */
-.rl-rt-wrap{width:100%}
 .rl-rt-h{display:flex;align-items:stretch;background:#0D1322;border-radius:100px;
   border:1.5px solid #252D3D;padding:6px 0}
 .rl-rt-end{display:flex;flex-direction:column;justify-content:space-around;align-items:center;gap:3px}
