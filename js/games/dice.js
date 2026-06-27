@@ -1,16 +1,14 @@
 /* --- dice --- */
 (function(){
 
-/* ── audio files (sounds/dice.game.mp3, sounds/win.mp3, sounds/lose.mp3) ── */
-var _snd={
-  roll:new Audio('sounds/dice.game.mp3'),
-  win: new Audio('sounds/win.mp3'),
-  lose:new Audio('sounds/lose.mp3')
-};
+/* ── audio files ── */
+var _snd={roll:new Audio('sounds/dice.game.mp3'),win:null,lose:null};
+(function(){var w=new Audio('sounds/win.mp3');w.addEventListener('canplaythrough',function(){_snd.win=w;},{once:true});w.load();
+ var l=new Audio('sounds/lose.mp3');l.addEventListener('canplaythrough',function(){_snd.lose=l;},{once:true});l.load();})();
 function _sndRollStart(){try{_snd.roll.currentTime=0;_snd.roll.play().catch(function(){});}catch(e){}}
 function _sndRollStop(){try{_snd.roll.pause();_snd.roll.currentTime=0;}catch(e){}}
-function _sndWin(){try{_snd.win.currentTime=0;_snd.win.play().catch(function(){});}catch(e){}}
-function _sndLose(){try{_snd.lose.currentTime=0;_snd.lose.play().catch(function(){});}catch(e){}}
+function _sndWin(){try{if(_snd.win){_snd.win.currentTime=0;_snd.win.play().catch(function(){});}}catch(e){}}
+function _sndLose(){try{if(_snd.lose){_snd.lose.currentTime=0;_snd.lose.play().catch(function(){});}}catch(e){}}
 
 /* cube face rotations — rotate the cube so each face faces the camera */
 const FACE_TARGETS=[
@@ -56,13 +54,13 @@ ORIGINALS['originals-dice']={
     const finalX=Math.round(this._spinX/360)*360+720+tx;
     const finalY=Math.round(this._spinY/360)*360+720+ty;
     requestAnimationFrame(()=>{
-      cube.style.transition='transform .75s cubic-bezier(.16,1,.3,1)';
+      cube.style.transition='transform .5s cubic-bezier(.16,1,.3,1)';
       cube.style.transform=`rotateX(${finalX}deg) rotateY(${finalY}deg)`;
       setTimeout(()=>{
         cube.classList.add(win?'win':'lose');
         if(win){_sndWin();setTimeout(()=>cube.classList.remove('win'),1800);}
         else   {_sndLose();setTimeout(()=>cube.classList.remove('lose'),500);}
-      },680);
+      },400);
     });
   },
 
@@ -139,8 +137,8 @@ ORIGINALS['originals-dice']={
     rollEl.className='dice-roll';
     pin.classList.remove('show');
     this._startSpin();
-    let spinning=true;
-    const spinFn=()=>{if(spinning){rollEl.textContent=rnd(0,100).toFixed(2);this._raf=requestAnimationFrame(spinFn);}};
+    let spinning=true,_fc=0;
+    const spinFn=()=>{if(spinning){if(++_fc%3===0)rollEl.textContent=rnd(0,100).toFixed(2);this._raf=requestAnimationFrame(spinFn);}};
     this._raf=requestAnimationFrame(spinFn);
     creditTo(st.w,st.b);
     let res;
