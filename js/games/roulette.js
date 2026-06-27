@@ -396,7 +396,28 @@ ORIGINALS['originals-roulette']={
 
   _renderStreak(){
     const el=document.getElementById('rlStreak');if(!el)return;
-    el.innerHTML=this._history.map((h,i)=>`<span class="rl-sdot ${h.c}${i===0?' rl-sdot-new':''}" title="Number ${h.n}">${h.n}</span>`).join('');
+    const last10=[...this._history.slice(0,10)].reverse();
+    const dots=last10.map((h,i)=>{
+      const isNew=i===last10.length-1;
+      return`<span class="rl-sdot ${h.c}${isNew?' rl-sdot-new':''}" title="${h.n}">${h.n}</span>`;
+    }).join('');
+    const r=this._history.filter(h=>h.c==='red').length;
+    const b=this._history.filter(h=>h.c==='black').length;
+    const g=this._history.filter(h=>h.c==='green').length;
+    let streakTxt='';
+    if(this._history.length>0){
+      const col=this._history[0].c;let len=0;
+      for(const h of this._history){if(h.c===col)len++;else break;}
+      if(len>1)streakTxt=`${len} ${col==='green'?'ZERO':col.toUpperCase()} IN A ROW`;
+    }
+    el.innerHTML=`
+      <div class="rl-streak-dots">${dots||'<span class="rl-streak-empty">Spin to start</span>'}</div>
+      <div class="rl-streak-stats">
+        <span class="rl-sstat rl-sstat-r">R <b>${r}</b></span>
+        <span class="rl-sstat rl-sstat-b">B <b>${b}</b></span>
+        <span class="rl-sstat rl-sstat-g">0 <b>${g}</b></span>
+        ${streakTxt?`<span class="rl-streak-lbl">${streakTxt}</span>`:''}
+      </div>`;
   },
 
   _syncInfo(){
@@ -994,7 +1015,7 @@ ${brushes}
 .rl-wrap{display:flex;flex-direction:column;gap:10px;width:100%;padding:12px;
   background:radial-gradient(120% 85% at 50% -5%,#20273A 0%,#161B29 58%,#10141E 100%);
   border-radius:16px;box-sizing:border-box}
-.rl-top{display:flex;align-items:flex-start;gap:16px;justify-content:center}
+.rl-top{display:flex;flex-direction:column;align-items:center;gap:10px}
 .rl-bottom{display:flex;flex-direction:column;gap:7px;width:100%}
 /* wheel */
 .rl-wheel-area{position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -1017,10 +1038,19 @@ ${brushes}
 .rl-res.red{background:#C81E29}
 .rl-res.black{background:#14181F;border:1.5px solid rgba(255,255,255,.2)}
 /* streak */
-.rl-streak{display:flex;flex-direction:column;flex-wrap:wrap;gap:4px;padding:6px;
-  background:rgba(0,0,0,.18);border-radius:8px;box-sizing:border-box;
-  align-content:flex-start;max-height:420px;width:36px}
-.rl-sdot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+.rl-streak{display:flex;flex-direction:column;gap:7px;padding:8px 12px;
+  background:rgba(0,0,0,.22);border-radius:10px;box-sizing:border-box;width:100%;max-width:480px}
+.rl-streak-dots{display:flex;gap:5px;align-items:center;justify-content:flex-end;min-height:28px}
+.rl-streak-empty{font-size:10px;color:rgba(255,255,255,.2);font-weight:600;letter-spacing:.04em;margin-left:auto}
+.rl-streak-stats{display:flex;align-items:center;gap:10px;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)}
+.rl-sstat{font-size:10px;font-weight:700;letter-spacing:.06em}
+.rl-sstat b{font-size:12px;font-weight:900;margin-left:3px}
+.rl-sstat-r{color:rgba(224,80,90,.75)}.rl-sstat-r b{color:#e05565}
+.rl-sstat-b{color:rgba(160,180,210,.45)}.rl-sstat-b b{color:rgba(180,200,230,.7)}
+.rl-sstat-g{color:rgba(65,240,164,.55)}.rl-sstat-g b{color:#41f0a4}
+.rl-streak-lbl{margin-left:auto;font-size:10px;font-weight:800;letter-spacing:.07em;
+  color:#E6BE55;text-transform:uppercase;animation:sdotIn .22s ease both}
+.rl-sdot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:10px;font-weight:800;color:#fff;flex-shrink:0;
   box-shadow:0 2px 6px rgba(0,0,0,.55);cursor:default;transition:transform .15s}
 .rl-sdot:hover{transform:scale(1.18);z-index:2;position:relative}
