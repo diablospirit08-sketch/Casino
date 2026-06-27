@@ -30,6 +30,7 @@ function makeFace(n){
 ORIGINALS['originals-dice']={
   rtp:'99%',auto:true,chance:50,over:true,busy:false,_raf:0,
   hist:[],_spinX:0,_spinY:0,_spinTimer:null,
+  _baseBet:0,_winStrat:'reset',_winPct:50,_lossStrat:'inc',_lossPct:100,
 
   mult(){return 99/this.chance},
 
@@ -58,6 +59,8 @@ ORIGINALS['originals-dice']={
       cube.style.transform=`rotateX(${finalX}deg) rotateY(${finalY}deg)`;
       setTimeout(()=>{
         cube.classList.add(win?'win':'lose');
+        const fill=$id('diFill');
+        if(fill){fill.classList.remove('flash-win','flash-lose');void fill.offsetWidth;fill.classList.add(win?'flash-win':'flash-lose');}
         if(win){_sndWin();setTimeout(()=>cube.classList.remove('win'),1800);}
         else   {_sndLose();setTimeout(()=>cube.classList.remove('lose'),500);}
       },400);
@@ -66,16 +69,35 @@ ORIGINALS['originals-dice']={
 
   mount(){
     this.hist=[];
+    const _tv=this.over?100-this.chance:this.chance;
     engFields.innerHTML=`
       <div class="gv-field"><label>Win Chance <span id="diLbl"></span></label>
         <input type="range" class="eng-range" id="diChance" min="2" max="98" step="1" value="${this.chance}" aria-label="Win chance"/></div>
+      <div class="gv-field"><label>Target Number</label>
+        <input type="number" class="eng-num" id="diTarget" min="1" max="99" step="0.5" value="${_tv.toFixed(1)}"/></div>
       <div class="gv-field"><label>Roll Mode</label>
         <div class="auto-segs" id="diMode">
           <button class="auto-seg${this.over?' active':''}" data-v="1">Roll Over</button>
           <button class="auto-seg${this.over?'':' active'}" data-v="0">Roll Under</button>
         </div></div>
       <div class="eng-readout"><span>Payout</span><b id="diPay"></b></div>
-      <div class="eng-readout"><span>Profit on Win</span><b id="diProf"></b></div>`;
+      <div class="eng-readout"><span>Profit on Win</span><b id="diProf"></b></div>
+      <div class="gv-field"><label>On Win</label>
+        <div class="strat-row">
+          <div class="auto-segs" id="diWinSeg">
+            <button class="auto-seg${this._winStrat==='reset'?' active':''}" data-v="reset">Reset</button>
+            <button class="auto-seg${this._winStrat==='inc'?' active':''}" data-v="inc">Increase</button>
+          </div>
+          <input type="number" class="eng-num-sm" id="diWinPct" min="1" max="999" value="${this._winPct}" placeholder="%"/>
+        </div></div>
+      <div class="gv-field"><label>On Loss</label>
+        <div class="strat-row">
+          <div class="auto-segs" id="diLossSeg">
+            <button class="auto-seg${this._lossStrat==='reset'?' active':''}" data-v="reset">Reset</button>
+            <button class="auto-seg${this._lossStrat==='inc'?' active':''}" data-v="inc">Increase</button>
+          </div>
+          <input type="number" class="eng-num-sm" id="diLossPct" min="1" max="999" value="${this._lossPct}" placeholder="%"/>
+        </div></div>`;
     gvStage.innerHTML=`
       <div class="dice-wrap">
         <div class="dice-3d-wrap"><div class="dice-cube" id="diCube">
@@ -95,12 +117,27 @@ ORIGINALS['originals-dice']={
         <div class="dice-hist" id="diHist"></div>
       </div>`;
     $id('diChance').addEventListener('input',()=>{this.chance=+$id('diChance').value;this.sync();});
+    $id('diTarget').addEventListener('input',()=>{
+      const v=Math.min(99,Math.max(1,parseFloat($id('diTarget').value)||50));
+      this.chance=this.over?Math.round(100-v):Math.round(v);
+      this.chance=Math.min(98,Math.max(2,this.chance));
+      $id('diChance').value=this.chance;this.sync();
+    });
     $id('diMode').addEventListener('click',e=>{
       const b=e.target.closest('.auto-seg');if(!b||b.disabled)return;
       this.over=b.dataset.v==='1';
       $id('diMode').querySelectorAll('.auto-seg').forEach(x=>x.classList.toggle('active',x===b));
       this.sync();
     });
+    ['Win','Loss'].forEach(k=>{
+      $id('di'+k+'Seg').addEventListener('click',e=>{
+        const b=e.target.closest('.auto-seg');if(!b||b.disabled)return;
+        $id('di'+k+'Seg').querySelectorAll('.auto-seg').forEach(x=>x.classList.toggle('active',x===b));
+        this['_'+k.toLowerCase()+'Strat']=b.dataset.v;
+      });
+    });
+    $id('diWinPct').addEventListener('input',()=>{this._winPct=parseFloat($id('diWinPct').value)||50;});
+    $id('diLossPct').addEventListener('input',()=>{this._lossPct=parseFloat($id('diLossPct').value)||100;});
     this.sync();
   },
 
@@ -110,6 +147,7 @@ ORIGINALS['originals-dice']={
     $id('diLbl').textContent=this.chance+'% — roll '+(this.over?'over '+t.toFixed(0):'under '+t.toFixed(0));
     $id('diPay').textContent=this.mult().toFixed(2)+'×';
     $id('diProf').textContent=fmtW(w,b*(this.mult()-1))+' '+w.c;
+    const tEl=$id('diTarget');if(tEl&&document.activeElement!==tEl)tEl.value=t.toFixed(1);
     const f=$id('diFill');
     if(this.over){f.style.left=t+'%';f.style.right='0';}
     else{f.style.left='0';f.style.right=(100-t)+'%';}
@@ -167,6 +205,16 @@ ORIGINALS['originals-dice']={
     serverSettleBet(st,win?m:0,res.new_balance);
     this.busy=false;gvBetBtn.disabled=false;
     this.sync();
+    if(autoRunning&&done){
+      if(!this._baseBet)this._baseBet=st.b;
+      const strat=win?this._winStrat:this._lossStrat;
+      const pct=(win?this._winPct:this._lossPct)/100;
+      const cur=parseFloat(gvBetIn.value)||st.b;
+      const w=curW();
+      gvBetIn.value=fmtW(w,Math.min(w.amt,strat==='inc'?cur*(1+pct):this._baseBet));
+      if(ENG&&ENG.sync)ENG.sync();
+    }
+    if(!autoRunning)this._baseBet=0;
     if(done)done(win,st.b*(win?m-1:-1));
   },
 
