@@ -348,6 +348,38 @@
     .gv-title h1{font-size:16px}
     .gv-stats{flex-direction:column;gap:14px}
     .gv-block.sess{flex:none;width:100%}
+    /* dice: scale down to fit the 4/3 canvas (≈230px content area) */
+    .dice-wrap{gap:10px}
+    .dice-3d-wrap{width:74px;height:74px}
+    .dice-cube{width:74px;height:74px}
+    .dice-face.f{transform:translateZ(37px)}
+    .dice-face.b{transform:rotateY(180deg) translateZ(37px)}
+    .dice-face.r{transform:rotateY(90deg) translateZ(37px)}
+    .dice-face.l{transform:rotateY(-90deg) translateZ(37px)}
+    .dice-face.t{transform:rotateX(90deg) translateZ(37px)}
+    .dice-face.d{transform:rotateX(-90deg) translateZ(37px)}
+    .dice-dots{width:54px;height:54px;padding:6px}
+    .dice-dot{width:8px;height:8px}
+    .dice-roll{font-size:34px;min-height:34px}
+    .dice-arena{padding-top:32px}
+    .dice-track{height:14px}
+    .dice-pin .dpv{font-size:11px;padding:3px 8px}
+    .dice-hist{min-height:22px}
+  }
+  /* dice: extra-compact for narrow phones (≤480px) where the rail eats canvas width */
+  @media(max-width:480px){
+    .dice-3d-wrap{width:64px;height:64px}
+    .dice-cube{width:64px;height:64px}
+    .dice-face.f{transform:translateZ(32px)}
+    .dice-face.b{transform:rotateY(180deg) translateZ(32px)}
+    .dice-face.r{transform:rotateY(90deg) translateZ(32px)}
+    .dice-face.l{transform:rotateY(-90deg) translateZ(32px)}
+    .dice-face.t{transform:rotateX(90deg) translateZ(32px)}
+    .dice-face.d{transform:rotateX(-90deg) translateZ(32px)}
+    .dice-dots{width:46px;height:46px;padding:5px}
+    .dice-dot{width:7px;height:7px}
+    .dice-roll{font-size:28px;min-height:28px}
+    .dice-hist{display:none}
   }
 
   /* ===== DEPOSIT MODAL ===== */
