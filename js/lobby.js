@@ -738,10 +738,12 @@ syncProvArrows();
 const bplayers=['Hidden','Volty_88','Nina_X','Hidden','Krakn','Joules','Hidden','Mx_Turbo','Hidden','Ohmies'];
 const ballgames=['Berry Rush','Limbo','Plinko','Crazy Hour','Blackjack','Dice','Jelly Express','Storm Roulette','Keno','Coinflip'];
 function rnd(a,b){return Math.random()*(b-a)+a}
-const _COINS=[{bg:'#F3BA2F',fg:'#000',s:'BNB'},{bg:'#627EEA',fg:'#fff',s:'ETH'},{bg:'#9945FF',fg:'#fff',s:'SOL'},{bg:'#00AAE4',fg:'#fff',s:'XRP'},{bg:'#2775CA',fg:'#fff',s:'USDC'},{bg:'#E84142',fg:'#fff',s:'AVAX'},{bg:'#16C784',fg:'#fff',s:'BNB'},{bg:'#FF6B35',fg:'#fff',s:'DOGE'}];
+const _COINS=[{s:'BNB',slug:'bnb'},{s:'ETH',slug:'eth'},{s:'SOL',slug:'sol'},{s:'XRP',slug:'xrp'},{s:'USDC',slug:'usdc'},{s:'AVAX',slug:'avax'},{s:'BTC',slug:'btc'},{s:'DOGE',slug:'doge'}];
+const _COIN_CDN='https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/';
 function _maskName(n){if(n==='Hidden')return'Hidden';return n[0]+'*'.repeat(Math.min(5,n.length-2))+n[n.length-1];}
 function _coinIdx(r){return(r.game.charCodeAt(0)+r.player.charCodeAt(0))%_COINS.length;}
-function _coinIc(c){return`<div class="bt-ic" style="background:${c.bg};color:${c.fg}">${c.s}</div>`;}
+function _coinIc(c){return`<img class="bt-ic" src="${_COIN_CDN}${c.slug}.svg" alt="${c.s}" width="22" height="22">`;}
+
 function makeBetRow(){
   const bet=rnd(0.05,2.4),mult=Math.random()<0.5?0:rnd(1.5,50);
   return{game:ballgames[Math.floor(rnd(0,ballgames.length))],
