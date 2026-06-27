@@ -1,74 +1,17 @@
 /* --- dice --- */
 (function(){
 
-/* ── Web Audio sound system ── */
-var _dAc=null;
-function _getAc(){
-  if(!_dAc||_dAc.state==='closed')
-    _dAc=new(window.AudioContext||window.webkitAudioContext)();
-  if(_dAc.state==='suspended')_dAc.resume();
-  return _dAc;
-}
-function _noiseBuf(ac,dur){
-  var n=Math.ceil(ac.sampleRate*dur),buf=ac.createBuffer(1,n,ac.sampleRate),d=buf.getChannelData(0);
-  for(var i=0;i<n;i++)d[i]=Math.random()*2-1;
-  var s=ac.createBufferSource();s.buffer=buf;return s;
-}
-function _sndRattle(){
-  try{
-    var ac=_getAc(),t=ac.currentTime;
-    var ns=_noiseBuf(ac,0.022);
-    var f=ac.createBiquadFilter();f.type='bandpass';
-    f.frequency.value=450+Math.random()*450;f.Q.value=1.8;
-    var g=ac.createGain();
-    g.gain.setValueAtTime(0.26,t);
-    g.gain.exponentialRampToValueAtTime(0.001,t+0.022);
-    ns.connect(f);f.connect(g);g.connect(ac.destination);ns.start();
-  }catch(e){}
-}
-function _sndWin(){
-  try{
-    var ac=_getAc();
-    /* ascending arpeggio C5→E5→G5→C6→E6 */
-    [523,659,784,1047,1319].forEach(function(hz,i){
-      var o=ac.createOscillator();o.type='triangle';o.frequency.value=hz;
-      var g=ac.createGain(),t=ac.currentTime+i*0.072;
-      g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(0.2,t+0.016);
-      g.gain.exponentialRampToValueAtTime(0.001,t+0.32);
-      o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+0.36);
-    });
-    /* sparkle shimmer at the top */
-    [2093,2637,3136,4186].forEach(function(hz,i){
-      var o=ac.createOscillator();o.type='sine';o.frequency.value=hz;
-      var g=ac.createGain(),t=ac.currentTime+0.32+i*0.042;
-      g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(0.09,t+0.01);
-      g.gain.exponentialRampToValueAtTime(0.001,t+0.13);
-      o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+0.16);
-    });
-  }catch(e){}
-}
-function _sndLose(){
-  try{
-    var ac=_getAc(),t=ac.currentTime;
-    /* descending thud */
-    var o=ac.createOscillator();o.type='sine';
-    o.frequency.setValueAtTime(190,t);
-    o.frequency.exponentialRampToValueAtTime(42,t+0.26);
-    var g=ac.createGain();
-    g.gain.setValueAtTime(0.42,t);
-    g.gain.exponentialRampToValueAtTime(0.001,t+0.29);
-    o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+0.32);
-    /* low impact noise */
-    var ns=_noiseBuf(ac,0.055);
-    var f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=160;
-    var ng=ac.createGain();
-    ng.gain.setValueAtTime(0.32,t);
-    ng.gain.exponentialRampToValueAtTime(0.001,t+0.055);
-    ns.connect(f);f.connect(ng);ng.connect(ac.destination);ns.start(t);
-  }catch(e){}
-}
+/* ── audio files (sounds/dice-roll.mp3, sounds/win.mp3, sounds/lose.mp3) ── */
+var _snd={
+  roll:new Audio('sounds/dice.game.mp3'),
+  win: new Audio('sounds/win.mp3'),
+  lose:new Audio('sounds/lose.mp3')
+};
+_snd.roll.loop=true;
+function _sndRollStart(){try{_snd.roll.currentTime=0;_snd.roll.play().catch(function(){});}catch(e){}}
+function _sndRollStop(){try{_snd.roll.pause();_snd.roll.currentTime=0;}catch(e){}}
+function _sndWin(){try{_snd.win.currentTime=0;_snd.win.play().catch(function(){});}catch(e){}}
+function _sndLose(){try{_snd.lose.currentTime=0;_snd.lose.play().catch(function(){});}catch(e){}}
 
 /* cube face rotations — rotate the cube so each face faces the camera */
 const FACE_TARGETS=[
@@ -98,16 +41,16 @@ ORIGINALS['originals-dice']={
     cube.style.transition='none';
     cube.classList.remove('win','lose');
     this._spinX=0;this._spinY=0;
+    _sndRollStart();
     this._spinTimer=setInterval(()=>{
       this._spinX+=40+Math.random()*65;
       this._spinY+=40+Math.random()*65;
       cube.style.transform=`rotateX(${this._spinX}deg) rotateY(${this._spinY}deg)`;
-      _sndRattle();
     },80);
   },
 
   _stopSpin(win){
-    clearInterval(this._spinTimer);this._spinTimer=null;
+    clearInterval(this._spinTimer);this._spinTimer=null;_sndRollStop();
     const cube=$id('diCube');if(!cube)return;
     const[tx,ty]=FACE_TARGETS[Math.floor(Math.random()*6)];
     /* add 2 full extra rotations so it decelerates dramatically */
@@ -217,6 +160,7 @@ ORIGINALS['originals-dice']={
     const{roll:r}=res.gameData,win=res.gameData?.win===true,m=res.multiplier;
     rollEl.textContent=r.toFixed(2);
     rollEl.classList.add(win?'win':'lose');
+    rollEl.classList.remove('punch');void rollEl.offsetWidth;rollEl.classList.add('punch');
     pin.classList.add('show');
     pin.style.left=r+'%';
     pin.querySelector('.dpv').textContent=r.toFixed(0);
