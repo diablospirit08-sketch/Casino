@@ -104,7 +104,17 @@ ORIGINALS['originals-roulette']={
     gvStage.style.overflowY='';gvStage.style.overflowX='';
     gvStage.innerHTML=`
 <div class="rl-wrap">
-  <div class="rl-left">
+  <div class="rl-top">
+    <div class="rl-wheel-area">
+      ${this._buildWheelSVG()}
+      <div class="rl-ptr">▼</div>
+      <div class="rl-res" id="rlRes"></div>
+      <div class="rl-payout" id="rlPayout"></div>
+      <div class="rl-nb-label" id="rlNbLabel"></div>
+    </div>
+    <div class="rl-streak" id="rlStreak"></div>
+  </div>
+  <div class="rl-bottom">
     <div class="rl-rt-wrap" id="rlRtWrap">
       ${this._buildRacetrack()}
     </div>
@@ -116,16 +126,6 @@ ORIGINALS['originals-roulette']={
     <div class="rl-table-wrap">
       ${this._tableHTML()}
     </div>
-  </div>
-  <div class="rl-right">
-    <div class="rl-wheel-area">
-      ${this._buildWheelSVG()}
-      <div class="rl-ptr">▼</div>
-      <div class="rl-res" id="rlRes"></div>
-      <div class="rl-payout" id="rlPayout"></div>
-      <div class="rl-nb-label" id="rlNbLabel"></div>
-    </div>
-    <div class="rl-streak" id="rlStreak"></div>
   </div>
 </div>`;
 
@@ -629,7 +629,7 @@ ORIGINALS['originals-roulette']={
     for(let i=0;i<5;i++){
       turret+=`<g transform="rotate(${i*72} 250 250)"><polygon points="246.5,250 253.5,250 251,150 249,150" fill="url(#rlGoldArm)" stroke="#7E5E1C" stroke-width="0.4"/><line x1="250" y1="246" x2="250" y2="153" stroke="#FFF4CE" stroke-opacity="0.5" stroke-width="0.8"/><circle cx="250" cy="150" r="7" fill="url(#rlGoldKnob)" stroke="#7E5E1C" stroke-width="0.6"/></g>`;
     }
-    return`<svg id="rlWheelSvg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:460px;filter:drop-shadow(0 20px 52px rgba(0,0,0,.85))">
+    return`<svg id="rlWheelSvg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:480px;filter:drop-shadow(0 20px 52px rgba(0,0,0,.85))">
 <defs>
 <radialGradient id="rlWoodGrad" cx="50%" cy="42%" r="60%"><stop offset="0%" stop-color="#8A552E"/><stop offset="60%" stop-color="#5C3318"/><stop offset="100%" stop-color="#2E1809"/></radialGradient>
 <radialGradient id="rlWoodInner" cx="50%" cy="40%" r="58%"><stop offset="0%" stop-color="#7A4824"/><stop offset="100%" stop-color="#3A2010"/></radialGradient>
@@ -985,13 +985,13 @@ ${brushes}
 .rl-panel-mode #gvBet{pointer-events:none;background:transparent;border:none;padding-left:0;font-weight:700;color:var(--txt)}
 .rl-panel-mode .gv-field:has(#gvBet) label{font-size:10px;letter-spacing:.06em;color:var(--muted-2)}
 /* layout */
-.rl-wrap{display:flex;flex-direction:row;align-items:flex-start;gap:12px;width:100%;padding:12px;
+.rl-wrap{display:flex;flex-direction:column;gap:10px;width:100%;padding:12px;
   background:radial-gradient(120% 85% at 50% -5%,#20273A 0%,#161B29 58%,#10141E 100%);
   border-radius:16px;box-sizing:border-box}
-.rl-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
-.rl-right{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.rl-top{display:flex;align-items:flex-start;gap:16px;justify-content:center}
+.rl-bottom{display:flex;flex-direction:column;gap:7px;width:100%}
 /* wheel */
-.rl-wheel-area{position:relative;display:flex;align-items:center;justify-content:center}
+.rl-wheel-area{position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .rl-ptr{position:absolute;top:2px;left:50%;transform:translateX(-50%);
   color:#E6BE55;font-size:18px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.9));pointer-events:none;z-index:2}
 .rl-res{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
@@ -1011,8 +1011,9 @@ ${brushes}
 .rl-res.red{background:#C81E29}
 .rl-res.black{background:#14181F;border:1.5px solid rgba(255,255,255,.2)}
 /* streak */
-.rl-streak{display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px;width:100%;max-width:420px;
-  justify-content:flex-end;background:rgba(0,0,0,.18);border-radius:8px;min-height:38px;box-sizing:border-box}
+.rl-streak{display:flex;flex-direction:column;flex-wrap:wrap;gap:4px;padding:6px;
+  background:rgba(0,0,0,.18);border-radius:8px;box-sizing:border-box;
+  align-content:flex-start;max-height:420px;width:36px}
 .rl-sdot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:10px;font-weight:800;color:#fff;flex-shrink:0;
   box-shadow:0 2px 6px rgba(0,0,0,.55);cursor:default;transition:transform .15s}
