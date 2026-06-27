@@ -989,7 +989,7 @@ ${brushes}
   background:radial-gradient(120% 85% at 50% -5%,#20273A 0%,#161B29 58%,#10141E 100%);
   border-radius:16px;box-sizing:border-box}
 .rl-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
-.rl-right{flex-shrink:0;width:460px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.rl-right{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px}
 /* wheel */
 .rl-wheel-area{position:relative;display:flex;align-items:center;justify-content:center}
 .rl-ptr{position:absolute;top:2px;left:50%;transform:translateX(-50%);
@@ -1011,9 +1011,9 @@ ${brushes}
 .rl-res.red{background:#C81E29}
 .rl-res.black{background:#14181F;border:1.5px solid rgba(255,255,255,.2)}
 /* streak */
-.rl-streak{display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px;width:100%;max-width:460px;
+.rl-streak{display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px;width:100%;max-width:420px;
   justify-content:flex-end;background:rgba(0,0,0,.18);border-radius:8px;min-height:38px;box-sizing:border-box}
-.rl-sdot{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;
+.rl-sdot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:10px;font-weight:800;color:#fff;flex-shrink:0;
   box-shadow:0 2px 6px rgba(0,0,0,.55);cursor:default;transition:transform .15s}
 .rl-sdot:hover{transform:scale(1.18);z-index:2;position:relative}
