@@ -55,7 +55,7 @@ ORIGINALS['originals-dice']={
     const finalX=Math.round(this._spinX/360)*360+720+tx;
     const finalY=Math.round(this._spinY/360)*360+720+ty;
     requestAnimationFrame(()=>{
-      cube.style.transition='transform .18s cubic-bezier(.16,1,.3,1)';
+      cube.style.transition='none';
       cube.style.transform=`rotateX(${finalX}deg) rotateY(${finalY}deg)`;
       setTimeout(()=>{
         cube.classList.add(win?'win':'lose');
@@ -63,7 +63,7 @@ ORIGINALS['originals-dice']={
         if(fill){fill.classList.remove('flash-win','flash-lose');void fill.offsetWidth;fill.classList.add(win?'flash-win':'flash-lose');}
         if(win){_sndWin();setTimeout(()=>cube.classList.remove('win'),1800);}
         else   {_sndLose();setTimeout(()=>cube.classList.remove('lose'),500);}
-      },120);
+      },0);
     });
   },
 
