@@ -758,7 +758,7 @@
   .dice-roll.punch{animation:rollPunch .38s cubic-bezier(.22,1,.36,1) both}
   /* track arena — padding-top reserves space for the floating pin */
   .dice-arena{position:relative;width:100%;padding-top:42px}
-  .dice-track{position:relative;width:100%;height:20px;border-radius:99px;background:#3d1a20;box-shadow:inset 0 2px 6px rgba(0,0,0,.4)}
+  .dice-track{position:relative;width:100%;height:20px;border-radius:99px;background:linear-gradient(90deg,#420d16,#5a1020);box-shadow:inset 0 2px 6px rgba(0,0,0,.5),0 0 12px rgba(180,20,50,.18)}
   .dice-fill{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,#1d4ed8,#4287f5,#60a5fa);border-radius:99px;box-shadow:0 0 22px rgba(66,135,245,.5);overflow:hidden}
   .dice-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);background-size:200% 100%;animation:diceShimmer 2s linear infinite}
   @keyframes diceShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
@@ -774,9 +774,13 @@
   .strat-row{display:flex;gap:8px;align-items:center}
   .strat-row .auto-segs{flex:1}
   /* pin — triangle arrow floating above the track */
-  .dice-pin{position:absolute;top:4px;left:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;opacity:0;transition:left .42s cubic-bezier(.3,1.4,.4,1),opacity .2s;pointer-events:none;z-index:2}
-  .dice-pin.show{opacity:1}
-  .dice-pin .dpv{background:#fff;color:#10141d;font-size:12px;font-weight:900;font-variant-numeric:tabular-nums;padding:4px 10px;border-radius:7px;box-shadow:0 4px 14px rgba(0,0,0,.5);white-space:nowrap}
+  @keyframes pinDrop{0%{top:-22px;opacity:0}60%{top:8px;opacity:1}80%{top:2px}100%{top:4px;opacity:1}}
+  @keyframes pinGlow{0%{opacity:.6}50%{opacity:1}100%{opacity:.6}}
+  .dice-pin{position:absolute;top:4px;left:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;opacity:0;transition:left .42s cubic-bezier(.3,1.4,.4,1);pointer-events:none;z-index:2}
+  .dice-pin.show{animation:pinDrop .38s cubic-bezier(.3,1.5,.4,1) forwards}
+  .dice-pin .dpv{background:#fff;color:#10141d;font-size:12px;font-weight:900;font-variant-numeric:tabular-nums;padding:4px 10px;border-radius:7px;box-shadow:0 4px 14px rgba(0,0,0,.5);white-space:nowrap;transition:box-shadow .2s}
+  .dice-pin.win .dpv{box-shadow:0 4px 14px rgba(0,0,0,.5),0 0 18px rgba(52,211,153,.85);animation:pinGlow .5s ease 3}
+  .dice-pin.lose .dpv{box-shadow:0 4px 14px rgba(0,0,0,.5),0 0 18px rgba(226,89,106,.85);animation:pinGlow .5s ease 3}
   .dice-pin::after{content:'';width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #fff}
   .dice-scale{display:flex;justify-content:space-between;width:100%;margin-top:6px;font-size:10px;font-weight:800;color:var(--muted-2);font-variant-numeric:tabular-nums}
   /* roll history ticker */

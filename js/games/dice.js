@@ -196,7 +196,8 @@ ORIGINALS['originals-dice']={
     rollEl.textContent=r.toFixed(2);
     rollEl.classList.add(win?'win':'lose');
     rollEl.classList.remove('punch');void rollEl.offsetWidth;rollEl.classList.add('punch');
-    pin.classList.add('show');
+    pin.classList.remove('show','win','lose');void pin.offsetWidth;
+    pin.classList.add('show',win?'win':'lose');
     pin.style.left=r+'%';
     pin.querySelector('.dpv').textContent=r.toFixed(0);
     this._stopSpin(win);
