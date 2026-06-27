@@ -16,6 +16,7 @@ const walletEl=document.getElementById('wallet'),
       walletBal=document.getElementById('walletBal'),
       walletIc=document.getElementById('walletIc'),
       walletAmt=document.getElementById('walletAmt'),
+      walletFiatEl=document.getElementById('walletFiat'),
       walletCurEl=document.getElementById('walletCur'),
       walletMenu=document.getElementById('walletMenu'),
       avatarWrap=document.getElementById('avatarWrap');
@@ -52,6 +53,7 @@ function renderWallet(){
   walletIc.style.background='none';
   walletIc.innerHTML=`<img src="${coinIconUrl(w.c)}" style="width:24px;height:24px;object-fit:cover" alt="${w.c}" onerror="var p=this.parentElement;p.style.background='${w.col}';p.innerHTML='${w.s}'">`;
   walletAmt.textContent=fmtAmt(w);
+  if(walletFiatEl)walletFiatEl.textContent='$'+w.fiat.toFixed(2);
   walletCurEl.textContent=w.c;
   walletMenu.innerHTML='<div class="mlbl">Balances</div>'+WALLETS.map(x=>`
     <button class="wmi ${x.c===voltCur?'sel':''}" data-cur="${x.c}">
