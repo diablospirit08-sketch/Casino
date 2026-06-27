@@ -629,7 +629,7 @@ ORIGINALS['originals-roulette']={
     for(let i=0;i<5;i++){
       turret+=`<g transform="rotate(${i*72} 250 250)"><polygon points="246.5,250 253.5,250 251,150 249,150" fill="url(#rlGoldArm)" stroke="#7E5E1C" stroke-width="0.4"/><line x1="250" y1="246" x2="250" y2="153" stroke="#FFF4CE" stroke-opacity="0.5" stroke-width="0.8"/><circle cx="250" cy="150" r="7" fill="url(#rlGoldKnob)" stroke="#7E5E1C" stroke-width="0.6"/></g>`;
     }
-    return`<svg id="rlWheelSvg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:400px;filter:drop-shadow(0 20px 52px rgba(0,0,0,.85))">
+    return`<svg id="rlWheelSvg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:460px;filter:drop-shadow(0 20px 52px rgba(0,0,0,.85))">
 <defs>
 <radialGradient id="rlWoodGrad" cx="50%" cy="42%" r="60%"><stop offset="0%" stop-color="#8A552E"/><stop offset="60%" stop-color="#5C3318"/><stop offset="100%" stop-color="#2E1809"/></radialGradient>
 <radialGradient id="rlWoodInner" cx="50%" cy="40%" r="58%"><stop offset="0%" stop-color="#7A4824"/><stop offset="100%" stop-color="#3A2010"/></radialGradient>
@@ -962,8 +962,8 @@ ${brushes}
       <div class="rl-out-row">
         <div class="rl-cell rl-out" data-bet-type="half"    data-bet-key="half:lo" data-bet-nums="[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]" data-tip="1 : 1">1–18</div>
         <div class="rl-cell rl-out" data-bet-type="evenodd" data-bet-key="eo:even" data-bet-nums="[2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36]" data-tip="1 : 1">EVEN</div>
-        <div class="rl-cell rl-out rl-colr" data-bet-type="color" data-bet-key="clr:r" data-bet-nums="[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]" data-tip="1 : 1"><div class="rl-diamond" style="background:#9E1620"></div></div>
-        <div class="rl-cell rl-out rl-colb" data-bet-type="color" data-bet-key="clr:b" data-bet-nums="[2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35]" data-tip="1 : 1"><div class="rl-diamond" style="background:#05070A"></div></div>
+        <div class="rl-cell rl-out rl-colr" data-bet-type="color" data-bet-key="clr:r" data-bet-nums="[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]" data-tip="1 : 1"><div class="rl-colbadge"><div class="rl-diamond"></div><span>RED</span></div></div>
+        <div class="rl-cell rl-out rl-colb" data-bet-type="color" data-bet-key="clr:b" data-bet-nums="[2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35]" data-tip="1 : 1"><div class="rl-colbadge"><div class="rl-diamond"></div><span>BLACK</span></div></div>
         <div class="rl-cell rl-out" data-bet-type="evenodd" data-bet-key="eo:odd"  data-bet-nums="[1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]" data-tip="1 : 1">ODD</div>
         <div class="rl-cell rl-out" data-bet-type="half"    data-bet-key="half:hi" data-bet-nums="[19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36]" data-tip="1 : 1">19–36</div>
       </div>
@@ -989,7 +989,7 @@ ${brushes}
   background:radial-gradient(120% 85% at 50% -5%,#20273A 0%,#161B29 58%,#10141E 100%);
   border-radius:16px;box-sizing:border-box}
 .rl-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
-.rl-right{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.rl-right{flex-shrink:0;width:460px;display:flex;flex-direction:column;align-items:center;gap:6px}
 /* wheel */
 .rl-wheel-area{position:relative;display:flex;align-items:center;justify-content:center}
 .rl-ptr{position:absolute;top:2px;left:50%;transform:translateX(-50%);
@@ -1011,7 +1011,8 @@ ${brushes}
 .rl-res.red{background:#C81E29}
 .rl-res.black{background:#14181F;border:1.5px solid rgba(255,255,255,.2)}
 /* streak */
-.rl-streak{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;padding:6px 8px;width:100%;max-width:420px}
+.rl-streak{display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px;width:100%;max-width:460px;
+  justify-content:flex-end;background:rgba(0,0,0,.18);border-radius:8px;min-height:38px;box-sizing:border-box}
 .rl-sdot{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:10px;font-weight:800;color:#fff;flex-shrink:0;
   box-shadow:0 2px 6px rgba(0,0,0,.55);cursor:default;transition:transform .15s}
@@ -1119,7 +1120,12 @@ ${brushes}
 .rl-out{flex:1;background:rgba(255,255,255,.03);height:28px;min-height:28px;font-size:11px;letter-spacing:.02em}
 .rl-colr{background:#C81E29!important;border-color:#C81E29!important}
 .rl-colb{background:#14181F!important}
-.rl-diamond{width:18px;height:18px;transform:rotate(45deg);border-radius:3px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.rl-diamond{width:14px;height:14px;transform:rotate(45deg);border-radius:2px}
+.rl-colr .rl-diamond{background:#E8302A;box-shadow:0 0 0 2px rgba(255,255,255,.45),inset 0 1px 0 rgba(255,255,255,.3)}
+.rl-colb .rl-diamond{background:#2A3040;box-shadow:0 0 0 2px rgba(255,255,255,.4),inset 0 1px 0 rgba(255,255,255,.1)}
+.rl-colbadge{display:flex;align-items:center;gap:5px;font-size:9px;font-weight:800;letter-spacing:.06em;pointer-events:none}
+.rl-colr .rl-colbadge{color:rgba(255,210,210,.95)}
+.rl-colb .rl-colbadge{color:rgba(200,215,235,.8)}
 /* street / six-line */
 .rl-str,.rl-sixl{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;border-radius:2px;transition:background .1s}
 .rl-str::after,.rl-sixl::after{content:'';position:absolute;inset:-6px;z-index:0}
