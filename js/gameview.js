@@ -349,7 +349,7 @@ function runAutoRound(){
     updateAutoProgress();
     if(!autoRunning)return;
     if(checkAutoStop()){stopAuto();return;}
-    autoTimer=setTimeout(runAutoRound,150);
+    autoTimer=setTimeout(runAutoRound,80);
   });
 }
 function startAuto(){
