@@ -787,8 +787,8 @@ ORIGINALS['originals-blackjack']={
   background:repeating-linear-gradient(90deg,transparent 0,transparent 10px,rgba(0,0,0,.09) 10px,rgba(0,0,0,.09) 11px),
              repeating-linear-gradient(0deg,transparent 0,transparent 6px,rgba(255,255,255,.02) 6px,rgba(255,255,255,.02) 7px)}
 .bj2rail::after{content:"";position:absolute;top:0;left:5%;right:5%;height:2px;
-  background:linear-gradient(90deg,transparent,rgba(195,155,55,.5) 15%,rgba(245,210,80,.95) 50%,rgba(195,155,55,.5) 85%,transparent);
-  box-shadow:0 1px 6px rgba(195,155,55,.3)}
+  background:linear-gradient(90deg,transparent,rgba(195,155,55,.4) 15%,rgba(245,210,80,.8) 50%,rgba(195,155,55,.4) 85%,transparent);
+  box-shadow:0 1px 4px rgba(195,155,55,.15)}
 /* felt weave texture */
 .bj2tbl::before{content:"";position:absolute;inset:0;pointer-events:none;
   background:
@@ -841,9 +841,9 @@ ORIGINALS['originals-blackjack']={
     repeating-linear-gradient(-45deg,rgba(255,255,255,.07) 0,rgba(255,255,255,.07) 2px,transparent 2px,transparent 8px)}
 .bj2c.p{border:2px solid rgba(255,255,255,.5)}
 .bj2c.p.win{border-color:#22dd66;
-  box-shadow:0 0 0 3px rgba(34,221,102,.22),0 8px 24px rgba(0,0,0,.52),0 0 22px rgba(34,221,102,.2)}
+  box-shadow:0 0 0 2px rgba(34,221,102,.18),0 8px 24px rgba(0,0,0,.52),0 0 10px rgba(34,221,102,.12)}
 .bj2c.p.lose{border-color:#e8304a;
-  box-shadow:0 0 0 3px rgba(232,48,74,.22),0 8px 24px rgba(0,0,0,.52),0 0 18px rgba(232,48,74,.15)}
+  box-shadow:0 0 0 2px rgba(232,48,74,.18),0 8px 24px rgba(0,0,0,.52),0 0 8px rgba(232,48,74,.08)}
 @keyframes bj2deal{from{opacity:0;transform:translateY(-28px) scale(.84) rotate(-5deg)}to{opacity:1;transform:none}}
 .bj2c.dealing{animation:bj2deal .32s cubic-bezier(.22,1,.36,1) both}
 
@@ -882,7 +882,7 @@ ORIGINALS['originals-blackjack']={
   border:1px solid rgba(195,155,55,.3);pointer-events:none;transition:border-color .3s}
 .bj2betring.has-chips{
   border-color:rgba(245,200,66,.95);
-  box-shadow:0 0 0 3px rgba(245,200,66,.15),0 0 24px rgba(245,200,66,.3),inset 0 0 22px rgba(0,0,0,.22);
+  box-shadow:0 0 0 2px rgba(245,200,66,.1),0 0 12px rgba(245,200,66,.15),inset 0 0 18px rgba(0,0,0,.2);
 }
 .bj2betring.has-chips::before{border-color:rgba(245,200,66,.5)}
 .bj2br-stk{position:relative;width:50px;height:50px}
@@ -1096,7 +1096,7 @@ ORIGINALS['originals-blackjack']={
     document.addEventListener('keydown',this._kh);
     this._acts(false);this.syncBtn();
     // preload chip sound file
-    const chipFile='sounds/GAMEMisc_blackjack Poker chips (ID 0942)_com.mp3';
+    const chipFile='sounds/chips (ID 0942)_com.mp3';
     const a=new Audio(chipFile);
     a.addEventListener('canplaythrough',()=>{this._chipAudio=a;},{once:true});
     a.addEventListener('error',()=>{this._tryLoadProjectFile();},{once:true});

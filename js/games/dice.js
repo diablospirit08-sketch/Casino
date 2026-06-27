@@ -1,14 +1,26 @@
 /* --- dice --- */
 (function(){
 
-/* ── audio files ── */
-var _snd={roll:new Audio('sounds/dice.game.mp3'),win:null,lose:null};
-(function(){var w=new Audio('sounds/win.mp3');w.addEventListener('canplaythrough',function(){_snd.win=w;},{once:true});w.load();
- var l=new Audio('sounds/lose.mp3');l.addEventListener('canplaythrough',function(){_snd.lose=l;},{once:true});l.load();})();
-function _sndRollStart(){try{_snd.roll.currentTime=0;_snd.roll.play().catch(function(){});}catch(e){}}
-function _sndRollStop(){try{_snd.roll.pause();_snd.roll.currentTime=0;}catch(e){}}
-function _sndWin(){try{if(_snd.win){_snd.win.currentTime=0;_snd.win.play().catch(function(){});}}catch(e){}}
-function _sndLose(){try{if(_snd.lose){_snd.lose.currentTime=0;_snd.lose.play().catch(function(){});}}catch(e){}}
+/* ── audio ── */
+var _sndRoll=new Audio('sounds/dice.game.mp3');
+var _sndAc=null,_diSndOn=localStorage.getItem('volt-snd')!=='off';
+function _sndBeep(freq,dur,gain,type){
+  if(!_diSndOn)return;
+  try{
+    var c=_sndAc||(_sndAc=new(window.AudioContext||window.webkitAudioContext)());
+    if(c.state==='suspended')c.resume();
+    var o=c.createOscillator(),g=c.createGain();
+    o.type=type||'sine';o.frequency.value=freq;
+    g.gain.setValueAtTime(gain,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+dur);
+    o.connect(g);g.connect(c.destination);
+    o.start();o.stop(c.currentTime+dur);
+  }catch(e){}
+}
+function _sndRollStart(){if(!_diSndOn)return;try{_sndRoll.currentTime=0;_sndRoll.play().catch(function(){});}catch(e){}}
+function _sndRollStop(){try{_sndRoll.pause();_sndRoll.currentTime=0;}catch(e){}}
+function _sndWin(){_sndBeep(660,0.12,0.06);setTimeout(function(){_sndBeep(990,0.18,0.05);},80);}
+function _sndLose(){_sndBeep(170,0.18,0.06);}
 
 /* cube face rotations — rotate the cube so each face faces the camera */
 const FACE_TARGETS=[
@@ -138,6 +150,13 @@ ORIGINALS['originals-dice']={
     });
     $id('diWinPct').addEventListener('input',()=>{this._winPct=parseFloat($id('diWinPct').value)||50;});
     $id('diLossPct').addEventListener('input',()=>{this._lossPct=parseFloat($id('diLossPct').value)||100;});
+    $id('gvSndSlot').innerHTML=`<button class="pl-snd" id="diSnd" aria-label="Toggle sound">${_diSndOn?'🔊':'🔇'}</button>`;
+    $id('diSnd').addEventListener('click',()=>{
+      _diSndOn=!_diSndOn;
+      localStorage.setItem('volt-snd',_diSndOn?'on':'off');
+      $id('diSnd').textContent=_diSndOn?'🔊':'🔇';
+      if(_diSndOn)_sndBeep(660,0.08,0.05);
+    });
     this.sync();
   },
 

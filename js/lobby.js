@@ -34,19 +34,14 @@ const TXN_CFG={
   bet:     {bg:'rgba(255,255,255,.07)',stroke:'#8899bb', icon:'<circle cx="12" cy="12" r="5"/><path d="M12 8v4l3 3"/>'},
   win:     {bg:'rgba(65,240,164,.12)', stroke:'#41f0a4', icon:'<path d="M12 4v16M5 15l7 7 7-7"/>'},
 };
+const _CDN='https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/';
 const COIN_ICONS={
-  BTC:'https://coin-images.coingecko.com/coins/images/1/small/bitcoin.png',
-  ETH:'https://coin-images.coingecko.com/coins/images/279/small/ethereum.png',
-  BNB:'https://coin-images.coingecko.com/coins/images/825/small/bnb-icon2_2x.png',
-  LTC:'https://coin-images.coingecko.com/coins/images/2/small/litecoin.png',
-  USDT:'https://coin-images.coingecko.com/coins/images/325/small/Tether.png',
-  USDC:'https://coin-images.coingecko.com/coins/images/6319/small/usdc.png',
-  SOL:'https://coin-images.coingecko.com/coins/images/4128/small/solana.png',
-  XRP:'https://coin-images.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png',
-  TRX:'https://coin-images.coingecko.com/coins/images/1094/small/tron-logo.png',
-  MATIC:'https://coin-images.coingecko.com/coins/images/4713/small/matic-token-icon.png',
+  BTC:_CDN+'btc.svg',  ETH:_CDN+'eth.svg',  BNB:_CDN+'bnb.svg',
+  LTC:_CDN+'ltc.svg',  USDT:_CDN+'usdt.svg', USDC:_CDN+'usdc.svg',
+  SOL:_CDN+'sol.svg',  XRP:_CDN+'xrp.svg',  TRX:_CDN+'trx.svg',
+  MATIC:_CDN+'matic.svg',
 };
-const coinIconUrl=c=>COIN_ICONS[c]||'https://coin-images.coingecko.com/coins/images/1/small/bitcoin.png';
+const coinIconUrl=c=>COIN_ICONS[c]||COIN_ICONS.BTC;
 const coinImg=(c)=>`<img src="${coinIconUrl(c)}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex:none" alt="${c}" onerror="this.style.visibility='hidden'">`;
 function renderWallet(){
   const w=WALLETS.find(x=>x.c===voltCur);
@@ -163,7 +158,32 @@ async function loadTxnPage(reset){
       });
     }
   }catch(e){
-    list.innerHTML='<div class="txn-empty">Failed to load transactions</div>';
+    /* server unavailable — use client-side bet history captured this session */
+    const hist=window._clientBetHist||[];
+    const slice=hist.slice(off,off+txnPageSize);
+    if(reset)list.innerHTML='';
+    if(!slice.length&&reset){
+      list.innerHTML='<div class="txn-empty">No bets yet this session</div>';
+    }else{
+      slice.forEach(b=>{
+        const win=b.mult>1;
+        const gameName=(b.game||'Game').replace('originals-','').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+        const fmtAmt=b.cur==='USDT'?Math.abs(b.profit).toFixed(2):Math.abs(b.profit).toFixed(4);
+        const sign=win?'+':'−';
+        const col=win?'#41f0a4':'var(--muted)';
+        const cfg=win?TXN_CFG.win:TXN_CFG.bet;
+        const ago=Math.floor((Date.now()-b.ts)/1000);
+        const t=ago<60?ago+'s ago':ago<3600?Math.floor(ago/60)+'m ago':Math.floor(ago/3600)+'h ago';
+        list.insertAdjacentHTML('beforeend',`<div class="txn">
+          <div class="txn-ic" style="background:${cfg.bg}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="${cfg.stroke}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${cfg.icon}</svg>
+          </div>
+          <div class="txn-meta"><div class="txn-lbl">${gameName}</div><div class="txn-time">${t}</div></div>
+          <div class="txn-right"><div class="txn-amt" style="color:${col}">${sign}${fmtAmt} ${b.cur}</div></div>
+        </div>`);
+      });
+      if(hist.length>off+txnPageSize)document.getElementById('txnMore').style.display='block';
+    }
     txnLoading=false;return;
   }
   rows.sort((a,b)=>b._ts-a._ts);

@@ -18,6 +18,11 @@ function debitBet(){
   return{w,b,name:gvName.textContent};
 }
 function creditTo(w,x){w.amt=Math.max(0,w.amt+x);w.fiat=w.amt*w.rate;renderWallet();}
+function _pushBetHist(st,mult){
+  if(!window._clientBetHist)window._clientBetHist=[];
+  window._clientBetHist.unshift({game:st.name,cur:st.w.c,wager:st.b,mult:mult,profit:st.b*(mult-1),ts:Date.now()});
+  if(window._clientBetHist.length>100)window._clientBetHist.length=100;
+}
 function settleBet(st,mult){
   if(mult>0)creditTo(st.w,st.b*mult);
   const win=mult>1;
@@ -30,6 +35,7 @@ function settleBet(st,mult){
   renderSession();
   pushChip(mult,win);
   if(win)pushFeed('You',st.name,st.b*(mult-1)*st.w.rate,true);
+  _pushBetHist(st,mult);
 }
 function lockBet(on){
   if(!on&&autoRunning)return;

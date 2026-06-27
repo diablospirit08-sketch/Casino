@@ -33,6 +33,10 @@ function syncBetBtn(){
   if(onAutoTab)b.textContent=authed?'Start Auto':'Log In to Play';
   else if(!authed)b.textContent='Log In to Play';
   else b.textContent=(window.ENG&&ENG.label)?ENG.label():'Bet';
+  const sub=document.getElementById('gvIdleSub');
+  const signin=document.getElementById('gvIdleSignin');
+  if(sub)sub.textContent=authed?'Set a bet amount and press Bet':'Sign in to play for real';
+  if(signin)signin.hidden=authed;
 }
 function syncDerived(){
   const w=curW(),b=parseFloat(gvBetIn.value)||0,m=Math.max(1.01,parseFloat(gvMultIn.value)||2);
@@ -414,12 +418,20 @@ window._pfNonce  = 0;
    called from applyHash() at line 139 before this declaration is reached */
 var _pfLastServerSeed='', _pfLastServerHash='', _pfLastClientSeed='', _pfLastNonce=0;
 
+var _pfLog = [];
+
 /* called by place-bet.js after every successful bet */
 window.pfRecordServer = function(serverSeed, serverSeedHash, clientSeed, nonce){
   _pfLastServerSeed = serverSeed;
   _pfLastServerHash = serverSeedHash;
   _pfLastClientSeed = clientSeed;
   _pfLastNonce      = nonce;
+  const gameName = ENG ? (Object.keys(ORIGINALS).find(k=>ORIGINALS[k]===ENG)||'').replace('originals-','') : '';
+  _pfLog.unshift({game:gameName||'game', serverSeed, serverSeedHash, clientSeed, nonce, mult:null, ts:Date.now()});
+  if(_pfLog.length>50)_pfLog.length=50;
+  /* backfill multiplier from bet history */
+  const h=window._clientBetHist;
+  if(h&&h.length&&_pfLog[0])_pfLog[0].mult=h[0].mult;
 };
 
 
@@ -459,7 +471,7 @@ async function pfVerify(serverSeed, clientSeed, nonce, game, params){
   if(game==='plinko'){
     const rows=Math.max(8,Math.min(16,Number(params.rows)||12));
     const risk=params.risk||'medium';
-    const T={low:{8:[5.6,2.1,1.1,1,0.5,1,1.1,2.1,5.6],12:[10,3,1.6,1.4,1.1,1,0.5,1,1.1,1.4,1.6,3,10],16:[16,9,2,1.4,1.4,1.2,1.1,1,0.5,1,1.1,1.2,1.4,1.4,2,9,16]},medium:{8:[13,3,1.3,0.7,0.4,0.7,1.3,3,13],12:[33,11,4,2,1.1,0.6,0.3,0.6,1.1,2,4,11,33],16:[170,24,8.1,2,0.7,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.7,2,8.1,24,170]},high:{8:[29,4,1.5,0.3,0.2,0.3,1.5,4,29],12:[170,24,8.1,2,0.7,0.2,0.2,0.2,0.7,2,8.1,24,170],16:[1000,130,26,9,4,2,0.2,0.2,0.2,0.2,0.2,2,4,9,26,130,1000]}};
+    const T={low:{8:[5.6,2.1,1.1,1,0.5,1,1.1,2.1,5.6],12:[10,3,1.6,1.4,1.1,1,0.5,1,1.1,1.4,1.6,3,10],16:[16,9,2,1.4,1.4,1.2,1.1,1,0.5,1,1.1,1.2,1.4,1.4,2,9,16]},medium:{8:[13,3,1.3,0.7,0.4,0.7,1.3,3,13],12:[33,11,4,2,1.1,0.6,0.3,0.6,1.1,2,4,11,33],16:[110,41,10,5,3,1.5,1,0.5,0.3,0.5,1,1.5,3,5,10,41,110]},high:{8:[29,4,1.5,0.3,0.2,0.3,1.5,4,29],12:[170,24,8.1,2,0.7,0.2,0.2,0.2,0.7,2,8.1,24,170],16:[1000,130,26,9,4,2,0.2,0.2,0.2,0.2,0.2,2,4,9,26,130,1000]}};
     let pos=0;const path=[];
     for(let i=0;i<rows;i++){pos+=(await rnd(i))<0.5?0:1;path.push(pos);}
     const mult=(T[risk]||T.medium)[rows]?.[pos]??1;
@@ -510,6 +522,23 @@ function _pfRender(){
     document.getElementById('pfVerifyClient').value=_pfLastClientSeed;
     document.getElementById('pfVerifyNonce').value=_pfLastNonce;
   }
+  /* session bet log */
+  const logEl=document.getElementById('pfLog');
+  if(logEl){
+    if(!_pfLog.length){logEl.innerHTML='<div class="pf-log-empty">No bets yet this session</div>';}
+    else logEl.innerHTML=_pfLog.map(b=>{
+      const t=Math.floor((Date.now()-b.ts)/1000);
+      const ago=t<60?t+'s':t<3600?Math.floor(t/60)+'m':Math.floor(t/3600)+'h';
+      const m=b.mult!=null?b.mult.toFixed(2)+'×':'—';
+      return`<div class="pf-log-row" title="Click to verify" data-seed="${b.serverSeed}" data-cs="${b.clientSeed}" data-nc="${b.nonce}">
+        <span class="pf-log-game">${b.game}</span>
+        <span class="pf-log-nc">#${b.nonce}</span>
+        <span class="pf-log-mult" style="color:${b.mult>1?'#41f0a4':b.mult===1?'var(--txt)':'#f87171'}">${m}</span>
+        <code class="pf-log-seed">${b.serverSeed.slice(0,12)}…</code>
+        <span class="pf-log-ago">${ago}</span>
+      </div>`;
+    }).join('');
+  }
 }
 
 const pfOverlay=document.getElementById('pfOverlay');
@@ -522,6 +551,16 @@ document.getElementById('pfNewClient').addEventListener('click',()=>{window._pfC
 document.getElementById('pfRotate').addEventListener('click',()=>{
   window._pfClient=_randHex(8);window._pfNonce=0;
   _pfRender();
+});
+document.getElementById('pfLog').addEventListener('click',e=>{
+  const row=e.target.closest('.pf-log-row');if(!row)return;
+  document.getElementById('pfVerifySeed').value=row.dataset.seed;
+  document.getElementById('pfVerifyClient').value=row.dataset.cs;
+  document.getElementById('pfVerifyNonce').value=row.dataset.nc;
+  document.getElementById('pfResultSection').hidden=false;
+  document.getElementById('pfVerifyOut').textContent='';
+  document.getElementById('pfVerifyHashOut').textContent='';
+  document.getElementById('pfVerifySeed').scrollIntoView({behavior:'smooth',block:'nearest'});
 });
 document.getElementById('pfVerifyBtn').addEventListener('click',async()=>{
   try{

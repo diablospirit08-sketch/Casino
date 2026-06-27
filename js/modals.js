@@ -242,7 +242,11 @@ function openDep(mode){
   if(depMode==='dep')startDepMonitor();
 }
 function closeDep(){depOverlay.classList.remove('open');stopDepMonitor();}
-function openTxnModal(){openDep('txn');}
+function openTxnModal(){
+  const ov=document.getElementById('txnOverlay');
+  if(ov){ov.classList.add('open');if(window.loadTxnPage)loadTxnPage(true);}
+  else openDep('txn');
+}
 window.openTxnModal=openTxnModal;
 document.getElementById('walletDep').addEventListener('click',()=>openDep());
 document.getElementById('depClose').addEventListener('click',closeDep);

@@ -84,4 +84,5 @@ function serverSettleBet(st, mult, newBalance) {
   renderSession();
   pushChip(mult, win);
   if (win) pushFeed('You', st.name, st.b * (mult - 1) * w.rate, true);
+  if (window._pushBetHist) _pushBetHist(st, mult);
 }
