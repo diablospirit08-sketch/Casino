@@ -415,7 +415,7 @@ ORIGINALS['originals-roulette']={
       <div class="rl-streak-stats">
         <span class="rl-sstat rl-sstat-r">R <b>${r}</b></span>
         <span class="rl-sstat rl-sstat-b">B <b>${b}</b></span>
-        <span class="rl-sstat rl-sstat-g">0 <b>${g}</b></span>
+        <span class="rl-sstat rl-sstat-g">G <b>${g}</b></span>
         ${streakTxt?`<span class="rl-streak-lbl">${streakTxt}</span>`:''}
       </div>`;
   },
