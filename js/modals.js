@@ -351,7 +351,9 @@ document.getElementById('buyContinueBtn').addEventListener('click',async()=>{
   const net=(DEPOSIT[buyCur]?.networks||[]).find(n=>n.id===buyNetId)||(DEPOSIT[buyCur]?.networks||[])[0];
   const addr=depAddrCache[buyCur+':'+(net?.id||buyCur)]||await fetchDepositAddress(buyCur,net?.id||buyCur)||'';
   const mpCur=(MOONPAY_CUR[buyCur]||{})[buyNetId]||buyCur.toLowerCase();
-  const url='https://buy-sandbox.moonpay.com/?apiKey=pk_test_01KVX5EX6NMKGSF6VX1FH71FH3'
+  /* SECURITY: API key must come from your backend — never hardcode in client JS */
+  const mpKey=window._mpk||'';
+  const url='https://buy-sandbox.moonpay.com/?apiKey='+mpKey
     +'&currencyCode='+mpCur
     +(addr?'&walletAddress='+encodeURIComponent(addr):'')
     +'&theme=dark&colorCode='+encodeURIComponent('#4287f5');

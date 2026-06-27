@@ -1,4 +1,4 @@
-/* Volt Casino — API client (replaces Supabase SDK)
+﻿/* Volt Casino â€” API client (replaces Supabase SDK)
    Mimics the supa.auth.* shape so existing code needs minimal changes. */
 (function () {
   'use strict';
@@ -15,21 +15,21 @@
   }
 
   function _setSession(accessToken, refreshToken, user) {
-    localStorage.setItem(LS_AT,  accessToken);
-    localStorage.setItem(LS_RT,  refreshToken);
+    sessionStorage.setItem(LS_AT,  accessToken);
+    sessionStorage.setItem(LS_RT,  refreshToken);
     localStorage.setItem(LS_USR, JSON.stringify(user));
     _listeners.forEach(fn => fn('SIGNED_IN', { access_token: accessToken, user }));
   }
 
   function _clearSession() {
-    localStorage.removeItem(LS_AT);
-    localStorage.removeItem(LS_RT);
+    sessionStorage.removeItem(LS_AT);
+    sessionStorage.removeItem(LS_RT);
     localStorage.removeItem(LS_USR);
     _listeners.forEach(fn => fn('SIGNED_OUT', null));
   }
 
   async function _refresh() {
-    const rt = localStorage.getItem(LS_RT);
+    const rt = sessionStorage.getItem(LS_RT);
     if (!rt) return null;
     try {
       const res = await fetch(`${API}/api/auth/refresh`, {
@@ -39,16 +39,16 @@
       });
       if (!res.ok) { _clearSession(); return null; }
       const j = await res.json();
-      localStorage.setItem(LS_AT, j.accessToken);
-      localStorage.setItem(LS_RT, j.refreshToken);
+      sessionStorage.setItem(LS_AT, j.accessToken);
+      sessionStorage.setItem(LS_RT, j.refreshToken);
       return j.accessToken;
     } catch { return null; }
   }
 
-  // Token-aware fetch — auto-refreshes on 401
+  // Token-aware fetch â€” auto-refreshes on 401
   async function _fetch(path, opts = {}) {
-    const at = localStorage.getItem(LS_AT);
-    // Don't set Content-Type for FormData — browser must set it with the multipart boundary
+    const at = sessionStorage.getItem(LS_AT);
+    // Don't set Content-Type for FormData â€” browser must set it with the multipart boundary
     const headers = opts.body instanceof FormData
       ? { ...(opts.headers || {}) }
       : { 'Content-Type': 'application/json', ...(opts.headers || {}) };
@@ -72,7 +72,7 @@
 
     auth: {
       async getSession() {
-        const at   = localStorage.getItem(LS_AT);
+        const at   = sessionStorage.getItem(LS_AT);
         const user = _getUser();
         if (!at || !user) return { data: { session: null } };
         // Auto-refresh if token looks expired (JWT exp claim check)
@@ -82,8 +82,8 @@
             const fresh = await _refresh();
             if (!fresh) return { data: { session: null } };
           }
-        } catch { /* malformed token — proceed, let API reject it */ }
-        return { data: { session: { access_token: localStorage.getItem(LS_AT), user } } };
+        } catch { /* malformed token â€” proceed, let API reject it */ }
+        return { data: { session: { access_token: sessionStorage.getItem(LS_AT), user } } };
       },
 
       async getUser() {
@@ -117,7 +117,7 @@
       },
 
       async signOut() {
-        const rt = localStorage.getItem(LS_RT);
+        const rt = sessionStorage.getItem(LS_RT);
         if (rt) {
           fetch(`${API}/api/auth/logout`, {
             method: 'POST',
@@ -164,7 +164,7 @@
           if (!res.ok) return { error: { message: json.error || 'Request failed' } };
           return { error: null };
         } catch {
-          return { error: { message: 'Network error — check your connection.' } };
+          return { error: { message: 'Network error â€” check your connection.' } };
         }
       },
 
@@ -179,7 +179,7 @@
           if (!res.ok) return { error: { message: json.error || 'Reset failed' } };
           return { error: null };
         } catch {
-          return { error: { message: 'Network error — check your connection.' } };
+          return { error: { message: 'Network error â€” check your connection.' } };
         }
       },
 
@@ -195,3 +195,4 @@
     },
   };
 })();
+

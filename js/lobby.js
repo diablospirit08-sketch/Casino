@@ -51,7 +51,11 @@ const coinImg=(c)=>`<img src="${coinIconUrl(c)}" style="width:28px;height:28px;b
 function renderWallet(){
   const w=WALLETS.find(x=>x.c===voltCur);
   walletIc.style.background='none';
-  walletIc.innerHTML=`<img src="${coinIconUrl(w.c)}" style="width:24px;height:24px;object-fit:cover" alt="${w.c}" onerror="var p=this.parentElement;p.style.background='${w.col}';p.innerHTML='${w.s}'">`;
+  walletIc.innerHTML='';
+  const _icImg=document.createElement('img');
+  _icImg.src=coinIconUrl(w.c);_icImg.alt=w.c;_icImg.style.cssText='width:24px;height:24px;object-fit:cover';
+  _icImg.addEventListener('error',function(){walletIc.style.background=w.col;walletIc.textContent=w.s;},{once:true});
+  walletIc.appendChild(_icImg);
   walletAmt.textContent=fmtAmt(w);
   if(walletFiatEl)walletFiatEl.textContent='$'+w.fiat.toFixed(2);
   walletCurEl.textContent=w.c;
