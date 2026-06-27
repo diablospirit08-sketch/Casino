@@ -38,7 +38,7 @@ const _CDN='https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/'
 const COIN_ICONS={
   BTC:_CDN+'btc.svg',  ETH:_CDN+'eth.svg',  BNB:_CDN+'bnb.svg',
   LTC:_CDN+'ltc.svg',  USDT:_CDN+'usdt.svg', USDC:_CDN+'usdc.svg',
-  SOL:_CDN+'sol.svg',  XRP:_CDN+'xrp.svg',  TRX:_CDN+'trx.svg',
+  SOL:'https://assets.coingecko.com/coins/images/4128/small/solana.png',  XRP:_CDN+'xrp.svg',  TRX:_CDN+'trx.svg',
   MATIC:_CDN+'matic.svg',
 };
 const coinIconUrl=c=>COIN_ICONS[c]||COIN_ICONS.BTC;
@@ -738,11 +738,12 @@ syncProvArrows();
 const bplayers=['Hidden','Volty_88','Nina_X','Hidden','Krakn','Joules','Hidden','Mx_Turbo','Hidden','Ohmies'];
 const ballgames=['Berry Rush','Limbo','Plinko','Crazy Hour','Blackjack','Dice','Jelly Express','Storm Roulette','Keno','Coinflip'];
 function rnd(a,b){return Math.random()*(b-a)+a}
-const _COINS=[{s:'BNB',slug:'bnb'},{s:'ETH',slug:'eth'},{s:'SOL',slug:'sol'},{s:'XRP',slug:'xrp'},{s:'USDC',slug:'usdc'},{s:'AVAX',slug:'avax'},{s:'BTC',slug:'btc'},{s:'DOGE',slug:'doge'}];
 const _COIN_CDN='https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/';
+const _COIN_ICON_OVERRIDES={SOL:'https://assets.coingecko.com/coins/images/4128/small/solana.png'};
+const _COINS=[{s:'BNB',slug:'bnb'},{s:'ETH',slug:'eth'},{s:'SOL',slug:'sol'},{s:'XRP',slug:'xrp'},{s:'USDC',slug:'usdc'},{s:'AVAX',slug:'avax'},{s:'BTC',slug:'btc'},{s:'DOGE',slug:'doge'}];
 function _maskName(n){if(n==='Hidden')return'Hidden';return n[0]+'*'.repeat(Math.min(5,n.length-2))+n[n.length-1];}
 function _coinIdx(r){return(r.game.charCodeAt(0)+r.player.charCodeAt(0))%_COINS.length;}
-function _coinIc(c){return`<img class="bt-ic" src="${_COIN_CDN}${c.slug}.svg" alt="${c.s}" width="22" height="22">`;}
+function _coinIc(c){const url=_COIN_ICON_OVERRIDES[c.s]||(_COIN_CDN+c.slug+'.svg');return`<img class="bt-ic" src="${url}" alt="${c.s}" width="22" height="22">`;}
 
 function makeBetRow(){
   const bet=rnd(0.05,2.4),mult=Math.random()<0.5?0:rnd(1.5,50);
