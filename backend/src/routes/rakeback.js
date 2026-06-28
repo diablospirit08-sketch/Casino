@@ -12,6 +12,7 @@ const HOUSE_EDGE = {
   crash:     0.03,
   mines:     0.025,
   plinko:    0.02,
+  limbo:     0.01,
   coinflip:  0.02,
   keno:      0.04,
   blackjack: 0.005,

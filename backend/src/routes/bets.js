@@ -42,6 +42,16 @@ const GAMES = {
     return { result: { roll: +roll.toFixed(2), target, direction, win }, multiplier };
   },
 
+  'originals-limbo': ({ serverSeed, clientSeed, nonce, params }) => {
+    const { target = 2 } = params; // player's target multiplier, e.g. 2.00
+    const roll = rollDice(serverSeed, clientSeed, nonce); // 0–100
+    // result: exponential distribution — P(result >= x) = 0.99/x
+    const result = Math.max(1.00, +(99 / Math.max(0.0001, roll)).toFixed(2));
+    const win = result >= target;
+    const multiplier = win ? +parseFloat(target).toFixed(4) : 0;
+    return { result: { result, target, win }, multiplier };
+  },
+
   'originals-coinflip': ({ serverSeed, clientSeed, nonce, params }) => {
     const { side: clientPick } = params; // 'don' | 'snitch'
     const flip = flipCoin(serverSeed, clientSeed, nonce); // 'heads' | 'tails'
