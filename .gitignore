@@ -16,6 +16,10 @@ chain/ledger.json
 
 # Dev screenshots (reference only, not needed in repo)
 screenshots/
+shot_*.png
+
+# Playwright test runner
+_pw/
 
 # Uploads / scratch images
 uploads/
