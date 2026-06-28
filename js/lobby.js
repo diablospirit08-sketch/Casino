@@ -64,6 +64,37 @@ function renderWallet(){
   +`<hr class="txn-divider"><button class="txn-footer" id="txnOpenBtn">Transactions</button>`;
 }
 renderWallet();
+
+/* ── live price refresh (runs regardless of auth/Supabase state) ── */
+(function(){
+  const CG_IDS={BTC:'bitcoin',ETH:'ethereum',BNB:'binancecoin',LTC:'litecoin',USDT:'tether',USDC:'usd-coin',SOL:'solana'};
+  const LS_R='volt-rates',LS_T='volt-rates-ts',TTL=5*60*1000;
+  async function loadRates(){
+    const now=Date.now(),ts=parseInt(localStorage.getItem(LS_T)||'0');
+    if(now-ts<TTL){try{return JSON.parse(localStorage.getItem(LS_R)||'{}');}catch(e){}}
+    const ids=Object.values(CG_IDS).join(',');
+    const res=await fetch('https://api.coingecko.com/api/v3/simple/price?ids='+ids+'&vs_currencies=usd');
+    const json=await res.json();
+    const rates={};
+    for(const[sym,id] of Object.entries(CG_IDS))rates[sym]=json[id]?.usd??0;
+    rates.USDT=1;rates.USDC=1;
+    localStorage.setItem(LS_R,JSON.stringify(rates));
+    localStorage.setItem(LS_T,String(now));
+    return rates;
+  }
+  function applyRates(rates){
+    let changed=false;
+    WALLETS.forEach(w=>{
+      if(rates[w.c]&&rates[w.c]>0){w.rate=rates[w.c];w.fiat=+(w.amt*w.rate).toFixed(2);changed=true;}
+    });
+    if(changed)renderWallet();
+  }
+  loadRates().then(applyRates).catch(()=>{
+    try{const c=localStorage.getItem(LS_R);if(c)applyRates(JSON.parse(c));}catch(e){}
+  });
+  setInterval(()=>loadRates().then(applyRates).catch(()=>{}),TTL);
+})();
+
 function setAuth(on){
   document.body.classList.toggle('authed',on);
   localStorage.setItem(LS_AUTH,on?'in':'out');

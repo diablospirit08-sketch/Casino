@@ -7,7 +7,7 @@
  * Email is sent via Resend (https://resend.com).
  * Set RESEND_API_KEY and RESEND_FROM in Railway env vars:
  *   RESEND_API_KEY=re_xxxx
- *   RESEND_FROM=VioFyre Casino <noreply@yourdomain.com>
+ *   RESEND_FROM=VioFyr Casino <noreply@yourdomain.com>
  *
  * If RESEND_API_KEY is not set the endpoint still creates the token but
  * returns 503 so the user knows email is not configured.
@@ -44,7 +44,7 @@ async function sendResetEmail(to, resetUrl) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) throw new Error('RESEND_API_KEY not set');
 
-  const from = process.env.RESEND_FROM || 'VioFyre Casino <noreply@viofyre.com>';
+  const from = process.env.RESEND_FROM || 'VioFyr Casino <noreply@viofyr.com>';
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -55,7 +55,7 @@ async function sendResetEmail(to, resetUrl) {
     body: JSON.stringify({
       from,
       to: [to],
-      subject: 'Reset your VioFyre password',
+      subject: 'Reset your VioFyr password',
       html: `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;background:#0a0c15;color:#fff;border-radius:16px">
           <img src="https://casino-production-2759.up.railway.app/images/icon.jpg%20(8).png" width="48" style="border-radius:12px;margin-bottom:20px;display:block">

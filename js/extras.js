@@ -230,9 +230,9 @@ async function openProfile(){
       $id('profVerifiedBadge').hidden=false;
       $id('profFine').textContent='Signed in as '+email;
     } else {
-      $id('profName').textContent='viofyre_player';
+      $id('profName').textContent='viofyr_player';
       $id('profEmail').value='';
-      $id('profUsername').value='viofyre_player';
+      $id('profUsername').value='viofyr_player';
       $id('profJoined').textContent='—';
       $id('profVerifiedBadge').hidden=true;
       $id('profFine').textContent='Demo profile — progress is stored in this browser only.';
@@ -492,8 +492,8 @@ const PAGES={
     <div class="faq-item"><button class="faq-q">How long do deposits take?<span class="arr">&#8964;</span></button><div class="faq-a">Deposits are credited after the required number of network confirmations: BTC (3), ETH/BNB/USDT/USDC (12). This typically takes 5–30 minutes depending on network congestion.</div></div>
     <div class="faq-item"><button class="faq-q">What is the minimum withdrawal?<span class="arr">&#8964;</span></button><div class="faq-a">Minimum withdrawals vary by currency. Network fees are deducted from the withdrawal amount. You can see exact minimums on the <b>Withdraw</b> screen after selecting your currency.</div></div>
     <p class="faq-cat">Games & Fairness</p>
-    <div class="faq-item"><button class="faq-q">Are the games provably fair?<span class="arr">&#8964;</span></button><div class="faq-a">Yes. All VioFyre Originals (Dice, Mines, Plinko, Crash, etc.) use a <b>provably fair</b> system. Each bet generates a server seed hash before the bet is placed — you can verify any result using the Verify tool on the game screen.</div></div>
-    <div class="faq-item"><button class="faq-q">What is RTP and where can I find it?<span class="arr">&#8964;</span></button><div class="faq-a"><b>Return to Player (RTP)</b> is the percentage of wagered money a game pays back over time. It's displayed on every game tile and inside the game header. VioFyre Originals are set at 97–99% RTP.</div></div>
+    <div class="faq-item"><button class="faq-q">Are the games provably fair?<span class="arr">&#8964;</span></button><div class="faq-a">Yes. All VioFyr Originals (Dice, Mines, Plinko, Crash, etc.) use a <b>provably fair</b> system. Each bet generates a server seed hash before the bet is placed — you can verify any result using the Verify tool on the game screen.</div></div>
+    <div class="faq-item"><button class="faq-q">What is RTP and where can I find it?<span class="arr">&#8964;</span></button><div class="faq-a"><b>Return to Player (RTP)</b> is the percentage of wagered money a game pays back over time. It's displayed on every game tile and inside the game header. VioFyr Originals are set at 97–99% RTP.</div></div>
     <div class="faq-item"><button class="faq-q">What is the Vio Token?<span class="arr">&#8964;</span></button><div class="faq-a">VIO is our loyalty token. You earn <b>1 VIO for every $100 wagered</b>. Accumulated VIO can be withdrawn to your BNB wallet once the contract is live. Track your balance via the ⚡ icon in the header.</div></div>
     <p class="faq-cat">Bonuses & VIP</p>
     <div class="faq-item"><button class="faq-q">How does the Welcome Bonus work?<span class="arr">&#8964;</span></button><div class="faq-a">New players receive a <b>200% match up to $1,000</b> on their first deposit. The bonus has a 30× wagering requirement before withdrawal. Full terms are available on the Promotions page.</div></div>
