@@ -11,6 +11,7 @@ ORIGINALS['originals-baccarat']={
   stats:{rounds:0,wins:0,streak:0,streakType:'',bigWin:0,bigLoss:0,balHistory:[]},
 
   _muted:false,_ac:null,_T:[],
+  _auto:{running:false,rounds:0,roundsLeft:0,stopProfit:0,stopLoss:0,startBal:0,bets:null},
 
   SSYM:{spades:'♠',hearts:'♥',diamonds:'♦',clubs:'♣'},
   RANKS:['A','2','3','4','5','6','7','8','9','10','J','Q','K'],
@@ -128,6 +129,9 @@ ORIGINALS['originals-baccarat']={
       const r=Math.floor(this.bets[k]/2);
       w.amt+=r;this.bets[k]-=r;
     });
+    // Rebuild betHistory so undo refunds match actual remaining bets
+    this.betHistory=[];
+    ['player','tie','banker'].forEach(k=>{if(this.bets[k]>0)this.betHistory.push({zone:k,v:this.bets[k]});});
     w.fiat=w.amt*(w.rate||1);renderWallet();
     this._updateUI();
   },
@@ -197,7 +201,7 @@ ORIGINALS['originals-baccarat']={
     const pH=[this._draw(),this._draw()];
     const bH=[this._draw(),this._draw()];
     const pb=$id('bac-pb'),bb=$id('bac-bb');
-    if(!pb||!bb)return;
+    if(!pb||!bb){this.gameState='betting';lockBet(false);syncBetBtn();return;}
     pb.innerHTML='';bb.innerHTML='';
 
     const c0=this._makeCard(pH[0],this.OF2[0],120,-30,25,false);
@@ -257,22 +261,35 @@ ORIGINALS['originals-baccarat']={
     this._finalize(pH,bH);
   },
 
-  _finalize(pH,bH){
+  async _finalize(pH,bH){
     const pv=this._hv(pH),bv=this._hv(bH);
     const winner=pv>bv?'player':bv>pv?'banker':'tie';
     const total=this.bets.player+this.bets.tie+this.bets.banker;
+    const pb=this.bets.player,tb=this.bets.tie,bb2=this.bets.banker;
 
     let winAmt=0;
-    if(winner==='player')winAmt=this.bets.player*2;
-    else if(winner==='banker')winAmt=this.bets.banker*1.95;
-    else winAmt=this.bets.tie*9+(this.bets.player+this.bets.banker);
+    if(winner==='player')winAmt=pb*2;
+    else if(winner==='banker')winAmt=bb2*1.95;
+    else winAmt=tb*9+(pb+bb2);
 
     const net=Math.round((winAmt-total)*100)/100;
 
-    if(winAmt>0){const w=curW();creditTo(w,winAmt);}
+    // Server settlement (provably fair) — restore chips, let server deduct+credit
+    const w=curW();
+    if(typeof placeBet==='function'&&w&&total>0){
+      try{
+        creditTo(w,total); // restore optimistic chip deductions
+        const r=await placeBet({game:'originals-baccarat',currency:w.c,wager:total,params:{playerBet:pb,tieBet:tb,bankerBet:bb2}});
+        if(r&&typeof serverSettleBet==='function')serverSettleBet(r);
+      }catch(e){
+        // Server unavailable — keep client-side result
+        creditTo(w,winAmt);
+      }
+    }else{
+      if(winAmt>0)creditTo(w,winAmt);
+    }
 
     // Session tracking
-    const w=curW();
     const mult=total>0?winAmt/total:0;
     gsession.wag+=total*(w.rate||1);
     gsession.prof+=net*(w.rate||1);
@@ -312,7 +329,23 @@ ORIGINALS['originals-baccarat']={
 
     this.gameState='done';
     lockBet(false);
-    if(!autoRunning)syncBetBtn();
+    if(!this._auto.running)syncBetBtn();
+
+    // Autoplay continuation
+    if(this._auto.running){
+      this._auto.roundsLeft--;
+      const bal=curW().amt;
+      const profit=bal-this._auto.startBal;
+      const loss=this._auto.startBal-bal;
+      const stopProfit=this._auto.stopProfit;
+      const stopLoss=this._auto.stopLoss;
+      if(
+        this._auto.roundsLeft<=0||
+        (stopProfit>0&&profit>=stopProfit)||
+        (stopLoss>0&&loss>=stopLoss)
+      ){this._stopAuto();return;}
+      this._T.push(setTimeout(()=>this._autoNext(),1400));
+    }
   },
 
   _renderRoad(){
@@ -385,6 +418,45 @@ ORIGINALS['originals-baccarat']={
     this._setStatus('PLACE YOUR BETS');
     const ov=$id('bac-ov');if(ov)ov.style.display='none';
     this._updateUI();
+  },
+
+  _startAuto(){
+    const rounds=parseInt($id('bac-ap-rounds')?.value)||0;
+    const stopProfit=parseFloat($id('bac-ap-profit')?.value)||0;
+    const stopLoss=parseFloat($id('bac-ap-loss')?.value)||0;
+    const total=this.bets.player+this.bets.tie+this.bets.banker;
+    if(total<=0){alert('Place a bet first');return;}
+    this._auto={running:true,rounds,roundsLeft:rounds>0?rounds:Infinity,stopProfit,stopLoss,startBal:curW().amt,bets:{...this.bets}};
+    autoRunning=true;
+    const sb=$id('bac-auto-start');if(sb){sb.textContent='STOP';sb.classList.add('bac-astop');}
+    const rc=$id('bac-auto-rc');if(rc)rc.textContent=rounds>0?rounds+'':'∞';
+    this._deal();
+  },
+  _stopAuto(){
+    this._auto.running=false;
+    autoRunning=false;
+    const sb=$id('bac-auto-start');if(sb){sb.textContent='START AUTO';sb.classList.remove('bac-astop');}
+    syncBetBtn();
+  },
+  _autoNext(){
+    if(!this._auto.running)return;
+    // Re-place same bets (balance was already settled; re-deduct same amounts)
+    const w=curW();
+    const saved=this._auto.bets;
+    const newTotal=saved.player+saved.tie+saved.banker;
+    if(newTotal>w.amt){this._stopAuto();return;}
+    this._resetRound();
+    ['player','tie','banker'].forEach(k=>{
+      if(saved[k]>0){
+        this.bets[k]=saved[k];
+        this.betHistory.push({zone:k,v:saved[k]});
+        w.amt-=saved[k];
+      }
+    });
+    w.fiat=w.amt*(w.rate||1);renderWallet();
+    this._updateUI();
+    const rc=$id('bac-auto-rc');if(rc)rc.textContent=isFinite(this._auto.roundsLeft)?this._auto.roundsLeft:'∞';
+    this._deal();
   },
 
   sync(){},
@@ -520,6 +592,7 @@ ORIGINALS['originals-baccarat']={
 .bac-clbl{font-size:8px;color:#4b5563;letter-spacing:.8px;font-weight:700}
 .bac-totrow{display:flex;justify-content:space-between;align-items:center;padding:6px 0 0;border-top:1px solid #1e2840;font-size:10px;color:#4b5563;font-weight:700;margin-top:4px}
 .bac-totrow b{color:#e2e8f0}
+.bac-astop{background:#ff4444!important;color:#fff!important}
       `;
       document.head.appendChild(s);
     }
@@ -530,38 +603,63 @@ ORIGINALS['originals-baccarat']={
     this.gameState='betting';
     this.bets={player:0,tie:0,banker:0};this.betHistory=[];
 
+    const muted=this._muted;
     engFields.innerHTML=`
       <div class="bac-tabs">
         <button class="bac-tab active" id="bac-tab-m">MANUAL</button>
         <button class="bac-tab" id="bac-tab-a">AUTOPLAY</button>
       </div>
-      <div class="gv-field" style="margin-top:6px">
-        <label style="font-size:10px;color:#4b5563;font-weight:700;letter-spacing:.8px">CHIP VALUE</label>
-        <div class="bac-cv-wrap">
-          <div class="bac-cv-box">
-            <span class="bac-dollar">$</span>
-            <input class="bac-cv-inp" id="bac-cv" type="number" value="${this.chipVal}" min="1" step="1">
-          </div>
-          <div class="bac-hx">
-            <button class="bac-hx-btn" id="bac-half">1/2</button>
-            <button class="bac-hx-btn" id="bac-x2">X2</button>
+      <div id="bac-panel-m">
+        <div class="gv-field" style="margin-top:6px">
+          <label style="font-size:10px;color:#4b5563;font-weight:700;letter-spacing:.8px">CHIP VALUE</label>
+          <div class="bac-cv-wrap">
+            <div class="bac-cv-box">
+              <span class="bac-dollar">$</span>
+              <input class="bac-cv-inp" id="bac-cv" type="number" value="${this.chipVal}" min="1" step="1">
+            </div>
+            <div class="bac-hx">
+              <button class="bac-hx-btn" id="bac-half">1/2</button>
+              <button class="bac-hx-btn" id="bac-x2">X2</button>
+            </div>
           </div>
         </div>
+        <div style="font-size:10px;color:#4b5563;font-weight:700;letter-spacing:.8px;margin-top:6px">CHIPS (USD)</div>
+        <div class="bac-rack">
+          <div class="bac-chip bc10 selected" data-v="10">10</div>
+          <div class="bac-chip bc100" data-v="100">100</div>
+          <div class="bac-chip bc1k" data-v="1000">1K</div>
+          <div class="bac-chip bc10k" data-v="10000">10K</div>
+        </div>
+        <div class="bac-ctrl" style="margin-top:8px">
+          <div class="bac-cbtn" id="bac-btn-clear"><div class="bac-cicon">🗑</div><span class="bac-clbl">CLEAR</span></div>
+          <div class="bac-cbtn" id="bac-btn-undo"><div class="bac-cicon">↩</div><span class="bac-clbl">UNDO</span></div>
+          <div class="bac-cbtn" id="bac-btn-dbl"><div class="bac-cicon">×2</div><span class="bac-clbl">DOUBLE</span></div>
+          <div class="bac-cbtn" id="bac-btn-half"><div class="bac-cicon">½</div><span class="bac-clbl">HALF</span></div>
+        </div>
+        <div class="bac-totrow">TOTAL BET <b id="bac-tot">$0.00</b></div>
+        <div class="bac-tog-row" style="margin-top:6px">
+          <span class="bac-tog-lbl">SOUND</span>
+          <button id="bac-snd" class="bac-hx-btn" style="font-size:14px;padding:4px 10px">${muted?'🔇':'🔊'}</button>
+        </div>
       </div>
-      <div style="font-size:10px;color:#4b5563;font-weight:700;letter-spacing:.8px;margin-top:6px">CHIPS (USD)</div>
-      <div class="bac-rack">
-        <div class="bac-chip bc10 selected" data-v="10">10</div>
-        <div class="bac-chip bc100" data-v="100">100</div>
-        <div class="bac-chip bc1k" data-v="1000">1K</div>
-        <div class="bac-chip bc10k" data-v="10000">10K</div>
-      </div>
-      <div class="bac-ctrl" style="margin-top:8px">
-        <div class="bac-cbtn" id="bac-btn-clear"><div class="bac-cicon">🗑</div><span class="bac-clbl">CLEAR</span></div>
-        <div class="bac-cbtn" id="bac-btn-undo"><div class="bac-cicon">↩</div><span class="bac-clbl">UNDO</span></div>
-        <div class="bac-cbtn" id="bac-btn-dbl"><div class="bac-cicon">×2</div><span class="bac-clbl">DOUBLE</span></div>
-        <div class="bac-cbtn" id="bac-btn-half"><div class="bac-cicon">½</div><span class="bac-clbl">HALF</span></div>
-      </div>
-      <div class="bac-totrow">TOTAL BET <b id="bac-tot">$0.00</b></div>`;
+      <div id="bac-panel-a" style="display:none">
+        <div style="font-size:10px;color:#4b5563;font-weight:700;letter-spacing:.8px;margin-top:6px">NUMBER OF ROUNDS</div>
+        <div class="bac-cv-wrap" style="margin-top:4px">
+          <div class="bac-cv-box"><input class="bac-cv-inp" id="bac-ap-rounds" type="number" value="10" min="0" step="1" placeholder="0 = ∞"></div>
+        </div>
+        <div style="font-size:10px;color:#4b5563;font-weight:700;letter-spacing:.8px;margin-top:8px">STOP ON PROFIT ($)</div>
+        <div class="bac-cv-wrap" style="margin-top:4px">
+          <div class="bac-cv-box"><span class="bac-dollar">$</span><input class="bac-cv-inp" id="bac-ap-profit" type="number" value="0" min="0" step="1" placeholder="0 = off"></div>
+        </div>
+        <div style="font-size:10px;color:#4b5563;font-weight:700;letter-spacing:.8px;margin-top:8px">STOP ON LOSS ($)</div>
+        <div class="bac-cv-wrap" style="margin-top:4px">
+          <div class="bac-cv-box"><span class="bac-dollar">$</span><input class="bac-cv-inp" id="bac-ap-loss" type="number" value="0" min="0" step="1" placeholder="0 = off"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:10px;color:#4b5563;font-weight:700">
+          <span>ROUNDS LEFT</span><span id="bac-auto-rc">—</span>
+        </div>
+        <button id="bac-auto-start" style="margin-top:10px;width:100%;padding:10px;border-radius:8px;background:#00e701;color:#000;font-weight:900;font-size:12px;letter-spacing:1px;border:none;cursor:pointer;font-family:inherit">START AUTO</button>
+      </div>`;
 
     gvStage.innerHTML=`
       <div class="bac-wrap">
@@ -659,12 +757,25 @@ ORIGINALS['originals-baccarat']={
     $id('bac-btn-dbl').addEventListener('click',()=>this._doubleBet());
     $id('bac-btn-half').addEventListener('click',()=>this._halfBet());
 
-    // Tabs (autoplay is UI-only for now)
+    // Tabs
     $id('bac-tab-m').addEventListener('click',()=>{
       $id('bac-tab-m').classList.add('active');$id('bac-tab-a').classList.remove('active');
+      $id('bac-panel-m').style.display='';$id('bac-panel-a').style.display='none';
     });
     $id('bac-tab-a').addEventListener('click',()=>{
       $id('bac-tab-a').classList.add('active');$id('bac-tab-m').classList.remove('active');
+      $id('bac-panel-a').style.display='';$id('bac-panel-m').style.display='none';
+    });
+
+    // Sound toggle
+    $id('bac-snd').addEventListener('click',()=>{
+      this._muted=!this._muted;
+      $id('bac-snd').textContent=this._muted?'🔇':'🔊';
+    });
+
+    // Autoplay start/stop
+    $id('bac-auto-start').addEventListener('click',()=>{
+      if(this._auto.running){this._stopAuto();}else{this._startAuto();}
     });
 
     this._updateUI();
@@ -673,6 +784,7 @@ ORIGINALS['originals-baccarat']={
   },
 
   unmount(){
+    if(this._auto.running){this._auto.running=false;autoRunning=false;}
     this._T.forEach(clearTimeout);this._T=[];
     // Refund chips that were placed but game not started
     const total=this.bets.player+this.bets.tie+this.bets.banker;

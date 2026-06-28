@@ -129,6 +129,54 @@ const GAMES = {
     const totalBet = betList.reduce((s, b) => s + b.amount, 0) || 1;
     return { result: { pocket, bets: betList, totalWin }, multiplier: totalWin / totalBet };
   },
+
+  'originals-baccarat': ({ serverSeed, clientSeed, nonce, params }) => {
+    const { playerBet = 0, tieBet = 0, bankerBet = 0 } = params;
+    const indices = shuffleDeck(serverSeed, clientSeed, nonce);
+    // rank 0=A(1), 1-8=2-9, 9=10(0), 10=J(0), 11=Q(0), 12=K(0)
+    const cv = r => r === 0 ? 1 : r >= 9 ? 0 : r;
+    const rank = idx => idx % 13;
+    const hv = cards => cards.reduce((s, c) => s + cv(rank(c)), 0) % 10;
+
+    // Deal order: P1 B1 P2 B2, then optional P3 B3
+    const pH = [indices[0], indices[2]];
+    const bH = [indices[1], indices[3]];
+
+    let pv = hv(pH), bv = hv(bH);
+    let pDrew = false;
+
+    if (pv < 8 && bv < 8) {
+      if (pv <= 5) {
+        pH.push(indices[4]);
+        pDrew = true;
+      }
+      let bd = false;
+      if (!pDrew) { bd = bv <= 5; }
+      else {
+        const pt = cv(rank(pH[2]));
+        if (bv <= 2) bd = true;
+        else if (bv === 3 && pt !== 8) bd = true;
+        else if (bv === 4 && [2,3,4,5,6,7].includes(pt)) bd = true;
+        else if (bv === 5 && [4,5,6,7].includes(pt)) bd = true;
+        else if (bv === 6 && [6,7].includes(pt)) bd = true;
+      }
+      if (bd) bH.push(indices[pDrew ? 5 : 4]);
+    }
+
+    pv = hv(pH); bv = hv(bH);
+    const winner = pv > bv ? 'player' : bv > pv ? 'banker' : 'tie';
+    const total = playerBet + tieBet + bankerBet;
+
+    let winAmt = 0;
+    if (winner === 'player') winAmt = playerBet * 2;
+    else if (winner === 'banker') winAmt = bankerBet * 1.95;
+    else winAmt = tieBet * 9 + (playerBet + bankerBet);
+
+    return {
+      result: { winner, playerScore: pv, bankerScore: bv },
+      multiplier: total > 0 ? winAmt / total : 0,
+    };
+  },
 };
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
