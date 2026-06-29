@@ -698,6 +698,7 @@ ORIGINALS['originals-blackjack']={
     this.colorCards(state==='w'?'win':state==='l'?'lose':'');
     this.setMsg(msgs.join(' · '),state);
     this.setFlush(state==='w'?'w':state==='l'?'l':'');
+    if(state==='w'){const ring=$id('bj2BetRing');if(ring){ring.classList.remove('ring-win');void ring.offsetWidth;ring.classList.add('ring-win');setTimeout(()=>ring.classList.remove('ring-win'),1500);}}
 
     // session stats — immediate
     gsession.wag+=totalWagered*w.rate;gsession.prof+=prof*w.rate;
@@ -775,28 +776,37 @@ ORIGINALS['originals-blackjack']={
     if(!document.getElementById('bj2css')){
       const s=document.createElement('style');s.id='bj2css';
       s.textContent=`
-/* TABLE — casino felt green */
+/* TABLE — classic casino felt, polished */
 .bj2tbl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
-  justify-content:space-between;padding:14px 12px 52px;overflow:hidden;
-  background:radial-gradient(ellipse at 50% 30%,#2d8a52 0%,#1c6639 40%,#0e4225 72%,#071c10 100%)}
-/* padded rail */
-.bj2rail{position:absolute;bottom:0;left:0;right:0;height:52px;z-index:3;
-  background:linear-gradient(180deg,#2a1a0c 0%,#3e2410 28%,#4c2e14 52%,#3a2010 76%,#1a0e06 100%);
-  border-radius:50% 50% 0 0/20px 20px 0 0}
+  justify-content:space-between;padding:14px 12px 60px;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 22%,#35a060 0%,#1e7540 32%,#0f4a24 62%,#071e0e 88%,#030d06 100%)}
+/* padded rail — mahogany with gold studs */
+.bj2rail{position:absolute;bottom:0;left:0;right:0;height:60px;z-index:3;
+  background:linear-gradient(180deg,#321808 0%,#4a2210 22%,#5c2c14 48%,#432010 74%,#1c0c04 100%);
+  border-radius:50% 50% 0 0/24px 24px 0 0;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.5)}
 .bj2rail::before{content:"";position:absolute;inset:0;border-radius:inherit;
-  background:repeating-linear-gradient(90deg,transparent 0,transparent 10px,rgba(0,0,0,.09) 10px,rgba(0,0,0,.09) 11px),
-             repeating-linear-gradient(0deg,transparent 0,transparent 6px,rgba(255,255,255,.02) 6px,rgba(255,255,255,.02) 7px)}
-.bj2rail::after{content:"";position:absolute;top:0;left:5%;right:5%;height:2px;
-  background:linear-gradient(90deg,transparent,rgba(195,155,55,.4) 15%,rgba(245,210,80,.8) 50%,rgba(195,155,55,.4) 85%,transparent);
-  box-shadow:0 1px 4px rgba(195,155,55,.15)}
-/* felt weave texture */
+  background:
+    repeating-linear-gradient(90deg,transparent 0,transparent 14px,rgba(0,0,0,.07) 14px,rgba(0,0,0,.07) 15px),
+    repeating-linear-gradient(0deg,transparent 0,transparent 8px,rgba(255,255,255,.015) 8px,rgba(255,255,255,.015) 9px)}
+/* gold top-edge line */
+.bj2rail::after{content:"";position:absolute;top:0;left:4%;right:4%;height:2.5px;
+  background:linear-gradient(90deg,transparent,rgba(195,155,55,.35) 12%,rgba(255,215,80,.9) 50%,rgba(195,155,55,.35) 88%,transparent);
+  box-shadow:0 0 8px rgba(215,175,60,.3),0 1px 3px rgba(195,155,55,.2)}
+/* gold stud dots along the rail */
+.bj2rail-studs{position:absolute;bottom:0;left:0;right:0;height:60px;pointer-events:none;z-index:4;
+  border-radius:inherit;overflow:hidden}
+.bj2rail-studs::before{content:"· · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·";
+  position:absolute;top:12px;left:0;right:0;text-align:center;
+  font-size:8px;letter-spacing:14px;color:rgba(215,175,55,.45);pointer-events:none}
+/* felt weave — denser, more visible */
 .bj2tbl::before{content:"";position:absolute;inset:0;pointer-events:none;
   background:
-    repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 6px),
-    repeating-linear-gradient(-45deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 6px)}
-/* vignette */
+    repeating-linear-gradient(45deg,transparent,transparent 2px,rgba(0,0,0,.055) 2px,rgba(0,0,0,.055) 4px),
+    repeating-linear-gradient(-45deg,transparent,transparent 2px,rgba(0,0,0,.055) 2px,rgba(0,0,0,.055) 4px)}
+/* vignette — stronger corners */
 .bj2tbl::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse at 50% 50%,transparent 38%,rgba(0,0,0,.42) 100%)}
+  background:radial-gradient(ellipse at 50% 50%,transparent 30%,rgba(0,0,0,.55) 100%)}
 
 /* zones */
 .bj2zone{display:flex;flex-direction:column;align-items:center;gap:8px;z-index:2}
@@ -827,18 +837,21 @@ ORIGINALS['originals-blackjack']={
 .bj2c .cr{font-size:26px;font-weight:900;color:#1a2634;line-height:1}
 .bj2c .cs{font-size:18px;color:#1a2634;line-height:1.1}
 .bj2center-suit{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-size:42px;opacity:.15;pointer-events:none;line-height:1}
-.bj2c.red .cr,.bj2c.red .cs{color:#cc1a2e}
-.bj2c.back{background:linear-gradient(145deg,#1e74d8 0%,#0d51b8 48%,#0940a2 100%);
-  border:2px solid rgba(255,255,255,.32)}
-/* ornate inner frame — replaces face gloss on back cards */
+  font-size:52px;opacity:.22;pointer-events:none;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
+.bj2c.red .cr,.bj2c.red .cs{color:#c8102e}
+/* card back — dark forest green with gold ornate frame */
+.bj2c.back{
+  background:linear-gradient(145deg,#0e4225 0%,#0a3019 48%,#071e10 100%);
+  border:2px solid rgba(195,155,55,.55)}
+/* gold outer frame */
 .bj2c.back::before{content:"";position:absolute;inset:6px;border-radius:7px;
-  border:1.5px solid rgba(255,255,255,.28);pointer-events:none;z-index:1;background:none}
-/* tighter diamond pattern inside the frame */
+  border:1.5px solid rgba(215,175,60,.45);pointer-events:none;z-index:1;background:none;
+  box-shadow:inset 0 0 12px rgba(0,0,0,.4)}
+/* diamond lattice in gold tones inside the frame */
 .bj2c.back::after{content:"";position:absolute;inset:11px;border-radius:4px;
   background:
-    repeating-linear-gradient(45deg,rgba(255,255,255,.07) 0,rgba(255,255,255,.07) 2px,transparent 2px,transparent 8px),
-    repeating-linear-gradient(-45deg,rgba(255,255,255,.07) 0,rgba(255,255,255,.07) 2px,transparent 2px,transparent 8px)}
+    repeating-linear-gradient(45deg,rgba(195,155,55,.09) 0,rgba(195,155,55,.09) 2px,transparent 2px,transparent 9px),
+    repeating-linear-gradient(-45deg,rgba(195,155,55,.09) 0,rgba(195,155,55,.09) 2px,transparent 2px,transparent 9px)}
 .bj2c.p{border:2px solid rgba(255,255,255,.5)}
 .bj2c.p.win{border-color:#22dd66;
   box-shadow:0 0 0 2px rgba(34,221,102,.18),0 8px 24px rgba(0,0,0,.52),0 0 10px rgba(34,221,102,.12)}
@@ -882,9 +895,14 @@ ORIGINALS['originals-blackjack']={
   border:1px solid rgba(195,155,55,.3);pointer-events:none;transition:border-color .3s}
 .bj2betring.has-chips{
   border-color:rgba(245,200,66,.95);
-  box-shadow:0 0 0 2px rgba(245,200,66,.1),0 0 12px rgba(245,200,66,.15),inset 0 0 18px rgba(0,0,0,.2);
+  box-shadow:0 0 0 2px rgba(245,200,66,.1),0 0 16px rgba(245,200,66,.2),inset 0 0 18px rgba(0,0,0,.2);
 }
 .bj2betring.has-chips::before{border-color:rgba(245,200,66,.5)}
+@keyframes bj2ring-win{
+  0%{box-shadow:0 0 0 2px rgba(34,221,102,.2),0 0 14px rgba(34,221,102,.3),inset 0 0 14px rgba(0,0,0,.2)}
+  50%{box-shadow:0 0 0 6px rgba(34,221,102,.08),0 0 32px rgba(34,221,102,.5),inset 0 0 14px rgba(0,0,0,.2)}
+  100%{box-shadow:0 0 0 2px rgba(34,221,102,.2),0 0 14px rgba(34,221,102,.3),inset 0 0 14px rgba(0,0,0,.2)}}
+.bj2betring.ring-win{border-color:#22dd66;animation:bj2ring-win .7s ease 2}
 .bj2br-stk{position:relative;width:50px;height:50px}
 .bj2br-lbl{
   font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
@@ -1025,7 +1043,7 @@ ORIGINALS['originals-blackjack']={
         </div>
         <div class="bj2msg" id="bj2Msg">Place a bet and deal</div>
         <div class="bj2fl"  id="bj2Fl"></div>
-        <div class="bj2rail"></div>
+        <div class="bj2rail"><div class="bj2rail-studs"></div></div>
         <div class="bj2ins" id="bj2Ins" hidden>
           <strong>🛡 Insurance?</strong>
           <p>Dealer shows Ace. Side bet costs ½ wager<br>— pays 2:1 if dealer has Blackjack.</p>
