@@ -1,7 +1,31 @@
 /* VOLT — originals engine framework: bet debit/settle helpers, engine mount/unmount.
-   Games register themselves on ORIGINALS (js/games/*.js, loaded after this file). */
+   Games register themselves on ORIGINALS (js/games/*.js, lazy-loaded on first open). */
 /* ---------- volt originals engines ---------- */
 var ENG=null,ORIGINALS={};
+
+const GAME_SCRIPTS={
+  'originals-dice':      'js/games/dice.js',
+  'originals-mines':     'js/games/mines.js',
+  'originals-plinko':    'js/games/plinko.js',
+  'originals-crash':     'js/games/crash.js',
+  'originals-blackjack': 'js/games/blackjack.js',
+  'originals-roulette':  'js/games/roulette.js',
+  'originals-keno':      'js/games/keno.js',
+  'originals-coinflip':  'js/games/coinflip.js',
+  'originals-limbo':     'js/games/limbo.js',
+  'originals-baccarat':  'js/games/baccarat.js',
+};
+const _loadedScripts=new Set();
+function _loadScript(src){
+  return new Promise((resolve,reject)=>{
+    if(_loadedScripts.has(src)){resolve();return;}
+    const s=document.createElement('script');
+    s.src=src;
+    s.onload=()=>{_loadedScripts.add(src);resolve();};
+    s.onerror=()=>reject(new Error('Failed to load '+src));
+    document.head.appendChild(s);
+  });
+}
 const $id=id=>document.getElementById(id);
 const gvStage=$id('gvStage'),engFields=$id('engFields'),gvMultField=$id('gvMultField'),
       gvProfitFieldEl=$id('gvProfitField'),gvHalfBtn=$id('gvHalf'),gvDoubleBtn=$id('gvDouble'),
@@ -41,10 +65,18 @@ function lockBet(on){
   if(!on&&autoRunning)return;
   gvBetIn.disabled=on;gvHalfBtn.disabled=on;gvDoubleBtn.disabled=on;
 }
-function mountEngine(slug){
+async function mountEngine(slug){
   unmountEngine();
+  // Lazy-load game script if not yet registered
+  const src=GAME_SCRIPTS[slug];
+  if(src&&!ORIGINALS[slug]){
+    gvStage.hidden=false;
+    gvStage.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#374151;font-size:12px;font-weight:700;letter-spacing:1.5px">LOADING…</div>';
+    if(gvIdle)gvIdle.hidden=true;
+    try{await _loadScript(src);}catch{gvStage.innerHTML='';gvStage.hidden=true;return;}
+  }
   const eng=window.ORIGINALS&&ORIGINALS[slug];
-  if(!eng)return;
+  if(!eng){gvStage.hidden=true;return;}
   ENG=eng;
   gvMultField.hidden=true;gvProfitFieldEl.hidden=true;
   gvIdle.hidden=true;gvResult.hidden=true;
