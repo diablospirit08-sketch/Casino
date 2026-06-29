@@ -303,9 +303,9 @@ ORIGINALS['originals-baccarat']={
 
     // Visual
     this._setStatus({player:'PLAYER WINS',banker:'BANKER WINS',tie:'TIE'}[winner]);
-    const pb=$id('bac-pb'),bb=$id('bac-bb');
-    if(winner==='player'&&pb)pb.style.filter='drop-shadow(0 0 18px rgba(79,70,229,.7))';
-    else if(winner==='banker'&&bb)bb.style.filter='drop-shadow(0 0 18px rgba(220,38,38,.6))';
+    const pbEl=$id('bac-pb'),bbEl=$id('bac-bb');
+    if(winner==='player'&&pbEl)pbEl.style.filter='drop-shadow(0 0 18px rgba(79,70,229,.7))';
+    else if(winner==='banker'&&bbEl)bbEl.style.filter='drop-shadow(0 0 18px rgba(220,38,38,.6))';
     this._setSuit(winner);
 
     // Road + stats
