@@ -941,6 +941,36 @@
   .pf-rrow:last-child{border-bottom:none;padding-bottom:0}
   .pf-rrow span{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2)}
   .pf-rrow code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;color:var(--txt);word-break:break-all;line-height:1.5}
+  .pf-copy-row{display:flex;gap:6px;align-items:center}
+  .pf-copy-row .pf-input{font-size:10.5px}
+  .pf-copy-btn{height:38px;padding:0 11px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:8px;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.13s;flex-none;white-space:nowrap}
+  .pf-copy-btn:hover{border-color:var(--mint);color:var(--mint)}
+  .pf-game-sel{width:100%;background:var(--panel);border:1px solid var(--line-2);border-radius:9px;padding:9px 12px;color:var(--txt);font-family:inherit;font-size:12px;font-weight:700;outline:none;cursor:pointer;margin-bottom:8px}
+  .pf-game-sel:focus{border-color:var(--mint)}
+  .pf-params{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+  .pf-param-label{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--muted-2);text-transform:uppercase;margin-bottom:3px;display:block}
+  .pf-param-group{display:flex;flex-direction:column}
+  .pf-param-input{background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:7px 10px;color:var(--txt);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;outline:none;width:100px;transition:.14s}
+  .pf-param-input:focus{border-color:var(--mint)}
+  .pf-outcome{border-radius:11px;padding:14px 16px;margin-top:2px}
+  .pf-outcome.win{background:rgba(65,240,164,.07);border:1px solid rgba(65,240,164,.25)}
+  .pf-outcome.loss{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.25)}
+  .pf-outcome.neutral{background:var(--panel);border:1px solid var(--line-2)}
+  .pf-outcome-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .pf-outcome-badge{font-size:11px;font-weight:900;letter-spacing:.1em;padding:4px 12px;border-radius:99px}
+  .pf-outcome-badge.win{background:rgba(65,240,164,.15);color:#41f0a4}
+  .pf-outcome-badge.loss{background:rgba(248,113,113,.15);color:#f87171}
+  .pf-outcome-badge.neutral{background:var(--panel-2);color:var(--muted)}
+  .pf-outcome-mult{font-size:20px;font-weight:900;margin-left:auto;font-variant-numeric:tabular-nums}
+  .pf-outcome-mult.win{color:#41f0a4}
+  .pf-outcome-mult.loss{color:#f87171}
+  .pf-outcome-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--line)}
+  .pf-outcome-row:last-child{border-bottom:none}
+  .pf-outcome-row span{color:var(--muted-2);font-weight:700}
+  .pf-outcome-row b{color:var(--txt);font-variant-numeric:tabular-nums}
+  .pf-hash-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;margin-bottom:8px}
+  .pf-hash-badge.ok{background:rgba(65,240,164,.12);color:#41f0a4;border:1px solid rgba(65,240,164,.3)}
+  .pf-hash-badge.fail{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.3)}
 
   /* ===== LOYALTY SECTION ===== */
   .vip-sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:14px}
@@ -2162,39 +2192,69 @@
       <h3>Provably Fair</h3>
       <button class="icon-btn" id="pfClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
     </div>
-    <p class="pf-info">Before every bet the server commits to a seed by publishing its SHA-256 hash. Your client seed and a nonce are mixed in to produce the result — no outcome can be altered once the hash is shown.</p>
-    <p class="dep-lbl">Client Seed</p>
-    <div class="pf-seed-row">
-      <input id="pfClientSeed" class="pf-input" type="text" spellcheck="false" autocomplete="off" />
-      <button class="mod" id="pfNewClient">New</button>
+    <p class="pf-info">Before every bet the server commits to a seed by publishing its SHA-256 hash. Your client seed and a nonce are mixed in — no outcome can be altered after the hash is revealed.</p>
+
+    <!-- Active seeds -->
+    <p class="dep-lbl">Your Client Seed</p>
+    <div class="pf-copy-row">
+      <input id="pfClientSeed" class="pf-input" type="text" spellcheck="false" autocomplete="off"/>
+      <button class="pf-copy-btn" id="pfNewClient">New</button>
+      <button class="pf-copy-btn" id="pfCopyClient" title="Copy">Copy</button>
     </div>
-    <p class="dep-lbl">Server Seed Hash</p>
-    <div class="pf-hash" id="pfServerHash">—</div>
-    <p class="dep-lbl" style="margin-top:14px">Nonce</p>
-    <div class="pf-nonce-row"><b id="pfNonce">0</b><span>bets placed this seed</span></div>
-    <button class="pf-rotate" id="pfRotate">Rotate Seeds — Nonce Resets</button>
+    <p class="dep-lbl" style="margin-top:10px">Server Seed Hash (next bet)</p>
+    <div class="pf-copy-row" style="margin-bottom:4px">
+      <div class="pf-hash" id="pfServerHash" style="flex:1;margin:0">—</div>
+      <button class="pf-copy-btn" id="pfCopyHash" title="Copy hash">Copy</button>
+    </div>
+    <div class="pf-nonce-row"><b id="pfNonce">0</b><span>bets this seed</span></div>
+    <button class="pf-rotate" id="pfRotate">↻ Rotate Seeds — Nonce Resets to 0</button>
+
+    <!-- Last revealed seeds -->
     <div id="pfResultSection" hidden>
       <p class="dep-lbl" style="margin-top:16px">Last Bet — Revealed Seeds</p>
       <div class="pf-result">
-        <div class="pf-rrow"><span>Server Seed</span><code id="pfLastSeed">—</code></div>
-        <div class="pf-rrow"><span>Server Seed Hash</span><code id="pfLastHash">—</code></div>
+        <div class="pf-rrow">
+          <span>Server Seed</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <code id="pfLastSeed" style="flex:1">—</code>
+            <button class="pf-copy-btn" id="pfCopyLastSeed" style="height:28px;font-size:10px">Copy</button>
+          </div>
+        </div>
+        <div class="pf-rrow"><span>SHA-256 Hash</span><code id="pfLastHash">—</code></div>
       </div>
-      <p class="dep-lbl" style="margin-top:16px">Verify Outcome</p>
-      <p class="pf-info" style="margin-top:0">Re-enter the seeds to independently recalculate the result.</p>
-      <div class="pf-seed-row" style="margin-bottom:6px">
-        <input id="pfVerifySeed"   class="pf-input" type="text" placeholder="Server Seed" spellcheck="false"/>
-      </div>
-      <div class="pf-seed-row" style="margin-bottom:6px">
-        <input id="pfVerifyClient" class="pf-input" type="text" placeholder="Client Seed" spellcheck="false"/>
-        <input id="pfVerifyNonce"  class="pf-input" type="number" placeholder="Nonce" style="width:80px;flex:none"/>
-      </div>
-      <div id="pfVerifyHashOut" style="font-size:10px;color:var(--muted);margin-bottom:6px;word-break:break-all"></div>
-      <button class="dep-copy" id="pfVerifyBtn" style="width:100%;margin-bottom:8px">Verify</button>
-      <pre id="pfVerifyOut" style="font-size:10px;color:var(--mint);background:var(--panel-2);border-radius:8px;padding:10px;white-space:pre-wrap;word-break:break-all;margin:0"></pre>
     </div>
+
+    <!-- Verify form — always visible -->
+    <p class="dep-lbl" style="margin-top:16px">Verify Any Bet</p>
+    <p class="pf-info" style="margin-top:0">Paste seeds from any past bet and recalculate the result client-side — no server trust required.</p>
+    <select id="pfGameSel" class="pf-game-sel">
+      <option value="">— Select game —</option>
+      <option value="dice">Dice</option>
+      <option value="limbo">Limbo</option>
+      <option value="coinflip">Coinflip</option>
+      <option value="crash">Crash</option>
+      <option value="mines">Mines</option>
+      <option value="plinko">Plinko</option>
+      <option value="keno">Keno</option>
+      <option value="baccarat">Baccarat</option>
+      <option value="roulette">Roulette</option>
+    </select>
+    <!-- Game-specific params — shown/hidden per game -->
+    <div id="pfParams" class="pf-params"></div>
+    <div class="pf-copy-row" style="margin-bottom:6px">
+      <input id="pfVerifySeed"   class="pf-input" type="text" placeholder="Server Seed" spellcheck="false"/>
+    </div>
+    <div class="pf-copy-row" style="margin-bottom:10px">
+      <input id="pfVerifyClient" class="pf-input" type="text" placeholder="Client Seed" spellcheck="false"/>
+      <input id="pfVerifyNonce"  class="pf-input" type="number" placeholder="Nonce" style="width:80px;flex:none"/>
+    </div>
+    <button class="dep-copy" id="pfVerifyBtn" style="width:100%;margin-bottom:10px">Verify</button>
+    <div id="pfVerifyOut"></div>
+
+    <!-- Session log -->
     <p class="dep-lbl" style="margin-top:18px">Session Bet Log</p>
-    <p class="pf-info" style="margin-top:0">Click any row to load its seeds into the verify form.</p>
-    <div id="pfLog" style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:1px;border-radius:8px;overflow:hidden;border:1px solid var(--line-2)">
+    <p class="pf-info" style="margin-top:0">Click any row to load seeds into the verify form.</p>
+    <div id="pfLog" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:1px;border-radius:8px;overflow:hidden;border:1px solid var(--line-2)">
       <div class="pf-log-empty">No bets yet this session</div>
     </div>
   </div>

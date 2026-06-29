@@ -460,50 +460,90 @@ async function pfVerify(serverSeed, clientSeed, nonce, game, params){
     const roll=+((await rnd(0))*100).toFixed(2);
     const target=over?100-chance:chance;
     const win=over?roll>target:roll<target;
-    return{roll,target,over,win,mult:win?+(99/chance).toFixed(4):0};
+    const mult=win?+(99/chance).toFixed(4):0;
+    return{rows:[['Roll',roll],['Target',over?'> '+target:'< '+target],['Direction',over?'Over':'Under']],win,mult};
+  }
+  if(game==='limbo'){
+    const target=Math.max(1.01,Number(params.target)||2);
+    const r=await rnd(0);
+    const result=+Math.max(1,Math.min(1000000,0.99/Math.max(0.000001,r))).toFixed(2);
+    const win=result>=target;
+    const mult=win?+(target*0.99).toFixed(4):0;
+    return{rows:[['Result',result+'×'],['Target','≥ '+target+'×']],win,mult};
   }
   if(game==='coinflip'){
+    const side=params.side||'don';
     const flip=(await rnd(0))<0.5?'heads':'tails';
     const result=flip==='heads'?'don':'snitch';
-    const win=result===(params.side||'don');
-    return{result,win,mult:win?1.98:0};
-  }
-  if(game==='plinko'){
-    const rows=Math.max(8,Math.min(16,Number(params.rows)||12));
-    const risk=params.risk||'medium';
-    const T={low:{8:[5.6,2.1,1.1,1,0.5,1,1.1,2.1,5.6],12:[10,3,1.6,1.4,1.1,1,0.5,1,1.1,1.4,1.6,3,10],16:[16,9,2,1.4,1.4,1.2,1.1,1,0.5,1,1.1,1.2,1.4,1.4,2,9,16]},medium:{8:[13,3,1.3,0.7,0.4,0.7,1.3,3,13],12:[33,11,4,2,1.1,0.6,0.3,0.6,1.1,2,4,11,33],16:[110,41,10,5,3,1.5,1,0.5,0.3,0.5,1,1.5,3,5,10,41,110]},high:{8:[29,4,1.5,0.3,0.2,0.3,1.5,4,29],12:[170,24,8.1,2,0.7,0.2,0.2,0.2,0.7,2,8.1,24,170],16:[1000,130,26,9,4,2,0.2,0.2,0.2,0.2,0.2,2,4,9,26,130,1000]}};
-    let pos=0;const path=[];
-    for(let i=0;i<rows;i++){pos+=(await rnd(i))<0.5?0:1;path.push(pos);}
-    const mult=(T[risk]||T.medium)[rows]?.[pos]??1;
-    return{path,pos,mult,win:mult>1};
-  }
-  if(game==='keno'){
-    const picks=(params.picks||[]).map(Number);
-    const pool=Array.from({length:40},(_,i)=>i+1);
-    const draws=[];
-    for(let i=0;i<10;i++){const idx=Math.floor((await rnd(i))*pool.length);draws.push(pool.splice(idx,1)[0]);}
-    const hits=picks.filter(p=>draws.includes(p)).length;
-    return{draws,hits,win:hits>0};
+    const win=result===side;
+    return{rows:[['Flip',flip],['Result',result],['Your pick',side]],win,mult:win?1.98:0};
   }
   if(game==='crash'){
     const r=await rnd(0);
     const bust=r<0.01?1.00:+Math.min(1000,Math.max(1,0.99/(1-r))).toFixed(2);
-    return{bust};
+    const cashout=Number(params.cashout)||0;
+    const win=cashout>0&&cashout<=bust;
+    return{rows:[['Bust point',bust+'×'],['Cashout',cashout?cashout+'×':'—']],win,mult:win?cashout:0};
   }
   if(game==='mines'){
     const mineCount=Math.max(1,Math.min(24,Number(params.mineCount)||3));
     const revealedCells=(params.revealedCells||[]).map(Number);
     const gridSize=25;
     const positions=Array.from({length:gridSize},(_,i)=>i);
-    for(let i=0;i<mineCount;i++){
-      const f=await rnd(i);
-      const j=i+Math.floor(f*(gridSize-i));
-      [positions[i],positions[j]]=[positions[j],positions[i]];
-    }
+    for(let i=0;i<mineCount;i++){const f=await rnd(i);const j=i+Math.floor(f*(gridSize-i));[positions[i],positions[j]]=[positions[j],positions[i]];}
     const mines=positions.slice(0,mineCount).sort((a,b)=>a-b);
     const mineSet=new Set(mines);
     const hitMine=revealedCells.some(c=>mineSet.has(c));
-    return{mines,revealedCells,hitMine,win:!hitMine&&revealedCells.length>0};
+    const safe=gridSize-mineCount;
+    const picks=revealedCells.length;
+    let mult=0;if(!hitMine&&picks>0){let m=1;for(let i=0;i<picks;i++)m*=(safe-i)/(gridSize-mineCount-i);mult=+((m*0.99)).toFixed(4);}
+    return{rows:[['Mine positions',mines.join(', ')],['Mines count',mineCount],['Hit mine',hitMine?'Yes':'No']],win:!hitMine&&picks>0,mult};
+  }
+  if(game==='plinko'){
+    const rows=Math.max(8,Math.min(16,Number(params.rows)||12));
+    const risk=params.risk||'medium';
+    const T={low:{8:[5.6,2.1,1.1,1,0.5,1,1.1,2.1,5.6],12:[10,3,1.6,1.4,1.1,1,0.5,1,1.1,1.4,1.6,3,10],16:[16,9,2,1.4,1.4,1.2,1.1,1,0.5,1,1.1,1.2,1.4,1.4,2,9,16]},medium:{8:[13,3,1.3,0.7,0.4,0.7,1.3,3,13],12:[33,11,4,2,1.1,0.6,0.3,0.6,1.1,2,4,11,33],16:[110,41,10,5,3,1.5,1,0.5,0.3,0.5,1,1.5,3,5,10,41,110]},high:{8:[29,4,1.5,0.3,0.2,0.3,1.5,4,29],12:[170,24,8.1,2,0.7,0.2,0.2,0.2,0.7,2,8.1,24,170],16:[1000,130,26,9,4,2,0.2,0.2,0.2,0.2,0.2,2,4,9,26,130,1000]}};
+    let pos=0;for(let i=0;i<rows;i++)pos+=(await rnd(i))<0.5?0:1;
+    const mult=(T[risk]||T.medium)[rows]?.[pos]??1;
+    return{rows:[['Rows',rows],['Risk',risk],['Bucket',pos],['Multiplier',mult+'×']],win:mult>1,mult};
+  }
+  if(game==='keno'){
+    const picks=(params.picks||[]).map(Number);
+    const pool=Array.from({length:40},(_,i)=>i+1);
+    const draws=[];
+    for(let i=0;i<10;i++){const idx=Math.floor((await rnd(i))*pool.length);draws.push(pool.splice(idx,1)[0]);}
+    draws.sort((a,b)=>a-b);
+    const hits=picks.filter(p=>draws.includes(p)).length;
+    return{rows:[['Drawn',draws.join(', ')],['Your picks',picks.join(', ')||'—'],['Hits',hits]],win:hits>0,mult:0};
+  }
+  if(game==='baccarat'){
+    const RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+    const SUITS=['♠','♥','♦','♣'];
+    const cv=r=>r===0?1:r>=9?0:r;
+    const hv=cards=>cards.reduce((s,c)=>s+cv(c%13),0)%10;
+    // shuffleDeck uses same HMAC deriveFloats — replicate Fisher-Yates with index-based floats
+    const indices=Array.from({length:52},(_,i)=>i);
+    for(let i=51;i>0;i--){const f=await rnd(51-i);const j=Math.floor(f*(i+1));[indices[i],indices[j]]=[indices[j],indices[i]];}
+    const cardName=i=>RANKS[i%13]+SUITS[Math.floor(i/13)];
+    const pH=[indices[0],indices[2]];const bH=[indices[1],indices[3]];
+    let pDrew=false;
+    const pv0=hv(pH),bv0=hv(bH);
+    if(pv0<8&&bv0<8){
+      if(pv0<=5){pH.push(indices[4]);pDrew=true;}
+      let bd=false;const bv1=hv(bH);
+      if(!pDrew){bd=bv1<=5;}
+      else{const pt=cv(pH[2]%13);if(bv1<=2)bd=true;else if(bv1===3&&pt!==8)bd=true;else if(bv1===4&&[2,3,4,5,6,7].includes(pt))bd=true;else if(bv1===5&&[4,5,6,7].includes(pt))bd=true;else if(bv1===6&&[6,7].includes(pt))bd=true;}
+      if(bd)bH.push(indices[pDrew?5:4]);
+    }
+    const pv=hv(pH),bv=hv(bH);
+    const winner=pv>bv?'Player':bv>pv?'Banker':'Tie';
+    return{rows:[['Player hand',pH.map(cardName).join(' ')],['Player score',pv],['Banker hand',bH.map(cardName).join(' ')],['Banker score',bv],['Winner',winner]],win:true,mult:0};
+  }
+  if(game==='roulette'){
+    // Simple spin — 37 pockets (0-36)
+    const r=await rnd(0);
+    const pocket=Math.floor(r*37);
+    return{rows:[['Pocket',pocket],['Color',pocket===0?'Green':[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(pocket)?'Red':'Black']],win:false,mult:0};
   }
   return null;
 }
@@ -512,7 +552,7 @@ function _pfRender(){
   document.getElementById('pfClientSeed').value=window._pfClient;
   document.getElementById('pfNonce').textContent=window._pfNonce;
   const hasPrev=!!_pfLastServerSeed;
-  document.getElementById('pfServerHash').textContent=hasPrev?_pfLastServerHash:'Place a bet to see server seed hash';
+  document.getElementById('pfServerHash').textContent=_pfLastServerHash||'Place a bet to reveal hash';
   const sec=document.getElementById('pfResultSection');
   sec.hidden=!hasPrev;
   if(hasPrev){
@@ -521,8 +561,12 @@ function _pfRender(){
     document.getElementById('pfVerifySeed').value=_pfLastServerSeed;
     document.getElementById('pfVerifyClient').value=_pfLastClientSeed;
     document.getElementById('pfVerifyNonce').value=_pfLastNonce;
+    // Pre-select game
+    const gameName=ENG?Object.keys(ORIGINALS).find(k=>ORIGINALS[k]===ENG)||'':'';
+    const sel=document.getElementById('pfGameSel');
+    if(sel&&gameName)sel.value=gameName.replace('originals-','');
+    _pfUpdateParams();
   }
-  /* session bet log */
   const logEl=document.getElementById('pfLog');
   if(logEl){
     if(!_pfLog.length){logEl.innerHTML='<div class="pf-log-empty">No bets yet this session</div>';}
@@ -530,7 +574,7 @@ function _pfRender(){
       const t=Math.floor((Date.now()-b.ts)/1000);
       const ago=t<60?t+'s':t<3600?Math.floor(t/60)+'m':Math.floor(t/3600)+'h';
       const m=b.mult!=null?b.mult.toFixed(2)+'×':'—';
-      return`<div class="pf-log-row" title="Click to verify" data-seed="${b.serverSeed}" data-cs="${b.clientSeed}" data-nc="${b.nonce}">
+      return`<div class="pf-log-row" title="Click to verify" data-seed="${b.serverSeed}" data-cs="${b.clientSeed}" data-nc="${b.nonce}" data-game="${b.game}">
         <span class="pf-log-game">${b.game}</span>
         <span class="pf-log-nc">#${b.nonce}</span>
         <span class="pf-log-mult" style="color:${b.mult>1?'#41f0a4':b.mult===1?'var(--txt)':'#f87171'}">${m}</span>
@@ -541,43 +585,96 @@ function _pfRender(){
   }
 }
 
+const PF_PARAMS={
+  dice:[{id:'pfChance',label:'Win Chance %',type:'number',def:50,min:2,max:98},{id:'pfOver',label:'Direction',type:'select',opts:['over','under']}],
+  limbo:[{id:'pfTarget',label:'Target ×',type:'number',def:2,min:1.01}],
+  coinflip:[{id:'pfSide',label:'Side',type:'select',opts:['don','snitch']}],
+  crash:[{id:'pfCashout',label:'Cashout ×',type:'number',def:2,min:1}],
+  mines:[{id:'pfMineCount',label:'Mine Count',type:'number',def:3,min:1,max:24},{id:'pfRevealed',label:'Revealed cells (comma)',type:'text',def:''}],
+  plinko:[{id:'pfRows',label:'Rows',type:'select',opts:['8','12','16']},{id:'pfRisk',label:'Risk',type:'select',opts:['low','medium','high']}],
+  keno:[{id:'pfPicks',label:'Picks (comma)',type:'text',def:''}],
+  baccarat:[],
+  roulette:[],
+};
+function _pfUpdateParams(){
+  const game=document.getElementById('pfGameSel')?.value||'';
+  const defs=PF_PARAMS[game]||[];
+  const el=document.getElementById('pfParams');if(!el)return;
+  if(!defs.length){el.innerHTML='';return;}
+  el.innerHTML=defs.map(p=>{
+    if(p.type==='select')return`<div class="pf-param-group"><label class="pf-param-label">${p.label}</label><select id="${p.id}" class="pf-game-sel" style="margin:0;width:auto">${p.opts.map(o=>`<option value="${o}">${o}</option>`).join('')}</select></div>`;
+    return`<div class="pf-param-group"><label class="pf-param-label">${p.label}</label><input id="${p.id}" class="pf-param-input" type="${p.type}" value="${p.def??''}"${p.min!==undefined?' min="'+p.min+'"':''}${p.max!==undefined?' max="'+p.max+'"':''}></div>`;
+  }).join('');
+}
+function _pfGetParams(game){
+  const p={};
+  if(game==='dice'){p.chance=Number(document.getElementById('pfChance')?.value)||50;p.over=(document.getElementById('pfOver')?.value||'over')==='over';}
+  if(game==='limbo')p.target=Number(document.getElementById('pfTarget')?.value)||2;
+  if(game==='coinflip')p.side=document.getElementById('pfSide')?.value||'don';
+  if(game==='crash')p.cashout=Number(document.getElementById('pfCashout')?.value)||0;
+  if(game==='mines'){p.mineCount=Number(document.getElementById('pfMineCount')?.value)||3;p.revealedCells=(document.getElementById('pfRevealed')?.value||'').split(',').map(s=>s.trim()).filter(Boolean).map(Number);}
+  if(game==='plinko'){p.rows=Number(document.getElementById('pfRows')?.value)||12;p.risk=document.getElementById('pfRisk')?.value||'medium';}
+  if(game==='keno')p.picks=(document.getElementById('pfPicks')?.value||'').split(',').map(s=>s.trim()).filter(Boolean).map(Number);
+  return p;
+}
+function _pfRenderResult(r,hashOk){
+  const out=document.getElementById('pfVerifyOut');if(!out)return;
+  if(!r){out.innerHTML='<div style="color:var(--muted);font-size:12px;padding:8px 0">Unknown game or invalid seeds.</div>';return;}
+  const cls=r.win?'win':'loss';
+  const badge=r.win?'WIN':'LOSS';
+  const multStr=r.mult>0?r.mult.toFixed(4)+'×':'0×';
+  const hashBadge=hashOk===null?'':hashOk?
+    `<div class="pf-hash-badge ok">✓ Hash verified</div>`:
+    `<div class="pf-hash-badge fail">✗ Hash mismatch — seed may be wrong</div>`;
+  out.innerHTML=`${hashBadge}<div class="pf-outcome ${cls}">
+    <div class="pf-outcome-head">
+      <span class="pf-outcome-badge ${cls}">${badge}</span>
+      <span class="pf-outcome-mult ${cls}">${multStr}</span>
+    </div>
+    ${r.rows.map(([k,v])=>`<div class="pf-outcome-row"><span>${k}</span><b>${v}</b></div>`).join('')}
+  </div>`;
+}
+
 const pfOverlay=document.getElementById('pfOverlay');
+const _pfCopy=text=>{navigator.clipboard?.writeText(text).catch(()=>{});};
 document.getElementById('gvPfBtn').addEventListener('click',()=>{_pfRender();pfOverlay.classList.add('open');});
 document.getElementById('pfClose').addEventListener('click',()=>pfOverlay.classList.remove('open'));
 pfOverlay.addEventListener('click',e=>{if(e.target===pfOverlay)pfOverlay.classList.remove('open');});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&pfOverlay.classList.contains('open')){pfOverlay.classList.remove('open');e.stopPropagation();}},true);
 document.getElementById('pfClientSeed').addEventListener('input',e=>{window._pfClient=e.target.value||_randHex(8);});
 document.getElementById('pfNewClient').addEventListener('click',()=>{window._pfClient=_randHex(8);document.getElementById('pfClientSeed').value=window._pfClient;});
-document.getElementById('pfRotate').addEventListener('click',()=>{
-  window._pfClient=_randHex(8);window._pfNonce=0;
-  _pfRender();
-});
+document.getElementById('pfCopyClient').addEventListener('click',()=>_pfCopy(document.getElementById('pfClientSeed').value));
+document.getElementById('pfCopyHash').addEventListener('click',()=>_pfCopy(document.getElementById('pfServerHash').textContent));
+document.getElementById('pfCopyLastSeed').addEventListener('click',()=>_pfCopy(document.getElementById('pfLastSeed').textContent));
+document.getElementById('pfRotate').addEventListener('click',()=>{window._pfClient=_randHex(8);window._pfNonce=0;_pfRender();});
+document.getElementById('pfGameSel').addEventListener('change',_pfUpdateParams);
 document.getElementById('pfLog').addEventListener('click',e=>{
   const row=e.target.closest('.pf-log-row');if(!row)return;
   document.getElementById('pfVerifySeed').value=row.dataset.seed;
   document.getElementById('pfVerifyClient').value=row.dataset.cs;
   document.getElementById('pfVerifyNonce').value=row.dataset.nc;
-  document.getElementById('pfResultSection').hidden=false;
-  document.getElementById('pfVerifyOut').textContent='';
-  document.getElementById('pfVerifyHashOut').textContent='';
+  const game=(row.dataset.game||'').replace('originals-','');
+  const sel=document.getElementById('pfGameSel');if(sel&&game)sel.value=game;
+  _pfUpdateParams();
+  document.getElementById('pfVerifyOut').innerHTML='';
   document.getElementById('pfVerifySeed').scrollIntoView({behavior:'smooth',block:'nearest'});
 });
 document.getElementById('pfVerifyBtn').addEventListener('click',async()=>{
+  const btn=document.getElementById('pfVerifyBtn');
+  const seed=document.getElementById('pfVerifySeed').value.trim();
+  const cs=document.getElementById('pfVerifyClient').value.trim();
+  const nc=parseInt(document.getElementById('pfVerifyNonce').value)||0;
+  const game=document.getElementById('pfGameSel')?.value||'';
+  if(!seed||!cs){document.getElementById('pfVerifyOut').innerHTML='<div style="color:#f87171;font-size:12px;padding:6px 0">Enter server seed and client seed.</div>';return;}
+  if(!game){document.getElementById('pfVerifyOut').innerHTML='<div style="color:#f87171;font-size:12px;padding:6px 0">Select a game.</div>';return;}
+  btn.textContent='Verifying…';btn.disabled=true;
   try{
-    const seed=document.getElementById('pfVerifySeed').value.trim();
-    const cs=document.getElementById('pfVerifyClient').value.trim();
-    const nc=parseInt(document.getElementById('pfVerifyNonce').value)||0;
-    const game=ENG?Object.keys(ORIGINALS).find(k=>ORIGINALS[k]===ENG)||'':'';
-    if(!seed||!cs){document.getElementById('pfVerifyOut').textContent='Enter server seed and client seed.';return;}
     const hash=await _sha256(seed);
-    const hashEl=document.getElementById('pfVerifyHashOut');
-    hashEl.textContent='SHA-256: '+hash;
-    hashEl.style.color=hash===_pfLastServerHash?'#41f0a4':'#f87171';
-    const params=ENG?{chance:ENG.chance,over:ENG.over,side:ENG.side,rows:ENG.rows,risk:ENG.risk,picks:[...ENG.picks||[]],diff:ENG.diff}:{};
-    const r=await pfVerify(seed,cs,nc,game.replace('originals-',''),params);
-    document.getElementById('pfVerifyOut').textContent=r?JSON.stringify(r,null,2):'Unknown game';
+    const hashOk=_pfLastServerHash?hash===_pfLastServerHash:null;
+    const params=_pfGetParams(game);
+    const r=await pfVerify(seed,cs,nc,game,params);
+    _pfRenderResult(r,hashOk);
   }catch(err){
-    console.error('PF verify error:',err);
-    document.getElementById('pfVerifyOut').textContent='Verification error: '+err.message;
-  }
+    document.getElementById('pfVerifyOut').innerHTML=`<div style="color:#f87171;font-size:12px;padding:6px 0">Error: ${err.message}</div>`;
+  }finally{btn.textContent='Verify';btn.disabled=false;}
 });
