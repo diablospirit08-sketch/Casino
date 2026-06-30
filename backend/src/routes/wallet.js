@@ -12,7 +12,7 @@
  * GET  /api/wallet/withdrawals           — withdrawal history
  */
 
-import { verifyMessage, getAddress } from 'ethers';
+import { verifyMessage, getAddress, parseEther } from 'ethers';
 import { query, transaction } from '../db.js';
 import { signWithdrawal, cashierAddress } from '../services/vault.js';
 import { generateDepositAddress, EVM_CURRENCIES } from '../services/hdwallet.js';
@@ -130,7 +130,7 @@ export async function walletRoutes(fastify) {
 
     // Return existing address if already generated (one per user per currency)
     const existing = await query(
-      `SELECT address FROM deposit_addresses WHERE user_id = $1 AND currency = $2`,
+      `SELECT address FROM deposit_addresses WHERE user_id = $1 AND currency = $2 AND address != ''`,
       [req.user.id, currency]
     );
 
@@ -379,21 +379,19 @@ export async function walletRoutes(fastify) {
       return reply.code(400).send({ error: 'Wallet address not connected to your account' });
     }
 
-    // Get and increment nonce atomically
-    await query(
+    // Get and increment nonce atomically — RETURNING avoids a separate SELECT race
+    const nonceRows = await query(
       `INSERT INTO withdrawal_nonces (user_id, network, nonce)
        VALUES ($1, $2, 1)
-       ON CONFLICT (user_id, network) DO UPDATE SET nonce = withdrawal_nonces.nonce + 1`,
-      [req.user.id, network]
-    );
-    const nonceRows = await query(
-      `SELECT nonce FROM withdrawal_nonces WHERE user_id = $1 AND network = $2`,
+       ON CONFLICT (user_id, network) DO UPDATE SET nonce = withdrawal_nonces.nonce + 1
+       RETURNING nonce`,
       [req.user.id, network]
     );
     const nonce = nonceRows[0].nonce;
 
     // Debit the ledger before signing — if debit fails the voucher is never issued
-    const amountWei = BigInt(Math.round(amountBnb * 1e18)).toString();
+    // parseEther handles decimal precision correctly; Math.round(x * 1e18) loses precision
+    const amountWei = parseEther(amountBnb.toFixed(18)).toString();
     const wRows = await query(
       `INSERT INTO withdrawals (user_id, currency, network, amount, fee, address)
        VALUES ($1,'BNB',$2,$3,0,$4) RETURNING id`,

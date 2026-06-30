@@ -70,16 +70,23 @@ export async function generateDepositAddress(userId, currency) {
     `SELECT public.claim_deposit_address_slot($1, $2) AS idx`,
     [userId, currency]
   );
+  if (!rows.length || rows[0].idx == null) {
+    throw new Error('Failed to claim deposit address slot from DB');
+  }
   const index = rows[0].idx;
 
   const address = deriveEvmAddress(index);
 
   // Update the placeholder row the RPC created with the real address
-  await query(
+  const updated = await query(
     `UPDATE deposit_addresses SET address = $1
-     WHERE user_id = $2 AND currency = $3 AND address_index = $4`,
+     WHERE user_id = $2 AND currency = $3 AND address_index = $4
+     RETURNING address`,
     [address, userId, currency, index]
   );
+  if (!updated.length) {
+    throw new Error('Failed to save derived address to DB — placeholder row missing');
+  }
 
   // Best-effort: tell Alchemy to watch this address
   await registerWithAlchemy(address, currency);

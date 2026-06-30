@@ -428,8 +428,7 @@ document.getElementById('wdMax').addEventListener('click',()=>{
 [wdAddr,wdAmt].forEach(i=>i.addEventListener('input',validateWd));
 async function doOnChainWithdrawal(amountBnb){
   if(!window.ethereum){
-    showToast({icon:'⚠',title:'MetaMask required',sub:'Install MetaMask to withdraw BNB on-chain.'});
-    return;
+    throw new Error('MetaMask not installed — install MetaMask to withdraw BNB on-chain.');
   }
   /* Request account */
   const accounts=await window.ethereum.request({method:'eth_requestAccounts'});
