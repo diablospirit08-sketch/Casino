@@ -567,8 +567,8 @@ function sizeTiles(){
   const gap=14;
   const t=document.querySelector('.row-track');
   if(t){
-    const w=t.clientWidth-20;
-    document.documentElement.style.setProperty('--tiles',w>=900?8:Math.max(2,Math.floor((w+gap)/(130+gap))));
+    const w=t.clientWidth-4;
+    document.documentElement.style.setProperty('--tiles',w>=900?7:Math.max(2,Math.floor((w+gap)/(130+gap))));
   }
   const p=document.getElementById('provRow');
   if(p){
