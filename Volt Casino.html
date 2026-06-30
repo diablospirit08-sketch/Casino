@@ -2477,6 +2477,7 @@
 <script src="js/bets.js" defer></script>
 <script src="js/place-bet.js" defer></script>
 <script>
+var $id=id=>document.getElementById(id);
 $id('loyaltyBtn').addEventListener('click',()=>{
   if(typeof avatarWrap!=='undefined')avatarWrap.classList.remove('open');
   $id('vipOverlay').classList.add('open');
@@ -2539,6 +2540,7 @@ $id('loyaltyBtn').addEventListener('click',()=>{
 </script>
 <script>
 /* if the page loaded directly on an originals game via #play= hash */
+var curSlug=(location.hash.match(/[#&]play=([^&]+)/)||[])[1]||'';
 if(curSlug)mountEngine(curSlug);
 /* ── promo pair — apply admin overrides from localStorage ── */
 var PROMO_DEFAULTS_CASINO={
