@@ -149,7 +149,7 @@
   }
 
   /* ===== NAV RAIL (expanded 216px / collapsed 56px) ===== */
-  .rail{position:fixed;left:0;top:80px;bottom:0;width:var(--rail);background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px 10px;gap:2px;z-index:60;overflow-y:auto;overflow-x:hidden;transition:width .22s cubic-bezier(.4,0,.2,1)}
+  .rail{position:fixed;left:0;top:80px;bottom:0;width:var(--rail);background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px 10px;gap:2px;z-index:60;overflow-y:auto;overflow-x:hidden;transition:width .22s cubic-bezier(.4,0,.2,1),padding .22s cubic-bezier(.4,0,.2,1)}
   /* edge chevron */
   .rail-chevron{position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:24px;height:24px;background:var(--panel);border:1px solid var(--line);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:61;color:var(--muted);transition:color .15s,background .15s}
   .rail-chevron:hover{background:var(--panel-2);color:var(--txt)}
@@ -161,7 +161,7 @@
   .rail a .it,.rail button .it{width:36px;height:36px;flex:none;border-radius:8px;display:grid;place-items:center;
     background:transparent;border:none;transition:.15s;user-select:none}
   .it svg{width:28px;height:28px;color:#6b82a0;transition:color .15s,transform .15s}
-  .rail a .lbl,.rail button .lbl{overflow:hidden;text-overflow:ellipsis}
+  .rail a .lbl,.rail button .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;opacity:1;transition:opacity .1s ease .12s,max-width .22s cubic-bezier(.4,0,.2,1)}
   .rail a:hover .it svg,.rail button:hover .it svg{color:#c8d6e8;transform:scale(1.1)}
   .rail a:hover,.rail button:hover{color:var(--txt);background:rgba(255,255,255,.04);border-radius:8px}
   .rail a.active .it svg{color:#e8edf5}
@@ -182,7 +182,8 @@
   body.rail-min .rail{padding:14px 0}
   body.rail-min .rail a,body.rail-min .rail button{justify-content:center;gap:0;padding:0}
   body.rail-min .rail a .lbl,body.rail-min .rail button .lbl{
-    opacity:0;width:0;overflow:hidden;pointer-events:none;transition:opacity .18s,width .18s}
+    opacity:0;max-width:0;pointer-events:none;
+    transition:opacity .1s ease,max-width .22s cubic-bezier(.4,0,.2,1) .05s}
   body.rail-min .rail .sep{margin:8px 4px}
   /* tooltip on hover when collapsed */
   body.rail-min .rail a[title]:hover::after,body.rail-min .rail button[title]:hover::after{
