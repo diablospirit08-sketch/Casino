@@ -105,7 +105,7 @@ export async function authRoutes(fastify) {
   }, async (req, reply) => {
     const { email, password } = req.body;
     const rows = await query(
-      `SELECT id, email, username, password_hash, is_banned, kyc_status
+      `SELECT id, email, username, password_hash, is_banned, kyc_status, is_admin
        FROM users WHERE email = $1`,
       [email.toLowerCase()]
     );
@@ -151,7 +151,7 @@ export async function authRoutes(fastify) {
 
     const rows = await query(
       `SELECT rt.id, rt.user_id, rt.expires_at, rt.revoked,
-              u.email, u.username, u.is_banned
+              u.email, u.username, u.is_banned, u.is_admin
        FROM refresh_tokens rt
        JOIN users u ON u.id = rt.user_id
        WHERE rt.token_hash = $1`,
@@ -172,7 +172,7 @@ export async function authRoutes(fastify) {
       [rt.id]
     );
 
-    const user = { id: rt.user_id, email: rt.email, username: rt.username };
+    const user = { id: rt.user_id, email: rt.email, username: rt.username, is_admin: rt.is_admin ?? false };
     const { accessToken, refreshToken: newRefresh } = await issueTokens(fastify, user);
     return { accessToken, refreshToken: newRefresh };
   });
@@ -255,7 +255,7 @@ export async function authRoutes(fastify) {
 
 async function issueTokens(fastify, user) {
   const accessToken = fastify.jwt.sign(
-    { sub: user.id, email: user.email, username: user.username },
+    { sub: user.id, email: user.email, username: user.username, is_admin: user.is_admin ?? false },
     { expiresIn: '15m' }
   );
 

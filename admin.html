@@ -625,43 +625,23 @@ tbody tr:last-child td{border-bottom:none}
             <div class="pce-field"><label class="pce-field" style="display:flex;flex-direction:column;gap:6px"><span style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Casino Name</span><input class="pce-input" type="text" value="VioFyr Casino"/></label></div>
             <div class="pce-field"><label class="pce-field" style="display:flex;flex-direction:column;gap:6px"><span style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Support Email</span><input class="pce-input" type="email" value="support@viofyr.com"/></label></div>
             <div class="pce-field"><label class="pce-field" style="display:flex;flex-direction:column;gap:6px"><span style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Default Currency</span><input class="pce-input" type="text" value="BNB"/></label></div>
-            <button class="pce-save" style="align-self:flex-start" onclick="this.textContent='Saved ✓';setTimeout(()=>this.textContent='Save',2000)">Save</button>
+            <button class="pce-save" style="align-self:flex-start" id="siteInfoSaveBtn" onclick="saveSiteInfo(this)">Save</button>
           </div>
         </div>
 
-        <!-- Game Toggles -->
+        <!-- Feature Flags -->
         <div class="tbl-wrap">
           <div class="tbl-toolbar"><h3 style="font-size:13px;font-weight:800;flex:1">Feature Flags</h3></div>
-          <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
-            ${[
-              ['Maintenance Mode','Redirect all visitors to a maintenance page',false],
-              ['Demo Mode','Allow games to be played without signing in',true],
-              ['Registrations Open','Allow new accounts to be created',true],
-              ['Deposits Enabled','Accept new crypto deposits',true],
-              ['Withdrawals Enabled','Process withdrawal requests',true],
-            ].map(([label,desc,on])=>`
-              <div style="display:flex;align-items:center;gap:12px">
-                <div style="flex:1"><div style="font-size:13px;font-weight:700">${label}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${desc}</div></div>
-                <label style="position:relative;display:inline-block;width:38px;height:22px;cursor:pointer;flex:none">
-                  <input type="checkbox" ${on?'checked':''} style="opacity:0;width:0;height:0" onchange="this.previousElementSibling&&(this.previousElementSibling.style.background=this.checked?'var(--mint)':'var(--panel-2)')">
-                  <span style="position:absolute;inset:0;background:${on?'var(--mint)':'var(--panel-2)'};border-radius:99px;transition:.2s;border:1px solid var(--line-2)"></span>
-                  <span style="position:absolute;top:3px;left:${on?'18':'3'}px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s"></span>
-                </label>
-              </div>`).join('')}
+          <div id="featureFlagsContainer" style="padding:20px;display:flex;flex-direction:column;gap:14px">
+            <div style="font-size:12px;color:var(--muted)">Loading…</div>
           </div>
         </div>
 
         <!-- House Edge Overrides -->
         <div class="tbl-wrap">
           <div class="tbl-toolbar"><h3 style="font-size:13px;font-weight:800;flex:1">House Edge Overrides</h3></div>
-          <div style="padding:20px;display:flex;flex-direction:column;gap:10px">
-            ${[['Crash','3'],['Mines','2.5'],['Dice','1'],['Plinko','2'],['Coinflip','2'],['Keno','4'],['Limbo','1'],['Blackjack','0.5'],['Roulette','2.7'],['Baccarat','1.06']].map(([g,e])=>`
-              <div style="display:flex;align-items:center;gap:10px">
-                <span style="flex:1;font-size:13px;font-weight:700">${g}</span>
-                <input class="pce-input" type="number" value="${e}" step="0.1" min="0" max="20" style="width:80px;text-align:right"/>
-                <span style="font-size:12px;color:var(--muted)">%</span>
-              </div>`).join('')}
-            <button class="pce-save" style="align-self:flex-start;margin-top:4px" onclick="this.textContent='Saved ✓';setTimeout(()=>this.textContent='Save',2000)">Save</button>
+          <div id="houseEdgeContainer" style="padding:20px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:12px;color:var(--muted)">Loading…</div>
           </div>
         </div>
 
@@ -876,7 +856,7 @@ async function loadTransactions(){
 }
 
 function renderTx(){
-  const rows=_txFilter==='all'?_txs:_txs.filter(t=>t.type===_txFilter);
+  const rows=_txFilter==='all'?_txs:_txFilter==='pending'?_txs.filter(t=>t.status==='pending'):_txs.filter(t=>t.type===_txFilter);
   $('txTbody').innerHTML=rows.map(t=>{
     const pos=parseFloat(t.amount)>0;
     return `<tr>
@@ -902,20 +882,42 @@ document.querySelectorAll('[data-tf]').forEach(btn=>{
 
 /* ══ GAMES ══════════════════════════════════════════════════ */
 const GDEFS=[
-  {name:'Crash',    icon:'💥',cat:'Originals',edge:'3%'},
-  {name:'Mines',    icon:'💎',cat:'Originals',edge:'2.5%'},
-  {name:'Dice',     icon:'🎲',cat:'Originals',edge:'1%'},
-  {name:'Plinko',   icon:'🔮',cat:'Originals',edge:'2%'},
-  {name:'Coinflip', icon:'🪙',cat:'Originals',edge:'2%'},
-  {name:'Keno',     icon:'🎯',cat:'Originals',edge:'4%'},
-  {name:'Limbo',    icon:'🌀',cat:'Originals',edge:'1%'},
-  {name:'Blackjack',icon:'🃏',cat:'Table',    edge:'0.5%'},
-  {name:'Roulette', icon:'🎡',cat:'Table',    edge:'2.7%'},
-  {name:'Baccarat', icon:'🎴',cat:'Table',    edge:'1.06%'},
+  {slug:'originals-crash',    name:'Crash',    icon:'💥',cat:'Originals',edge:'3%'},
+  {slug:'originals-mines',    name:'Mines',    icon:'💎',cat:'Originals',edge:'2.5%'},
+  {slug:'originals-dice',     name:'Dice',     icon:'🎲',cat:'Originals',edge:'1%'},
+  {slug:'originals-plinko',   name:'Plinko',   icon:'🔮',cat:'Originals',edge:'2%'},
+  {slug:'originals-coinflip', name:'Coinflip', icon:'🪙',cat:'Originals',edge:'2%'},
+  {slug:'originals-keno',     name:'Keno',     icon:'🎯',cat:'Originals',edge:'4%'},
+  {slug:'originals-limbo',    name:'Limbo',    icon:'🌀',cat:'Originals',edge:'1%'},
+  {slug:'originals-blackjack',name:'Blackjack',icon:'🃏',cat:'Table',    edge:'0.5%'},
+  {slug:'originals-roulette', name:'Roulette', icon:'🎡',cat:'Table',    edge:'2.7%'},
+  {slug:'originals-baccarat', name:'Baccarat', icon:'🎴',cat:'Table',    edge:'1.06%'},
 ];
 
+window.toggleGame=async function(slug,enabled,cb){
+  cb.disabled=true;
+  try{
+    await aFetch('/api/admin/games/'+encodeURIComponent(slug)+'/toggle',{method:'POST',body:JSON.stringify({enabled})});
+    const row=cb.closest('tr');
+    const badge=row.querySelector('.badge-status');
+    badge.className='badge-status '+(enabled?'active':'suspended');
+    badge.textContent=enabled?'Active':'Disabled';
+    cb.previousElementSibling.style.background=enabled?'var(--mint)':'var(--panel-2)';
+    cb.nextElementSibling.style.left=enabled?'18px':'3px';
+  }catch(e){
+    cb.checked=!enabled;
+    alert('Failed to toggle game: '+esc(e.message));
+  }finally{
+    cb.disabled=false;
+  }
+};
+
 async function loadGames(){
-  const {bets}=await aFetch('/api/admin/bets?limit=200&since='+todayStr()+'T00:00:00Z');
+  const [{bets},{disabled_games}]=await Promise.all([
+    aFetch('/api/admin/bets?limit=200&since='+todayStr()+'T00:00:00Z'),
+    aFetch('/api/admin/config'),
+  ]);
+  const disabledMap=disabled_games||{};
   const gmap={};
   (bets||[]).forEach(b=>{
     const k=b.game.replace(/^originals-/i,'').replace(/^\w/,c=>c.toUpperCase());
@@ -925,21 +927,20 @@ async function loadGames(){
   });
   $('gamesTbody').innerHTML=GDEFS.map(g=>{
     const s=gmap[g.name]||{bets:0,rev:0};
+    const enabled=!disabledMap[g.slug];
     return `<tr>
       <td><div class="td-user"><div class="tg-ic" style="width:32px;height:32px;border-radius:8px;background:var(--panel-2);font-size:16px;display:grid;place-items:center">${g.icon}</div><div class="u-name">${g.name}</div></div></td>
       <td style="color:var(--muted)">${g.cat}</td>
       <td style="color:var(--yellow);font-weight:700">${g.edge}</td>
       <td style="color:var(--muted)">${s.bets.toLocaleString()}</td>
       <td class="amt-pos">${fmtN(s.rev)} BNB</td>
-      <td><span class="badge-status active">Active</span></td>
+      <td><span class="badge-status ${enabled?'active':'suspended'}">${enabled?'Active':'Disabled'}</span></td>
       <td>
         <label style="position:relative;display:inline-block;width:38px;height:22px;cursor:pointer">
-          <input type="checkbox" checked style="opacity:0;width:0;height:0"
-            onchange="this.closest('tr').querySelector('.badge-status').className='badge-status '+(this.checked?'active':'suspended');this.closest('tr').querySelector('.badge-status').textContent=this.checked?'Active':'Disabled';
-                      this.previousElementSibling.style.background=this.checked?'var(--mint)':'var(--panel-2)';
-                      this.nextElementSibling.style.left=this.checked?'18px':'3px'">
-          <span style="position:absolute;inset:0;background:var(--mint);border-radius:99px;transition:.2s;border:1px solid var(--line-2)"></span>
-          <span style="position:absolute;top:3px;left:18px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s"></span>
+          <input type="checkbox" ${enabled?'checked':''} style="opacity:0;width:0;height:0"
+            onchange="toggleGame('${g.slug}',this.checked,this)">
+          <span style="position:absolute;inset:0;background:${enabled?'var(--mint)':'var(--panel-2)'};border-radius:99px;transition:.2s;border:1px solid var(--line-2)"></span>
+          <span style="position:absolute;top:3px;left:${enabled?'18':'3'}px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s"></span>
         </label>
       </td>
     </tr>`;
@@ -975,9 +976,17 @@ function renderLiveBets(){
 /* ══ POLLING (replaces Supabase realtime) ═══════════════════ */
 let _pollInterval=null;
 function startPolling(){
-  _pollInterval=setInterval(()=>{
-    if($('tab-bets').classList.contains('active')) loadLiveBets();
-    if($('tab-dashboard').classList.contains('active')) loadDashboard();
+  _pollInterval=setInterval(async()=>{
+    try{
+      if($('tab-bets').classList.contains('active'))      await loadLiveBets();
+      if($('tab-dashboard').classList.contains('active')) await loadDashboard();
+    }catch(e){
+      if(e.status===401){
+        clearInterval(_pollInterval);
+        _pollInterval=null;
+        showAuthError('Session expired — please sign in again.');
+      }
+    }
   },10000);
 }
 
@@ -1103,11 +1112,11 @@ function initGameArtEditor(){
   grid.innerHTML=GAME_ART_GAMES.map(g=>`
     <div class="promo-card-edit" id="gae-${g.slug}">
       <div class="pce-preview" style="background:${g.grad};height:130px">
-        <img id="gaeImg-${g.slug}" src="${saved[g.slug]||''}" alt="" style="${saved[g.slug]?'':'display:none'};position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none">
+        <img id="gaeImg-${g.slug}" src="${esc(saved[g.slug]||'')}" alt="" style="${saved[g.slug]?'':'display:none'};position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none">
         <span class="pce-preview-label">${g.name}</span>
       </div>
       <div class="pce-body" style="padding:12px 14px;gap:8px">
-        <input class="pce-input" id="gaeUrl-${g.slug}" type="text" placeholder="Image URL" value="${saved[g.slug]&&!saved[g.slug].startsWith('data:')?saved[g.slug]:(saved[g.slug]?'(uploaded file)':'')}"/>
+        <input class="pce-input" id="gaeUrl-${g.slug}" type="text" placeholder="Image URL" value="${esc(saved[g.slug]&&!saved[g.slug].startsWith('data:')?saved[g.slug]:(saved[g.slug]?'(uploaded file)':''))}"/>
         <div class="pce-row">
           <label class="pce-upload"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Upload<input type="file" accept="image/*" id="gaeFile-${g.slug}" hidden/></label>
           <button class="pce-save" onclick="saveGameArt('${g.slug}')">Save</button>
@@ -1207,6 +1216,104 @@ async function loadVip(){
     : `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">No users yet</td></tr>`;
 }
 
+/* ══ SETTINGS ═══════════════════════════════════════════════ */
+const FLAG_DEFS=[
+  {key:'maintenance_mode',  label:'Maintenance Mode',  desc:'Redirect all visitors to a maintenance page', def:false},
+  {key:'demo_mode',         label:'Demo Mode',         desc:'Allow games to be played without signing in', def:true},
+  {key:'registrations_open',label:'Registrations Open',desc:'Allow new accounts to be created',            def:true},
+  {key:'deposits_enabled',  label:'Deposits Enabled',  desc:'Accept new crypto deposits',                  def:true},
+  {key:'withdrawals_enabled',label:'Withdrawals Enabled',desc:'Process withdrawal requests',               def:true},
+];
+const HEDGE_DEFS=[
+  {key:'crash',     label:'Crash',     def:'3'},
+  {key:'mines',     label:'Mines',     def:'2.5'},
+  {key:'dice',      label:'Dice',      def:'1'},
+  {key:'plinko',    label:'Plinko',    def:'2'},
+  {key:'coinflip',  label:'Coinflip',  def:'2'},
+  {key:'keno',      label:'Keno',      def:'4'},
+  {key:'limbo',     label:'Limbo',     def:'1'},
+  {key:'blackjack', label:'Blackjack', def:'0.5'},
+  {key:'roulette',  label:'Roulette',  def:'2.7'},
+  {key:'baccarat',  label:'Baccarat',  def:'1.06'},
+];
+
+async function loadSettings(){
+  let cfg={feature_flags:{},house_edges:{}};
+  try{ cfg=await aFetch('/api/admin/config'); }catch(_){}
+
+  /* Feature flags */
+  $('featureFlagsContainer').innerHTML=FLAG_DEFS.map(f=>{
+    const on=f.key in cfg.feature_flags?cfg.feature_flags[f.key]:f.def;
+    return `<div style="display:flex;align-items:center;gap:12px">
+      <div style="flex:1"><div style="font-size:13px;font-weight:700">${f.label}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${f.desc}</div></div>
+      <label style="position:relative;display:inline-block;width:38px;height:22px;cursor:pointer;flex:none">
+        <input type="checkbox" data-flag="${f.key}" ${on?'checked':''} style="opacity:0;width:0;height:0"
+          onchange="saveFeatureFlag('${f.key}',this.checked,this)">
+        <span style="position:absolute;inset:0;background:${on?'var(--mint)':'var(--panel-2)'};border-radius:99px;transition:.2s;border:1px solid var(--line-2)"></span>
+        <span style="position:absolute;top:3px;left:${on?'18':'3'}px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s"></span>
+      </label>
+    </div>`;
+  }).join('');
+
+  /* House edge */
+  $('houseEdgeContainer').innerHTML=HEDGE_DEFS.map(h=>{
+    const val=cfg.house_edges[h.key]??h.def;
+    return `<div style="display:flex;align-items:center;gap:10px">
+      <span style="flex:1;font-size:13px;font-weight:700">${h.label}</span>
+      <input class="pce-input" type="number" data-hedge="${h.key}" value="${val}" step="0.1" min="0" max="20" style="width:80px;text-align:right"/>
+      <span style="font-size:12px;color:var(--muted)">%</span>
+    </div>`;
+  }).join('')+`<button class="pce-save" style="align-self:flex-start;margin-top:4px" onclick="saveHouseEdges(this)">Save</button>`;
+}
+
+window.saveFeatureFlag=async function(key,value,cb){
+  cb.disabled=true;
+  try{
+    const cfg=await aFetch('/api/admin/config');
+    const flags=Object.assign({},cfg.feature_flags,{[key]:value});
+    await aFetch('/api/admin/config',{method:'PATCH',body:JSON.stringify({feature_flags:flags})});
+    cb.previousElementSibling.style.background=value?'var(--mint)':'var(--panel-2)';
+    cb.nextElementSibling.style.left=value?'18px':'3px';
+  }catch(e){
+    cb.checked=!value;
+    alert('Save failed: '+esc(e.message));
+  }finally{
+    cb.disabled=false;
+  }
+};
+
+window.saveHouseEdges=async function(btn){
+  btn.textContent='Saving…';btn.disabled=true;
+  try{
+    const house_edges={};
+    document.querySelectorAll('[data-hedge]').forEach(el=>{
+      house_edges[el.dataset.hedge]=parseFloat(el.value)||0;
+    });
+    await aFetch('/api/admin/config',{method:'PATCH',body:JSON.stringify({house_edges})});
+    btn.textContent='Saved ✓';
+    setTimeout(()=>{btn.textContent='Save';btn.disabled=false;},2000);
+  }catch(e){
+    btn.textContent='Save';btn.disabled=false;
+    alert('Save failed: '+esc(e.message));
+  }
+};
+
+window.saveSiteInfo=async function(btn){
+  btn.textContent='Saving…';btn.disabled=true;
+  const panel=btn.closest('[style]');
+  const inputs=panel?panel.querySelectorAll('input'):[];
+  const site_settings={};
+  inputs.forEach(el=>{if(el.type!=='submit'&&el.name)site_settings[el.name]=el.value;});
+  try{
+    await aFetch('/api/admin/config',{method:'PATCH',body:JSON.stringify({feature_flags:{...site_settings}})});
+    btn.textContent='Saved ✓';
+    setTimeout(()=>{btn.textContent='Save';btn.disabled=false;},2000);
+  }catch(e){
+    btn.textContent='Save';btn.disabled=false;
+    alert('Save failed: '+esc(e.message));
+  }
+};
+
 /* ══ SETTINGS STATUS ════════════════════════════════════════ */
 async function loadSettingsStatus(){
   const el=$('settingsBackendStatus');
@@ -1241,7 +1348,7 @@ async function initAdmin(){
   document.querySelector('.sb-user-info span').textContent=me.email||'admin';
   document.querySelector('.sb-avatar').textContent=(me.username||'A')[0].toUpperCase();
 
-  await Promise.all([loadDashboard(),loadUsers(),loadTransactions(),loadGames(),loadLiveBets(),loadVip(),loadSettingsStatus()]);
+  await Promise.all([loadDashboard(),loadUsers(),loadTransactions(),loadGames(),loadLiveBets(),loadVip(),loadSettings(),loadSettingsStatus()]);
   startPolling();
 }
 

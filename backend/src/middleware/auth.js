@@ -22,6 +22,7 @@ export const authPlugin = fp(async function authPlugin(fastify) {
         id:       req.user.sub,
         email:    req.user.email,
         username: req.user.username,
+        is_admin: req.user.is_admin ?? false,
       };
     } catch (err) {
       reply.code(401).send({ error: 'Unauthorized', message: err.message });
@@ -35,6 +36,7 @@ export const authPlugin = fp(async function authPlugin(fastify) {
         id:       req.user.sub,
         email:    req.user.email,
         username: req.user.username,
+        is_admin: req.user.is_admin ?? false,
       };
     } catch {
       req.user = null;

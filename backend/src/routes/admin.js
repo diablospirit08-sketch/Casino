@@ -11,8 +11,7 @@
 import { query } from '../db.js';
 
 async function requireAdmin(req, reply) {
-  const rows = await query('SELECT is_admin FROM users WHERE id = $1', [req.user.id]);
-  if (!rows[0]?.is_admin) {
+  if (!req.user.is_admin) {
     return reply.code(403).send({ error: 'Admin access required' });
   }
 }
@@ -81,6 +80,10 @@ export async function adminRoutes(fastify) {
     if (req.params.id === req.user.id) {
       return reply.code(400).send({ error: 'Cannot ban yourself' });
     }
+    const target = await query('SELECT is_admin FROM users WHERE id = $1', [req.params.id]);
+    if (target[0]?.is_admin) {
+      return reply.code(403).send({ error: 'Cannot ban another admin account' });
+    }
     await query('UPDATE users SET is_banned = $1 WHERE id = $2', [req.body.banned, req.params.id]);
     return { ok: true };
   });
@@ -93,7 +96,7 @@ export async function adminRoutes(fastify) {
         properties: {
           limit:  { type: 'integer', minimum: 1, maximum: 200, default: 25 },
           offset: { type: 'integer', minimum: 0, default: 0 },
-          since:  { type: 'string' },
+          since:  { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}' },
         },
       },
     },
@@ -111,6 +114,65 @@ export async function adminRoutes(fastify) {
       LIMIT $1 OFFSET $2
     `, params);
     return { bets: rows, limit, offset };
+  });
+
+  // ── Site config ────────────────────────────────────────────────────────────
+  fastify.get('/config', async () => {
+    const rows = await query(
+      'SELECT feature_flags, house_edges, disabled_games FROM site_config LIMIT 1'
+    );
+    return rows[0] ?? { feature_flags: {}, house_edges: {}, disabled_games: {} };
+  });
+
+  fastify.patch('/config', {
+    schema: {
+      body: {
+        type: 'object',
+        properties: {
+          feature_flags:  { type: 'object' },
+          house_edges:    { type: 'object' },
+          disabled_games: { type: 'object' },
+        },
+        additionalProperties: false,
+      },
+    },
+  }, async (req) => {
+    const sets = [], params = [];
+    const push = (col, val) => { params.push(val); sets.push(`${col} = $${params.length}`); };
+    if (req.body.feature_flags  !== undefined) push('feature_flags',  JSON.stringify(req.body.feature_flags));
+    if (req.body.house_edges    !== undefined) push('house_edges',    JSON.stringify(req.body.house_edges));
+    if (req.body.disabled_games !== undefined) push('disabled_games', JSON.stringify(req.body.disabled_games));
+    if (sets.length) await query(`UPDATE site_config SET ${sets.join(', ')}`);
+    return { ok: true };
+  });
+
+  // ── Game toggle ─────────────────────────────────────────────────────────────
+  fastify.post('/games/:slug/toggle', {
+    schema: {
+      params: {
+        type: 'object',
+        required: ['slug'],
+        properties: { slug: { type: 'string', maxLength: 60 } },
+      },
+      body: {
+        type: 'object',
+        required: ['enabled'],
+        properties: { enabled: { type: 'boolean' } },
+        additionalProperties: false,
+      },
+    },
+  }, async (req) => {
+    const { slug } = req.params;
+    const { enabled } = req.body;
+    if (enabled) {
+      await query(`UPDATE site_config SET disabled_games = disabled_games - $1`, [slug]);
+    } else {
+      await query(
+        `UPDATE site_config SET disabled_games = disabled_games || jsonb_build_object($1::text, true)`,
+        [slug]
+      );
+    }
+    return { ok: true };
   });
 
   // ── Transactions (ledger) ──────────────────────────────────────────────────
