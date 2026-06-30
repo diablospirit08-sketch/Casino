@@ -819,10 +819,10 @@ ORIGINALS['originals-blackjack']={
 .bj2pill.d{background:rgba(0,0,0,.45);color:#c8dff0;border:1px solid rgba(255,255,255,.15)}
 
 /* card stacks */
-.bj2stk{position:relative;min-height:88px;min-width:62px;display:flex;align-items:center;perspective:700px}
+.bj2stk{position:relative;min-height:108px;min-width:80px;display:flex;align-items:center;perspective:700px}
 
 /* cards */
-.bj2c{position:absolute;width:54px;height:76px;border-radius:6px;
+.bj2c{position:absolute;width:72px;height:100px;border-radius:8px;
   background:linear-gradient(175deg,#fefefe 0%,#f3f3f1 100%);
   box-shadow:0 1px 3px rgba(0,0,0,.1),0 6px 20px rgba(0,0,0,.54),0 14px 32px rgba(0,0,0,.2);
   border:1px solid rgba(0,0,0,.09);overflow:hidden;user-select:none}
@@ -831,13 +831,13 @@ ORIGINALS['originals-blackjack']={
   border-radius:9px 9px 0 0;
   background:linear-gradient(180deg,rgba(255,255,255,.2) 0%,transparent 100%);
   pointer-events:none;z-index:1}
-.bj2corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:0px;line-height:1;padding:3px 4px}
+.bj2corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:0px;line-height:1;padding:5px 6px}
 .bj2corner.tl{top:0;left:0}
 .bj2corner.br{bottom:0;right:0;transform:rotate(180deg)}
-.bj2c .cr{font-size:12px;font-weight:900;color:#1a2634;line-height:1}
-.bj2c .cs{font-size:9px;color:#1a2634;line-height:1.1}
+.bj2c .cr{font-size:18px;font-weight:900;color:#1a2634;line-height:1}
+.bj2c .cs{font-size:13px;color:#1a2634;line-height:1.1}
 .bj2center-suit{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-size:22px;opacity:.22;pointer-events:none;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
+  font-size:36px;opacity:.22;pointer-events:none;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
 .bj2c.red .cr,.bj2c.red .cs{color:#c8102e}
 /* card back — dark forest green with gold ornate frame */
 .bj2c.back{
