@@ -819,10 +819,10 @@ ORIGINALS['originals-blackjack']={
 .bj2pill.d{background:rgba(0,0,0,.45);color:#c8dff0;border:1px solid rgba(255,255,255,.15)}
 
 /* card stacks */
-.bj2stk{position:relative;min-height:118px;min-width:88px;display:flex;align-items:center;perspective:700px}
+.bj2stk{position:relative;min-height:116px;min-width:86px;display:flex;align-items:center;perspective:700px}
 
 /* cards */
-.bj2c{position:absolute;width:80px;height:112px;border-radius:9px;
+.bj2c{position:absolute;width:78px;height:110px;border-radius:8px;
   background:linear-gradient(175deg,#fefefe 0%,#f3f3f1 100%);
   box-shadow:0 1px 3px rgba(0,0,0,.1),0 6px 20px rgba(0,0,0,.54),0 14px 32px rgba(0,0,0,.2);
   border:1px solid rgba(0,0,0,.09);overflow:hidden;user-select:none}
