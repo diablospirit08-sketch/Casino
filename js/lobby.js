@@ -337,17 +337,24 @@ function movePill(a,instant){
 /* ---------- rail collapse toggle ---------- */
 const LS_RAIL='volt-rail';
 const railToggle=document.getElementById('railToggle');
+const railChevron=document.getElementById('railChevron');
+const railBackdrop=document.getElementById('railBackdrop');
 const provRowEl=document.getElementById('provRow');
+const isMobile=()=>window.innerWidth<=768;
 function setRailMin(min){
   document.body.classList.toggle('rail-min',min);
   localStorage.setItem(LS_RAIL,min?'min':'full');
-  railToggle.setAttribute('aria-expanded',!min);
+  if(railToggle)railToggle.setAttribute('aria-expanded',!min);
+  /* backdrop on mobile */
+  if(railBackdrop)railBackdrop.style.display=(!min&&isMobile())?'block':'none';
   /* re-fit tiles once the rail width transition lands */
   setTimeout(()=>{sizeTiles();updateFades();movePill(document.querySelector('#railNav a.active'),true);syncAllRowArrows();syncProvArrows();},230);
 }
 const storedRail=localStorage.getItem(LS_RAIL);
 setRailMin(storedRail?storedRail==='min':window.innerWidth<1100);
-railToggle.addEventListener('click',()=>setRailMin(!document.body.classList.contains('rail-min')));
+if(railToggle)railToggle.addEventListener('click',()=>setRailMin(!document.body.classList.contains('rail-min')));
+if(railChevron)railChevron.addEventListener('click',()=>setRailMin(!document.body.classList.contains('rail-min')));
+if(railBackdrop)railBackdrop.addEventListener('click',()=>setRailMin(true));
 
 /* ---------- rail scrollspy + category wiring ---------- */
 const railLinks = [...document.querySelectorAll('#railNav a[data-target]')];

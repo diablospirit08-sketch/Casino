@@ -33,7 +33,7 @@
     --purple-ink:#ffffff;
     --violet:#8b7ae8;
     --win:#41f0a4;
-    --rail:180px;
+    --rail:250px;
     --maxw:100%;
     --fs-xs:10px;
     --fs-sm:12px;
@@ -149,7 +149,12 @@
   }
 
   /* ===== NAV RAIL (expanded 216px / collapsed 56px) ===== */
-  .rail{position:fixed;left:0;top:80px;bottom:0;width:var(--rail);background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px 10px;gap:2px;z-index:60;overflow-y:auto;overflow-x:hidden;transition:width .2s ease}
+  .rail{position:fixed;left:0;top:80px;bottom:0;width:var(--rail);background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px 10px;gap:2px;z-index:60;overflow-y:auto;overflow-x:hidden;transition:width .22s cubic-bezier(.4,0,.2,1)}
+  /* edge chevron */
+  .rail-chevron{position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:24px;height:24px;background:var(--panel);border:1px solid var(--line);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:61;color:var(--muted);transition:color .15s,background .15s}
+  .rail-chevron:hover{background:var(--panel-2);color:var(--txt)}
+  .rail-chevron svg{width:12px;height:12px;transition:transform .22s cubic-bezier(.4,0,.2,1)}
+  body.rail-min .rail-chevron svg{transform:rotate(180deg)}
   .rail::-webkit-scrollbar{display:none}
   .rail a,.rail button{position:relative;z-index:1;display:flex;align-items:center;gap:11px;height:48px;flex:none;padding:0 4px;border-radius:10px;color:var(--muted);font-family:inherit;font-size:14px;font-weight:800;letter-spacing:.01em;text-transform:none;white-space:nowrap;transition:color .16s;background:none;border:none;cursor:pointer;width:100%;text-align:left}
   .rail-pill{display:none}
@@ -180,7 +185,7 @@
   body.rail-min .rail .sep{margin:8px 2px}
 
   /* ===== MAIN ===== */
-  .main{margin-left:56px;padding:104px 90px 0}
+  .main{margin-left:var(--rail);padding:104px calc(90px + (250px - var(--rail))) 0 90px;width:calc(100vw - 250px);box-sizing:border-box;transition:margin-left .2s ease,padding-right .2s ease}
   .wrap{max-width:var(--maxw);margin:0 auto}
 
   /* hero carousel */
@@ -657,13 +662,17 @@
   @media(max-width:920px){
     .foot-grid{grid-template-columns:1fr 1fr}
   }
-  @media(max-width:600px){
-    :root{--rail:0px}
+  @media(max-width:768px){
+    :root{--rail:250px}
     body.rail-min{--rail:0px}
-    .rail{display:none}
-    .rail-toggle{display:none}
-    .main{padding:80px 14px 0}
+    .rail{transition:transform .22s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 24px rgba(0,0,0,.5)}
+    body.rail-min .rail{transform:translateX(-100%)}
+    .rail-chevron{display:none}
+    .main{margin-left:0!important;width:100vw!important;padding:80px 14px 0}
+    /* backdrop */
+    .rail-backdrop{display:block}
   }
+  .rail-backdrop{display:none;position:fixed;inset:0;z-index:59;background:rgba(0,0,0,.5);backdrop-filter:blur(2px)}
 
   @keyframes viewIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
   @keyframes viewOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-10px)}}
@@ -1457,7 +1466,12 @@
 </header>
 
 <!-- ===== ICON RAIL ===== -->
-<aside class="rail" id="railNav"></aside>
+<div class="rail-backdrop" id="railBackdrop"></div>
+<aside class="rail" id="railNav">
+  <button class="rail-chevron" id="railChevron" aria-label="Toggle sidebar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+</aside>
 
 <!-- ===== MAIN ===== -->
 <main class="main">
