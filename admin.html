@@ -1047,7 +1047,7 @@ function initPromoPairEditor(){
         const fd=new FormData();
         fd.append('promo-'+k,f,f.name);
         const res=await aFetch('/api/admin/upload',{method:'POST',body:fd});
-        const fullUrl=API+res.url;
+        const fullUrl=res.url.startsWith('http')?res.url:API+res.url;
         previewImg.src=lpImg.src=fullUrl;
         _pendingImg[k]=fullUrl;
         urlEl.value=fullUrl;
