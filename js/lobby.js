@@ -515,6 +515,7 @@ document.getElementById('rows').innerHTML = ROWS.map(row=>`
     <div class="row-head">
       <span class="ic">${row.img?`<img src="${row.img}" style="width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4))">`:(row.iconSvg||`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="${row.icon}"/></svg>`)}</span>
       <h2>${row.title}</h2>
+      <button class="see-all" data-seeall="${row.key}">See all <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg></button>
       <div class="row-nav">
         <button class="rbtn" data-scroll="${row.key}" data-dir="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 6-6 6 6 6"/></svg></button>
         <button class="rbtn" data-scroll="${row.key}" data-dir="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg></button>
@@ -561,6 +562,16 @@ document.querySelectorAll('[data-scroll]').forEach(btn=>{
 });
 document.querySelectorAll('.row-track').forEach(t=>{
   t.addEventListener('scroll',()=>syncRowArrows(t),{passive:true});
+});
+document.querySelectorAll('[data-seeall]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const row=document.getElementById('sec-'+btn.dataset.seeall);
+    if(!row)return;
+    const expanded=row.classList.toggle('expanded');
+    btn.innerHTML=expanded
+      ?'Show less <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg>'
+      :'See all <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg>';
+  });
 });
 /* ---------- fluid tile sizing: a whole number of tiles always fits ---------- */
 function sizeTiles(){
