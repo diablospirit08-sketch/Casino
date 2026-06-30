@@ -12,10 +12,10 @@
  * GET  /api/wallet/withdrawals           — withdrawal history
  */
 
-import { randomBytes } from 'crypto';
 import { verifyMessage, getAddress } from 'ethers';
 import { query, transaction } from '../db.js';
 import { signWithdrawal, cashierAddress } from '../services/vault.js';
+import { generateDepositAddress, EVM_CURRENCIES } from '../services/hdwallet.js';
 import {
   getBalance,
   getAllBalances,
@@ -124,28 +124,21 @@ export async function walletRoutes(fastify) {
       });
     }
 
-    // Return existing address or create one
+    if (!EVM_CURRENCIES.has(currency)) {
+      return reply.code(400).send({ error: `${currency} deposits are not yet supported` });
+    }
+
+    // Return existing address if already generated (one per user per currency)
     const existing = await query(
-      `SELECT address FROM deposit_addresses
-       WHERE user_id = $1 AND currency = $2 AND network = $3`,
-      [req.user.id, currency, network]
+      `SELECT address FROM deposit_addresses WHERE user_id = $1 AND currency = $2`,
+      [req.user.id, currency]
     );
 
     if (existing.length) {
       return { currency, network, address: existing[0].address };
     }
 
-    // In production: call your custody provider (NOWPayments, Fireblocks, etc.)
-    // to generate a real deposit address. Here we generate a placeholder.
-    const address = generatePlaceholderAddress(currency);
-
-    await query(
-      `INSERT INTO deposit_addresses (user_id, currency, network, address)
-       VALUES ($1, $2, $3, $4)
-       ON CONFLICT (user_id, currency, network) DO NOTHING`,
-      [req.user.id, currency, network, address]
-    );
-
+    const address = await generateDepositAddress(req.user.id, currency);
     return { currency, network, address };
   });
 
@@ -459,9 +452,3 @@ function connectWalletMessage(userId, address) {
   return `Connect wallet to Volt Casino\n\nAccount: ${userId}\nAddress: ${address}\n\nThis signature proves you own this wallet. No funds will be moved.`;
 }
 
-// ─── Placeholder — replace with real custody provider call ───────────────────
-function generatePlaceholderAddress(currency) {
-  const prefix = { BTC: '1', ETH: '0x', USDC: '0x', BNB: '0x', USDT: '0x' }[currency] ?? '0x';
-  const hex = randomBytes(20).toString('hex');
-  return prefix === '1' ? `1${hex.slice(0, 33)}` : `${prefix}${hex}`;
-}

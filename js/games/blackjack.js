@@ -368,7 +368,7 @@ ORIGINALS['originals-blackjack']={
   },
 
   /* ── card DOM ── */
-  _OV:56,// card overlap offset px
+  _OV:44,// card overlap offset px
   _ROTS:[0,-0.7,1.0,-0.5,0.8,-0.6],
   _SHADS:['0 6px 18px rgba(0,0,0,.48)','0 10px 26px rgba(0,0,0,.54)',
            '0 13px 30px rgba(0,0,0,.6)','0 15px 34px rgba(0,0,0,.63)',
@@ -396,7 +396,7 @@ ORIGINALS['originals-blackjack']={
   },
   _renderStack(container,hand,hidden,isPlayer,stagger){
     container.innerHTML='';
-    const OV=this._OV,totalW=Math.max(112,(hand.length-1)*OV+112);
+    const OV=this._OV,totalW=Math.max(88,(hand.length-1)*OV+88);
     hand.forEach((card,i)=>{
       const isHidden=hidden&&i===0;
       const delay=stagger?i*120:0;
@@ -819,36 +819,36 @@ ORIGINALS['originals-blackjack']={
 .bj2pill.d{background:rgba(0,0,0,.45);color:#c8dff0;border:1px solid rgba(255,255,255,.15)}
 
 /* card stacks */
-.bj2stk{position:relative;min-height:148px;min-width:112px;display:flex;align-items:center;perspective:700px}
+.bj2stk{position:relative;min-height:118px;min-width:88px;display:flex;align-items:center;perspective:700px}
 
 /* cards */
-.bj2c{position:absolute;width:104px;height:144px;border-radius:12px;
+.bj2c{position:absolute;width:80px;height:112px;border-radius:9px;
   background:linear-gradient(175deg,#fefefe 0%,#f3f3f1 100%);
   box-shadow:0 1px 3px rgba(0,0,0,.1),0 6px 20px rgba(0,0,0,.54),0 14px 32px rgba(0,0,0,.2);
   border:1px solid rgba(0,0,0,.09);overflow:hidden;user-select:none}
 /* top-edge gloss on face cards */
 .bj2c::before{content:"";position:absolute;top:0;left:0;right:0;height:52%;
-  border-radius:12px 12px 0 0;
+  border-radius:9px 9px 0 0;
   background:linear-gradient(180deg,rgba(255,255,255,.2) 0%,transparent 100%);
   pointer-events:none;z-index:1}
-.bj2corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:0px;line-height:1;padding:8px 9px}
+.bj2corner{position:absolute;display:flex;flex-direction:column;align-items:center;gap:0px;line-height:1;padding:6px 7px}
 .bj2corner.tl{top:0;left:0}
 .bj2corner.br{bottom:0;right:0;transform:rotate(180deg)}
-.bj2c .cr{font-size:26px;font-weight:900;color:#1a2634;line-height:1}
-.bj2c .cs{font-size:18px;color:#1a2634;line-height:1.1}
+.bj2c .cr{font-size:20px;font-weight:900;color:#1a2634;line-height:1}
+.bj2c .cs{font-size:14px;color:#1a2634;line-height:1.1}
 .bj2center-suit{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-size:52px;opacity:.22;pointer-events:none;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
+  font-size:40px;opacity:.22;pointer-events:none;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
 .bj2c.red .cr,.bj2c.red .cs{color:#c8102e}
 /* card back — dark forest green with gold ornate frame */
 .bj2c.back{
   background:linear-gradient(145deg,#0e4225 0%,#0a3019 48%,#071e10 100%);
   border:2px solid rgba(195,155,55,.55)}
 /* gold outer frame */
-.bj2c.back::before{content:"";position:absolute;inset:6px;border-radius:7px;
+.bj2c.back::before{content:"";position:absolute;inset:5px;border-radius:5px;
   border:1.5px solid rgba(215,175,60,.45);pointer-events:none;z-index:1;background:none;
   box-shadow:inset 0 0 12px rgba(0,0,0,.4)}
 /* diamond lattice in gold tones inside the frame */
-.bj2c.back::after{content:"";position:absolute;inset:11px;border-radius:4px;
+.bj2c.back::after{content:"";position:absolute;inset:9px;border-radius:3px;
   background:
     repeating-linear-gradient(45deg,rgba(195,155,55,.09) 0,rgba(195,155,55,.09) 2px,transparent 2px,transparent 9px),
     repeating-linear-gradient(-45deg,rgba(195,155,55,.09) 0,rgba(195,155,55,.09) 2px,transparent 2px,transparent 9px)}

@@ -374,6 +374,8 @@ function renderDepMode(){
   if(depMode==='txn')window.loadInlineTxnPage&&window.loadInlineTxnPage(true);
   if(depMode==='buy')renderBuyView();
 }
+function isOnChainWd(){return depCur==='BNB'&&currentNetwork().id==='BEP20';}
+
 function renderWd(){
   const w=depW();
   wdCoins.innerHTML=WALLETS.map(x=>`
@@ -383,11 +385,33 @@ function renderWd(){
   wdCoinIc.style.background='none';wdCoinIc.innerHTML=`<img src="${coinIconUrl(depCur)}" style="width:22px;height:22px;object-fit:cover" alt="${depCur}">`;
   wdAddr.placeholder='Paste your '+depCur+' address';
   wdFee.textContent=currentNetwork().fee||'—';
+
+  const onChain=isOnChainWd();
+  const mmBox=document.getElementById('wdMetaMaskBox');
+  const addrLabel=document.getElementById('wdAddrLabel');
+  const addrWrap=document.getElementById('wdAddrWrap');
+  if(mmBox)mmBox.hidden=!onChain;
+  if(addrLabel)addrLabel.hidden=onChain;
+  if(addrWrap)addrWrap.hidden=onChain;
+
+  /* Auto-populate MetaMask address if available */
+  if(onChain&&window.ethereum){
+    window.ethereum.request({method:'eth_accounts'}).then(accs=>{
+      const el=document.getElementById('wdMetaMaskAddr');
+      if(el&&accs[0])el.textContent=accs[0];
+    }).catch(()=>{});
+  }
+
   validateWd();
 }
 function validateWd(){
   const a=parseFloat(wdAmt.value);
-  wdSubmit.disabled=!(wdAddr.value.trim().length>=16&&a>0&&a<=depW().amt);
+  const bal=depW().amt;
+  if(isOnChainWd()){
+    wdSubmit.disabled=!(a>0&&a<=bal);
+  } else {
+    wdSubmit.disabled=!(wdAddr.value.trim().length>=16&&a>0&&a<=bal);
+  }
 }
 depTabsEl.addEventListener('click',e=>{
   const t=e.target.closest('.auth-tab');
@@ -402,24 +426,92 @@ document.getElementById('wdMax').addEventListener('click',()=>{
   wdAmt.value=fmtW(w,floorW(w,w.amt));validateWd();
 });
 [wdAddr,wdAmt].forEach(i=>i.addEventListener('input',validateWd));
+async function doOnChainWithdrawal(amountBnb){
+  if(!window.ethereum){
+    showToast({icon:'⚠',title:'MetaMask required',sub:'Install MetaMask to withdraw BNB on-chain.'});
+    return;
+  }
+  /* Request account */
+  const accounts=await window.ethereum.request({method:'eth_requestAccounts'});
+  const playerAddress=accounts[0];
+  if(!playerAddress)throw new Error('No account selected in MetaMask');
+
+  /* Switch to BSC mainnet */
+  try{
+    await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x38'}]});
+  }catch(e){
+    if(e.code===4902){
+      await window.ethereum.request({method:'wallet_addEthereumChain',params:[{
+        chainId:'0x38',chainName:'BNB Smart Chain',
+        nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},
+        rpcUrls:['https://bsc-dataseed.binance.org/'],
+        blockExplorerUrls:['https://bscscan.com/'],
+      }]});
+    } else throw e;
+  }
+
+  /* Connect wallet to account if not already verified */
+  const conRes=await window.voltApi._fetch('/api/wallet/connected-wallets');
+  const conJson=conRes.ok?await conRes.json():{wallets:[]};
+  const already=(conJson.wallets||[]).some(w=>
+    w.address.toLowerCase()===playerAddress.toLowerCase()&&w.network==='bsc'&&w.verified
+  );
+  if(!already){
+    const msgRes=await window.voltApi._fetch('/api/wallet/connect-wallet-message?address='+playerAddress);
+    const msgJson=await msgRes.json();
+    const sig=await window.ethereum.request({method:'personal_sign',params:[msgJson.message,playerAddress]});
+    const linkRes=await window.voltApi._fetch('/api/wallet/connect-wallet',{
+      method:'POST',body:JSON.stringify({address:playerAddress,network:'bsc',signature:sig})
+    });
+    if(!linkRes.ok){const j=await linkRes.json();throw new Error(j.error||'Wallet link failed');}
+  }
+
+  /* Get signed EIP-712 voucher — also debits the ledger */
+  const vRes=await window.voltApi._fetch('/api/wallet/sign-withdrawal',{
+    method:'POST',body:JSON.stringify({amountBnb,playerAddress,network:'bsc'})
+  });
+  const vJson=await vRes.json();
+  if(!vRes.ok)throw new Error(vJson.error||'Voucher request failed');
+  const{vaultAddress,amountWei,nonce,deadline,signature:vSig}=vJson;
+
+  /* Call VoltVault.withdraw() on-chain via MetaMask */
+  const provider=new window.ethers.BrowserProvider(window.ethereum);
+  const signer=await provider.getSigner();
+  const abi=['function withdraw(uint256 amount,uint256 nonce,uint256 deadline,bytes calldata signature) external'];
+  const vault=new window.ethers.Contract(vaultAddress,abi,signer);
+  const tx=await vault.withdraw(BigInt(amountWei),BigInt(nonce),BigInt(deadline),vSig);
+
+  showToast({icon:'↗',title:'Withdrawal sent',sub:'Tx: '+tx.hash.slice(0,10)+'… · Confirming on BSC'});
+
+  /* Refresh balance after confirmation (non-blocking) */
+  tx.wait().then(()=>{
+    if(window.loadBalances)loadBalances().catch(()=>{});
+    showToast({icon:'✓',col:'#41f0a4',title:'Withdrawal confirmed',sub:amountBnb+' BNB sent to your wallet'});
+  }).catch(()=>{});
+}
+
 wdSubmit.addEventListener('click',async()=>{
   if(wdSubmit.disabled)return;
   const w=depW(),a=Math.min(parseFloat(wdAmt.value)||0,w.amt);
   if(a<=0)return;
-  const addr=wdAddr.value.trim();
   wdSubmit.disabled=true;wdSubmit.textContent='Submitting…';
   try{
-    const net=currentNetwork();
-    const railwayNet=DEP_NET_MAP[net.id]||net.id.toLowerCase();
-    const res=await window.voltApi._fetch('/api/wallet/withdraw',{
-      method:'POST',
-      body:JSON.stringify({currency:w.c,network:railwayNet,amount:a,address:addr})
-    });
-    const json=await res.json();
-    if(!res.ok)throw new Error(json.error||'Withdrawal failed');
-    if(window.loadBalances)loadBalances().catch(()=>{});
-    const sub=json.txHash?'-'+fmtW(w,a)+' '+w.c+' · tx: '+json.txHash.slice(0,10)+'…':json.message||'Processing within 24h';
-    showToast({icon:'↗',title:'Withdrawal submitted',sub});
+    if(isOnChainWd()){
+      await doOnChainWithdrawal(a);
+    } else {
+      const addr=wdAddr.value.trim();
+      const net=currentNetwork();
+      const railwayNet=DEP_NET_MAP[net.id]||net.id.toLowerCase();
+      const res=await window.voltApi._fetch('/api/wallet/withdraw',{
+        method:'POST',
+        body:JSON.stringify({currency:w.c,network:railwayNet,amount:a,address:addr})
+      });
+      const json=await res.json();
+      if(!res.ok)throw new Error(json.error||'Withdrawal failed');
+      if(window.loadBalances)loadBalances().catch(()=>{});
+      const sub=json.txHash?'-'+fmtW(w,a)+' '+w.c+' · tx: '+json.txHash.slice(0,10)+'…':json.message||'Processing within 24h';
+      showToast({icon:'↗',title:'Withdrawal submitted',sub});
+    }
     wdAmt.value='';wdAddr.value='';renderWd();
   }catch(err){
     showToast({icon:'⚠',title:'Withdrawal failed',sub:err.message});

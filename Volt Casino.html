@@ -1902,8 +1902,16 @@
       <p class="dep-lbl" style="margin-top:0">Currency</p>
       <div class="dep-coins" id="wdCoins"></div>
       <div class="eng-readout" style="margin-top:14px"><span>Available</span><b id="wdAvail">—</b></div>
-      <p class="dep-lbl">Destination Address</p>
-      <div class="gv-input"><input id="wdAddr" type="text" autocomplete="off" spellcheck="false" placeholder="Paste your BTC address" aria-label="Destination address" /></div>
+      <!-- MetaMask wallet box — shown for BNB on-chain withdrawals -->
+      <div id="wdMetaMaskBox" hidden style="display:flex;align-items:center;gap:10px;background:var(--panel-2);border-radius:10px;padding:10px 12px;margin-top:14px">
+        <svg style="flex:none;width:28px;height:28px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        <div style="min-width:0">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px">Connected BSC wallet</div>
+          <code id="wdMetaMaskAddr" style="font-size:11px;word-break:break-all;color:var(--txt)">—</code>
+        </div>
+      </div>
+      <p class="dep-lbl" id="wdAddrLabel">Destination Address</p>
+      <div class="gv-input" id="wdAddrWrap"><input id="wdAddr" type="text" autocomplete="off" spellcheck="false" placeholder="Paste your BTC address" aria-label="Destination address" /></div>
       <p class="dep-lbl">Amount</p>
       <div class="gv-input">
         <span class="coin-ic sm" id="wdCoinIc" style="background:#f7931a">₿</span>
@@ -2454,7 +2462,8 @@
 <script src="js/engines.js" defer></script>
 <script src="js/vip.js?v=3" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js" integrity="sha384-HGmnkDZJy7mRkoARekrrj0VjEFSh9a0Z8qxGri/kTTAJkgR8hqD1lHsYSh3JdzRi" crossorigin="anonymous" defer></script>
-<script src="js/modals.js?v=20" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js" crossorigin="anonymous" defer></script>
+<script src="js/modals.js?v=21" defer></script>
 <script src="js/extras.js?v=11" defer></script>
 <script src="js/balances.js" defer></script>
 <script src="js/bets.js" defer></script>
