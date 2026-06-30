@@ -47,7 +47,7 @@
     --amber-dim:rgba(232,160,32,.12);
     --amber-border:rgba(232,160,32,.28);
   }
-  body.rail-min{--rail:56px}
+  body.rail-min{--rail:60px}
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{background:var(--bg);color:var(--txt);font-family:var(--font-ui);font-size:var(--fs-base);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
@@ -178,14 +178,22 @@
   .rail-lang{display:contents}
   .lang-menu{position:fixed;top:auto;width:170px}
   .rail-lang.open .lang-menu{display:block}
-  /* collapsed state */
-  body.rail-min .rail{padding:14px 7px}
-  body.rail-min .rail a{justify-content:center;gap:0;padding:0}
-  body.rail-min .rail a .lbl{display:none}
-  body.rail-min .rail .sep{margin:8px 2px}
+  /* collapsed state — Stake-style icon strip */
+  body.rail-min .rail{padding:14px 0}
+  body.rail-min .rail a,body.rail-min .rail button{justify-content:center;gap:0;padding:0}
+  body.rail-min .rail a .lbl,body.rail-min .rail button .lbl{
+    opacity:0;width:0;overflow:hidden;pointer-events:none;transition:opacity .18s,width .18s}
+  body.rail-min .rail .sep{margin:8px 4px}
+  /* tooltip on hover when collapsed */
+  body.rail-min .rail a[title]:hover::after,body.rail-min .rail button[title]:hover::after{
+    content:attr(title);position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);
+    background:var(--panel-2);color:var(--txt);font-size:11px;font-weight:700;white-space:nowrap;
+    padding:5px 10px;border-radius:7px;border:1px solid var(--line-2);pointer-events:none;z-index:200;
+    box-shadow:0 4px 14px rgba(0,0,0,.5)}
+  body.rail-min .rail a[title]:hover,body.rail-min .rail button[title]:hover{overflow:visible}
 
   /* ===== MAIN ===== */
-  .main{margin-left:var(--rail);padding:104px calc(90px + (250px - var(--rail))) 0 90px;width:calc(100vw - 250px);box-sizing:border-box;transition:margin-left .2s ease,padding-right .2s ease}
+  .main{margin-left:var(--rail);padding:104px 90px 0;transition:margin-left .22s cubic-bezier(.4,0,.2,1)}
   .wrap{max-width:var(--maxw);margin:0 auto}
 
   /* hero carousel */
@@ -665,6 +673,7 @@
   @media(max-width:768px){
     :root{--rail:250px}
     body.rail-min{--rail:0px}
+    body.rail-min .rail a .lbl,body.rail-min .rail button .lbl{display:none}
     .rail{transition:transform .22s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 24px rgba(0,0,0,.5)}
     body.rail-min .rail{transform:translateX(-100%)}
     .rail-chevron{display:none}
