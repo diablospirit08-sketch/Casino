@@ -478,15 +478,10 @@ const ROWS = [
 const slugify=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-');
 /* tile art lives in art/*.webp (extracted from the image-slot sidecar so the page
    doesn't fetch one huge base64 JSON); a fresh drop on a slot still overrides src */
-const ART=new Set(['originals-plinko','originals-keno','originals-limbo',
-  'originals-coinflip','slots-sin-city','slots-berry-rush',
-  'slots-eternal-clash','slots-duck-hunters','slots-wanted-outlaws','slots-fisherman-le',
-  'slots-sugar-merge','new-plinko-of-mine']);
+const ART=new Set(['slots-sin-city','slots-berry-rush',
+  'slots-duck-hunters','slots-wanted-outlaws','slots-fisherman-le',
+  'slots-sugar-merge']);
 const EXT_ART={
-  'originals-dice':     'art/art-originals-dice.png',
-  'originals-crash':    'art/art-originals-crash.svg',
-  'originals-mines':    'art/art-originals-mines.svg',
-  'originals-blackjack':'art/art-originals-blackjack.svg',
   'originals-baccarat': 'art/art-originals-baccarat.svg',
 };
 const GAME_ART_LS=(()=>{try{return JSON.parse(localStorage.getItem('volt-game-art')||'{}');}catch{return{};}})();
