@@ -759,7 +759,7 @@ ${brushes}
     const fmt=v=>'$'+Math.abs(v).toFixed(2);
     const sw=document.getElementById('sWag');if(sw)sw.textContent=fmt(this._sessWag);
     const sp=document.getElementById('sProf');
-    if(sp){sp.textContent=(this._sessProf>=0?'+':'-')+fmt(this._sessProf);sp.style.color=this._sessProf>=0?'var(--mint)':'#e2596a';}
+    if(sp){sp.textContent=(this._sessProf>=0?'+':'-')+fmt(this._sessProf);sp.style.color=this._sessProf>=0?'var(--purple)':'#e2596a';}
     const swi=document.getElementById('sWins');if(swi)swi.textContent=this._sessWins;
     const sl=document.getElementById('sLoss');if(sl)sl.textContent=this._sessLoss;
   },

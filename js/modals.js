@@ -683,7 +683,7 @@ forgotBtn.addEventListener('click',async()=>{
       <div class="gv-input"><input id="resetEmail" type="email" placeholder="you@example.com" autocomplete="email" /></div>
     </div>
     <button class="auth-submit" id="resetSubmit" disabled>Send Reset Link</button>
-    <p class="auth-fine" style="margin-top:10px"><button id="resetBack" style="background:none;border:none;font:inherit;font-size:10.5px;color:var(--mint);cursor:pointer;padding:0">← Back to Sign In</button></p>`;
+    <p class="auth-fine" style="margin-top:10px"><button id="resetBack" style="background:none;border:none;font:inherit;font-size:10.5px;color:var(--purple);cursor:pointer;padding:0">← Back to Sign In</button></p>`;
   const resetEmail=modal.querySelector('#resetEmail');
   const resetSubmit=modal.querySelector('#resetSubmit');
   const validate=()=>{resetSubmit.disabled=!/.+@.+\..+/.test(resetEmail.value);};

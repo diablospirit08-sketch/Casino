@@ -271,7 +271,7 @@ function pickerHTML(){
     +'<p class="dep-lbl" style="margin-top:0">Connect Wallet</p>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
     +WALLET_OPTS.map(function(w){
-      return '<button class="bsc-w-btn" data-wid="'+w.id+'" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:10px;color:var(--txt);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.15s" onmouseover="this.style.borderColor=\'var(--mint)\'" onmouseout="this.style.borderColor=\'var(--line-2)\'">'
+      return '<button class="bsc-w-btn" data-wid="'+w.id+'" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:10px;color:var(--txt);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.15s" onmouseover="this.style.borderColor=\'var(--purple)\'" onmouseout="this.style.borderColor=\'var(--line-2)\'">'
         +'<img src="'+w.icon+'" style="width:22px;height:22px;border-radius:4px;object-fit:contain" onerror="this.style.display=\'none\'">'
         +w.label+'</button>';
     }).join('')
@@ -284,7 +284,7 @@ function connectedHTML(section){
   var isWd=section==='wd';
   return '<hr style="border:none;border-top:1px solid var(--line-2);margin:16px 0">'
     +'<p class="dep-lbl" style="margin-top:0">'+(isWd?'Live BNB Withdrawal':'Live BNB Deposit')+'</p>'
-    +'<p style="font-size:12px;color:var(--muted);margin-bottom:10px">Connected: <span style="color:var(--mint)">'+short(account)+'</span>'
+    +'<p style="font-size:12px;color:var(--muted);margin-bottom:10px">Connected: <span style="color:var(--purple)">'+short(account)+'</span>'
     +(isWd?' · Available: <b style="color:var(--txt)">'+bnbBal.toFixed(4)+' BNB</b>':'')
     +' <button id="bscDisc" style="background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;text-decoration:underline;margin-left:6px">Disconnect</button></p>'
     +'<div class="gv-input" style="margin-bottom:10px">'
