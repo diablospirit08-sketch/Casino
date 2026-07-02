@@ -73,9 +73,16 @@ function openChat(){
     for(let i=0;i<7;i++)addChat(CHAT_USERS[Math.floor(rnd(0,CHAT_USERS.length))],CHAT_LINES[i]);
   }
   chatDrawer.classList.add('open');
+  if(window.VoltHost)VoltHost.onChatOpen();
   clearInterval(chatTimer);
   chatTimer=setInterval(()=>{
-    addChat(CHAT_USERS[Math.floor(rnd(0,CHAT_USERS.length))],CHAT_LINES[Math.floor(rnd(0,CHAT_LINES.length))]);
+    /* richer ambient lines when the bot population is loaded */
+    if(window.VoltBots){
+      const b=VoltBots.roster[Math.floor(rnd(0,VoltBots.roster.length))];
+      addChat(b.n,VoltBots.ambientLine());
+    }else{
+      addChat(CHAT_USERS[Math.floor(rnd(0,CHAT_USERS.length))],CHAT_LINES[Math.floor(rnd(0,CHAT_LINES.length))]);
+    }
     chatOn.textContent=(1200+Math.floor(rnd(0,180))).toLocaleString('en-US')+' online';
   },5200);
 }
@@ -87,6 +94,7 @@ function sendChat(){
   const t=chatInput.value.trim();if(!t)return;
   addChat('You',t,true);
   chatInput.value='';
+  if(window.VoltHost)VoltHost.onUserMessage(t);
 }
 $id('chatBtn').addEventListener('click',()=>{chatDrawer.classList.contains('open')?closeChat():openChat();});
 $id('chatClose').addEventListener('click',closeChat);

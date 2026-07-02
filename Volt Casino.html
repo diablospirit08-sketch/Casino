@@ -1580,6 +1580,9 @@
 
   </div><!-- /lobbyView -->
 
+  <!-- ===== SPORTSBOOK (rendered by js/sportsbook.js) ===== -->
+  <div id="sportsView" data-screen-label="Sportsbook" hidden></div>
+
   <!-- ===== GAME VIEW ===== -->
   <section class="gameview" id="gameView" data-screen-label="Game Launch">
     <div class="gv-frame">
@@ -2476,7 +2479,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" integrity="sha384-3wY11tldQ5+yWqAvmTN4XtQvnjoTva0cV15O/O/O5NTtp0ivVopSzLOzsVXWZse9" crossorigin="anonymous" defer></script>
 <script src="js/api.js?v=2" defer></script>
 <script src="js/supabase-client.js" defer></script>
-<script src="js/lobby.js?v=20" defer></script>
+<script src="js/lobby.js?v=21" defer></script>
 <script src="js/gameview.js?v=4" defer></script>
 <script src="js/chips.js" defer></script>
 <script src="js/engines.js" defer></script>
@@ -2484,10 +2487,13 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js" integrity="sha384-HGmnkDZJy7mRkoARekrrj0VjEFSh9a0Z8qxGri/kTTAJkgR8hqD1lHsYSh3JdzRi" crossorigin="anonymous" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js" crossorigin="anonymous" defer></script>
 <script src="js/modals.js?v=21" defer></script>
-<script src="js/extras.js?v=11" defer></script>
+<script src="js/extras.js?v=12" defer></script>
 <script src="js/balances.js" defer></script>
 <script src="js/bets.js" defer></script>
 <script src="js/place-bet.js" defer></script>
+<script src="js/bots.js" defer></script>
+<script src="js/host.js" defer></script>
+<script src="js/sportsbook.js" defer></script>
 <script>
 var _$id=id=>document.getElementById(id);
 _$id('loyaltyBtn').addEventListener('click',()=>{
