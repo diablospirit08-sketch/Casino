@@ -580,7 +580,7 @@ function sizeTiles(){
   const t=document.querySelector('.row-track');
   if(t){
     const w=t.clientWidth-24;
-    document.documentElement.style.setProperty('--tiles',w>=900?7:Math.max(2,Math.floor((w+gap)/(130+gap))));
+    document.documentElement.style.setProperty('--tiles',w>=900?6:Math.max(2,Math.floor((w+gap)/(160+gap))));
   }
   const p=document.getElementById('provRow');
   if(p){
