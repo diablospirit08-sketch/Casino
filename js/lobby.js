@@ -532,7 +532,7 @@ document.getElementById('rows').innerHTML = ROWS.map(row=>`
             ${row.dealer?'<span class="silh"></span><span class="livechip"><i></i>Live</span>':''}
             ${g.corner?`<span class="corner${g.corner==='Hot'?' hot':''}">${g.corner}</span>`:''}
             ${g.boost?`<span class="boost">⚡ ${g.boost}</span>`:''}
-
+            ${g.demo?`<button class="gc-mini-btn" title="Open in mini window" onclick="event.stopPropagation();openMiniGame('${slug}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></button>`:''}
           </div>
         </div>`;}).join('')}
     </div>
