@@ -34,7 +34,7 @@
     --violet:#8b7ae8;
     --win:#41f0a4;
     --rail:250px;
-    --maxw:calc(100vw - 430px);
+    --maxw:calc(100vw - 420px);
     --fs-xs:10px;
     --fs-sm:12px;
     --fs-base:15px;
@@ -72,8 +72,8 @@
   header{position:fixed;top:0;left:0;right:0;z-index:70;height:70px;display:flex;align-items:center;overflow:visible;background:color-mix(in srgb,var(--hdr-bg) 0%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid transparent;transition:background .3s,border-color .3s}
   header.scrolled{background:color-mix(in srgb,var(--hdr-bg) 92%,transparent);border-bottom-color:var(--line)}
   header::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;background:var(--spectrum)}
-  .hdr-inner{width:100%;display:flex;align-items:center;gap:16px;padding:0 calc(215px - var(--rail)/2) 0 22px;transition:padding .22s cubic-bezier(.4,0,.2,1)}
-  .logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:23px;letter-spacing:.06em;text-transform:lowercase;text-decoration:none;flex:none;position:absolute;left:calc(var(--rail)/2 + 215px);top:50%;transform:translateY(-50%);transition:left .22s cubic-bezier(.4,0,.2,1)}
+  .hdr-inner{width:100%;display:flex;align-items:center;gap:16px;padding:0 calc(210px - var(--rail)/2) 0 22px;transition:padding .22s cubic-bezier(.4,0,.2,1)}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:23px;letter-spacing:.06em;text-transform:lowercase;text-decoration:none;flex:none;position:absolute;left:calc(var(--rail)/2 + 210px);top:50%;transform:translateY(-50%);transition:left .22s cubic-bezier(.4,0,.2,1)}
   .logo .wordmark{background:var(--spectrum);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   .logo .bolt{width:40px;height:40px;border-radius:11px;background:none;display:grid;place-items:center;flex:none;overflow:hidden}
   .logo .bolt svg{width:23px;height:23px}
@@ -193,7 +193,7 @@
   body.rail-min .rail a[title]:hover,body.rail-min .rail button[title]:hover{overflow:visible}
 
   /* ===== MAIN ===== */
-  .main{margin-left:var(--rail);padding:94px 90px 0;transition:margin-left .22s cubic-bezier(.4,0,.2,1)}
+  .main{margin-left:var(--rail);padding:94px 85px 0;transition:margin-left .22s cubic-bezier(.4,0,.2,1)}
   .wrap{max-width:var(--maxw);margin:0 auto}
 
   /* hero carousel */
