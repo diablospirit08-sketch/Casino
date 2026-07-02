@@ -530,10 +530,9 @@ document.getElementById('rows').innerHTML = ROWS.map(row=>`
             <image-slot id="art-${slug}"${(()=>{const s=GAME_ART_LS[slug]||(ART.has(slug)?`art/art-${slug}.webp`:EXT_ART[slug]||'');return s?` src="${s}"`:'';})()} shape="rect" fit="cover" placeholder="Drop game art"></image-slot>
             <span class="prov">${g.p}</span>
             ${row.dealer?'<span class="silh"></span><span class="livechip"><i></i>Live</span>':''}
-            <span class="nm">${g.n}</span>
             ${g.corner?`<span class="corner${g.corner==='Hot'?' hot':''}">${g.corner}</span>`:''}
             ${g.boost?`<span class="boost">⚡ ${g.boost}</span>`:''}
-            <div class="gc-ov"><div class="gc-ov-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7-11-7Z"/></svg>Play Now</div>${g.demo?`<button class="gc-mini-btn" title="Open in mini window"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></button>`:''}</div>
+
           </div>
         </div>`;}).join('')}
     </div>
