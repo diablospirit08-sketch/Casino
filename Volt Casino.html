@@ -10,7 +10,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e1118'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%233d9bff'/%3E%3Cstop offset='50%25' stop-color='%2341f0a4'/%3E%3Cstop offset='100%25' stop-color='%23ffd23d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M19 4 9 18h8l-4 10 14-16h-9l1-8z' fill='url(%23g)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 <script src="image-slot.js" defer></script>
 <style>
   :root{
@@ -42,7 +42,6 @@
     --fs-lg:20px;
     --fs-xl:24px;
     --font-ui:'Outfit',system-ui,sans-serif;
-    --font-display:'Cinzel',serif;
     --amber:#e8a020;
     --amber-dim:rgba(232,160,32,.12);
     --amber-border:rgba(232,160,32,.28);
@@ -1168,9 +1167,8 @@
   .info-body p:last-child{margin-bottom:0}
   .info-body b{color:var(--txt)}
 
-  /* ===== DISPLAY FONT — Inter for all UI; Cinzel for wordmark, section heads, and large game displays ===== */
   .logo,.row-head h2,.vip-sec-head h2,.gv-result,.dice-roll,
-  .crash-mult,.promo-card h3,.gv-idle b{font-family:var(--font-display);font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+  .crash-mult,.promo-card h3,.gv-idle b{font-weight:800;text-transform:uppercase;letter-spacing:.04em}
   .row-head h2,.vip-sec-head h2{font-size:17px}
   .logo{font-size:27px}
 
