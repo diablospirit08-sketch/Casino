@@ -2474,7 +2474,7 @@
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" integrity="sha384-nD3dwv4+ZqdYnmZKe/249ImlV04om7xTCcsoSeQYI+RO+XlKPoqAWaJR1M5SJH9p" crossorigin="anonymous" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" integrity="sha384-3wY11tldQ5+yWqAvmTN4XtQvnjoTva0cV15O/O/O5NTtp0ivVopSzLOzsVXWZse9" crossorigin="anonymous" defer></script>
 <script src="js/api.js?v=2" defer></script>
 <script src="js/supabase-client.js" defer></script>
 <script src="js/lobby.js?v=20" defer></script>
@@ -2490,10 +2490,10 @@
 <script src="js/bets.js" defer></script>
 <script src="js/place-bet.js" defer></script>
 <script>
-var $id=id=>document.getElementById(id);
-$id('loyaltyBtn').addEventListener('click',()=>{
+var _$id=id=>document.getElementById(id);
+_$id('loyaltyBtn').addEventListener('click',()=>{
   if(typeof avatarWrap!=='undefined')avatarWrap.classList.remove('open');
-  $id('vipOverlay').classList.add('open');
+  _$id('vipOverlay').classList.add('open');
 });
 
 /* ── header scroll glass ── */
@@ -2553,8 +2553,8 @@ $id('loyaltyBtn').addEventListener('click',()=>{
 </script>
 <script>
 /* if the page loaded directly on an originals game via #play= hash */
-var curSlug=(location.hash.match(/[#&]play=([^&]+)/)||[])[1]||'';
-if(curSlug)mountEngine(curSlug);
+var _initSlug=(location.hash.match(/[#&]play=([^&]+)/)||[])[1]||'';
+if(_initSlug)mountEngine(_initSlug);
 /* ── promo pair — apply admin overrides from localStorage ── */
 var PROMO_DEFAULTS_CASINO={
   a:{img:'art/art-slots-eternal-clash.webp',head:'Take on the Challenge!',sub:'Play, progress, and earn rewards across a range of challenges.',btn:'View Challenges →'},
