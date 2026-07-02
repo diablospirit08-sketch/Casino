@@ -155,7 +155,7 @@
   .rail-chevron svg{width:12px;height:12px;transition:transform .22s cubic-bezier(.4,0,.2,1)}
   body.rail-min .rail-chevron svg{transform:rotate(180deg)}
   .rail::-webkit-scrollbar{display:none}
-  .rail a,.rail button{position:relative;z-index:1;display:flex;align-items:center;gap:11px;height:48px;flex:none;padding:0 4px;border-radius:10px;color:var(--muted);font-family:inherit;font-size:14px;font-weight:800;letter-spacing:.01em;text-transform:none;white-space:nowrap;transition:color .16s;background:none;border:none;cursor:pointer;width:100%;text-align:left}
+  .rail a,.rail button{position:relative;z-index:1;display:flex;align-items:center;gap:11px;height:48px;flex:none;padding:0 4px;border-radius:10px;color:var(--muted);font-family:inherit;font-size:14px;font-weight:600;letter-spacing:.01em;text-transform:none;white-space:nowrap;transition:color .16s;background:none;border:none;cursor:pointer;width:100%;text-align:left}
   .rail-pill{display:none}
   .rail a .it,.rail button .it{width:36px;height:36px;flex:none;border-radius:8px;display:grid;place-items:center;
     background:transparent;border:none;transition:.15s;user-select:none}
@@ -165,7 +165,7 @@
   .rail a:hover,.rail button:hover{color:var(--txt);background:rgba(255,255,255,.04);border-radius:8px}
   .rail a.active .it svg{color:#e8edf5}
   .rail a.active .it{background:rgba(66,135,245,.1);animation:railPop .28s cubic-bezier(.34,1.56,.64,1)}
-  .rail a.active{color:var(--txt)}
+  .rail a.active{color:var(--txt);font-weight:800}
   @keyframes railPop{0%{transform:scale(.82)}100%{transform:scale(1)}}
   @media (prefers-reduced-motion: reduce){.rail a.active .it{animation:none}.rail,.main,.rail-pill{transition:none}}
   .rail .sep{height:1px;background:var(--line-2);margin:8px 4px;flex:none}
