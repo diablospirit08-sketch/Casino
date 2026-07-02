@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: https:; connect-src https: wss:; frame-src https://buy-sandbox.moonpay.com https://buy.moonpay.com" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: https:; connect-src https: wss:; frame-src https://buy-sandbox.moonpay.com https://buy.moonpay.com https://demogamesfree.pragmaticplay.net https://tadagaming.com" />
 <title>VioFyr Casino</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e1118'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%233d9bff'/%3E%3Cstop offset='50%25' stop-color='%2341f0a4'/%3E%3Cstop offset='100%25' stop-color='%23ffd23d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M19 4 9 18h8l-4 10 14-16h-9l1-8z' fill='url(%23g)'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -2703,8 +2703,8 @@ if(false)(function(){
   function prev(){goTo(cur-1);}
   function startAuto(){clearInterval(timer);timer=setInterval(next,5000);}
 
-  document.getElementById('hcarNext').addEventListener('click',function(){next();startAuto();});
-  document.getElementById('hcarPrev').addEventListener('click',function(){prev();startAuto();});
+  var _hcN=document.getElementById('hcarNext');if(_hcN)_hcN.addEventListener('click',function(){next();startAuto();});
+  var _hcP=document.getElementById('hcarPrev');if(_hcP)_hcP.addEventListener('click',function(){prev();startAuto();});
   dots.forEach(function(d,i){d.addEventListener('click',function(){goTo(i);startAuto();});});
 
   /* CTA wiring */
@@ -2854,7 +2854,7 @@ if(false)(function(){
   });
 
   /* connect wallet — placeholder */
-  $i('vioWalletBtn').addEventListener('click',function(){
+  var _vwb=$i('vioWalletBtn');if(_vwb)_vwb.addEventListener('click',function(){
     var note=$i('vioWithdrawNote');
     if(note)note.innerHTML='<b>Coming soon.</b> On-chain withdrawals will be enabled once the VIO contract is deployed on BNB.';
     this.disabled=true;
