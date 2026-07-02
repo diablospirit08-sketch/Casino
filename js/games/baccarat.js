@@ -77,7 +77,7 @@ ORIGINALS['originals-baccarat']={
       out+=`<ellipse cx="${W/2}" cy="${cy+5}" rx="${R-3}" ry="4" fill="rgba(0,0,0,0.4)"/>`;
       out+=`<circle cx="${W/2}" cy="${cy}" r="${R-1}" fill="#080c14" stroke="${col.b}" stroke-width="2" filter="url(#${fid})"/>`;
       out+=`<circle cx="${W/2}" cy="${cy}" r="${R-6}" fill="none" stroke="${col.b}" stroke-width="1" stroke-opacity="0.35"/>`;
-      out+=`<text x="${W/2}" y="${cy+4}" text-anchor="middle" dominant-baseline="middle" font-size="9" font-weight="900" font-family="Inter,sans-serif" fill="${col.l}">${lbl}</text>`;
+      out+=`<text x="${W/2}" y="${cy+4}" text-anchor="middle" dominant-baseline="middle" font-size="9" font-weight="900" font-family="Outfit,sans-serif" fill="${col.l}">${lbl}</text>`;
     });
     out+='</svg>';el.innerHTML=out;
   },

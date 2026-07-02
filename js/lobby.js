@@ -575,12 +575,14 @@ document.querySelectorAll('[data-seeall]').forEach(btn=>{
   });
 });
 /* ---------- fluid tile sizing: a whole number of tiles always fits ---------- */
+let _tileMin=0;
 function sizeTiles(){
   const gap=14;
+  if(!_tileMin)_tileMin=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tile-min'))||160;
   const t=document.querySelector('.row-track');
   if(t){
     const w=t.clientWidth-24;
-    document.documentElement.style.setProperty('--tiles',w>=900?7:Math.max(2,Math.floor((w+gap)/(160+gap))));
+    document.documentElement.style.setProperty('--tiles',Math.min(7,Math.max(2,Math.floor((w+gap)/(_tileMin+gap)))));
   }
   const p=document.getElementById('provRow');
   if(p){

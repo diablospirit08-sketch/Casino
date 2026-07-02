@@ -6,7 +6,7 @@
 <title>VioFyr — Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800;900&display=swap" rel="stylesheet"/>
 <style>
 :root{
   --bg:#0e1118;
@@ -30,7 +30,7 @@
   --sidebar:220px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--txt);font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;min-height:100vh}
+body{background:var(--bg);color:var(--txt);font-family:'Outfit',system-ui,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;min-height:100vh}
 a{color:inherit;text-decoration:none}
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:var(--bg)}
@@ -41,7 +41,7 @@ a{color:inherit;text-decoration:none}
 .sidebar::after{content:'';position:absolute;top:0;right:0;width:2px;height:100%;background:linear-gradient(180deg,#3d9bff,#41f0a4 28%,#ffd23d 52%,#ff8a3d 76%,#ff4757);opacity:.35;pointer-events:none}
 .sb-logo{display:flex;align-items:center;gap:10px;padding:22px 20px 18px;border-bottom:1px solid var(--line)}
 .sb-logo .volt-ic{width:30px;height:30px;background:var(--spectrum);border-radius:8px;display:grid;place-items:center;font-size:14px}
-.sb-logo span{font-family:'Inter',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em}
+.sb-logo span{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em}
 .sb-logo small{font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-2);margin-left:auto;background:var(--panel-2);padding:3px 7px;border-radius:99px}
 .sb-nav{padding:12px 10px;flex:1;display:flex;flex-direction:column;gap:2px}
 .sb-sec{font-size:9px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-2);padding:10px 10px 6px}
@@ -60,7 +60,7 @@ a{color:inherit;text-decoration:none}
 /* ── main ── */
 .main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
 .topbar{display:flex;align-items:center;gap:12px;padding:18px 28px;border-bottom:1px solid var(--line);background:var(--bg)}
-.topbar h1{font-family:'Inter',sans-serif;font-size:17px;font-weight:700;letter-spacing:.04em;flex:1}
+.topbar h1{font-family:'Outfit',sans-serif;font-size:17px;font-weight:700;letter-spacing:.04em;flex:1}
 .topbar-actions{display:flex;align-items:center;gap:8px}
 .tbtn{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:var(--txt);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.14s}
 .tbtn:hover{background:var(--panel-2)}
@@ -698,6 +698,11 @@ document.querySelectorAll('.ctab').forEach(t=>{
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 
 /* ── auth error / login screen ── */
+const LS_ADMIN_EMAIL='volt-admin-email';
+/* storage can throw (blocked cookies/site data) — never let that kill the login form */
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const lsDel=k=>{try{localStorage.removeItem(k)}catch(e){}};
 function showAuthError(msg){
   /* hide Railway-dependent sections but keep localStorage-only tools (promo editor etc.) */
   document.querySelectorAll('.tab-btn:not([data-tab="promo"])').forEach(b=>b.style.opacity='.35');
@@ -723,11 +728,12 @@ function showAuthError(msg){
   document.querySelector('.main').prepend(banner);
 
   /* restore saved email so only the password needs typing */
-  const savedEmail=localStorage.getItem('volt-admin-email');
+  const savedEmail=lsGet(LS_ADMIN_EMAIL);
   if(savedEmail){
-    const emailEl=document.getElementById('adminEmail');
-    emailEl.value=savedEmail;
-    document.getElementById('adminPass').focus();
+    document.getElementById('adminEmail').value=savedEmail;
+    /* focus only if the user isn't typing elsewhere — this also runs async on session expiry */
+    const ae=document.activeElement;
+    if(!ae||ae===document.body)document.getElementById('adminPass').focus();
   }
 
   const btn=document.getElementById('adminLoginBtn');
@@ -742,7 +748,6 @@ function showAuthError(msg){
       err.textContent=error.message;
       btn.textContent='Sign In';btn.disabled=false;
     }else{
-      localStorage.setItem('volt-admin-email',email);
       banner.remove();
       initAdmin();
     }
@@ -1349,9 +1354,11 @@ async function initAdmin(){
   catch(e){ showAuthError(); return; }
 
   if(!me?.is_admin){
+    lsDel(LS_ADMIN_EMAIL); /* don't keep prefilling a non-admin email */
     showAuthError('Your account does not have admin privileges. Ask a super-admin to set <code>is_admin=true</code> for your user in the database.');
     return;
   }
+  if(me.email)lsSet(LS_ADMIN_EMAIL,me.email); /* remember only verified admin emails */
 
   document.querySelector('.sb-user-info b').textContent=me.username||'Admin';
   document.querySelector('.sb-user-info span').textContent=me.email||'admin';
