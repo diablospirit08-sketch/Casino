@@ -722,6 +722,14 @@ function showAuthError(msg){
     </div>`;
   document.querySelector('.main').prepend(banner);
 
+  /* restore saved email so only the password needs typing */
+  const savedEmail=localStorage.getItem('volt-admin-email');
+  if(savedEmail){
+    const emailEl=document.getElementById('adminEmail');
+    emailEl.value=savedEmail;
+    document.getElementById('adminPass').focus();
+  }
+
   const btn=document.getElementById('adminLoginBtn');
   const doLogin=async()=>{
     const email=document.getElementById('adminEmail').value.trim();
@@ -734,6 +742,7 @@ function showAuthError(msg){
       err.textContent=error.message;
       btn.textContent='Sign In';btn.disabled=false;
     }else{
+      localStorage.setItem('volt-admin-email',email);
       banner.remove();
       initAdmin();
     }
