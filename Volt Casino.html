@@ -164,6 +164,10 @@
   .rail a:hover .it svg,.rail button:hover .it svg{color:#c8d6e8;transform:scale(1.1)}
   .rail a:hover,.rail button:hover{color:var(--txt);background:rgba(255,255,255,.04);border-radius:8px}
   .rail a.active .it svg{color:#e8edf5}
+  /* PNG icons match the flat gray until hovered/active — color = "you are here" */
+  .rail a .it img{filter:grayscale(1) brightness(1.25) opacity(.72)!important;transition:filter .18s,transform .15s}
+  .rail a:hover .it img{filter:grayscale(0) drop-shadow(0 1px 3px rgba(0,0,0,.4))!important;transform:scale(1.1)}
+  .rail a.active .it img{filter:grayscale(0) drop-shadow(0 1px 3px rgba(0,0,0,.4))!important}
   .rail a.active .it{background:rgba(66,135,245,.1);animation:railPop .28s cubic-bezier(.34,1.56,.64,1)}
   .rail a.active{color:var(--txt);font-weight:800}
   @keyframes railPop{0%{transform:scale(.82)}100%{transform:scale(1)}}
@@ -2494,6 +2498,7 @@
 <script src="js/bots.js" defer></script>
 <script src="js/host.js" defer></script>
 <script src="js/sportsbook.js" defer></script>
+<script src="js/sphere.js" defer></script>
 <script>
 var _$id=id=>document.getElementById(id);
 _$id('loyaltyBtn').addEventListener('click',()=>{
