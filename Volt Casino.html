@@ -204,7 +204,7 @@
   body.rail-min .rail a[title]:hover,body.rail-min .rail button[title]:hover{overflow:visible}
 
   /* ===== MAIN ===== */
-  .main{margin-left:var(--rail);padding:84px var(--content-gap) 0;transition:margin-left .22s cubic-bezier(.4,0,.2,1)}
+  .main{margin:calc(70px + var(--rail-pad)) var(--rail-pad) var(--rail-pad) calc(var(--rail) + var(--rail-pad));padding:24px var(--content-gap);background:var(--bg-2);border-radius:16px;transition:margin-left .22s cubic-bezier(.4,0,.2,1)}
   .wrap{max-width:var(--maxw);margin:0 auto;padding-left:var(--content-gap);padding-right:var(--content-gap)}
 
   /* Responsive: collapse rail earlier for medium screens to improve usable width — reuses the same --rail/--maxw vars as body.rail-min */
@@ -701,7 +701,7 @@
     .rail{transition:transform .22s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 24px rgba(0,0,0,.5)}
     body.rail-min .rail{transform:translateX(-100%)}
     .rail-chevron{display:none}
-    .main{margin-left:0!important;width:100vw!important;padding:80px 14px 0}
+    .main{margin-left:var(--rail-pad)!important;margin-right:var(--rail-pad)!important;width:calc(100vw - var(--rail-pad)*2)!important;padding:20px 14px}
     /* backdrop */
     .rail-backdrop{display:block}
   }
