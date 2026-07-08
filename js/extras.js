@@ -116,6 +116,8 @@ function renderLang(){
   langLbl.textContent=LANGS.find(l=>l[0]===curLang)[1];
   langMenu.innerHTML='<div class="mlbl">Language</div>'+LANGS.map(([k,l])=>`
     <button class="wmi ${k===curLang?'sel':''}" data-k="${k}"><span class="wnm">${l}</span>${TICK_SVG}</button>`).join('');
+  const moreLangLbl=$id('moreLangLbl');
+  if(moreLangLbl)moreLangLbl.textContent=LANGS.find(l=>l[0]===curLang)[1];
 }
 renderLang();
 langBtn.addEventListener('click',e=>{
@@ -138,6 +140,35 @@ langMenu.addEventListener('click',e=>{
   showToast({icon:'🌐',title:'Language: '+LANGS.find(l=>l[0]===curLang)[1],sub:'Demo — interface copy stays in English'});
 });
 document.addEventListener('click',()=>railLang.classList.remove('open'));
+
+/* ---------- header "more" menu — Promotions/VIP/Affiliate + Responsible Gambling/Support/Language ---------- */
+const moreWrap=$id('moreWrap'),moreBtn=$id('moreBtn'),moreMenu=$id('moreMenu');
+const _IC_GIFT='<path d="M20 12v10H4V12M2 7h20v5H2V7zm10 0V4a2.5 2.5 0 0 0-5 0c0 1.5 2 3 2 3zm0 0V4a2.5 2.5 0 0 1 5 0c0 1.5-2 3-2 3z"/>';
+const _IC_VIP='<path d="M4 8l4 3 4-6 4 6 4-3-2 11H6z"/>';
+const _IC_AFFIL='<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 8a3 3 0 1 1 0 6"/><path d="M22 20c0-2.5-1.6-4.6-4-5.5"/>';
+const _IC_SHIELD='<path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/>';
+const _IC_HEADSET='<path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="2.5" y="13" width="4" height="6" rx="1.5"/><rect x="17.5" y="13" width="4" height="6" rx="1.5"/><path d="M20 19v1a3 3 0 0 1-3 3h-3"/>';
+function moreIcon(paths){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex:none">${paths}</svg>`;}
+moreMenu.innerHTML=`
+  <a href="#" class="wmi" data-act="bonus">${moreIcon(_IC_GIFT)}Promotions</a>
+  <a href="#" class="wmi" data-act="vip">${moreIcon(_IC_VIP)}VIP Club</a>
+  <a href="#" class="wmi" data-act="affiliate">${moreIcon(_IC_AFFIL)}Affiliate</a>
+  <div class="um-divider"></div>
+  <a href="#" class="wmi" data-act="responsible">${moreIcon(_IC_SHIELD)}Responsible Gambling</a>
+  <a href="#" class="wmi" data-act="support">${moreIcon(_IC_HEADSET)}Live Support</a>
+  <a href="#" class="wmi" id="moreLangRow">${moreIcon(_IC_LANG)}Language: <b id="moreLangLbl" style="margin-left:4px">${LANGS.find(l=>l[0]===curLang)[1]}</b></a>
+`;
+moreBtn.addEventListener('click',e=>{
+  e.stopPropagation();
+  notifWrap.classList.remove('open');walletEl.classList.remove('open');avatarWrap.classList.remove('open');
+  const open=moreWrap.classList.toggle('open');
+  moreBtn.setAttribute('aria-expanded',open);
+});
+moreMenu.addEventListener('click',e=>{
+  if(e.target.closest('#moreLangRow')){e.preventDefault();e.stopPropagation();moreWrap.classList.remove('open');langBtn.click();return;}
+  if(e.target.closest('a[data-act]'))moreWrap.classList.remove('open');
+});
+document.addEventListener('click',()=>moreWrap.classList.remove('open'));
 
 /* ---------- user menu header ---------- */
 async function refreshUmHead(){
@@ -487,8 +518,10 @@ const PAGES={
   privacy:['Privacy Policy','<p>Your account, balances, bets and transactions are stored securely in our database. Your email and password are managed by <b>Supabase Auth</b> and never stored in plain text.</p><p>Preferences such as your avatar and selected currency are saved locally in your browser via <b>localStorage</b>. No analytics or third-party tracking scripts are used.</p>'],
   fraud:['Anti-Fraud Policy','<p>A real operator would document chargeback handling, bonus-abuse detection and multi-accounting rules here.</p><p>Since VIOFYRE is a demo with no real money involved, this page is a placeholder for that policy.</p>'],
   aml:['AML Policy','<p>A real operator would document KYC tiers, source-of-funds checks and transaction monitoring here.</p><p>Since VIOFYRE is a demo with no real money involved, this page is a placeholder for that policy.</p>'],
-  sports:['Sports','<p>The sportsbook is not part of this demo — only the casino lobby is implemented.</p>'],
   referrals:['Referrals','<p>Invite friends, earn a cut of their wagers — that\'s how this page would work on a real platform.</p><p>In this demo there are no accounts, so there\'s no one to refer. Sorry to you and your imaginary friends.</p>'],
+  fairness:['Fairness','<p>Every Volt Original is provably fair: a server seed is committed <b>before</b> you bet, combined with your client seed and a nonce to produce the result. After you play, reveal the server seed on the game\'s fairness panel and recompute the outcome yourself.</p><p>Since VIOFYRE is a demo, this is a working illustration of the mechanism real crypto casinos use — the math is real even though the wagers aren\'t.</p>'],
+  affiliate:['Affiliate','<p>A real operator would run a revenue-share program here — a unique referral link, a dashboard, and a cut of the house edge from anyone who signs up through you.</p><p>Since VIOFYRE is a demo with no real money involved, this page is a placeholder for that program.</p>'],
+  crypto:['Supported Crypto','<p>VIOFYRE\'s demo wallet supports BTC, ETH, SOL, XRP, USDC, AVAX, BNB and DOGE — pick any of them from the wallet menu to see simulated balances and deposit addresses.</p><p>No real transactions ever occur; this is a fictional balance for demonstration purposes only.</p>'],
   help:['Help Center',`
     <style>.faq-item{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:8px}.faq-q{width:100%;background:var(--panel-2);border:none;color:var(--txt);font-family:inherit;font-size:13px;font-weight:700;text-align:left;padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px}.faq-q:hover{background:var(--panel)}.faq-q .arr{font-size:16px;transition:transform .2s;flex:none}.faq-item.open .arr{transform:rotate(180deg)}.faq-a{display:none;padding:14px 16px;font-size:12.5px;color:var(--muted);line-height:1.7;background:var(--panel)}.faq-item.open .faq-a{display:block}.faq-cat{font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2);margin:18px 0 8px}</style>
     <p class="faq-cat">Account</p>
@@ -618,6 +651,9 @@ $id('infoClose').addEventListener('click',()=>infoOverlay.classList.remove('open
 infoOverlay.addEventListener('click',e=>{if(e.target===infoOverlay)infoOverlay.classList.remove('open');});
 const ACTS={
   top:()=>lobbyScroll('top'),
+  slots:()=>lobbyScroll('sec-slots'),
+  live:()=>lobbyScroll('sec-live'),
+  originals:()=>lobbyScroll('sec-originals'),
   providers:()=>lobbyScroll('provSection'),
   race:openRace,
   bonus:()=>openBonus(),
@@ -625,6 +661,8 @@ const ACTS={
   chat:openChat,
   support:()=>{if(typeof openLiveSupport==='function')openLiveSupport();},
   responsible:()=>openRg(),
+  sports:()=>{if(typeof openSports==='function')openSports();},
+  deposit:()=>{if(typeof openDep==='function')openDep('dep');},
 };
 document.addEventListener('click',e=>{
   const a=e.target.closest('a[data-act]');

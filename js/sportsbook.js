@@ -19,11 +19,11 @@ body.ingame #sportsView{display:none!important}
 .sb-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:6px 0 14px;flex-wrap:wrap}
 .sb-head h2{font-size:22px;font-weight:800;letter-spacing:.3px;margin:0;display:flex;align-items:center;gap:9px}
 .sb-head h2 svg{width:24px;height:24px;color:#41f0a4}
-.sb-tabs{display:flex;gap:6px;background:#141b2e;border-radius:10px;padding:4px}
+.sb-tabs{display:flex;gap:6px;background:var(--panel);border-radius:10px;padding:4px}
 .sb-tabs button{border:0;background:transparent;color:#8b93a7;font:inherit;font-size:13px;font-weight:700;padding:7px 16px;border-radius:8px;cursor:pointer}
-.sb-tabs button.active{background:#232d47;color:#ebf0ff}
+.sb-tabs button.active{background:#2f4553;color:#ebf0ff}
 .sb-tabs .n{display:inline-block;min-width:16px;padding:0 4px;margin-left:4px;border-radius:8px;background:#8b5cf6;color:#fff;font-size:10.5px;line-height:16px}
-.sb-ticker{display:flex;align-items:center;gap:8px;background:#10162a;border:1px solid rgba(235,240,255,.06);border-radius:10px;padding:8px 12px;margin-bottom:14px;font-size:12.5px;color:#8b93a7;overflow:hidden;white-space:nowrap}
+.sb-ticker{display:flex;align-items:center;gap:8px;background:var(--bg-2);border:1px solid rgba(235,240,255,.06);border-radius:10px;padding:8px 12px;margin-bottom:14px;font-size:12.5px;color:#8b93a7;overflow:hidden;white-space:nowrap}
 .sb-ticker b{color:#dfe6f5}
 .sb-ticker .dot{width:7px;height:7px;border-radius:50%;background:#41f0a4;flex:none;animation:sbPulse 1.6s infinite}
 @keyframes sbPulse{0%,100%{opacity:1}50%{opacity:.3}}
@@ -31,7 +31,7 @@ body.ingame #sportsView{display:none!important}
 @media(max-width:900px){.sb-cols{grid-template-columns:1fr}}
 .sb-lg{margin-bottom:18px}
 .sb-lg-head{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#8b93a7;margin:0 2px 8px}
-.sb-match{background:#141b2e;border:1px solid rgba(235,240,255,.05);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.sb-match{background:var(--panel);border:1px solid rgba(235,240,255,.05);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
 .sb-mstat{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:#6d7688}
 .sb-live{color:#ff5c72;display:inline-flex;align-items:center;gap:5px}
 .sb-live::before{content:'';width:7px;height:7px;border-radius:50%;background:#ff5c72;animation:sbPulse 1.2s infinite}
@@ -40,26 +40,26 @@ body.ingame #sportsView{display:none!important}
 .sb-team{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#dfe6f5}
 .sb-team .sc{margin-left:auto;font-weight:800;color:#41f0a4;font-variant-numeric:tabular-nums}
 .sb-odds{display:flex;gap:6px}
-.sb-odd{border:1px solid rgba(235,240,255,.08);background:#1b2440;color:#dfe6f5;border-radius:9px;padding:7px 0;width:72px;cursor:pointer;font:inherit;display:flex;flex-direction:column;align-items:center;gap:1px;transition:background .15s,border-color .15s}
+.sb-odd{border:1px solid rgba(235,240,255,.08);background:#2a4152;color:#dfe6f5;border-radius:9px;padding:7px 0;width:72px;cursor:pointer;font:inherit;display:flex;flex-direction:column;align-items:center;gap:1px;transition:background .15s,border-color .15s}
 .sb-odd small{font-size:10px;font-weight:700;color:#6d7688;text-transform:uppercase;letter-spacing:.5px}
 .sb-odd b{font-size:13.5px;font-variant-numeric:tabular-nums}
-.sb-odd:hover{background:#232d47}
+.sb-odd:hover{background:#2f4553}
 .sb-odd.sel{background:linear-gradient(135deg,#7c52e0,#8b5cf6);border-color:#a48bfd}
 .sb-odd.sel small{color:#e6dcff}
 .sb-odd:disabled{opacity:.35;cursor:default}
-.sb-slip{background:#141b2e;border:1px solid rgba(235,240,255,.06);border-radius:14px;padding:14px;position:sticky;top:86px}
+.sb-slip{background:var(--panel);border:1px solid rgba(235,240,255,.06);border-radius:14px;padding:14px;position:sticky;top:86px}
 .sb-slip h3{margin:0 0 10px;font-size:14px;font-weight:800}
-.sb-mode{display:flex;gap:5px;background:#0f1526;border-radius:8px;padding:3px;margin-bottom:10px}
+.sb-mode{display:flex;gap:5px;background:#152a37;border-radius:8px;padding:3px;margin-bottom:10px}
 .sb-mode button{flex:1;border:0;background:transparent;color:#8b93a7;font:inherit;font-size:12px;font-weight:700;padding:6px;border-radius:6px;cursor:pointer}
-.sb-mode button.active{background:#232d47;color:#ebf0ff}
-.sb-sel{background:#0f1526;border-radius:10px;padding:9px 10px;margin-bottom:7px;font-size:12.5px}
+.sb-mode button.active{background:#2f4553;color:#ebf0ff}
+.sb-sel{background:#152a37;border-radius:10px;padding:9px 10px;margin-bottom:7px;font-size:12.5px}
 .sb-sel-top{display:flex;justify-content:space-between;gap:8px;font-weight:700;color:#dfe6f5}
 .sb-sel-top .x{cursor:pointer;color:#57607a;border:0;background:none;font:inherit;font-size:14px;line-height:1;padding:0 2px}
 .sb-sel-top .x:hover{color:#ff5c72}
 .sb-sel-sub{display:flex;justify-content:space-between;color:#6d7688;margin-top:2px}
 .sb-sel-sub b{color:#41f0a4}
 .sb-stake{display:flex;align-items:center;gap:6px;margin-top:7px}
-.sb-stake input{flex:1;background:#141b2e;border:1px solid rgba(235,240,255,.1);border-radius:7px;color:#ebf0ff;font:inherit;font-size:13px;font-weight:700;padding:6px 8px;width:100%}
+.sb-stake input{flex:1;background:var(--panel);border:1px solid rgba(235,240,255,.1);border-radius:7px;color:#ebf0ff;font:inherit;font-size:13px;font-weight:700;padding:6px 8px;width:100%}
 .sb-stake input:focus{outline:none;border-color:#8b5cf6}
 .sb-tot{display:flex;justify-content:space-between;font-size:12.5px;color:#8b93a7;margin:9px 2px}
 .sb-tot b{color:#ebf0ff}
@@ -68,7 +68,7 @@ body.ingame #sportsView{display:none!important}
 .sb-msg{font-size:12px;font-weight:700;margin-top:8px;text-align:center;min-height:15px}
 .sb-msg.ok{color:#41f0a4}.sb-msg.err{color:#ff5c72}
 .sb-empty{color:#57607a;font-size:12.5px;text-align:center;padding:18px 6px}
-.sb-bet{background:#141b2e;border:1px solid rgba(235,240,255,.05);border-radius:12px;padding:12px 14px;margin-bottom:8px;font-size:13px}
+.sb-bet{background:var(--panel);border:1px solid rgba(235,240,255,.05);border-radius:12px;padding:12px 14px;margin-bottom:8px;font-size:13px}
 .sb-bet-head{display:flex;justify-content:space-between;font-weight:800;color:#dfe6f5}
 .sb-chip{font-size:10.5px;font-weight:800;letter-spacing:.6px;padding:2px 8px;border-radius:20px;text-transform:uppercase}
 .sb-chip.pending{background:rgba(139,92,246,.15);color:#a48bfd}

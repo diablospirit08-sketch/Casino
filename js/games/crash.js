@@ -123,7 +123,7 @@ ORIGINALS['originals-crash']={
     if($id('crashPlCss'))return;
     const s=document.createElement('style');s.id='crashPlCss';
     s.textContent=`
-    .crash-players{position:absolute;top:10px;left:10px;width:196px;max-height:calc(100% - 20px);display:flex;flex-direction:column;gap:6px;background:rgba(10,14,26,.72);border:1px solid rgba(235,240,255,.08);border-radius:12px;padding:10px 10px 8px;backdrop-filter:blur(6px);font-size:11.5px;pointer-events:none;z-index:3}
+    .crash-players{position:absolute;top:10px;left:10px;width:196px;max-height:calc(100% - 20px);display:flex;flex-direction:column;gap:6px;background:rgba(15,33,46,.78);border:1px solid rgba(235,240,255,.08);border-radius:12px;padding:10px 10px 8px;backdrop-filter:blur(6px);font-size:11.5px;pointer-events:none;z-index:3}
     .crash-pl-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;color:#8b93a7;font-weight:700;letter-spacing:.4px;font-size:10.5px;text-transform:uppercase}
     .crash-pl-head b{color:#ebf0ff;font-size:11.5px;letter-spacing:0}
     .crash-pl-list{overflow:hidden;display:flex;flex-direction:column;gap:3px}

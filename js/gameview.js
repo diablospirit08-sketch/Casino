@@ -65,9 +65,16 @@ function _abortTransition(){
   if(gameEl)gameEl.classList.remove('view-out','view-in');
   if(lobbyEl)lobbyEl.classList.remove('view-out','view-in');
 }
+function trackRecent(slug){
+  const ids=readRecentIds().filter(id=>id!==slug);
+  ids.unshift(slug);
+  if(ids.length>12)ids.length=12;
+  writeRecentIds(ids);
+}
 function openGame(slug,mode){
   const g=GAMES[slug];if(!g||_viewBusy)return;
   if(autoRunning)stopAuto();
+  trackRecent(slug);
   // Prepare game data immediately so it's ready when the view appears
   curSlug=slug;
   gvName.textContent=g.n;gvIdleName.textContent=g.n;
@@ -167,6 +174,7 @@ function closeGame(){
     document.body.classList.remove('ingame');
     gameEl.classList.remove('view-out');
     lobbyEl.classList.add('view-in');
+    if(window.refreshRecentRow)refreshRecentRow();
     _t2=setTimeout(()=>{_t2=0;lobbyEl.classList.remove('view-in');_viewBusy=false;},280);
     try{history.pushState('','',location.pathname+location.search);}catch(err){location.hash='';}
     spy();

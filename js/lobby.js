@@ -246,8 +246,6 @@ document.getElementById('avatarBtn').addEventListener('click',e=>{
 document.addEventListener('click',()=>{
   walletEl.classList.remove('open');
   avatarWrap.classList.remove('open');
-  sortWrap.classList.remove('open');
-  filterWrap.classList.remove('open');
 });
 
 /* ---------- nav rail ---------- */
@@ -411,11 +409,11 @@ movePill(document.querySelector('#railNav a.active'),true);
 /* ic is inner-SVG markup; shapes tagged .fl get a solid fill while the chip is active */
 const cats = [
   {l:'Lobby', key:'lobby', cnt:3214, active:true, ic:'<path class="fl" d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9.5Z"/><path d="M9.5 21v-5.5h5V21"/>'},
+  {l:'Popular', key:'popular', cnt:35, rows:['hot'], ic:'<path class="fl" d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>'},
   {l:'Originals', key:'originals', cnt:24, rows:['originals'], ic:'<path class="fl" d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/>'},
   {l:'Slots', key:'slots', cnt:2418, rows:['slots','hot'], ic:'<rect class="fl" x="3" y="6" width="18" height="13" rx="2"/><path d="M9 6V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V6"/><line x1="9" y1="6" x2="9" y2="19"/><line x1="15" y1="6" x2="15" y2="19"/><circle cx="6.5" cy="12.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="17.5" cy="12.5" r="1.2" fill="currentColor" stroke="none"/>'},
   {l:'Live Casino', key:'live', cnt:312, rows:['live'], ic:'<path class="fl" d="M15 10l4.5-2.5v9L15 14v-4z"/><rect class="fl" x="2" y="8" width="13" height="9" rx="2"/><circle cx="5.5" cy="5.5" r="1.5" fill="currentColor" stroke="none"/><line x1="5.5" y1="7" x2="5.5" y2="8"/>'},
   {l:'Game Shows', key:'shows', cnt:38, rows:['shows'], ic:'<rect class="fl" x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><circle cx="12" cy="10.5" r="2.5" fill="currentColor" stroke="none"/>'},
-  {l:'Table Games', key:'table', cnt:146, match:'baccarat|blackjack|roulette|board bonanza', ic:'<rect class="fl" x="2" y="4" width="13" height="17" rx="2"/><rect x="9" y="3" width="13" height="17" rx="2"/><path d="M15 7h4M15 10h4M15 13h4"/>'},
   {l:'New Arrivals', key:'new', cnt:89, rows:['new'], ic:'<path class="fl" d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z"/>'},
 ];
 document.getElementById('cats').innerHTML = cats.map(c=>`
@@ -445,6 +443,7 @@ const ROWS = [
     {n:'Wanted Outlaws', p:'Pragmatic Play', g:['#7d4a16','#c68b3a'], demo:'https://demogamesfree.pragmaticplay.net/gs2c/openGame.do?lang=en&cur=USD&gameid=vs25wolfgold'},
     {n:'Fisherman Le',   p:'Pragmatic Play', g:['#14716b','#2eb0a6'], demo:'https://demogamesfree.pragmaticplay.net/gs2c/openGame.do?lang=en&cur=USD&gameid=vs10fishin'},
     {n:'Sugar Merge',    p:'Pragmatic Play', g:['#8a2a8a','#d052d0'], boost:'Boosted RTP 97.1%', demo:'https://demogamesfree.pragmaticplay.net/gs2c/openGame.do?lang=en&cur=USD&gameid=vs20sugarrush'},
+    {n:'Gem Saviour',    p:'Pragmatic Play', g:['#1c5a7d','#3aa0c6'], corner:'New', demo:'https://demogamesfree.pragmaticplay.net/gs2c/openGame.do?lang=en&cur=USD&gameid=vs25gemsaviour'},
   ]},
   {key:'hot', title:'Hot Picks', icon:'M12 2c2 4-3 5-1 9 1.5 3-1 4-2 4 4 3 10 1 10-4 0-4-4-5-3-9-2 1-3 2-4 0Z', games:[
     {n:'Mortal Bromance', p:'Pragmatic Play', g:['#243e80','#4272c8'], corner:'Hot', demo:'https://demogamesfree.pragmaticplay.net/gs2c/openGame.do?lang=en&cur=USD&gameid=vs20starlight'},
@@ -453,6 +452,8 @@ const ROWS = [
     {n:'Lucky Streak 3',  p:'Pragmatic Play', g:['#8a1c1c','#d04a2e'], corner:'77', demo:'https://demogamesfree.pragmaticplay.net/gs2c/openGame.do?lang=en&cur=USD&gameid=vs5jokersjewels'},
     {n:'Sugar Merge Up',  p:'Pragmatic Play', g:['#7b2ad6','#b052f0'], demo:'https://demogamesfree.pragmaticplay.net/gs2c/openGame.do?lang=en&cur=USD&gameid=vs20sugarrush'},
     {n:'Penalty Duel',    p:'Pragmatic Play', g:['#168a4a','#3ac670'], demo:'https://demogamesfree.pragmaticplay.net/gs2c/openGame.do?lang=en&cur=USD&gameid=vs25mustang'},
+    {n:'Gates of Fortune',p:'Pragmatic Play', g:['#a8720e','#e8b83e'], corner:'Hot', demo:'https://demogamesfree.pragmaticplay.net/gs2c/openGame.do?lang=en&cur=USD&gameid=vs20gatot'},
+    {n:'Fire Hyperlink',  p:'Pragmatic Play', g:['#8a1c1c','#e0522e'], corner:'Hot', demo:'https://demogamesfree.pragmaticplay.net/gs2c/openGame.do?lang=en&cur=USD&gameid=vs20hyperstrike'},
   ]},
   {key:'live', title:'Live Casino', icon:'M2 8h20v8H2zM6 8v8M18 8v8', dealer:true, games:[
     {n:'Board Bonanza',  p:'Live Studio', g:['#c98b2e','#f0c05a']},
@@ -460,6 +461,9 @@ const ROWS = [
     {n:'Blackjack',       p:'Live Studio',  g:['#1e4878','#2b63d4']},
     {n:'Roulette',        p:'Live Studio',  g:['#7d1c28','#c63a44']},
     {n:'Blackjack VIP',   p:'Live Studio',  g:['#1e48a8','#4a82e0']},
+    {n:'Speed Baccarat',  p:'Live Studio',  g:['#166b52','#2ec68f']},
+    {n:'Golden Sic Bo',   p:'Live Studio',  g:['#8a6d1c','#d6b23a']},
+    {n:'Dream Wheel',     p:'Live Studio',  g:['#5a1c8a','#a63ad0']},
   ]},
   {key:'shows', title:'Game Shows', icon:'M4 7h16v10H4zM8 21h8M12 17v4', dealer:true, games:[
     {n:'Crazy Hour',        p:'Live Studio', g:['#d6451e','#f0a03d']},
@@ -467,6 +471,9 @@ const ROWS = [
     {n:'Lightning Wheel',   p:'Live Studio', g:['#5a2ea6','#9a3df0']},
     {n:'Storm Roulette',    p:'Live Studio', g:['#2356c9','#41cdf0']},
     {n:'Mega Spin',         p:'Live Studio', g:['#c92356','#f05a8a']},
+    {n:'Cash Wheel',        p:'Live Studio', g:['#166b52','#3ac68f']},
+    {n:'Fortune Ball',      p:'Live Studio', g:['#8a5a1c','#e0a03d']},
+    {n:'Dream Dice',        p:'Live Studio', g:['#1c4a8a','#3a82d0']},
   ]},
   {key:'new', title:'New Arrivals', icon:'M12 2v6M12 16v6M2 12h6M16 12h6', games:[
     {n:'Plinko of Mine',  p:'TaDa Gaming', g:['#8a4a0e','#f0931a'], corner:'New', demo:'https://tadagaming.com/PlusTrial/551/en-us'},
@@ -475,6 +482,8 @@ const ROWS = [
     {n:'Joker Returns',   p:'Volt Picks',    g:['#7d1c8a','#c63ad0']},
     {n:'Fortune Bankers', p:'Encore',        g:['#9a6b1e','#d6a93a'], corner:'Early'},
     {n:'Raid Marauder',   p:'Ace Roll',      g:['#8a4a16','#d0823a'], corner:'Early'},
+    {n:'Neon Serpent',    p:'Zenith City',   g:['#1c8a6d','#3ad0a6'], corner:'New'},
+    {n:'Crimson Vault',   p:'Sawtooth',      g:['#7d1c28','#c63a44'], corner:'Early'},
   ]},
 ];
 
@@ -491,22 +500,22 @@ const GAME_ART_LS=(()=>{try{return JSON.parse(localStorage.getItem('volt-game-ar
 
 function applyGameArt(arts){
   Object.entries(arts).forEach(([slug,url])=>{
-    const tile=document.querySelector('[data-slug="'+slug+'"]');
-    if(!tile)return;
-    const cover=tile.querySelector('.gcover');
-    if(!cover)return;
-    let over=cover.querySelector('img.ga-url');
-    if(url){
-      if(!over){
-        over=document.createElement('img');
-        over.className='ga-url';
-        over.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:4;pointer-events:none;border-radius:inherit';
-        cover.appendChild(over);
+    document.querySelectorAll('[data-slug="'+slug+'"]').forEach(tile=>{
+      const cover=tile.querySelector('.gcover');
+      if(!cover)return;
+      let over=cover.querySelector('img.ga-url');
+      if(url){
+        if(!over){
+          over=document.createElement('img');
+          over.className='ga-url';
+          over.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:4;pointer-events:none;border-radius:inherit';
+          cover.appendChild(over);
+        }
+        over.src=url;
+      }else{
+        if(over)over.remove();
       }
-      over.src=url;
-    }else{
-      if(over)over.remove();
-    }
+    });
   });
 }
 window.addEventListener('storage',e=>{
@@ -515,7 +524,31 @@ window.addEventListener('storage',e=>{
   applyGameArt(arts);
 });
 let _artCh;try{_artCh=new BroadcastChannel('volt-game-art');_artCh.addEventListener('message',e=>applyGameArt(e.data||{}));}catch(_){}
-document.getElementById('rows').innerHTML = ROWS.map(row=>`
+
+/* stable-ish "X playing" count per slug: hash seeds a base, a slow shared
+   ticker jitters it live so the lobby never looks static (Stake-style). */
+const PLAYING_BASE={};
+function playingCount(slug){
+  if(!(slug in PLAYING_BASE)){
+    let h=0;for(const ch of slug)h=(h*31+ch.charCodeAt(0))%9973;
+    PLAYING_BASE[slug]=40+h%2460;
+  }
+  return PLAYING_BASE[slug];
+}
+function tickPlayingCounts(){
+  if(document.body.classList.contains('ingame'))return;
+  document.querySelectorAll('.gc-playing').forEach(el=>{
+    const slug=el.dataset.slug;
+    let v=PLAYING_BASE[slug]||40;
+    v=Math.max(12,Math.round(v+rnd(-1,1)*Math.max(3,v*0.03)));
+    PLAYING_BASE[slug]=v;
+    el.lastChild.textContent=v.toLocaleString('en-US')+' playing';
+  });
+}
+setInterval(tickPlayingCounts,5000);
+
+function rowHtml(row){
+  return `
   <div class="row" id="sec-${row.key}">
     <div class="row-head">
       <span class="ic">${row.img?`<img src="${row.img}" style="width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,.4))">`:(row.iconSvg||`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="${row.icon}"/></svg>`)}</span>
@@ -527,20 +560,38 @@ document.getElementById('rows').innerHTML = ROWS.map(row=>`
       </div>
     </div>
     <div class="row-track" id="track-${row.key}">
-      ${row.games.map(g=>{const slug=row.key+'-'+slugify(g.n);return`
+      ${row.games.map(g=>{const slug=g._slug||(row.key+'-'+slugify(g.n));const artKey=row.key+'-'+slugify(g.n);const dealer=g._dealer!==undefined?g._dealer:!!row.dealer;return`
         <div class="gtile" data-slug="${slug}">
-          <div class="gcover ${row.dealer?'dealer':''}" style="background:linear-gradient(160deg,${g.g[0]},${g.g[1]})">
-            <image-slot id="art-${slug}"${(()=>{const s=GAME_ART_LS[slug]||(ART.has(slug)?`art/art-${slug}.webp`:EXT_ART[slug]||'');return s?` src="${s}"`:'';})()} shape="rect" fit="cover" placeholder="Drop game art"></image-slot>
+          <div class="gcover ${dealer?'dealer':''}" style="background:linear-gradient(160deg,${g.g[0]},${g.g[1]})">
+            <image-slot id="art-${artKey}"${(()=>{const s=GAME_ART_LS[slug]||(ART.has(slug)?`art/art-${slug}.webp`:EXT_ART[slug]||'');return s?` src="${s}"`:'';})()} shape="rect" fit="cover" placeholder="Drop game art"></image-slot>
             <span class="prov">${g.p}</span>
-            ${row.dealer?'<span class="silh"></span><span class="livechip"><i></i>Live</span>':''}
+            ${dealer?'<span class="silh"></span><span class="livechip"><i></i>Live</span>':''}
             ${g.corner?`<span class="corner${g.corner==='Hot'?' hot':''}">${g.corner}</span>`:''}
             ${g.boost?`<span class="boost">⚡ ${g.boost}</span>`:''}
+            <span class="gc-playing" data-slug="${slug}"><i></i>${playingCount(slug).toLocaleString('en-US')} playing</span>
             ${g.demo?`<button class="gc-mini-btn" title="Open in mini window"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></button>`:''}
           </div>
         </div>`;}).join('')}
     </div>
   </div>
-`).join('');
+`;
+}
+
+/* "Continue Playing" — built from slugs opened via openGame(), tracked in localStorage.
+   readRecentIds/writeRecentIds are the single accessor for 'volt-recent', shared with js/gameview.js's trackRecent(). */
+const RECENT_LS_KEY='volt-recent';
+function readRecentIds(){try{return JSON.parse(localStorage.getItem(RECENT_LS_KEY)||'[]');}catch{return[];}}
+function writeRecentIds(ids){try{localStorage.setItem(RECENT_LS_KEY,JSON.stringify(ids));}catch{}}
+function buildRecentRow(){
+  const ids=readRecentIds();
+  if(!ids.length)return null;
+  const bySlug={};
+  ROWS.forEach(r=>r.games.forEach(g=>{bySlug[r.key+'-'+slugify(g.n)]=Object.assign({_slug:r.key+'-'+slugify(g.n),_dealer:!!r.dealer},g);}));
+  const games=ids.map(id=>bySlug[id]).filter(Boolean).slice(0,10);
+  if(!games.length)return null;
+  return{key:'recent',title:'Continue Playing',icon:'M13 3 4 14h6l-1 7 9-12h-6l1-6Z',games};
+}
+document.getElementById('rows').innerHTML = (()=>{const rr=buildRecentRow();return(rr?rowHtml(rr):'')+ROWS.map(rowHtml).join('');})();
 
 /* apply any admin-saved art URLs as overlay imgs (bypasses image-slot internals) */
 applyGameArt(GAME_ART_LS);
@@ -558,34 +609,41 @@ function syncRowArrows(track){
 function syncAllRowArrows(){
   document.querySelectorAll('.row-track').forEach(syncRowArrows);
 }
-document.querySelectorAll('[data-scroll]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const track=document.getElementById('track-'+btn.dataset.scroll);
-    track.scrollBy({left:(+btn.dataset.dir)*track.clientWidth,behavior:'smooth'});
+function wireRowScroll(scope){
+  scope.querySelectorAll('[data-scroll]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const track=document.getElementById('track-'+btn.dataset.scroll);
+      track.scrollBy({left:(+btn.dataset.dir)*track.clientWidth,behavior:'smooth'});
+    });
   });
-});
-document.querySelectorAll('.row-track').forEach(t=>{
-  t.addEventListener('scroll',()=>syncRowArrows(t),{passive:true});
-});
-document.querySelectorAll('[data-seeall]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const row=document.getElementById('sec-'+btn.dataset.seeall);
-    if(!row)return;
-    const expanded=row.classList.toggle('expanded');
-    btn.innerHTML=expanded
-      ?'Show less <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg>'
-      :'See all <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg>';
+  scope.querySelectorAll('.row-track').forEach(t=>{
+    t.addEventListener('scroll',()=>syncRowArrows(t),{passive:true});
   });
-});
+}
+function wireRowSeeAll(scope){
+  scope.querySelectorAll('[data-seeall]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const row=document.getElementById('sec-'+btn.dataset.seeall);
+      if(!row)return;
+      const expanded=row.classList.toggle('expanded');
+      btn.innerHTML=expanded
+        ?'Show less <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg>'
+        :'See all <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg>';
+    });
+  });
+}
+wireRowScroll(document.getElementById('rows'));
+wireRowSeeAll(document.getElementById('rows'));
 /* ---------- fluid tile sizing: a whole number of tiles always fits ---------- */
-let _tileMin=0;
+let _tileMin=0,_tileGap=0;
 function sizeTiles(){
-  const gap=14;
   if(!_tileMin)_tileMin=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tile-min'))||160;
+  if(!_tileGap)_tileGap=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tile-gap'))||10;
+  const gap=_tileGap;
   const t=document.querySelector('.row-track');
   if(t){
     const w=t.clientWidth-24;
-    document.documentElement.style.setProperty('--tiles',w>=900?7:Math.max(2,Math.floor((w+gap)/(_tileMin+gap))));
+    document.documentElement.style.setProperty('--tiles',w>=900?8:Math.max(2,Math.floor((w+gap)/(_tileMin+gap))));
   }
   const p=document.getElementById('provRow');
   if(p){
@@ -641,7 +699,8 @@ function applyFilter(){
   const rowVisible={};
   TILE_META.forEach(m=>{
     let ok=true;
-    if(cat.rows)ok=cat.rows.includes(m.rowKey);
+    if(m.rowKey==='recent'){/* Continue Playing spans categories — never hidden by cat.rows */}
+    else if(cat.rows)ok=cat.rows.includes(m.rowKey);
     else if(matchRe)ok=matchRe.test(m.name);
     if(ok&&q)ok=m.name.toLowerCase().includes(q);
     if(ok&&activeProv)ok=m.prov===activeProv;
@@ -666,6 +725,31 @@ function applyFilter(){
   spy();
   updateFades();
 }
+/* re-render "Continue Playing" so it reflects the game just opened, without touching other rows */
+function refreshRecentRow(){
+  const rowsEl=document.getElementById('rows');
+  const old=document.getElementById('sec-recent');
+  const rr=buildRecentRow();
+  for(let i=TILE_META.length-1;i>=0;i--){if(TILE_META[i].rowKey==='recent')TILE_META.splice(i,1);}
+  if(!rr){if(old)old.remove();applyFilter();return;}
+  const tmp=document.createElement('div');
+  tmp.innerHTML=rowHtml(rr).trim();
+  const rowEl=tmp.firstElementChild;
+  if(old)old.replaceWith(rowEl);else rowsEl.insertBefore(rowEl,rowsEl.firstChild);
+  wireRowScroll(rowEl);wireRowSeeAll(rowEl);
+  applyGameArt(GAME_ART_LS);
+  rowEl.querySelectorAll('.gtile').forEach((tile,i)=>{
+    const g=GAME_BY_SLUG[tile.dataset.slug]||{};
+    TILE_META.push({tile,rowEl,rowKey:'recent',ord:i,
+      name:(tile.querySelector('.nm')||{}).textContent||'',
+      boost:!!tile.querySelector('.boost'),
+      prov:g.p||'',isNew:g.corner==='New',live:!!g.live,demo:!!g.demo});
+  });
+  applyFilter();
+  sizeTiles();
+  syncRowArrows(rowEl.querySelector('.row-track'));
+}
+window.refreshRecentRow=refreshRecentRow;
 catsEl.addEventListener('click',e=>{
   const c=e.target.closest('.cat');if(!c)return;
   activeCat=c.dataset.cat;
@@ -680,65 +764,8 @@ catsEl.addEventListener('keydown',e=>{
 });
 searchEl.addEventListener('input',applyFilter);
 
-/* ---------- sort + filter pills ---------- */
-const sortWrap=document.getElementById('sortWrap'),sortPill=document.getElementById('sortPill'),
-      sortMenu=document.getElementById('sortMenu'),sortVal=document.getElementById('sortVal'),
-      filterWrap=document.getElementById('filterWrap'),filterPill=document.getElementById('filterPill'),
-      filterMenu=document.getElementById('filterMenu'),filterVal=document.getElementById('filterVal');
-let activeSort='featured';
-const SORTS=[['featured','Featured'],['az','Name A–Z'],['za','Name Z–A'],['boost','Boosted first']];
-const FILTERS=[['boost','⚡ Boosted RTP'],['new','✨ New releases'],['live','🔴 Live games'],['demo','🎮 Free play demo']];
+/* shared checkmark icon — used by language menu (extras.js) and other dropdowns */
 const TICK_SVG='<svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-11"></path></svg>';
-function renderSortMenu(){
-  sortMenu.innerHTML='<div class="mlbl">Sort by</div>'+SORTS.map(([k,l])=>`
-    <button class="wmi ${k===activeSort?'sel':''}" data-k="${k}"><span class="wnm">${l}</span>${TICK_SVG}</button>`).join('');
-  sortVal.textContent=activeSort==='featured'?'':SORTS.find(s=>s[0]===activeSort)[1];
-}
-function renderFilterMenu(){
-  filterMenu.innerHTML='<div class="mlbl">Show only</div>'+FILTERS.map(([k,l])=>`
-    <button class="wmi ${activeFlags.has(k)?'sel':''}" data-k="${k}"><span class="wnm">${l}</span>${TICK_SVG}</button>`).join('')
-    +(activeFlags.size?'<button class="wmi" data-k=""><span class="wnm" style="color:var(--muted)">Clear filters</span></button>':'');
-  filterVal.textContent=activeFlags.size?String(activeFlags.size):'';
-}
-function applySort(){
-  document.querySelectorAll('#rows .row-track').forEach(track=>{
-    TILE_META.filter(m=>m.tile.parentElement===track).sort((a,b)=>{
-      if(activeSort==='az')return a.name.localeCompare(b.name);
-      if(activeSort==='za')return b.name.localeCompare(a.name);
-      if(activeSort==='boost')return (b.boost?1:0)-(a.boost?1:0)||a.ord-b.ord;
-      return a.ord-b.ord;
-    }).forEach(m=>track.appendChild(m.tile));
-  });
-}
-sortPill.addEventListener('click',e=>{
-  e.stopPropagation();
-  filterWrap.classList.remove('open');walletEl.classList.remove('open');avatarWrap.classList.remove('open');
-  sortWrap.classList.toggle('open');
-});
-sortMenu.addEventListener('click',e=>{
-  const b=e.target.closest('.wmi');if(!b)return;
-  e.stopPropagation();
-  activeSort=b.dataset.k;
-  renderSortMenu();applySort();
-  sortWrap.classList.remove('open');
-});
-filterPill.addEventListener('click',e=>{
-  e.stopPropagation();
-  sortWrap.classList.remove('open');walletEl.classList.remove('open');avatarWrap.classList.remove('open');
-  filterWrap.classList.toggle('open');
-});
-filterMenu.addEventListener('click',e=>{
-  const b=e.target.closest('.wmi');if(!b)return;
-  e.stopPropagation();
-  const k=b.dataset.k;
-  if(!k)activeFlags.clear();
-  else activeFlags.has(k)?activeFlags.delete(k):activeFlags.add(k);
-  renderFilterMenu();applyFilter();
-});
-[sortPill,filterPill].forEach(p=>p.addEventListener('keydown',e=>{
-  if(e.key==='Enter'||e.key===' '){e.preventDefault();p.click();}
-}));
-renderSortMenu();renderFilterMenu();
 
 /* ---------- promo banner: new releases ---------- */
 document.getElementById('promoNew')?.addEventListener('click',()=>{

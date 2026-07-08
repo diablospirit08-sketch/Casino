@@ -47,7 +47,7 @@ css.textContent=`
 .sph-shake{animation:sphShake .09s 10!important}
 @keyframes sphShake{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
 /* ---- lobby monument ---- */
-#sec-sphere{position:relative;margin:26px 0;background:radial-gradient(ellipse at 28% 40%,rgba(245,200,66,.09),rgba(12,16,30,0) 60%),#0d1322;border:1px solid rgba(245,200,66,.14);border-radius:20px;padding:30px 34px;overflow:hidden}
+#sec-sphere{position:relative;margin:26px 0;background:radial-gradient(ellipse at 28% 40%,rgba(245,200,66,.09),rgba(15,33,46,0) 60%),var(--bg-2);border:1px solid rgba(245,200,66,.14);border-radius:20px;padding:30px 34px;overflow:hidden}
 .sphero{display:grid;grid-template-columns:auto 1fr;gap:38px;align-items:center}
 @media(max-width:760px){.sphero{grid-template-columns:1fr;justify-items:center;text-align:center}}
 .sphero-orbwrap{position:relative;padding-top:34px}
