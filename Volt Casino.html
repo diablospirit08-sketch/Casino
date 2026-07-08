@@ -21,7 +21,6 @@
     --panel-2:#2f4553;
     --line:rgba(177,186,211,.16);
     --line-2:rgba(177,186,211,.26);
-    --blue:#5294f7;
     --spectrum:linear-gradient(90deg,#1d4ed8,#0ea5e9,#41f0a4,#f97316,#fbbf24);
     --spectrum-v:linear-gradient(180deg,#1d4ed8,#0ea5e9,#41f0a4,#f97316,#fbbf24);
     --accent-grad:linear-gradient(90deg,#2563eb,#06b6d4);
@@ -30,7 +29,6 @@
     --muted:#b1bad3;
     --muted-2:#8fa3b5;
     --purple:#38bdf8; /* accent (was violet #a78bfa — softened to sky for comfort) */
-    --purple-2:#c4aff8;
     --purple-ink:#ffffff;
     --violet:#8b7ae8;
     --win:#41f0a4;
@@ -50,6 +48,7 @@
     --amber-border:rgba(232,160,32,.28);
     --content-gap:0px;
     --rail-pad:12px; /* inset between the rail's floating card and the page edge/header */
+    --content-top-gap:2px; /* gap between header and the content card only */
   }
   body.rail-min{--rail:60px;--rail-pad:6px}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -155,7 +154,7 @@
   }
 
   /* ===== NAV RAIL (expanded 216px / collapsed 56px) ===== */
-  .rail{position:fixed;left:var(--rail-pad);top:calc(70px + var(--rail-pad));bottom:var(--rail-pad);width:calc(var(--rail) - var(--rail-pad)*2);background:var(--panel-2);border-radius:16px;box-shadow:0 10px 30px -14px rgba(0,0,0,.6);display:flex;flex-direction:column;padding:14px 10px;gap:2px;z-index:60;overflow-y:auto;overflow-x:hidden;transition:width .22s cubic-bezier(.4,0,.2,1),padding .22s cubic-bezier(.4,0,.2,1),left .22s cubic-bezier(.4,0,.2,1),top .22s cubic-bezier(.4,0,.2,1),bottom .22s cubic-bezier(.4,0,.2,1)}
+  .rail{position:fixed;left:var(--rail-pad);top:calc(70px + var(--rail-pad));bottom:var(--rail-pad);width:calc(var(--rail) - var(--rail-pad)*2);background:#16233f;border-radius:16px;box-shadow:0 10px 30px -14px rgba(0,0,0,.6);display:flex;flex-direction:column;padding:14px 10px;gap:2px;z-index:60;overflow-y:auto;overflow-x:hidden;transition:width .22s cubic-bezier(.4,0,.2,1),padding .22s cubic-bezier(.4,0,.2,1),left .22s cubic-bezier(.4,0,.2,1),top .22s cubic-bezier(.4,0,.2,1),bottom .22s cubic-bezier(.4,0,.2,1)}
   /* edge chevron */
   .rail-chevron{position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:24px;height:24px;background:var(--panel);border:1px solid var(--line);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:61;color:var(--muted);transition:color .15s,background .15s}
   .rail-chevron:hover{background:var(--panel-2);color:var(--txt)}
@@ -204,7 +203,7 @@
   body.rail-min .rail a[title]:hover,body.rail-min .rail button[title]:hover{overflow:visible}
 
   /* ===== MAIN ===== */
-  .main{margin:calc(70px + var(--rail-pad)) var(--rail-pad) var(--rail-pad) calc(var(--rail) + var(--rail-pad));padding:24px var(--content-gap);background:var(--bg-2);border-radius:16px;transition:margin-left .22s cubic-bezier(.4,0,.2,1)}
+  .main{margin:calc(70px + var(--content-top-gap)) var(--rail-pad) var(--rail-pad) calc(var(--rail) + var(--rail-pad));padding:24px var(--content-gap);background:var(--bg-2);border-radius:16px;transition:margin-left .22s cubic-bezier(.4,0,.2,1)}
   .wrap{max-width:var(--maxw);margin:0 auto;padding-left:var(--content-gap);padding-right:var(--content-gap)}
 
   /* Responsive: collapse rail earlier for medium screens to improve usable width — reuses the same --rail/--maxw vars as body.rail-min */
@@ -221,6 +220,7 @@
   .promo-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
   .promo-card{position:relative;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.1);min-height:220px;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 22px 18px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
   .promo-card:hover{border-color:rgba(255,255,255,.22);box-shadow:0 8px 32px -10px rgba(0,0,0,.6)}
+  #promoPairB{border:1px solid var(--purple)}
   .promo-card::before{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(6,8,18,.9) 0%,rgba(6,8,18,.5) 35%,rgba(6,8,18,.0) 70%);z-index:1}
   .promo-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right center;transition:transform .4s ease}
   .promo-card:hover img{transform:scale(1.05)}
@@ -2584,7 +2584,7 @@ if(_initSlug)mountEngine(_initSlug);
 /* ── promo pair — apply admin overrides from localStorage ── */
 var PROMO_DEFAULTS_CASINO={
   a:{img:'art/art-slots-eternal-clash.webp',head:'Take on the Challenge!',sub:'Play, progress, and earn rewards across a range of challenges.',btn:'View Challenges →'},
-  b:{img:'art/poster-made-man.webp',head:'Compete & Win',sub:'Compete in tournaments and climb the leaderboard for rewards.',btn:'View Tournaments →'}
+  b:{img:'art/poster-wiseguys.webp',head:'Compete & Win',sub:'Compete in tournaments and climb the leaderboard for rewards.',btn:'View Tournaments →'}
 };
 function applyPromoPair(state){
   try{
@@ -2594,7 +2594,7 @@ function applyPromoPair(state){
       var K=k.toUpperCase();
       var def=PROMO_DEFAULTS_CASINO[k];
       var el;
-      el=document.getElementById('promoPairImg'+K);  if(el)el.src=d&&d.img?d.img:def.img;
+      el=document.getElementById('promoPairImg'+K);  if(el){el.src=d&&d.img?d.img:def.img;if(d&&d.img)el.style.display='';}
       el=document.getElementById('promoPairHead'+K); if(el)el.textContent=d&&d.head?d.head:def.head;
       el=document.getElementById('promoPairSub'+K);  if(el)el.textContent=d&&d.sub?d.sub:def.sub;
       el=document.getElementById('promoPairBtn'+K);  if(el)el.textContent=d&&d.btn?d.btn:def.btn;
